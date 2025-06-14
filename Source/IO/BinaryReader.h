@@ -17,7 +17,7 @@ public:
     BinaryReader(const uint8_t* memory, uint32_t memoryLength);
     BinaryReader(const char* memory, uint32_t memoryLength);
     ~BinaryReader();
-	
+
     // Should only write if OK is true.
     // Remember, "good" returns true as long as fail/bad/eof bits are all false.
     bool OK() const { return mStream->good(); }
@@ -34,16 +34,16 @@ public:
     // Read numeric types
     uint8_t ReadByte();
     int8_t ReadSByte();
-    
+
     uint16_t ReadUShort();
     int16_t ReadShort();
-    
+
     uint32_t ReadUInt();
     int32_t ReadInt();
 
     uint64_t ReadULong();
     int64_t ReadLong();
-    
+
     float ReadFloat();
     double ReadDouble();
 
@@ -66,7 +66,7 @@ public:
     Vector3 ReadVector3();
 
 private:
-	// Stream we are reading from.
-	// Needs to be pointer because type of stream (memory, file, etc) changes sometimes.
+    // Stream we are reading from.
+    // Needs to be pointer because type of stream (memory, file, etc) changes sometimes.
     std::istream* mStream = nullptr;
 };

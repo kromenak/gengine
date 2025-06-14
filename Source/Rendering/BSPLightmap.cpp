@@ -5,7 +5,7 @@
 
 TYPEINFO_INIT(BSPLightmap, Asset, GENERATE_TYPE_ID)
 {
-    
+
 }
 
 BSPLightmap::~BSPLightmap()

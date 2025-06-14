@@ -23,10 +23,10 @@ public:
     ~GAS();
 
     void Load(uint8_t* data, uint32_t dataLength);
-    
+
     GasNode* GetNode(int index) { return mNodes[index]; }
     int GetNodeCount() { return (int)mNodes.size(); }
-    
+
 private:
     std::vector<GasNode*> mNodes;
 };

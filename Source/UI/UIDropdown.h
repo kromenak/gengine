@@ -50,7 +50,7 @@ private:
         UIButton* button = nullptr;
     };
     std::vector<ChoiceUI> mChoiceUIs;
-    
+
     // All choices that can be selected.
     std::vector<std::string> mChoices;
 
@@ -60,7 +60,7 @@ private:
 
     // Max choices to show at one time. Additional choices are available by scrolling. 0 means no maximum...
     int mMaxVisibleChoices = 0;
-    
+
     // This is the offset/index of the selection at the top of the list; mainly used while scrolling.
     int mChoicesOffset = 0;
 

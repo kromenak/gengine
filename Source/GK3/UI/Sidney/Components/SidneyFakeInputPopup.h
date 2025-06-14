@@ -3,7 +3,7 @@
 //
 // This is a popup that shows Gabe/Grace typing some input into a popup.
 // It's "fake" because the in-game character types, not the player - it's all performative.
-// 
+//
 // It's non-interactive, but it's complex enough and used in multiple spots in the UI.
 // So a helper class makes sense.
 //

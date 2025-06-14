@@ -164,7 +164,7 @@ void VertexArray::ChangeVertexData(VertexAttribute::Semantic semantic, void* dat
         VertexAttribute& attribute = mData.vertexDefinition.attributes[i];
 
         // Determine size of this attribute's data.
-        GLsizeiptr attributeSize = mData.vertexCount * attribute.GetSize();
+        ptrdiff_t attributeSize = mData.vertexCount * attribute.GetSize();
 
         // Update sub-data, if semantic matches.
         if(attribute.semantic == semantic)

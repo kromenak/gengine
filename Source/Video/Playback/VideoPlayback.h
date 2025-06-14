@@ -24,28 +24,28 @@ class VideoPlayback
 {
 public:
     ~VideoPlayback();
-    
+
     void Update(VideoState* is);
-    
+
     void SetStep(bool s) { mStep = s; }
-    
+
     Texture* GetVideoTexture() { return mVideoTexture; }
-    
+
 private:
     // ffmpeg provides a helper library for converting between formats.
     // For ease of use, all formats are converted to RGBA for display.
     SwsContext* mRGBAConvertContext = nullptr;
-    
+
     // If true, playback is in "step" mode, where each frame is viewed one at a time.
     bool mStep = false;
-    
+
     // Texture that current video frame will be written to.
     Texture* mVideoTexture = nullptr;
-    
+
     bool UpdateVideoTexture(Frame* videoFrame);
-    
+
     void UpdateSubtitles(VideoState* is);
-    
+
     double CalculateFrameDuration(VideoState* is, Frame* vp, Frame* nextvp);
     double SyncVideo(VideoState* is, double delay);
 };

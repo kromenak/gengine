@@ -82,20 +82,20 @@ namespace StringUtil
         }
     }
 
-	inline void TrimComment(std::string& str)
-	{
-		// Trims any comment from trailing part of string.
-		size_t found = str.find("//");
-		if(found != std::string::npos)
-		{
-			str.erase(found);
-		}
-	}
+    inline void TrimComment(std::string& str)
+    {
+        // Trims any comment from trailing part of string.
+        size_t found = str.find("//");
+        if(found != std::string::npos)
+        {
+            str.erase(found);
+        }
+    }
 
-	inline void RemoveAll(std::string& str, char remove)
-	{
-		str.erase(std::remove(str.begin(), str.end(), remove), str.end());
-	}
+    inline void RemoveAll(std::string& str, char remove)
+    {
+        str.erase(std::remove(str.begin(), str.end(), remove), str.end());
+    }
 
     inline std::vector<std::string> Split(const std::string& str, char delim, bool removeEmpty = false)
     {
@@ -274,12 +274,12 @@ namespace StringUtil
         return static_cast<float>(atof(str.c_str()));
     }
 
-	template<typename ... Args>
-	inline std::string Format(const char* format, Args ... args)
-	{
-		// Calling snprintf with nullptr & 0 buff_size let's you determine the expected size of the result.
-		// Per: https://en.cppreference.com/w/cpp/io/c/fprintf
-		// +1 for the \0 null terminator.
+    template<typename ... Args>
+    inline std::string Format(const char* format, Args ... args)
+    {
+        // Calling snprintf with nullptr & 0 buff_size let's you determine the expected size of the result.
+        // Per: https://en.cppreference.com/w/cpp/io/c/fprintf
+        // +1 for the \0 null terminator.
         int res = snprintf(nullptr, 0, format, args ...) + 1;
         if(res < 0)
         {
@@ -287,16 +287,16 @@ namespace StringUtil
         }
         size_t size = static_cast<size_t>(res);
 
-		// Allocate a buffer to hold the formatted text.
-		// Using unique_ptr for auto-delete on return or exception.
-		std::unique_ptr<char[]> buf(new char[size]);
+        // Allocate a buffer to hold the formatted text.
+        // Using unique_ptr for auto-delete on return or exception.
+        std::unique_ptr<char[]> buf(new char[size]);
 
-		// Actually put the formatted string in the buffer "for real".
-		snprintf(buf.get(), size, format, args ...);
+        // Actually put the formatted string in the buffer "for real".
+        snprintf(buf.get(), size, format, args ...);
 
-		// Create a string from the buffer (-1 b/c we don't need the \0 for the string).
-		return std::string(buf.get(), buf.get() + size - 1);
-	}
+        // Create a string from the buffer (-1 b/c we don't need the \0 for the string).
+        return std::string(buf.get(), buf.get() + size - 1);
+    }
 
     inline unsigned long HashCaseInsensitive(const char* str)
     {

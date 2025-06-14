@@ -16,25 +16,25 @@ public:
     static AABB FromCenterAndSize(const Vector3& center, const Vector3& size);
 
     AABB() = default;
-	AABB(const Vector3& min, const Vector3& max);
-	
-	Vector3 GetMin() const { return mMin; }
-	Vector3 GetMax() const { return mMax; }
-	
-	Vector3 GetCenter() const { return mMin + ((mMax - mMin) * 0.5f); }
-	Vector3 GetExtents() const { return ((mMax - mMin) * 0.5f); }
+    AABB(const Vector3& min, const Vector3& max);
+
+    Vector3 GetMin() const { return mMin; }
+    Vector3 GetMax() const { return mMax; }
+
+    Vector3 GetCenter() const { return mMin + ((mMax - mMin) * 0.5f); }
+    Vector3 GetExtents() const { return ((mMax - mMin) * 0.5f); }
     Vector3 GetSize() const { return mMax - mMin; }
-	
-	void GrowToContain(const Vector3& point);
-	
-	bool IsValid() const { return mMin.x <= mMax.x && mMin.y <= mMax.y && mMin.z <= mMax.z; }
-	
-	bool ContainsPoint(const Vector3& point) const;
-	Vector3 GetClosestPoint(const Vector3& point) const;
-	
+
+    void GrowToContain(const Vector3& point);
+
+    bool IsValid() const { return mMin.x <= mMax.x && mMin.y <= mMax.y && mMin.z <= mMax.z; }
+
+    bool ContainsPoint(const Vector3& point) const;
+    Vector3 GetClosestPoint(const Vector3& point) const;
+
 private:
     // Min and max points of the AABB.
     // Keep private b/c AABB can be represented as min/max points or center/size...may want or need to switch this at some point.
-	Vector3 mMin;
-	Vector3 mMax;
+    Vector3 mMin;
+    Vector3 mMax;
 };

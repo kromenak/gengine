@@ -1,6 +1,5 @@
 #include "GasNodes.h"
 
-#include "Animation.h"
 #include "Animator.h"
 #include "GasPlayer.h"
 #include "GKActor.h"

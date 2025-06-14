@@ -8,7 +8,6 @@
 // The actual various SysFuncs themselves are implemented in the Sheep API.
 //
 #pragma once
-
 #include <functional>
 #include <map>
 #include <string>
@@ -41,14 +40,14 @@ struct SysFunc : public SysFuncImport
 
     // If true, this function can only work in dev builds.
     bool devOnly = false;
-    
+
     // Text that's output to explain this function when using HelpCommand.
     //std::string helpText;
-    
+
     // For help text output only, the names of the argument variables.
     // The length here should match the length of the argumentTypes array
     //std::vector<std::string> helpArgumentNames;
-    
+
     // For example, HelpCommand("AddStreamContent") outputs this:
     /*
      ----- 'Dump' * 03/16/2019 * 11:39:21 -----
@@ -163,34 +162,34 @@ std::function<void()> AddWait();
     } name##_instance
 
 #define RegFunc3(name, ret, t1, t2, t3, waitable, dev)                  \
-	Value name(const Value& x1, const Value& x2, const Value& x3) {     \
-		return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>());             \
-	}                                                       			\
-	struct name##_ {                                        			\
-		name##_() {                                         			\
-			GetSysFuncs().map3[#name]=&name;                            \
-			AddSysFunc(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE }, waitable, dev); \
-		}                                                   			\
-	} name##_instance
+    Value name(const Value& x1, const Value& x2, const Value& x3) {     \
+        return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>());             \
+    }                                                       			\
+    struct name##_ {                                        			\
+        name##_() {                                         			\
+            GetSysFuncs().map3[#name]=&name;                            \
+            AddSysFunc(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE }, waitable, dev); \
+        }                                                   			\
+    } name##_instance
 
 #define RegFunc4(name, ret, t1, t2, t3, t4, waitable, dev)              \
-	Value name(const Value& x1, const Value& x2, const Value& x3, const Value& x4) { \
-		return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>(), x4.To<t4>()); \
-	}                                                       			\
-	struct name##_ {                                        			\
-		name##_() {                                         			\
-			GetSysFuncs().map4[#name]=&name;                            \
-			AddSysFunc(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE, t4##_TYPE }, waitable, dev); \
-		}                                                   			\
-	} name##_instance
+    Value name(const Value& x1, const Value& x2, const Value& x3, const Value& x4) { \
+        return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>(), x4.To<t4>()); \
+    }                                                       			\
+    struct name##_ {                                        			\
+        name##_() {                                         			\
+            GetSysFuncs().map4[#name]=&name;                            \
+            AddSysFunc(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE, t4##_TYPE }, waitable, dev); \
+        }                                                   			\
+    } name##_instance
 
 #define RegFunc5(name, ret, t1, t2, t3, t4, t5, waitable, dev)          \
-	Value name(const Value& x1, const Value& x2, const Value& x3, const Value& x4, const Value& x5) { \
-		return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>(), x4.To<t4>(), x5.To<t5>()); \
-	}                                                       			\
-	struct name##_ {                                        			\
-		name##_() {                                         			\
-			GetSysFuncs().map5[#name]=&name;                            \
-			AddSysFunc(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE, t4##_TYPE, t5##_TYPE }, waitable, dev); \
-		}                                                   			\
-	} name##_instance
+    Value name(const Value& x1, const Value& x2, const Value& x3, const Value& x4, const Value& x5) { \
+        return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>(), x4.To<t4>(), x5.To<t5>()); \
+    }                                                       			\
+    struct name##_ {                                        			\
+        name##_() {                                         			\
+            GetSysFuncs().map5[#name]=&name;                            \
+            AddSysFunc(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE, t4##_TYPE, t5##_TYPE }, waitable, dev); \
+        }                                                   			\
+    } name##_instance

@@ -8,7 +8,6 @@
 
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
-#include "mstream.h"
 
 using namespace PNG;
 

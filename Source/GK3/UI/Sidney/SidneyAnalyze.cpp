@@ -1,6 +1,5 @@
 #include "SidneyAnalyze.h"
 
-#include "AssetManager.h"
 #include "Sidney.h"
 #include "SidneyButton.h"
 #include "SidneyFakeInputPopup.h"
@@ -8,8 +7,6 @@
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
-#include "UICanvas.h"
-#include "UINineSlice.h"
 #include "UIImage.h"
 
 void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTranslate* sidneyTranslate)
@@ -174,7 +171,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
 
         mPreAnalyzeWindow->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::BottomLeft);
         mPreAnalyzeWindow->GetComponent<RectTransform>()->SetAnchoredPosition(40.0f, 203.0f);
-        
+
         // Hide pre-analyze window by default.
         mPreAnalyzeWindow->SetActive(false);
     }
@@ -183,7 +180,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
     mAnalyzePopup = new SidneyPopup(mRoot);
     mSecondaryAnalyzePopup = new SidneyPopup(mRoot);
     mSetTextPopup = new SidneyFakeInputPopup(mRoot, "Set Text Popup");
-    
+
     // Start in empty state.
     SetState(State::Empty);
 
@@ -319,7 +316,7 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
 
     // Set to right state depending on the file we're analyzing.
     SetStateFromFile();
-    
+
     // Take the appropriate analyze action based on the item.
     switch(mState)
     {
@@ -349,7 +346,7 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
     {
         return;
     }
-    
+
     // This file has definitely been analyzed at least once now!
     SidneyFile* file = mSidneyFiles->GetFile(mAnalyzeFileId);
     if(file != nullptr)

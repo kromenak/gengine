@@ -34,7 +34,7 @@ TYPEINFO_INIT(SceneAsset, Asset, GENERATE_TYPE_ID)
 
 SceneAsset::~SceneAsset()
 {
-	delete mSkybox;
+    delete mSkybox;
 }
 
 void SceneAsset::Load(uint8_t* data, uint32_t dataLength)

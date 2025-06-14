@@ -2,7 +2,6 @@
 
 #include "ActionManager.h"
 #include "VideoHelper.h"
-#include "VideoPlayer.h"
 
 using namespace std;
 

@@ -4,8 +4,6 @@
 // UI for the "Add Data" dialog box and scanning cutscene.
 //
 #pragma once
-#include <unordered_map>
-
 #include "Vector2.h"
 
 class Actor;

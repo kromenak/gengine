@@ -3,7 +3,6 @@
 #include "ActionManager.h"
 #include "Animator.h"
 #include "AssetManager.h"
-#include "Camera.h"
 #include "CursorManager.h"
 #include "Debug.h"
 #include "GameCamera.h"
@@ -12,9 +11,8 @@
 #include "InputManager.h"
 #include "Interpolate.h"
 #include "MeshRenderer.h"
-#include "Ray.h"
 #include "SceneManager.h"
-#include "UICanvas.h"
+#include "Timers.h"
 
 Pendulum::Pendulum() : Actor("Pendulum Puzzle")
 {
@@ -78,7 +76,7 @@ Pendulum::Pendulum() : Actor("Pendulum Puzzle")
     // The amount of time it takes for the pendulum to complete one cycle is derived in a truly deranged way.
     // We know how many platforms should pass the pendulum between cycles.
     // We know the rotation speeds of the platforms. So...let's figure this out.
-    // 
+    //
     // The platforms rotate in a circle over the course of 50 seconds. So, the radians of movement per second are 2pi/50.
     mPlatformRotationSpeed = Math::k2Pi / platformRevolutionDuration;
 
@@ -286,7 +284,7 @@ Vector3 Pendulum::GetPlatformPosition(int platformIndex)
 {
     // You'd think this would be simple...just platform->GetPosition right?
     // WRONG! All the platforms have the same position, in the center of the scene.
-    
+
     // Calculate the current rotation of the platform index we're interested in.
     // The "half platform radians" is needed because we want the rotation of the platform center, not the platform left edge.
     float platformRotation = (kRadiansPerPlatform * 0.5f) + (kRadiansPerPlatform * platformIndex) + mPlatformRotation;
@@ -766,7 +764,7 @@ void Pendulum::OnFallToDeath()
 
     // Toggle back to non-Gabe version of pendulum.
     UseNormalPendulum();
-    
+
     // Position Gabe right under the pendulum.
     // This is janky, but the camera cut masks the position change.
     // The camera cut also purposely makes it difficult to gauge depth, but I think the cutscene ultimately looks better if you move Gabe closer to the ground.

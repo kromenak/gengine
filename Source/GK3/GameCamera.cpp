@@ -47,7 +47,7 @@ GameCamera::GameCamera() : Actor("Camera")
 {
     mCamera = AddComponent<Camera>();
     AddComponent<AudioListener>();
-    
+
     // Create option bar.
     mOptionBar = new OptionBar();
 }
@@ -63,12 +63,12 @@ void GameCamera::RemoveBounds(Model* model)
 
 void GameCamera::SetAngle(const Vector2& angle)
 {
-	SetAngle(angle.x, angle.y);
+    SetAngle(angle.x, angle.y);
 }
 
 void GameCamera::SetAngle(float yaw, float pitch)
 {
-	SetRotation(Quaternion(Vector3::UnitY, yaw) * Quaternion(Vector3::UnitX, pitch));
+    SetRotation(Quaternion(Vector3::UnitY, yaw) * Quaternion(Vector3::UnitX, pitch));
 }
 
 Vector2 GameCamera::GetAngle() const
@@ -88,7 +88,7 @@ void GameCamera::Glide(const Vector3& position, const Vector2& angle, std::funct
     mGlideStartRot = GetTransform()->GetRotation();
 
     mGlideTimer = 0.0f;
-    
+
     // A glide request would cancel any inspect that was occurring.
     mInspectNoun.clear();
 }
@@ -172,7 +172,7 @@ void GameCamera::OnUpdate(float deltaTime)
             Debug::DrawSphere(sphere, Color32::Blue);
             Debug::DrawSphere(sphereEnd, Color32::Red);
             Debug::DrawLine(sphereStartPos, sphereEndPos, Color32::White);
-            
+
             // Test collision resolution code.
             //Vector3 collidePos = ResolveCollisions(sphereCurrentPos, sphereEndPos - sphereCurrentPos);
             //Sphere sphereCurrent(collidePos, kCameraColliderRadius);
@@ -185,7 +185,7 @@ void GameCamera::OnUpdate(float deltaTime)
         }
     }
     */
-    
+
     // Perform scene-only updates (camera movement, click-to-interact), if scene is active and no action is playing.
     if(mSceneActive)
     {
@@ -217,7 +217,7 @@ void GameCamera::OnUpdate(float deltaTime)
             mUsedMouseInputsForMouseLock = false;
         }
     }
-    
+
     // BELOW HERE: logic for player's keyboard shortcuts.
     // Keyboard shortcut keys are only available if text input is not active.
     if(!gInputManager.IsTextInput())
@@ -241,7 +241,7 @@ void GameCamera::OnUpdate(float deltaTime)
                 }
             }
         }
-        
+
         // If 'P' is pressed, this toggles game pause. Works even if action is ongoing.
         if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_P))
         {
@@ -250,7 +250,7 @@ void GameCamera::OnUpdate(float deltaTime)
 
             // For debugging...
             std::cout << "Pos: " << GetPosition() << ", Heading: " << Heading::FromQuaternion(GetRotation()) << std::endl;
-            
+
         }
 
         // Pressing escape acts as a "skip" or "cancel" action, depending on current state of the game.
@@ -271,7 +271,7 @@ void GameCamera::SceneUpdate(float deltaTime)
         {
             t = 1.0f;
         }
-        
+
         // Interpolate towards desired position.
         GetTransform()->SetPosition(Vector3::Lerp(mGlideStartPos, mGlidePosition, t));
 
@@ -302,7 +302,7 @@ void GameCamera::SceneUpdate(float deltaTime)
 
     // Update camera movement/rotation.
     SceneUpdateMovement(deltaTime);
-    
+
     // Raycast to the ground and always maintain a desired height.
     //TODO: This does not apply when camera boundaries are disabled!
     //TODO: Doesn't apply when middle mouse button is held???
@@ -317,7 +317,7 @@ void GameCamera::SceneUpdate(float deltaTime)
 
     // Check for scene interaction based on mouse pointer position and mouse button presses.
     SceneUpdateInteract(deltaTime);
-    
+
     // Clear camera lock if left mouse is not pressed.
     // Do this AFTER interact check to avoid interacting with things when exiting mouse locked movement mode.
     if(!gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Left))
@@ -539,7 +539,7 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
     float height = mHeight + verticalSpeed * deltaTime;
     float floorY = mIgnoreFloor ? 0.0f : gSceneManager.GetScene()->GetFloorY(position);
     position.y = floorY + height;
-    
+
     // Determine offset from start to end position.
     Vector3 moveOffset = position - GetPosition();
 
@@ -626,9 +626,9 @@ GKObject* GameCamera::RaycastIntoScene(const Ray& ray, bool interactiveOnly)
 
 Vector3 GameCamera::ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset)
 {
-	// No bounds model = no collision.
-	// Bounds may also be purposely disabled for debugging purposes.
-	if(mBoundsModels.empty() || !mBoundsEnabled || gInputManager.IsKeyPressed(SDL_SCANCODE_SPACE))
+    // No bounds model = no collision.
+    // Bounds may also be purposely disabled for debugging purposes.
+    if(mBoundsModels.empty() || !mBoundsEnabled || gInputManager.IsKeyPressed(SDL_SCANCODE_SPACE))
     {
         return startPosition + moveOffset;
     }
@@ -657,7 +657,7 @@ Vector3 GameCamera::ResolveCollisions(const Vector3& startPosition, const Vector
         float smallestT = 1.0f;
         Vector3 collisionNormal;
         Triangle collideTriangle;
-        
+
         // Create sphere at current position.
         Sphere sphere(currentPosition, kCameraColliderRadius);
 
@@ -782,7 +782,7 @@ Vector3 GameCamera::ResolveCollisions(const Vector3& startPosition, const Vector
         currentMoveOffset = tangentPoint - currentPosition;
         //Debug::DrawLine(currentPosition, currentPosition + currentMoveOffset, Color32::Red);
     }
-    
+
     // Return whatever our final position was!
     return currentPosition;
 }

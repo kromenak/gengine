@@ -16,7 +16,7 @@ shpvoid StartAnimation(const std::string& animationName)
         gReportManager.Log("Error", "gk3 animation '" + animationName + ".anm' not found.");
         return 0;
     }
-    
+
     gSceneManager.GetScene()->GetAnimator()->Start(animation, AddWait());
     return 0;
 }

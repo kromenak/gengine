@@ -92,7 +92,7 @@ void UILines::GenerateMesh()
     meshDefinition.SetVertexLayout(VertexLayout::Packed);
     meshDefinition.AddVertexData(VertexAttribute::Position, positions);
 
-    // Create submesh from definition. 
+    // Create submesh from definition.
     Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
 
     // Render it in "lines" mode, since this is a set of lines!

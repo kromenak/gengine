@@ -7,7 +7,6 @@
 #include "GKActor.h"
 #include "MeshRenderer.h"
 #include "ReportManager.h"
-#include "Renderer.h"
 #include "SceneManager.h"
 #include "SceneData.h"
 #include "SceneFunctions.h"

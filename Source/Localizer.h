@@ -21,7 +21,7 @@ public:
 
     bool HasText(const std::string& key) const;
     std::string GetText(const std::string& key) const;
-    
+
 private:
     // Maps a localization key to the localized text.
     std::string_map_ci<std::string> mKeyToText;

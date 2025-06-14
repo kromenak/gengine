@@ -12,7 +12,7 @@ class AudioListener : public Component
     TYPEINFO_SUB(AudioListener, Component);
 public:
     AudioListener(Actor* owner);
-	
+
 protected:
     void OnUpdate(float deltaTime) override;
 };

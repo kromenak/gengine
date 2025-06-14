@@ -12,8 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include "ThreadUtil.h"
-
 class ThreadedTaskQueue
 {
 public:

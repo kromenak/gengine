@@ -19,7 +19,7 @@ bool Intersect::TestSphereSphere(const Sphere& s1, const Sphere& s2)
     // Get squared length of radii summed.
     float radiiDistSq = s1.radius + s2.radius;
     radiiDistSq *= radiiDistSq;
-    
+
     // Spheres must be colliding if distance between centers is less than sum of radii.
     return centersDistSq <= radiiDistSq;
 }
@@ -119,37 +119,37 @@ bool Intersect::TestSphereLine(const Sphere& s, const Line& l, int& numIntersect
 
 bool Intersect::TestAABBAABB(const AABB& aabb1, const AABB& aabb2)
 {
-	// There are 4 cases where the AABBs are not intersecting.
-	bool case1 = aabb1.GetMax().x < aabb2.GetMin().x;
-	bool case2 = aabb1.GetMin().x > aabb2.GetMax().x;
-	bool case3 = aabb1.GetMax().y < aabb2.GetMin().y;
-	bool case4 = aabb1.GetMin().y > aabb2.GetMax().y;
-	
-	// If none of those cases are true, they must be intersecting.
-	return !case1 && !case2 && !case3 && !case4;
+    // There are 4 cases where the AABBs are not intersecting.
+    bool case1 = aabb1.GetMax().x < aabb2.GetMin().x;
+    bool case2 = aabb1.GetMin().x > aabb2.GetMax().x;
+    bool case3 = aabb1.GetMax().y < aabb2.GetMin().y;
+    bool case4 = aabb1.GetMin().y > aabb2.GetMax().y;
+
+    // If none of those cases are true, they must be intersecting.
+    return !case1 && !case2 && !case3 && !case4;
 }
 
 bool Intersect::TestPlanePlane(const Plane& p1, const Plane& p2)
 {
-	// Planes don't intersect if they are parallel to one another.
-	// If not parallel, the planes DO intersect.
-	
-	// If planes do intersect, the line of intersection is along this vector.
-	// If parallel, normals are facing same direction or opposite - in both cases, cross result would be zero.
-	Vector3 lineDir = Vector3::Cross(p1.normal, p2.normal);
-	
-	// If not zero, there is an intersection.
-	return !Math::IsZero(lineDir.GetLengthSq());
+    // Planes don't intersect if they are parallel to one another.
+    // If not parallel, the planes DO intersect.
+
+    // If planes do intersect, the line of intersection is along this vector.
+    // If parallel, normals are facing same direction or opposite - in both cases, cross result would be zero.
+    Vector3 lineDir = Vector3::Cross(p1.normal, p2.normal);
+
+    // If not zero, there is an intersection.
+    return !Math::IsZero(lineDir.GetLengthSq());
 }
 
 bool Intersect::TestRayAABB(const Ray& r, const AABB& aabb, float& outRayT)
 {
-	Vector3 min = aabb.GetMin();
-	Vector3 max = aabb.GetMax();
-	Vector3 rayOrigin = r.origin;
-	Vector3 rayDir = r.direction;
-	
-	float t1 = (min.x - rayOrigin.x) / rayDir.x;
+    Vector3 min = aabb.GetMin();
+    Vector3 max = aabb.GetMax();
+    Vector3 rayOrigin = r.origin;
+    Vector3 rayDir = r.direction;
+
+    float t1 = (min.x - rayOrigin.x) / rayDir.x;
     float t2 = (max.x - rayOrigin.x) / rayDir.x;
     float t3 = (min.y - rayOrigin.y) / rayDir.y;
     float t4 = (max.y - rayOrigin.y) / rayDir.y;
@@ -161,26 +161,26 @@ bool Intersect::TestRayAABB(const Ray& r, const AABB& aabb, float& outRayT)
 
     // If tMax < 0, LINE is intersecting AABB, but RAY is not!
     if(tMax < 0)
-	{
-		return false;
+    {
+        return false;
     }
 
     // If tMin > tMax, ray doesn't intersect AABB.
     if(tMin > tMax)
-	{
-		return false;
+    {
+        return false;
     }
 
-	// Pass "t" of intersection out to caller.
+    // Pass "t" of intersection out to caller.
     outRayT = tMin >= 0.0f ? tMin : tMax;
-	
-	// Yep, they intersect.
-	return true;
+
+    // Yep, they intersect.
+    return true;
 }
 
 bool Intersect::TestRayTriangle(const Ray& r, const Triangle& t, float& outRayT)
 {
-	return TestRayTriangle(r, t.p0, t.p1, t.p2, outRayT);
+    return TestRayTriangle(r, t.p0, t.p1, t.p2, outRayT);
 }
 
 bool Intersect::TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& p1, const Vector3& p2, float& outRayT)
@@ -214,7 +214,7 @@ bool Intersect::TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& 
 
     float t = f * Vector3::Dot(e2, q);
     if(t < 0) { return false; }
-    
+
     // We DID intersect the triangle. Return the point of intersection.
     outRayT = t;
     return true;
@@ -240,7 +240,7 @@ bool Intersect::LineLine2D(const Vector2& line0P0, const Vector2& line0P1, const
 bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, const Vector3& sphereMoveOffset, float& outSphereT, Vector3& outCollisionNormal)
 {
     // Adapted (after A LOT of head scratching and experimenting) from flipcode.com/archives/Moving_Sphere_VS_Triangle_Collision.shtml
-    
+
     // Sphere must be moving towards triangle to collide. Even if actively intersecting, if not moving toward triangle front, no collision.
     // Allows moving in-bounds from out-of-bounds on a map, but not vice-versa, for example.
     Vector3 triNormal = triangle.GetNormal();
@@ -277,7 +277,7 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
         //if(signedDistToPlane >= sphere.radius)
         if(signedDistToPlane >= 0)
         {
-            // The signed dist is sphere *center* to plane. 
+            // The signed dist is sphere *center* to plane.
             // Subtract radius to get signed dist from sphere *surface* to plane.
             signedDistToPlane -= sphere.radius;
 
@@ -365,7 +365,7 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
 
             Vector3 pointOnSphere = line.GetPoint(t);
             outCollisionNormal = Vector3::Normalize(sphere.center - pointOnSphere);
-            
+
             //Vector3 pointOnTriangle = triangle[i];
         }
     }
@@ -387,7 +387,7 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
         // Create a plane from these points.
         // Each plane is kind of like a side of a "tunnel" shaped like the triangle (though remember planes extend infinitely).
         Plane plane(p0, p1, p2);
-        
+
         // If the sphere is not intersecting with the plane, we can ignore this edge.
         // We can check this by comparing the distance.
         float centerToPlaneDist = plane.GetDistance(sphere.center);

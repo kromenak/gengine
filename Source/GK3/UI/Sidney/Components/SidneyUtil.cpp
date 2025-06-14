@@ -53,7 +53,7 @@ UIButton* SidneyUtil::CreateCloseWindowButton(Actor* parent, const std::function
     UIButton* closeButton = UI::CreateWidgetActor<UIButton>("CloseButton", parent);
     closeButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     closeButton->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
-    
+
     closeButton->SetUpTexture(gAssetManager.LoadTexture("CLOSEWIN_UP.BMP"));
     closeButton->SetDownTexture(gAssetManager.LoadTexture("CLOSEWIN_DOWN.BMP"));
     closeButton->SetHoverTexture(gAssetManager.LoadTexture("CLOSEWIN_HOVER.BMP"));

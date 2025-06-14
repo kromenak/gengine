@@ -28,12 +28,12 @@
 
 // Line
 float line_vertices[] = {
-	0.0f, 0.0f, 0.0f,
-	1.0f, 1.0f, 1.0f
+    0.0f, 0.0f, 0.0f,
+    1.0f, 1.0f, 1.0f
 };
 float line_colors[] = {
-	1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f
+    1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f
 };
 Mesh* line = nullptr;
 
@@ -57,35 +57,35 @@ float axis_colors[] = {
 Mesh* axes = nullptr;
 
 float quad_vertices[] = {
-	-0.5f,  0.5f, 0.0f, // upper-left
-	 0.5f,  0.5f, 0.0f, // upper-right
-	 0.5f, -0.5f, 0.0f, // lower-right
-	-0.5f, -0.5f, 0.0f, // lower-left
+    -0.5f,  0.5f, 0.0f, // upper-left
+     0.5f,  0.5f, 0.0f, // upper-right
+     0.5f, -0.5f, 0.0f, // lower-right
+    -0.5f, -0.5f, 0.0f, // lower-left
 };
 float quad_uvs[] = {
-	0.0f, 0.0f,		// upper-left
-	1.0f, 0.0f,		// upper-right
-	1.0f, 1.0f,		// lower-right
-	0.0f, 1.0f		// lower-left
+    0.0f, 0.0f,		// upper-left
+    1.0f, 0.0f,		// upper-right
+    1.0f, 1.0f,		// lower-right
+    0.0f, 1.0f		// lower-left
 };
 unsigned short quad_indices[] = {
-	0, 1, 2, 	// upper-right triangle
-	2, 3, 0		// lower-left triangle
+    0, 1, 2, 	// upper-right triangle
+    2, 3, 0		// lower-left triangle
 };
 Mesh* quad = nullptr;
 
 // UI Quad
 float ui_quad_vertices[] = {
-	0.0f,  1.0f, 0.0f, // upper-left
-	1.0f,  1.0f, 0.0f, // upper-right
-	1.0f,  0.0f, 0.0f, // lower-right
-	0.0f,  0.0f, 0.0f, // lower-left
+    0.0f,  1.0f, 0.0f, // upper-left
+    1.0f,  1.0f, 0.0f, // upper-right
+    1.0f,  0.0f, 0.0f, // lower-right
+    0.0f,  0.0f, 0.0f, // lower-left
 };
 float ui_quad_uvs[] = {
-	0.0f, 0.0f,		// upper-left
-	1.0f, 0.0f,		// upper-right
-	1.0f, 1.0f,		// lower-right
-	0.0f, 1.0f		// lower-left
+    0.0f, 0.0f,		// upper-left
+    1.0f, 0.0f,		// upper-right
+    1.0f, 1.0f,		// lower-right
+    0.0f, 1.0f		// lower-left
 };
 Mesh* uiQuad = nullptr;
 
@@ -122,9 +122,9 @@ bool Renderer::Initialize()
     GAPI::Get()->SetPolygonWindingOrder(GAPI::WindingOrder::Clockwise);
 
     // Load default shader.
-	Shader* defaultShader = gAssetManager.LoadShader("3D-Tex");
-	if(defaultShader == nullptr) { return false; }
-	Material::sDefaultShader = defaultShader;
+    Shader* defaultShader = gAssetManager.LoadShader("3D-Tex");
+    if(defaultShader == nullptr) { return false; }
+    Material::sDefaultShader = defaultShader;
 
     // Pre-load additional shaders.
     // One reason this is important is because GL commands can only run on the main thread.
@@ -182,7 +182,7 @@ bool Renderer::Initialize()
         quadSubmesh->SetRenderMode(RenderMode::Triangles);
     }
 
-	// UI Quad
+    // UI Quad
     {
         MeshDefinition meshDefinition(MeshUsage::Static, 4);
         meshDefinition.SetVertexLayout(VertexLayout::Packed);
@@ -234,11 +234,11 @@ void Renderer::Clear()
 
 void Renderer::Render()
 {
-	// Render camera-oriented stuff.
+    // Render camera-oriented stuff.
     Matrix4 projectionMatrix;
     Matrix4 viewMatrix;
-	if(mCamera != nullptr)
-	{
+    if(mCamera != nullptr)
+    {
         PROFILER_BEGIN_SAMPLE("Renderer Generate Matrices");
         {
             // We'll need the projection and view matrix for the camera a few times below.
@@ -406,7 +406,7 @@ void Renderer::RemoveMeshRenderer(MeshRenderer* mr)
 
 void Renderer::SetSkybox(Skybox* skybox)
 {
-	mSkybox = skybox;
+    mSkybox = skybox;
 }
 
 void Renderer::SetUseMipmaps(bool useMipmaps)
@@ -460,7 +460,7 @@ void Renderer::ChangeResolution(const Window::Resolution& resolution)
         if(actor->GetTransform()->GetParent() == nullptr && actor->GetTransform()->IsA<RectTransform>())
         {
             actor->GetTransform()->SetDirty();
-            
+
             // Likewise, some UI widgets may rely on window size for positioning/presentation.
             // For example, a UILabel that is in a RectTransform that stretches to the window size.
             // Notify UI widgets that the window size has changed, so they should recalculate too.

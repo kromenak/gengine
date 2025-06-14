@@ -17,16 +17,16 @@
 class RenderTexture
 {
 public:
-	RenderTexture(int width, int height);
-	~RenderTexture();
-	
-	void Activate();
-	
-	Texture& GetTexture() { return mRenderTexture; }
-	
+    RenderTexture(int width, int height);
+    ~RenderTexture();
+
+    void Activate();
+
+    Texture& GetTexture() { return mRenderTexture; }
+
 private:
-	GLuint mFboId = GL_NONE;
-	Texture mRenderTexture;
-	
-	GLuint mRenderTextureId = GL_NONE;
+    GLuint mFboId = GL_NONE;
+    Texture mRenderTexture;
+
+    GLuint mRenderTextureId = GL_NONE;
 };

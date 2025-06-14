@@ -5,12 +5,8 @@
 // Actual rendering commands are delegated to the underlying "graphics API" (GAPI) implementation.
 //
 #pragma once
-#include <string>
 #include <vector>
 
-#include "Matrix4.h"
-#include "Rect.h"
-#include "Vector2.h"
 #include "Window.h"
 
 class BSP;
@@ -40,7 +36,7 @@ public:
     void SetBSP(BSP* bsp) { mBSP = bsp; }
     BSP* GetBSP() const { return mBSP; }
 
-	void SetSkybox(Skybox* skybox);
+    void SetSkybox(Skybox* skybox);
 
     void SetUseMipmaps(bool useMipmaps);
     void SetUseTrilinearFiltering(bool useTrilinearFiltering);

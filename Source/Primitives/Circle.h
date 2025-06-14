@@ -11,11 +11,11 @@ class Circle
 public:
     Circle() = default;
     Circle(const Vector2& center, float radius);
-	
-	bool ContainsPoint(const Vector2& point) const;
-	Vector2 GetClosestSurfacePoint(const Vector2& point) const;
-	
-	// Defined as a center point and radius.
-	Vector2 center;
-	float radius = 0.0f;
+
+    bool ContainsPoint(const Vector2& point) const;
+    Vector2 GetClosestSurfacePoint(const Vector2& point) const;
+
+    // Defined as a center point and radius.
+    Vector2 center;
+    float radius = 0.0f;
 };

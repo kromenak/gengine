@@ -46,15 +46,15 @@ struct VertexAttribute
     {
         Float
     };
-    Type type = Type::Float; 
-    
+    Type type = Type::Float;
+
     // The number of components of the type. For example, position data is 3 Floats.
     int count = 0;
-    
+
     // Should the data be normalized before use in shaders?
     // Some data (like colors) usually should be normalized, while others (like position) should not be.
     bool normalize = false;
-    
+
     int GetSize() const;
     bool operator==(const VertexAttribute& other) const { return semantic == other.semantic; }
 };
@@ -70,17 +70,17 @@ struct VertexDefinition
     // Layout of the vertex data.
     // I've read that interleaved data results in better GPU cache performance (since reading a single vertex requires no seeking).
     VertexLayout layout = VertexLayout::Interleaved;
-    
+
     // A vertex definition consists of one or more attributes.
     // Order IS important!
     std::vector<VertexAttribute> attributes;
-    
+
     int CalculateSize() const;
-    
+
     // "Stride" is the byte offset between attributes of the same type.
     // For packed data, this is zero. For interleaved data, it is essentially equal to the size of a single vertex.
     int CalculateStride() const;
-    
+
     // Byte offset to the first instance of an attribute is required by GPU.
     // For packed data, the vertex count is required to properly calculate this.
     int CalculateAttributeOffset(int index, int vertexCount = 0) const;

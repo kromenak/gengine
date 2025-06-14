@@ -1,6 +1,6 @@
 //
 // Clark Kromenaker
-// 
+//
 // A UI overlay that mimics looking through binoculars.
 // At certain points in the game, this allows you to "zoom in" on far away scenes to see what other characters are up to.
 //
@@ -66,7 +66,7 @@ private:
         // When zoomed in, the camera angle and position to start at.
         Vector2 cameraAngle;
         Vector3 cameraPos;
-        
+
         // When entering/exiting this instance, sheep functions in BINOCS.SHP to execute.
         std::string enterSheepFunctionName;
         std::string exitSheepFunctionName;
@@ -113,7 +113,7 @@ private:
             { "LHM", ZoomAngles(Vector2(108.0f, 11.0f), Vector2(121.0f, 14.0f)) },  // L'Homme Mort
             { "CSD", ZoomAngles(Vector2(108.0f, 2.0f), Vector2(120.0f, 11.0f)) },   // Coume Sourde
             { "MA3", ZoomAngles(Vector2(174.0f, 1.0f), Vector2(190.0f, 7.0f)) }     // Tour Magdala
-           
+
         }},
 
         // Tour Magadala
@@ -121,7 +121,7 @@ private:
             { "CD1", ZoomAngles(Vector2(355.0f, -5.0f), Vector2(360.0f, 0.0f)) } // Chateau de Blanchefort
         }}
     };
-    
+
     // Since the game camera doesn't store its angle in this format internally, we remember and update it here.
     Vector2 mZoomedOutCameraAngle;
 
@@ -146,7 +146,7 @@ private:
     // When zoomed in, we always use 30 degree FOV.
     // Save the camera's previous FOV for when we zoom back out.
     float mSavedCameraFov = 60.0f;
-    
+
     void OnZoomInButtonPressed();
     void OnZoomOutButtonPressed();
 };

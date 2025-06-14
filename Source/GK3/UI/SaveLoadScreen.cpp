@@ -5,18 +5,14 @@
 #include "GameProgress.h"
 #include "GK3UI.h"
 #include "InputManager.h"
-#include "Localizer.h"
-#include "LocationManager.h"
 #include "RectTransform.h"
 #include "SaveManager.h"
 #include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UITextInput.h"
 #include "UIUtil.h"
-#include "Window.h"
 
 namespace
 {

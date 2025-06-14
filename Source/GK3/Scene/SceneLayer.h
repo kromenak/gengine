@@ -14,11 +14,11 @@ class SceneLayer : public Layer
 public:
     SceneLayer();
     void SetScene(Scene* scene) { mScene = scene; }
-    
+
 protected:
     void OnEnter(Layer* fromLayer) override;
     void OnExit(Layer* toLayer) override;
-    
+
 private:
     Scene* mScene = nullptr;
 };

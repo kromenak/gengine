@@ -144,7 +144,7 @@ void UINineSlice::SetTexturesAndColors(const UINineSliceParams& params, bool res
     }
 
     // When setting the textures, we resize the RectTransform to match the texture size.
-    // But for stretched RectTransforms, this sets the stretched axis to an undesirable value. Reset to zero to fix. 
+    // But for stretched RectTransforms, this sets the stretched axis to an undesirable value. Reset to zero to fix.
     mLeftImage->GetRectTransform()->SetSizeDeltaY(0.0f);
     mRightImage->GetRectTransform()->SetSizeDeltaY(0.0f);
     mBottomImage->GetRectTransform()->SetSizeDeltaX(0.0f);

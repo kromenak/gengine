@@ -102,7 +102,7 @@ void PersistState::Xfer(const char* name, std::string& value)
     else if(mIniWriter != nullptr)
     {
         mIniWriter->WriteKeyValue(name, value.c_str());
-    }   
+    }
 }
 
 void PersistState::Xfer(const char* name, bool& value)

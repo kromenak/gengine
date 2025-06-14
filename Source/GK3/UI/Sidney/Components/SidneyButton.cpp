@@ -46,7 +46,7 @@ SidneyButton::SidneyButton(const std::string& name, Actor* parent) : Actor(name,
 
 SidneyButton::SidneyButton(Actor* parent) : SidneyButton("SidneyButton", parent)
 {
-    
+
 }
 
 void SidneyButton::PrepareToDestroy()
@@ -89,10 +89,10 @@ void SidneyButton::OnUpdate(float deltaTime)
     {
         // During a press animation, decrement the timer.
         mPressAnimTimer -= deltaTime;
-        
+
         // Calculate whether the button border should be gold or gray. During this anim, it flashes back and forth quickly.
         // Since the timer is short (~0.3f), multiplying by 10.0f causes a blink about every 0.1 seconds.
-        // Using values greater than 10.0f will make it blink faster and more often. 
+        // Using values greater than 10.0f will make it blink faster and more often.
         int blinkDiv = static_cast<int>(mPressAnimTimer * 20.0f);
         if(blinkDiv % 2 == 0)
         {

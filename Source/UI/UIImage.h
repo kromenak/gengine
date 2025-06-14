@@ -21,12 +21,12 @@ public:
     };
 
     UIImage(Actor* actor);
-	
+
     void Render() override;
 
     void SetColor(const Color32& color);
 
-	void SetTexture(Texture* texture, bool resizeImage = false);
+    void SetTexture(Texture* texture, bool resizeImage = false);
     Texture* GetTexture() const { return mMaterial.GetDiffuseTexture(); }
 
     void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
@@ -35,6 +35,6 @@ public:
     void ResizeToFitPreserveAspect(const Vector2& area);
 
 private:
-	Material mMaterial;
-	RenderMode mRenderMode = RenderMode::Normal;
+    Material mMaterial;
+    RenderMode mRenderMode = RenderMode::Normal;
 };

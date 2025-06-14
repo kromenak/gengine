@@ -284,7 +284,7 @@ namespace
     void TE1_Reset() { chessboard->Reset(true); }
     void TE1_Takeoff() { chessboard->Takeoff(); }
     void TE1_Landed() { chessboard->Landed(); }
-    void TE1_HideCurrentTile() { chessboard->HideCurrentTile(); } 
+    void TE1_HideCurrentTile() { chessboard->HideCurrentTile(); }
     void TE1_Fell() { /*TODO: Does this actually do anything? Maybe reset state?*/ }
     void TE1_CenterMe() { chessboard->CenterEgo(); }
     void TE1_BadLand() { chessboard->BadLand(); }

@@ -4,17 +4,12 @@
 #include "Actor.h"
 #include "AssetManager.h"
 #include "GameProgress.h"
-#include "Random.h"
 #include "SidneyAnagramParser.h"
-#include "SidneyButton.h"
 #include "SidneyFiles.h"
 #include "SidneyTranslate.h"
 #include "SidneyUtil.h"
-#include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UINineSlice.h"
-#include "UIScrollRect.h"
 #include "UIUtil.h"
 
 void SidneyAnalyze::AnalyzeText_Init()

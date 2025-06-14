@@ -18,34 +18,34 @@ typedef char AMPM;
 class Timeblock
 {
 public:
-	static const AMPM AM = 0;
-	static const AMPM PM = 1;
-	
+    static const AMPM AM = 0;
+    static const AMPM PM = 1;
+
     Timeblock() = default;
-	Timeblock(int day, int hour);
-	Timeblock(int day, int hour, AMPM amOrPM);
-	Timeblock(const std::string& str);
-	
-	std::string ToString() const;
-	friend std::ostream& operator<< (std::ostream& o, const Timeblock& timeblock);
-	
-	bool operator==(const Timeblock& other) const;
+    Timeblock(int day, int hour);
+    Timeblock(int day, int hour, AMPM amOrPM);
+    Timeblock(const std::string& str);
+
+    std::string ToString() const;
+    friend std::ostream& operator<< (std::ostream& o, const Timeblock& timeblock);
+
+    bool operator==(const Timeblock& other) const;
     bool operator!=(const Timeblock& other) const;
     bool operator<(const Timeblock& other) const;
     bool operator>(const Timeblock& other) const;
     bool operator<=(const Timeblock& other) const;
     bool operator>=(const Timeblock& other) const;
-    
-	int GetDay() const { return mDay; }
-	
-	int GetHour24() const { return mHour; }
-	int GetHour12() const;
-	
-	bool IsAM() const { return mHour < 12; }
-	bool IsPM() const { return mHour >= 12; }
-	
-	AMPM GetAMPM() const { return IsAM() ? AM : PM; }
-	char GetAMPMSuffix() const { return IsAM() ? 'A' : 'P'; }
+
+    int GetDay() const { return mDay; }
+
+    int GetHour24() const { return mHour; }
+    int GetHour12() const;
+
+    bool IsAM() const { return mHour < 12; }
+    bool IsPM() const { return mHour >= 12; }
+
+    AMPM GetAMPM() const { return IsAM() ? AM : PM; }
+    char GetAMPMSuffix() const { return IsAM() ? 'A' : 'P'; }
 
     #if !defined(TESTS)
     void OnPersist(PersistState& ps);
@@ -54,9 +54,9 @@ public:
     static void ParseTimeblockRange(const std::string& name, Timeblock& start, Timeblock& end);
 
 private:
-	// The day; should be 1+.
-	int mDay = 1;
-	
-	// The hour; should be 0-23.
-	int mHour = 10;
+    // The day; should be 1+.
+    int mDay = 1;
+
+    // The hour; should be 0-23.
+    int mHour = 10;
 };

@@ -59,6 +59,6 @@ void Heading::SetRadians(float radians)
 
 std::ostream& operator<<(std::ostream& os, const Heading& h)
 {
-	os << h.ToString();
-	return os;
+    os << h.ToString();
+    return os;
 }

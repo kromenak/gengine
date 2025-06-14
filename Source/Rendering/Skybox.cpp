@@ -98,13 +98,13 @@ void Skybox::Render()
         CreateMeshAndCubemap();
     }
 
-	// Activate the material.
+    // Activate the material.
     mMaterial.Activate(mRotationMatrix);
-	
-	// Activate and bind the cubemap texture.
+
+    // Activate and bind the cubemap texture.
     GAPI::Get()->ActivateCubemap(mCubemapHandle);
 
-	// Render the skybox.
+    // Render the skybox.
     mSkyboxMesh->Render();
 }
 
@@ -144,7 +144,7 @@ uint8_t Skybox::Raycast(const Ray& ray)
 
     // Create local ray.
     Ray localRay(localRayOrigin, localRayDirection);
-    
+
     // Iterate and check for ray/triangle intersection on all sides of the skybox cube.
     // Each side of the cube is made up of two triangles.
     float t = FLT_MAX;
@@ -213,7 +213,7 @@ uint8_t Skybox::Raycast(const Ray& ray)
                 finalUV = Vector2(1.0f - pointUV.z, 1.0f - pointUV.x);
                 maskTexture = mMaskTextures.named.up;
             }
-            
+
             // Ok, our raycast did hit a side of the skybox, and we've determined which side.
             // If this side had a mask texture, we now need to check the mask texture to get a palette index.
             if(maskTexture != nullptr)
@@ -221,7 +221,7 @@ uint8_t Skybox::Raycast(const Ray& ray)
                 // UVs are bottom-left to top-right, but Texture class uses pixel coordinates from top-left to bottom-right.
                 // Flip the y-axis to align this.
                 finalUV.y = 1.0f - finalUV.y;
-                    
+
                 // Convert the UV into a specific pixel position.
                 Vector2 pixelPos(finalUV.x * maskTexture->GetWidth(), finalUV.y * maskTexture->GetHeight());
 
@@ -315,5 +315,5 @@ void Skybox::CreateMeshAndCubemap()
 
         // Create cubemap from params.
         mCubemapHandle = GAPI::Get()->CreateCubemap(params);
-    }   
+    }
 }

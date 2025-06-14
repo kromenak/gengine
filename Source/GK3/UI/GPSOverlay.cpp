@@ -7,7 +7,6 @@
 #include "LocationManager.h"
 #include "SceneManager.h"
 #include "TextAsset.h"
-#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -52,7 +51,7 @@ GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
     // Not yet positioned, since that changes based on the layout used.
     mLatitudeLabel = UI::CreateWidgetActor<UILabel>("Latitude", mMapImage);
     mLatitudeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    
+
     mLongitudeLabel = UI::CreateWidgetActor<UILabel>("Longitude", mMapImage);
     mLongitudeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
@@ -235,7 +234,7 @@ void GPSOverlay::SetLatLongFromTexturePos(const Vector2& texturePos)
 {
     // GENERAL NOTE: I don't feel incredibly confident that this math is correct. However, I think it's passable.
     // The latitude and longitudes match pretty closely with the three instances you use the GPS in the original game.
-    // They aren't exact, but at least the values lead the player to the correct spots, and the values at the correct spots look very close to correct. 
+    // They aren't exact, but at least the values lead the player to the correct spots, and the values at the correct spots look very close to correct.
 
     // Convert reference world position to texture space.
     Vector2 refTexturePos = WorldPosToGPSTexturePos(mCurrentLocation->referenceWorldPosition);
@@ -459,7 +458,7 @@ void GPSOverlay::ApplyLayout(int index)
     }
 
     mVerticalLineImage->SetTexture(mLayouts[index].verticalLineTexture, true);
-    mHorizontalLineImage->SetTexture(mLayouts[index].horizontalLineTexture, true); 
+    mHorizontalLineImage->SetTexture(mLayouts[index].horizontalLineTexture, true);
     mTargetSquareImage->SetTexture(mLayouts[index].targetSquareTexture, true);
 
     mLatitudeLabel->SetFont(mLayouts[index].font);

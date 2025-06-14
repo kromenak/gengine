@@ -32,10 +32,10 @@ public:
 
     void AddBounds(Model* model) { mBoundsModels.push_back(model); }
     void RemoveBounds(Model* model);
-	void SetBoundsEnabled(bool enabled) { mBoundsEnabled = enabled; }
-	
-	void SetAngle(const Vector2& angle);
-	void SetAngle(float yaw, float pitch);
+    void SetBoundsEnabled(bool enabled) { mBoundsEnabled = enabled; }
+
+    void SetAngle(const Vector2& angle);
+    void SetAngle(float yaw, float pitch);
     Vector2 GetAngle() const;
 
     void SetForcedCinematicMode(bool forced) { mForcedCinematicMode = forced; }
@@ -54,14 +54,14 @@ public:
     void SetSceneActive(bool active) { mSceneActive = active; }
     void SetIgnoreFloor(bool ignoreFloor) { mIgnoreFloor = true; }
 
-	Camera* GetCamera() { return mCamera; }
-    
+    Camera* GetCamera() { return mCamera; }
+
     void SaveFov();
     void RestoreFov();
-	
+
 protected:
     void OnUpdate(float deltaTime) override;
-    
+
 private:
     // Reference to underlying camera component.
     Camera* mCamera = nullptr;
@@ -80,7 +80,7 @@ private:
     // 1) Even if cinematics are disabled, the camera will obey "cut to camera angle" sheep calls.
     // 2) All movement or rotation of the camera is disabled.
     bool mForcedCinematicMode = false;
-    
+
     // Cutscenes sometimes set the camera FOV, but forget to set it back afterwards.
     // To combat this, we remember the FOV pre-action and revert it afterwards.
     // (After some testing, even the original game does this!)
@@ -92,18 +92,18 @@ private:
     //////////////////
     // MOVEMENT
     //////////////////
-	// Camera movement speed in units/second.
-	// A modifier key (alt) causes the camera to move even faster.
-	// These values were derived from trial and error!
-	const float kSpeed = 500.0f;
-	const float kFastSpeedMultiplier = 2.0f;
-	
-	// Camera rotation speed in radians/second. Again, trial and error!
-	const float kRotationSpeed = Math::kPi / 2.0f;
-	
+    // Camera movement speed in units/second.
+    // A modifier key (alt) causes the camera to move even faster.
+    // These values were derived from trial and error!
+    const float kSpeed = 500.0f;
+    const float kFastSpeedMultiplier = 2.0f;
+
+    // Camera rotation speed in radians/second. Again, trial and error!
+    const float kRotationSpeed = Math::kPi / 2.0f;
+
     // How much you have to move the mouse (in pixels) to go as fast as keyboard keys. Derived from trial and error.
     // Smaller values make mouse movement more sensitive and speedier.
-	const float kMouseRangePixels = 12.0f;
+    const float kMouseRangePixels = 12.0f;
 
     // How far you need to move the mouse (in pixels) from click start pos to enable mouse-based movement.
     // Again...trial and error.
@@ -112,7 +112,7 @@ private:
     // For collision, the camera is represented as a sphere. This is the sphere's radius.
     // This value was derived from trial & error.
     const float kCameraColliderRadius = 16.0f;
-	
+
     // When mouse is clicked, this is start position of the click.
     // Used to determine when to enable mouse-based camera movement.
     Vector2 mClickStartPos;
@@ -121,12 +121,12 @@ private:
     // Track if current mouse inputs were used for mouse lock. If so, must release all mouse buttons before doing other mouse actions.
     // This is helpful/necessary to avoid accidentally opening option bar when releasing mouse buttons after mouse lock.
     bool mUsedMouseInputsForMouseLock = false;
-	
-	// Height of camera above ground. Always try to maintain some height above ground.
-	// So, if moving down a hill, the camera follows the slope, for example.
-	// Default value is derived from trial and error!
-	const float kDefaultHeight = 60.0f;
-	float mHeight = kDefaultHeight;
+
+    // Height of camera above ground. Always try to maintain some height above ground.
+    // So, if moving down a hill, the camera follows the slope, for example.
+    // Default value is derived from trial and error!
+    const float kDefaultHeight = 60.0f;
+    float mHeight = kDefaultHeight;
 
     // If true, the camera code doesn't care about floor height and pretty much just ignores it entirely.
     bool mIgnoreFloor = false;
@@ -134,12 +134,12 @@ private:
     //////////////////
     // COLLISION
     //////////////////
-	// A model whose triangles are used as collision for the camera.
+    // A model whose triangles are used as collision for the camera.
     std::vector<Model*> mBoundsModels;
-		
-	// If true, camera bounds are turned on. If false, they are disabled.
+
+    // If true, camera bounds are turned on. If false, they are disabled.
     bool mBoundsEnabled = true;
-	
+
     //////////////////
     // GLIDING
     //////////////////
@@ -171,11 +171,11 @@ private:
     // Start position/rotation when inspecting (so we can later do an uninspect).
     Vector3 mInspectStartPos;
     Quaternion mInspectStartRot;
-	
+
     void SceneUpdate(float deltaTime);
     void SceneUpdateMovement(float deltaTime);
     void SceneUpdateInteract(float deltaTime);
-    
+
     GKObject* RaycastIntoScene(const Ray& ray, bool interactiveOnly);
 
     Vector3 ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset);

@@ -2,7 +2,6 @@
 
 #include "Actor.h"
 #include "AudioManager.h"
-#include "Camera.h"
 #include "CursorManager.h"
 #include "Debug.h"
 #include "InputManager.h"
@@ -17,12 +16,12 @@ UIButton* UIButton::sDownButton = nullptr;
 
 TYPEINFO_INIT(UIButton, UIWidget, 16)
 {
-    
+
 }
 
 UIButton::UIButton(Actor* owner) : UIWidget(owner)
 {
-	// By default, a button ought to receive input.
+    // By default, a button ought to receive input.
     SetReceivesInput(true);
 
     // Tell material to use white texture by default.
@@ -32,8 +31,8 @@ UIButton::UIButton(Actor* owner) : UIWidget(owner)
 
 void UIButton::Render()
 {
-	if(!IsActiveAndEnabled()) { return; }
-	
+    if(!IsActiveAndEnabled()) { return; }
+
     // Update the texture to use.
     UpdateMaterial();
 
@@ -82,7 +81,7 @@ void UIButton::OnPointerEnter()
 
     // Record pointer over.
     mPointerOver = true;
-    
+
     // Only show interaction prompts (visual cursor change, audio) if we can actually interact with it.
     if(mCanInteract)
     {
@@ -113,7 +112,7 @@ void UIButton::OnPointerEnter()
 void UIButton::OnPointerExit()
 {
     gCursorManager.UseDefaultCursor();
-	mPointerOver = false;
+    mPointerOver = false;
 
     // Hide tooltip.
     Tooltip::Get()->Hide();
@@ -121,7 +120,7 @@ void UIButton::OnPointerExit()
 
 void UIButton::OnPointerDown()
 {
-	mPointerDown = true;
+    mPointerDown = true;
 
     // Got the pointer down event, so we must be the down button now.
     sDownButton = this;
@@ -132,12 +131,12 @@ void UIButton::OnPointerDown()
 
 void UIButton::OnPointerUp()
 {
-	// Pointer up after also receiving the pointer down event means...you pressed it!
-	if(mPointerDown)
-	{
-		Press();
-	}
-	mPointerDown = false;
+    // Pointer up after also receiving the pointer down event means...you pressed it!
+    if(mPointerDown)
+    {
+        Press();
+    }
+    mPointerDown = false;
 
     // Pointer is up, so we are no longer down.
     sDownButton = nullptr;
@@ -151,10 +150,10 @@ void UIButton::OnPointerUp()
 
 void UIButton::Press()
 {
-	if(mPressCallback && IsEnabled() && CanInteract())
-	{
+    if(mPressCallback && IsEnabled() && CanInteract())
+    {
         mPressCallback(this);
-	}
+    }
 }
 
 void UIButton::AnimatePress(float duration)
@@ -178,10 +177,10 @@ void UIButton::OnUpdate(float deltaTime)
 
 Texture* UIButton::GetDefaultTexture()
 {
-	if(mUpState.texture != nullptr) { return mUpState.texture; }
-	if(mHoverState.texture != nullptr) { return mHoverState.texture; }
-	if(mDownState.texture != nullptr) { return mDownState.texture; }
-	return mDisabledState.texture;
+    if(mUpState.texture != nullptr) { return mUpState.texture; }
+    if(mHoverState.texture != nullptr) { return mHoverState.texture; }
+    if(mDownState.texture != nullptr) { return mDownState.texture; }
+    return mDisabledState.texture;
 }
 
 void UIButton::UpdateMaterial()
@@ -207,7 +206,7 @@ void UIButton::UpdateMaterial()
             state = &mDownState;
         }
         // When in pointer down state, but moving pointer all over, the button should still show as hovered.
-        else if(mPointerOver || mPointerDown) 
+        else if(mPointerOver || mPointerDown)
         {
             state = &mHoverState;
         }
@@ -250,7 +249,7 @@ void UIButton::UpdateMaterial()
         {
             GetRectTransform()->SetSizeDelta(state->texture->GetWidth(), state->texture->GetHeight());
         }
-        
+
         // Set texture.
         mMaterial.SetDiffuseTexture(state->texture);
     }

@@ -23,7 +23,7 @@ VideoState::VideoState(const char* filename) :
     {
         return;
     }
-    
+
     // Initialize frame queues, or fail.
     if(videoFrames.Init(&videoPackets, VIDEO_PICTURE_QUEUE_SIZE, true) < 0 ||
        audioFrames.Init(&audioPackets, SAMPLE_QUEUE_SIZE, true) < 0 ||
@@ -31,7 +31,7 @@ VideoState::VideoState(const char* filename) :
     {
         return;
     }
-    
+
     // Create continue read condition or fail.
     mContinueReadCondition = SDL_CreateCond();
     if(mContinueReadCondition == nullptr)
@@ -39,12 +39,12 @@ VideoState::VideoState(const char* filename) :
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateCond(): %s\n", SDL_GetError());
         return;
     }
-    
+
     // Init clocks.
     videoClock = PtsClock(&videoPackets.serial);
     audioClock = PtsClock(&audioPackets.serial);
     externalClock = PtsClock(nullptr);
-    
+
     // Allocate format context or fail.
     format = avformat_alloc_context();
     if(format == nullptr)
@@ -52,25 +52,25 @@ VideoState::VideoState(const char* filename) :
         av_log(NULL, AV_LOG_FATAL, "Could not allocate context.\n");
         return;
     }
-    
+
     // Set interrupt callback - basically if IO is not possible, just abort.
     format->interrupt_callback.opaque = this;
     format->interrupt_callback.callback = [](void* arg) -> int {
         VideoState* is = static_cast<VideoState*>(arg);
         return is->mAborted;
     };
-    
+
     // Open video file, or fail.
     int res = avformat_open_input(&format, filename, nullptr, nullptr);
     if(res < 0) {
         av_log(NULL, AV_LOG_FATAL, "Could not open video file.\n");
         return;
     }
-    
+
     // Put global side data in first packets received from stream (and packets after a seek).
     //TODO: Why is this important/needed?
     av_format_inject_global_side_data(format);
-    
+
     // Populate format context with stream info, or fail.
     res = avformat_find_stream_info(format, nullptr);
     if(res < 0)
@@ -78,21 +78,21 @@ VideoState::VideoState(const char* filename) :
         av_log(NULL, AV_LOG_WARNING, "%s: could not find codec parameters\n", filename);
         return;
     }
-    
+
     // Reset EOF flag on I/O context, so we can catch EOF later, I guess?
     if(format->pb)
     {
         format->pb->eof_reached = 0; // FIXME hack, ffplay maybe should not use avio_feof() to test for the end
     }
-    
+
     // Output format info to log for debugging.
     av_dump_format(format, 0, filename, 0);
-    
+
     // Find stream indexes for video/audio/subs.
     int videoIndex = av_find_best_stream(format, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
     int audioIndex = av_find_best_stream(format, AVMEDIA_TYPE_AUDIO, -1, videoIndex, NULL, 0);
     int subtitlesIndex = av_find_best_stream(format, AVMEDIA_TYPE_SUBTITLE, -1, audioIndex, NULL, 0);
-    
+
     // Open streams.
     if(videoIndex >= 0)
     {
@@ -106,17 +106,17 @@ VideoState::VideoState(const char* filename) :
     {
         OpenStream(subtitlesIndex);
     }
-    
+
     // Could not open video or audio!?
     if(mVideoStreamIndex < 0 && mAudioStreamIndex < 0)
     {
         av_log(NULL, AV_LOG_FATAL, "Failed to open video/audio for '%s'\n", filename);
         return;
     }
-    
+
     // Video is now playing...
     mState = State::Playing;
-    
+
     // Create read thread or fail.
     mReadThread = SDL_CreateThread(ReadThread, "read_thread", this);
     if(mReadThread == nullptr)
@@ -158,10 +158,10 @@ VideoState::~VideoState()
     videoFrames.Destroy();
     audioFrames.Destroy();
     subtitleFrames.Destroy();
-    
+
     // Free condition variable.
     SDL_DestroyCond(mContinueReadCondition);
-    
+
     // Free filename memory.
     av_free(mFilename);
 }
@@ -175,7 +175,7 @@ void VideoState::TogglePause()
 {
     // Can only pause/unpause if video is playing.
     if(mState == State::Stopped) { return; }
-    
+
     // Reset clocks.
     if(mState == State::Paused)
     {
@@ -184,15 +184,15 @@ void VideoState::TogglePause()
         videoClock.SetPtsToCurrentTime();
     }
     externalClock.SetPtsToCurrentTime();
-    
+
     // Toggle pause.
     mState = (mState == State::Paused ? State::Playing : State::Paused);
-    
+
     // Propagate to all clocks.
     audioClock.SetPaused(mState == State::Paused);
     videoClock.SetPaused(mState == State::Paused);
     externalClock.SetPaused(mState == State::Paused);
-    
+
     videoPlayback->SetStep(false);
 }
 
@@ -253,7 +253,7 @@ int VideoState::OpenStream(int streamIndex)
     {
         return -1;
     }
-    
+
     // All streams should discard useless (e.g. 0-sized packets).
     format->streams[streamIndex]->discard = AVDISCARD_DEFAULT;
 
@@ -263,7 +263,7 @@ int VideoState::OpenStream(int streamIndex)
     {
         return AVERROR(ENOMEM);
     }
-    
+
     // Populate codec context with codec parameters from the format context stream info.
     int ret = avcodec_parameters_to_context(avctx, format->streams[streamIndex]->codecpar);
     if(ret < 0)
@@ -272,7 +272,7 @@ int VideoState::OpenStream(int streamIndex)
         return ret;
     }
     avctx->pkt_timebase = format->streams[streamIndex]->time_base;
-    
+
     // We need a decoder in order to decode the stream data for playback.
     // Find the decoder from the codec ID we got from the stream info.
     AVCodec* codec = avcodec_find_decoder(avctx->codec_id);
@@ -299,7 +299,7 @@ int VideoState::OpenStream(int streamIndex)
     {
     case AVMEDIA_TYPE_AUDIO:
         audioPlayback = new AudioPlaybackSDL();
-        
+
         // Open audio playback. Returns < 0 on error, audio buffer size on success.
         ret = audioPlayback->Open(this, avctx->channel_layout, avctx->channels, avctx->sample_rate);
         if(ret < 0)
@@ -307,27 +307,27 @@ int VideoState::OpenStream(int streamIndex)
             avcodec_free_context(&avctx);
             return ret;
         }
-        
+
         // Save stream info.
         mAudioStreamIndex = streamIndex;
         audioStream = format->streams[streamIndex];
 
         // Init audio decoder.
         audioDecoder.Init(avctx, &audioPackets, mContinueReadCondition);
-        
+
         // For audio, if seek isn't allowed by this stream type, flushing (during start/seek) must always start at beginning of stream.
         // So, set the pts/timebase when flushing to be the start time.
         if((format->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)) && !format->iformat->read_seek)
         {
             audioDecoder.SetFlushPts(audioStream->start_time, audioStream->time_base);
         }
-        
+
         ret = audioDecoder.Start(this);
         break;
-        
+
     case AVMEDIA_TYPE_VIDEO:
         videoPlayback = new VideoPlayback();
-        
+
         // Save stream info.
         mVideoStreamIndex = streamIndex;
         videoStream = format->streams[streamIndex];
@@ -336,7 +336,7 @@ int VideoState::OpenStream(int streamIndex)
         videoDecoder.Init(avctx, &videoPackets, mContinueReadCondition);
         ret = videoDecoder.Start(this);
         break;
-        
+
     case AVMEDIA_TYPE_SUBTITLE:
         // Save stream info.
         mSubtitleStreamIndex = streamIndex;
@@ -346,7 +346,7 @@ int VideoState::OpenStream(int streamIndex)
         subtitleDecoder.Init(avctx, &subtitlePackets, mContinueReadCondition);
         ret = subtitleDecoder.Start(this);
         break;
-        
+
     default:
         av_log(NULL, AV_LOG_ERROR, "Unexpected codec type!");
         break;
@@ -361,7 +361,7 @@ void VideoState::CloseStream(int streamIndex)
     {
         return;
     }
-    
+
     // Discard all packets (since the stream is now closed).
     format->streams[streamIndex]->discard = AVDISCARD_ALL;
 
@@ -422,7 +422,7 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
 /*static*/ int VideoState::ReadThread(void* arg)
 {
     VideoState* is = static_cast<VideoState*>(arg);
-    
+
     // Create wait mutex or fail.
     SDL_mutex* wait_mutex = SDL_CreateMutex();
     if(wait_mutex == nullptr)
@@ -431,11 +431,11 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
         is->ReadThreadEnd(AVERROR(ENOMEM));
         return 0;
     }
-    
+
     // If true, read all the content of the file. Note this DOES NOT mean playback is finished!
     // After reaching read EOF, we must wait until decoder and frame queues are empty.
     bool readEOF = false;
-    
+
     // Loop indefinitely, reading in data from input streams to packet queues.
     AVPacket avPacket;
     int result = 0;
@@ -443,7 +443,7 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
     {
         // Abort was requested, so break out.
         if(is->mAborted) { break; }
-        
+
         // Seek requested.
         if(is->seek_req)
         {
@@ -504,12 +504,12 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->mContinueReadCondition, wait_mutex, 10);
             SDL_UnlockMutex(wait_mutex);
-            
+
             // Everything below this point is about reading/decoding packets, but we have too many packets!
             // So, loop back to top.
             continue;
         }
-        
+
         // When this read thread reached EOF, it'll enqueue EOF packets in each packet queue.
         // Then, we just need to wait for the decoders to signal EOF and for the frame queues to indicate that all data has been displayed.
         // Then, we have "truly" reached EOF and can end playback.
@@ -519,7 +519,7 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
             result = AVERROR_EOF;
             break;
         }
-        
+
         // Attempt to read the next packet.
         int ret = av_read_frame(is->format, &avPacket);
         if(ret < 0)
@@ -542,14 +542,14 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
                 }
                 readEOF = true;
             }
-            
+
             // Some sort of playback error? Fail out with an unknown error.
             if(is->format->pb && is->format->pb->error)
             {
                 result = AVERROR_UNKNOWN;
                 break;
             }
-            
+
             // Wait 10ms, or until continue read condition is signaled.
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->mContinueReadCondition, wait_mutex, 10);
@@ -561,7 +561,7 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
             // Read frame successfully, so guess it's not eof yet.
             readEOF = false;
         }
-        
+
         // Queue packets for audio, video, and subtitles.
         // If a packet is not from one of those streams...clean it up and don't use it.
         if(avPacket.stream_index == is->mAudioStreamIndex)
@@ -583,10 +583,10 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
             av_packet_unref(&avPacket);
         }
     } // while(true)
-    
+
     // Clean up wait mutex.
     SDL_DestroyMutex(wait_mutex);
-    
+
     // Broke out of loop, so either playback is finished or an error occurred.
     is->ReadThreadEnd(result);
     return 0;
@@ -605,7 +605,7 @@ void VideoState::ReadThreadEnd(int result)
         // Pretty much anything else is bad news.
     }
     */
-    
+
     // Regardless, video is now stopped.
     mState = State::Stopped;
 }

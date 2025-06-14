@@ -31,19 +31,19 @@ void VideoPlayer::Initialize()
     mVideoCanvasActor = new Actor("VideoPlayer", TransformType::RectTransform);
     mVideoCanvasActor->SetIsDestroyOnLoad(false);
     UI::AddCanvas(mVideoCanvasActor, 15, Color32::Black);
-    
+
     // When a video plays, a background image either tints or completely blocks whatever's behind the video.
     // This is created along with the Canvas in AddCanvas - grab a reference to it here.
     mVideoBackgroundImage = mVideoCanvasActor->GetComponent<UIImage>();
-    
+
     // Create black background image, used for letterbox effect.
     mVideoLetterbox = UI::CreateWidgetActor<UIImage>("Letterbox", mVideoCanvasActor);
     mVideoLetterbox->SetColor(Color32::Black);
-    
+
     // Create video image, which shows actual video playback.
     mVideoImage = UI::CreateWidgetActor<UIImage>("Video", mVideoCanvasActor);
     mVideoImage->SetTexture(&Texture::Black);
-    
+
     // Disable video UI until a movie is played.
     mVideoCanvasActor->SetActive(false);
 }
@@ -55,7 +55,7 @@ void VideoPlayer::Update()
     {
         // Update video state (this fills video texture with new data as video plays back).
         mVideo->Update();
-        
+
         // Apply video texture.
         Texture* videoTexture = mVideo->GetVideoTexture();
         if(mHasTransparentColor && videoTexture != nullptr)
@@ -147,7 +147,7 @@ void VideoPlayer::Update()
             Stop();
         }
     }
-    
+
     // Only show video image when a video is playing.
     // Update UI after updating video playback in case video stops or ends prematurely.
     mVideoCanvasActor->SetActive(mOverrideVideoImage == nullptr && mVideo != nullptr);
@@ -162,23 +162,23 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
 {
     // Stop any video that is already playing first.
     Stop();
-    
+
     // Push video layer.
     gLayerManager.PushLayer(&mLayer);
-    
+
     // Log movie play.
     gReportManager.Log("Generic", "PlayMovie: trying to play " + name);
-    
+
     // Save callback.
     mStopCallback = stopCallback;
-    
+
     // If fullscreen, use window size as video size.
     // If not fullscreen, use size from video file.
     mVideoSizeMode = fullscreen ? SizeMode::Fullscreen : SizeMode::Native;
 
     // This video will use the built-in video image, so null out any override.
     mOverrideVideoImage = nullptr;
-    
+
     // If fullscreen, background is 100% opaque.
     // If not fullscreen, background is alpha'd a bit.
     if(fullscreen)
@@ -192,17 +192,17 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
         tintColor.SetA(kNonFullscreenAlpha);
         mVideoBackgroundImage->SetColor(tintColor);
     }
-    
+
     // Save autoclose flag.
     mAutoclose = autoclose;
-    
+
     // The name passed is just a filename (e.g. "intro.bik"). Need to convert that into a full path.
     // Names can also be passed with or without extension, so we have to try to resolve any ambiguous name.
     std::string videoPath = gAssetManager.GetAssetPath(name, { "bik", "avi" });
-    
+
     // Create new video.
     mVideo = new VideoState(videoPath.c_str());
-    
+
     // On create, video begins playing immediately, assuming no error occurs.
     // If stopped, something happened, and video will not play.
     if(mVideo->IsStopped())
@@ -211,7 +211,7 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
         Stop();
         return;
     }
-    
+
     // If we got here, movie seems to be playing ok!
     // Lock the mouse so it isn't visible and doesn't change position.
     gInputManager.LockMouse();
@@ -267,7 +267,7 @@ void VideoPlayer::Stop()
         {
             gLayerManager.PopLayer();
         }
-    
+
         // Delete video to cleanup resources.
         delete mVideo;
         mVideo = nullptr;
@@ -275,7 +275,7 @@ void VideoPlayer::Stop()
         // Unlock mouse on movie end. TODO: Maybe do this in the video layer?
         gInputManager.UnlockMouse();
     }
-    
+
     // Fire stop callback.
     if(mStopCallback != nullptr)
     {

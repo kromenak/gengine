@@ -22,21 +22,21 @@ class GKObject : public Actor
     TYPEINFO_SUB(GKObject, Actor);
 public:
     GKObject() = default;
-	
-	// GK3 rotations are often defined in terms of a heading (360 degrees about Y-axis).
-	virtual void SetHeading(const Heading& heading);
-	Heading GetHeading() const;
-    
+
+    // GK3 rotations are often defined in terms of a heading (360 degrees about Y-axis).
+    virtual void SetHeading(const Heading& heading);
+    Heading GetHeading() const;
+
     void DumpPosition();
-	
-	void SetNoun(const std::string& noun) { mNoun = noun; }
-	const std::string& GetNoun() const { return mNoun; }
-	
-	void SetVerb(const std::string& verb) { mVerb = verb; }
-	const std::string& GetVerb() const { return mVerb; }
-	
-	bool CanInteract() const { return IsActive() && !mNoun.empty(); }
-    
+
+    void SetNoun(const std::string& noun) { mNoun = noun; }
+    const std::string& GetNoun() const { return mNoun; }
+
+    void SetVerb(const std::string& verb) { mVerb = verb; }
+    const std::string& GetVerb() const { return mVerb; }
+
+    bool CanInteract() const { return IsActive() && !mNoun.empty(); }
+
     //TODO (but maybe OK): feels like these shouldn't be here, BUT some subclasses need these...
     virtual void StartAnimation(VertexAnimParams& animParams) { }
     virtual void SampleAnimation(VertexAnimParams& animParams, int frame) { }
@@ -47,13 +47,13 @@ public:
     virtual AABB GetAABB() { return AABB::FromCenterAndSize(GetPosition(), Vector3::One); }
 
     Vector3 GetAudioPosition() const;
-	
+
 private:
-	// A noun is used to refer to the objects in NVC logic.
-	// Only objects with nouns can be interacted with!
-	std::string mNoun;
-	
-	// When defined, the verb indicates that interacting with this object ONLY
-	// executes this verb in NVC logic. This often also changes the cursor.
-	std::string mVerb;
+    // A noun is used to refer to the objects in NVC logic.
+    // Only objects with nouns can be interacted with!
+    std::string mNoun;
+
+    // When defined, the verb indicates that interacting with this object ONLY
+    // executes this verb in NVC logic. This often also changes the cursor.
+    std::string mVerb;
 };

@@ -29,7 +29,7 @@ SheepThreadId SheepManager::Execute(SheepScript* script, std::function<void()> f
     const std::string& realTag = tag.empty() ? gLayerManager.GetTopLayerName() : tag;
 
     // Pass to VM for execution.
-	return mVirtualMachine.Execute(script, finishCallback, realTag);
+    return mVirtualMachine.Execute(script, finishCallback, realTag);
 }
 
 SheepThreadId SheepManager::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
@@ -38,7 +38,7 @@ SheepThreadId SheepManager::Execute(SheepScript* script, const std::string& func
     const std::string& realTag = tag.empty() ? gLayerManager.GetTopLayerName() : tag;
 
     // Pass to VM for execution.
-	return mVirtualMachine.Execute(script, functionName, finishCallback, realTag);
+    return mVirtualMachine.Execute(script, functionName, finishCallback, realTag);
 }
 
 SheepScript* SheepManager::CompileEval(const std::string& sheep)
@@ -54,14 +54,14 @@ SheepScript* SheepManager::CompileEval(const std::string& sheep)
 
 bool SheepManager::Evaluate(SheepScript* script)
 {
-	return Evaluate(script, 0, 0);
+    return Evaluate(script, 0, 0);
 }
 
 bool SheepManager::Evaluate(SheepScript* script, int n, int v)
 {
-	// No script automatically equates to "true".
-	if(script == nullptr) { return true; }
-	
-	// Otherwise, do it "for real."
-	return mVirtualMachine.Evaluate(script, n, v);
+    // No script automatically equates to "true".
+    if(script == nullptr) { return true; }
+
+    // Otherwise, do it "for real."
+    return mVirtualMachine.Evaluate(script, n, v);
 }

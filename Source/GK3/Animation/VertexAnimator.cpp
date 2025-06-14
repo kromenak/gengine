@@ -14,18 +14,18 @@ TYPEINFO_INIT(VertexAnimator, Component, 10)
 
 VertexAnimator::VertexAnimator(Actor* owner) : Component(owner)
 {
-	mMeshRenderer = owner->GetComponent<MeshRenderer>();
+    mMeshRenderer = owner->GetComponent<MeshRenderer>();
 }
 
 void VertexAnimator::Start(const VertexAnimParams& params)
 {
     // If we're interrupting some other anim, stop it (fires stop callback).
     Stop();
-    
+
     // Save parameters.
     mCurrentParams = params;
     mAnimationTimer = params.startTime;
-    
+
     // Sample animation immediately so mesh's positions/rotations are updated.
     TakeSample(mCurrentParams.vertexAnimation, mAnimationTimer);
 
@@ -36,27 +36,27 @@ void VertexAnimator::Start(const VertexAnimParams& params)
 
 void VertexAnimator::Stop(VertexAnimation* anim)
 {
-	// Stop if animation matches playing one OR null was passed in.
-	if(mCurrentParams.vertexAnimation != nullptr && (mCurrentParams.vertexAnimation == anim || anim == nullptr))
-	{
-		// Fire stop callback if an animation was in progress.
-		if(mCurrentParams.stopCallback != nullptr)
-		{
+    // Stop if animation matches playing one OR null was passed in.
+    if(mCurrentParams.vertexAnimation != nullptr && (mCurrentParams.vertexAnimation == anim || anim == nullptr))
+    {
+        // Fire stop callback if an animation was in progress.
+        if(mCurrentParams.stopCallback != nullptr)
+        {
             mCurrentParams.stopCallback();
-		}
-		
-		// Reset state data.
+        }
+
+        // Reset state data.
         mCurrentParams.vertexAnimation = nullptr;
         mCurrentParams.stopCallback = nullptr;
-	}
+    }
 }
 
 void VertexAnimator::Sample(VertexAnimation* animation, int frame)
 {
-	if(animation != nullptr)
-	{
-		TakeSample(animation, frame);
-	}
+    if(animation != nullptr)
+    {
+        TakeSample(animation, frame);
+    }
 }
 
 void VertexAnimator::OnEnable()
@@ -74,23 +74,23 @@ void VertexAnimator::OnDisable()
 
 void VertexAnimator::OnUpdate(float deltaTime)
 {
-	// Need a vertex animation to update.
-	if(mCurrentParams.vertexAnimation != nullptr)
-	{
-		// Increment animation timer.
-		mAnimationTimer += deltaTime;
-		
-		// Sample animation at current timer value, clamping to anim duration.
-		float animDuration = mCurrentParams.vertexAnimation->GetDuration(mCurrentParams.framesPerSecond);
-		TakeSample(mCurrentParams.vertexAnimation, Math::Clamp(mAnimationTimer, 0.0f, animDuration));
-		
-		// If at the end of the animation, clear animation.
-		// GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
-		if(mAnimationTimer >= animDuration)
-		{
-			Stop(mCurrentParams.vertexAnimation);
-		}
-	}
+    // Need a vertex animation to update.
+    if(mCurrentParams.vertexAnimation != nullptr)
+    {
+        // Increment animation timer.
+        mAnimationTimer += deltaTime;
+
+        // Sample animation at current timer value, clamping to anim duration.
+        float animDuration = mCurrentParams.vertexAnimation->GetDuration(mCurrentParams.framesPerSecond);
+        TakeSample(mCurrentParams.vertexAnimation, Math::Clamp(mAnimationTimer, 0.0f, animDuration));
+
+        // If at the end of the animation, clear animation.
+        // GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
+        if(mAnimationTimer >= animDuration)
+        {
+            Stop(mCurrentParams.vertexAnimation);
+        }
+    }
 }
 
 void VertexAnimator::OnLateUpdate(float deltaTime)
@@ -119,7 +119,7 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, int frame)
                 submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.vertexPositions.data()));
             }
         }
-        
+
         VertexAnimationTransformPose transformSample = animation->SampleTransformPose(frame, i);
         if(transformSample.frameNumber >= 0)
         {
@@ -130,25 +130,25 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, int frame)
 
 void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
 {
-	// Iterate through each mesh and sample it in the vertex animation.
-	// We need to sample both vertex poses and transform poses to get the right result.
-	const std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
-	for(size_t i = 0; i < meshes.size(); i++)
-	{
-		const std::vector<Submesh*>& submeshes = meshes[i]->GetSubmeshes();
-		for(size_t j = 0; j < submeshes.size(); j++)
-		{
-			VertexAnimationVertexPose sample = animation->SampleVertexPose(time, mCurrentParams.framesPerSecond, i, j);
-			if(sample.frameNumber >= 0)
-			{
+    // Iterate through each mesh and sample it in the vertex animation.
+    // We need to sample both vertex poses and transform poses to get the right result.
+    const std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
+    for(size_t i = 0; i < meshes.size(); i++)
+    {
+        const std::vector<Submesh*>& submeshes = meshes[i]->GetSubmeshes();
+        for(size_t j = 0; j < submeshes.size(); j++)
+        {
+            VertexAnimationVertexPose sample = animation->SampleVertexPose(time, mCurrentParams.framesPerSecond, i, j);
+            if(sample.frameNumber >= 0)
+            {
                 submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.vertexPositions.data()));
-			}
-		}
-		
-		VertexAnimationTransformPose transformSample = animation->SampleTransformPose(time, mCurrentParams.framesPerSecond, i);
-		if(transformSample.frameNumber >= 0)
-		{
+            }
+        }
+
+        VertexAnimationTransformPose transformSample = animation->SampleTransformPose(time, mCurrentParams.framesPerSecond, i);
+        if(transformSample.frameNumber >= 0)
+        {
             meshes[i]->SetMeshToLocalMatrix(transformSample.meshToLocalMatrix);
-		}
-	}
+        }
+    }
 }

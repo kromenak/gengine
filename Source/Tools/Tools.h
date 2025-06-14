@@ -21,7 +21,7 @@ namespace Tools
 
     void SetActive(bool active);
     bool Active();
-    
+
     void ProcessEvent(const SDL_Event& event);
     bool EatingMouseInputs();
     bool EatingKeyboardInputs();

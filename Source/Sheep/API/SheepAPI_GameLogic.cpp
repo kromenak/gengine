@@ -58,7 +58,7 @@ int GetFlagInt(int flagEnum)
 }
 RegFunc1(GetFlagInt, int, int, IMMEDIATE, REL_FUNC);
 */
- 
+
 shpvoid SetFlag(const std::string& flagName)
 {
     gGameProgress.SetFlag(flagName);
@@ -112,7 +112,7 @@ int GetNounVerbCountInt(int nounEnum, int verbEnum)
                             gActionManager.GetVerb(verbEnum));
 }
 RegFunc2(GetNounVerbCountInt, int, int, int, IMMEDIATE, REL_FUNC);
- 
+
 shpvoid IncNounVerbCount(const string& noun, const string& verb)
 {
     //TODO: Throw an error if the given noun corresponds to a "Topic".
@@ -179,7 +179,7 @@ int GetTopicCountInt(int nounEnum, int verbEnum)
     return GetTopicCount(noun, verb);
 }
 RegFunc2(GetTopicCountInt, int, int, int, IMMEDIATE, REL_FUNC);
- 
+
 int HasTopicsLeft(const std::string& noun)
 {
     //TODO: Validate noun.
@@ -208,7 +208,7 @@ int GetChatCountInt(int nounEnum)
     return GetChatCount(gActionManager.GetNoun(nounEnum));
 }
 RegFunc1(GetChatCountInt, int, int, IMMEDIATE, REL_FUNC);
- 
+
 shpvoid SetChatCount(std::string noun, int count)
 {
     gGameProgress.SetChatCount(noun, count);

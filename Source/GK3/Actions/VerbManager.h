@@ -11,7 +11,6 @@
 //
 #pragma once
 #include <string>
-#include <unordered_map>
 
 #include "StringUtil.h"
 
@@ -21,14 +20,14 @@ class Cursor;
 struct VerbIcon
 {
     // Button textures for the verb.
-	Texture* upTexture = nullptr;
-	Texture* downTexture = nullptr;
-	Texture* hoverTexture = nullptr;
-	Texture* disableTexture = nullptr;
+    Texture* upTexture = nullptr;
+    Texture* downTexture = nullptr;
+    Texture* hoverTexture = nullptr;
+    Texture* disableTexture = nullptr;
 
     // A cursor representing this verb.
     Cursor* cursor = nullptr;
-	
+
     float GetWidth() const;
 };
 
@@ -36,22 +35,22 @@ class VerbManager
 {
 public:
     void Init();
-	
-	VerbIcon& GetInventoryIcon(const std::string& noun);
-	VerbIcon& GetVerbIcon(const std::string& verb);
-	VerbIcon& GetTopicIcon(const std::string& topic);
-	
-	bool IsVerb(const std::string& word);
-	bool IsInventoryItem(const std::string& word);
-	bool IsTopic(const std::string& word);
-	
+
+    VerbIcon& GetInventoryIcon(const std::string& noun);
+    VerbIcon& GetVerbIcon(const std::string& verb);
+    VerbIcon& GetTopicIcon(const std::string& topic);
+
+    bool IsVerb(const std::string& word);
+    bool IsInventoryItem(const std::string& word);
+    bool IsTopic(const std::string& word);
+
 private:
-	VerbIcon mDefaultIcon;
-	
-	// Mappings from noun/verb/topic to icons.
-	std::string_map_ci<VerbIcon> mInventoryItems;
-	std::string_map_ci<VerbIcon> mVerbs;
-	std::string_map_ci<VerbIcon> mTopics;
+    VerbIcon mDefaultIcon;
+
+    // Mappings from noun/verb/topic to icons.
+    std::string_map_ci<VerbIcon> mInventoryItems;
+    std::string_map_ci<VerbIcon> mVerbs;
+    std::string_map_ci<VerbIcon> mTopics;
 };
 
 extern VerbManager gVerbManager;

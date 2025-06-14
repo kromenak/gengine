@@ -24,7 +24,7 @@ public:
 
     bool ContainsPoint(const Vector3& point) const;
     Vector3 GetClosestPoint(const Vector3& point) const;
-    
+
     // Line is defined by any two points.
     Vector3 p0;
     Vector3 p1;

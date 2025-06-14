@@ -27,11 +27,11 @@ Matrix3::Matrix3(float v00, float v01, float v02,
     mVals[0] = v00;
     mVals[1] = v10;
     mVals[2] = v20;
-    
+
     mVals[3] = v01;
     mVals[4] = v11;
     mVals[5] = v21;
-    
+
     mVals[6] = v02;
     mVals[7] = v12;
     mVals[8] = v22;
@@ -42,11 +42,11 @@ Matrix3::Matrix3(const Vector3& col1, const Vector3& col2, const Vector3& col3)
     mVals[0] = col1.x;
     mVals[1] = col1.y;
     mVals[2] = col1.z;
-    
+
     mVals[3] = col2.x;
     mVals[4] = col2.y;
     mVals[5] = col2.z;
-    
+
     mVals[6] = col3.x;
     mVals[7] = col3.y;
     mVals[8] = col3.z;
@@ -92,11 +92,11 @@ void Matrix3::SetRows(const Vector3& row1, const Vector3& row2, const Vector3& r
     mVals[0] = row1[0];
     mVals[3] = row1[1];
     mVals[6] = row1[2];
-    
+
     mVals[1] = row2[0];
     mVals[4] = row2[1];
     mVals[7] = row2[2];
-    
+
     mVals[2] = row3[0];
     mVals[5] = row3[1];
     mVals[8] = row3[2];
@@ -107,11 +107,11 @@ void Matrix3::GetRows(Vector3& row1, Vector3& row2, Vector3& row3)
     row1[0] = mVals[0];
     row1[1] = mVals[3];
     row1[2] = mVals[6];
-    
+
     row2[0] = mVals[1];
     row2[1] = mVals[4];
     row2[2] = mVals[7];
-    
+
     row3[0] = mVals[2];
     row3[1] = mVals[5];
     row3[2] = mVals[8];
@@ -122,11 +122,11 @@ void Matrix3::SetColumns(const Vector3& col1, const Vector3& col2, const Vector3
     mVals[0] = col1[0];
     mVals[1] = col1[1];
     mVals[2] = col1[2];
-    
+
     mVals[3] = col2[0];
     mVals[4] = col2[1];
     mVals[5] = col2[2];
-    
+
     mVals[6] = col3[0];
     mVals[7] = col3[1];
     mVals[8] = col3[2];
@@ -137,11 +137,11 @@ void Matrix3::GetColumns(Vector3& col1, Vector3& col2, Vector3& col3)
     col1[0] = mVals[0];
     col1[1] = mVals[1];
     col1[2] = mVals[2];
-    
+
     col2[0] = mVals[3];
     col2[1] = mVals[4];
     col2[2] = mVals[5];
-    
+
     col3[0] = mVals[6];
     col3[1] = mVals[7];
     col3[2] = mVals[8];
@@ -202,12 +202,12 @@ Matrix3 Matrix3::operator*(const Matrix3& rhs) const
     result.mVals[0] = mVals[0] * rhs.mVals[0] + mVals[3] * rhs.mVals[1] + mVals[6] * rhs.mVals[2];
     result.mVals[1] = mVals[1] * rhs.mVals[0] + mVals[4] * rhs.mVals[1] + mVals[7] * rhs.mVals[2];
     result.mVals[2] = mVals[2] * rhs.mVals[0] + mVals[5] * rhs.mVals[1] + mVals[8] * rhs.mVals[2];
-    
+
     // Column 2
     result.mVals[3] = mVals[0] * rhs.mVals[3] + mVals[3] * rhs.mVals[4] + mVals[6] * rhs.mVals[5];
     result.mVals[4] = mVals[1] * rhs.mVals[3] + mVals[4] * rhs.mVals[4] + mVals[7] * rhs.mVals[5];
     result.mVals[5] = mVals[2] * rhs.mVals[3] + mVals[5] * rhs.mVals[4] + mVals[8] * rhs.mVals[5];
-    
+
     // Column 3
     result.mVals[6] = mVals[0] * rhs.mVals[6] + mVals[3] * rhs.mVals[7] + mVals[6] * rhs.mVals[8];
     result.mVals[7] = mVals[1] * rhs.mVals[6] + mVals[4] * rhs.mVals[7] + mVals[7] * rhs.mVals[8];
@@ -270,11 +270,11 @@ void Matrix3::Transpose()
     float temp = mVals[1];
     mVals[1] = mVals[3];
     mVals[3] = temp;
-    
+
     temp = mVals[2];
     mVals[2] = mVals[6];
     mVals[6] = temp;
-    
+
     temp = mVals[5];
     mVals[5] = mVals[7];
     mVals[7] = temp;
@@ -304,42 +304,42 @@ void Matrix3::Invert()
 {
     // Math from Foundations of Game Engine Development.
     // Uses "inverse = adjugate divided by determinant" method.
-    
+
     // For a 3x3 matrix:
     // The adjugate matrix can be calculated using a series of cross products.
     // The determinant is equal to scalar triple produce ((a x b) dot c).
-    
+
     // Extract column vectors from matrix - we can calculate entire inverse with these.
     const Vector3& col0 = (*this)[0];
     const Vector3& col1 = (*this)[1];
     const Vector3& col2 = (*this)[2];
-    
+
     // Cross products of the column vectors give us the rows of the adjugate matrix.
     Vector3 row0 = Vector3::Cross(col1, col2);
     Vector3 row1 = Vector3::Cross(col2, col0);
     Vector3 row2 = Vector3::Cross(col0, col1);
-    
+
     // Determinant is calculated using scalar triple product.
     // row2 = (col0 x col1) and we dot product with col2.
     float determinant = Vector3::Dot(row2, col2);
-    
+
     // Determinant of zero indicates that an inverse doesn't exist.
     // Further reinforced by the "divide by determinant" below.
     if(Math::IsZero(determinant))
     {
         return;
     }
-    
+
     // Multiply adjugate matrix by (1/det) to get the inverse.
     float invDet = 1.0f / determinant;
     mVals[0] = row0.x * invDet;
     mVals[1] = row1.x * invDet;
     mVals[2] = row2.x * invDet;
-    
+
     mVals[3] = row0.y * invDet;
     mVals[4] = row1.y * invDet;
     mVals[5] = row2.y * invDet;
-    
+
     mVals[6] = row0.z * invDet;
     mVals[7] = row1.z * invDet;
     mVals[8] = row2.z * invDet;
@@ -403,24 +403,24 @@ Vector2 Matrix3::TransformPoint(const Vector2& point) const
 {
     // Math from Foundations of Game Engine Development.
     // Multiply by a vector (v) to rotate the vector by angle about axis.
-    
+
     // How it works: create a set of coordinate axes as [axis, projection of v onto axis, a x v].
     // Result = v.proj(a) + v.reject(a) * cos(theta) + (a x v) * sin(theta)
     // Representing this project/reject/cross as 3x3 matrices (and factoring out v),
     // we can generate a final 3x3 matrix to multiply by v to get the result.
-    
+
     // Pre-calculate terms that are used many times in the math.
     float cos = Math::Cos(angle);
     float cosComplement = 1.0f - cos;
     float sin = Math::Sin(angle);
-    
+
     float x = axis.x * cosComplement; // (1 - c) * x
     float y = axis.y * cosComplement; // (1 - c) * y
     float z = axis.z * cosComplement; // (1 - c) * z
     float axay = x * axis.y;
     float axaz = x * axis.z;
     float ayaz = y * axis.z;
-    
+
     // Generate final matrix.
     return Matrix3(cos + x * axis.x, axay - sin * axis.z, axaz + sin * axis.y,
                    axay + sin * axis.z, cos + y * axis.y, ayaz - sin * axis.x,
@@ -430,7 +430,7 @@ Vector2 Matrix3::TransformPoint(const Vector2& point) const
 /*static*/ Matrix3 Matrix3::MakeRotate(const Quaternion& quat)
 {
     float s = 2.0f / Quaternion::Dot(quat, quat);
-    
+
     float xs = s * quat.x;
     float ys = s * quat.y;
     float zs = s * quat.z;
@@ -443,16 +443,16 @@ Vector2 Matrix3::TransformPoint(const Vector2& point) const
     float yy = quat.y * ys;
     float yz = quat.y * zs;
     float zz = quat.z * zs;
-    
+
     Matrix3 m;
     m.mVals[0] = 1.0f - (yy + zz);
     m.mVals[1] = xy + wz;
     m.mVals[2] = xz - wy;
-    
+
     m.mVals[3] = xy - wz;
     m.mVals[4] = 1.0f - (xx + zz);
     m.mVals[5] = yz + wx;
-    
+
     m.mVals[6] = xz + wy;
     m.mVals[7] = yz - wx;
     m.mVals[8] = 1.0f - (xx + yy);

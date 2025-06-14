@@ -3,6 +3,8 @@
 #include <cstring>
 #include <iostream>
 
+#include <fmod_errors.h>
+
 #include "AssetManager.h"
 #include "Audio.h"
 #include "GEngine.h"
@@ -196,7 +198,7 @@ bool AudioManager::Initialize()
 {
     TIMER_SCOPED("AudioManager::Initialize");
 
-	// Create the FMOD system.
+    // Create the FMOD system.
     FMOD_RESULT result = FMOD::System_Create(&mSystem);
     if(result != FMOD_OK)
     {
@@ -204,7 +206,7 @@ bool AudioManager::Initialize()
         return false;
     }
 
-	// Retrieve the FMOD version.
+    // Retrieve the FMOD version.
     unsigned int version;
     result = mSystem->getVersion(&version);
     if(result != FMOD_OK)
@@ -213,14 +215,14 @@ bool AudioManager::Initialize()
         return false;
     }
 
-	// Verify that the FMOD library version matches the header version.
+    // Verify that the FMOD library version matches the header version.
     if(version < FMOD_VERSION)
     {
         std::cout << "FMOD lib version " << version << " doesn't match header version " <<  FMOD_VERSION << std::endl;
         return false;
     }
 
-	// Initialize the FMOD system.
+    // Initialize the FMOD system.
     result = mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
     if(result != FMOD_OK)
     {
@@ -324,7 +326,7 @@ bool AudioManager::Initialize()
 
 void AudioManager::Shutdown()
 {
-	// Close and release FMOD system.
+    // Close and release FMOD system.
     mSystem->close();
     mSystem->release();
     mSystem = nullptr;

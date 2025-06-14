@@ -69,7 +69,7 @@ void Chessboard::Reset(bool swordsGlow)
 void Chessboard::Takeoff()
 {
     // This function is called just as Gabe is about to jump to a new tile.
-    
+
     // First, get the row/col of the tile being jumped from.
     int row = gGameProgress.GetGameVariable("Te1GabeRow");
     int col = gGameProgress.GetGameVariable("Te1GabeColumn");
@@ -172,7 +172,7 @@ void Chessboard::OnUpdate(float deltaTime)
     // Get the object hovered by the mouse cursor, if any.
     Ray ray = gSceneManager.GetScene()->GetCamera()->GetSceneRayAtMousePos();
     SceneCastResult result = gSceneManager.GetScene()->Raycast(ray, false);
-    
+
     const int kValidMoveType = 1;
     const int kInvalidMoveType = 2;
     GKObject* hoveredObject = result.hitObject;
@@ -190,11 +190,11 @@ void Chessboard::OnUpdate(float deltaTime)
             // Save last clicked row/col.
             gGameProgress.SetGameVariable("Te1TileRow", row);
             gGameProgress.SetGameVariable("Te1TileColumn", col);
-            
+
             // Figure out valid row/col moves from Gabe's current position.
             int gabeRow = gGameProgress.GetGameVariable("Te1GabeRow");
             int gabeCol = gGameProgress.GetGameVariable("Te1GabeColumn");
-            
+
             // Here's an easy case for the start of the puzzle:
             // If Gabe's not yet on the board, the only valid move is to the first row.
             if(gabeRow < 0)

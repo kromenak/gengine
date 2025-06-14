@@ -28,17 +28,17 @@ public:
     void Load(uint8_t* data, uint32_t dataLength);
 
     const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
-	
-	bool IsBillboard() const { return mBillboard; }
-	
-	void WriteToObjFile(const std::string& filePath);
-	
+
+    bool IsBillboard() const { return mBillboard; }
+
+    void WriteToObjFile(const std::string& filePath);
+
 private:
     // A model consists of one or more meshes.
     std::vector<Mesh*> mMeshes;
-	
-	// If true, the model should be rendered as a billboard.
-	bool mBillboard = false;
-	
+
+    // If true, the model should be rendered as a billboard.
+    bool mBillboard = false;
+
     void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

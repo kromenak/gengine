@@ -37,7 +37,7 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
             break;
         }
     }
-    
+
     // The font texture may have the font glyphs in multiple vertical lines.
     // The height of each line can be calculated pretty easily.
     int lineHeight = mFontTexture->GetHeight() / mLineCount;
@@ -144,123 +144,123 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
 
 Glyph& Font::GetGlyph(char character)
 {
-	auto it = mFontGlyphs.find(character);
-	if(it != mFontGlyphs.end())
-	{
-		return it->second;
-	}
-	else
-	{
-		return mFontGlyphs[mDefaultChar];
-	}
+    auto it = mFontGlyphs.find(character);
+    if(it != mFontGlyphs.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return mFontGlyphs[mDefaultChar];
+    }
 }
 
 Shader* Font::GetShader() const
 {
-	if(mColorMode == ColorMode::ColorReplace)
-	{
-		return gAssetManager.LoadShader("3D-Tex", "UI-Text-ColorReplace");
-	}
-	return Material::sDefaultShader;
+    if(mColorMode == ColorMode::ColorReplace)
+    {
+        return gAssetManager.LoadShader("3D-Tex", "UI-Text-ColorReplace");
+    }
+    return Material::sDefaultShader;
 }
 
 void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
-	// Font is in INI format, but only one key per line.
-	IniParser parser(data, dataLength);
-	parser.SetMultipleKeyValuePairsPerLine(false);
-	
-	// Read each line, and each key/pair, one at a time.
+    // Font is in INI format, but only one key per line.
+    IniParser parser(data, dataLength);
+    parser.SetMultipleKeyValuePairsPerLine(false);
+
+    // Read each line, and each key/pair, one at a time.
     Texture* alphaTexture = nullptr;
-	while(parser.ReadLine())
-	{
-		while(parser.ReadKeyValuePair())
-		{
-			const IniKeyValue& keyValue = parser.GetKeyValue();
-			if(StringUtil::EqualsIgnoreCase(keyValue.key, "font"))
-			{
-				//TODO: If font contains non-ASCII chars (pretty likely), this won't work for those chars.
-				mFontCharacters = keyValue.value;
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "bitmap name"))
-			{
-				mFontTexture = gAssetManager.LoadTexture(keyValue.value, GetScope());
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "alpha channel"))
-			{
+    while(parser.ReadLine())
+    {
+        while(parser.ReadKeyValuePair())
+        {
+            const IniKeyValue& keyValue = parser.GetKeyValue();
+            if(StringUtil::EqualsIgnoreCase(keyValue.key, "font"))
+            {
+                //TODO: If font contains non-ASCII chars (pretty likely), this won't work for those chars.
+                mFontCharacters = keyValue.value;
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "bitmap name"))
+            {
+                mFontTexture = gAssetManager.LoadTexture(keyValue.value, GetScope());
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "alpha channel"))
+            {
                 alphaTexture = gAssetManager.LoadTexture(keyValue.value, GetScope());
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "line count"))
-			{
-				mLineCount = keyValue.GetValueAsInt();
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "char extra"))
-			{
-				mExtraCharacterSpacing = keyValue.GetValueAsInt();
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "line extra"))
-			{
-				mExtraLineSpacing = keyValue.GetValueAsInt();
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "default char"))
-			{
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "line count"))
+            {
+                mLineCount = keyValue.GetValueAsInt();
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "char extra"))
+            {
+                mExtraCharacterSpacing = keyValue.GetValueAsInt();
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "line extra"))
+            {
+                mExtraLineSpacing = keyValue.GetValueAsInt();
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "default char"))
+            {
                 mDefaultChar = static_cast<unsigned char>(keyValue.GetValueAsInt());
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
-			{
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
+            {
                 // Default is "alpha blend," but it can still be specified explicitly.
                 if(StringUtil::EqualsIgnoreCase(keyValue.value, "alpha blend"))
                 {
                     mColorMode = ColorMode::AlphaBlend;
                 }
-				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "color replacement"))
-				{
+                else if(StringUtil::EqualsIgnoreCase(keyValue.value, "color replacement"))
+                {
                     mColorMode = ColorMode::ColorReplace;
-				}
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "color"))
-			{
-				// Defined when type is "Color Replacement".
+                }
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "color"))
+            {
+                // Defined when type is "Color Replacement".
                 // The value is sometimes empty, which means we should just use the default.
                 if(!keyValue.value.empty())
                 {
                     mColor = keyValue.GetValueAsColor32();
                 }
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "foreground color"))
-			{
-				// Defined when type is "Alpha Blend".
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "foreground color"))
+            {
+                // Defined when type is "Alpha Blend".
                 // The value is sometimes empty, which means we should just use the default.
                 if(!keyValue.value.empty())
                 {
                     mColor = keyValue.GetValueAsColor32();
                 }
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "background color"))
-			{
-				// Defined when type is "Alpha Blend".
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "background color"))
+            {
+                // Defined when type is "Alpha Blend".
                 // The value is sometimes empty, which means we should just use the default.
                 if(!keyValue.value.empty())
                 {
                     mBackgroundColor = keyValue.GetValueAsColor32();
                 }
-			}
+            }
             //TODO: function
             //TODO: destination opacity
             //TODO: source opacity
-			else
-			{
-				std::cout << "Unknown font property: " << keyValue.key << std::endl;
-			}
-		}
-	}
-	
-	// After parsing, if font texture is null, we'll fall back on using
-	// a font texture with the same name as the font itself.
-	if(mFontTexture == nullptr)
-	{
-		mFontTexture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());
-	}
+            else
+            {
+                std::cout << "Unknown font property: " << keyValue.key << std::endl;
+            }
+        }
+    }
+
+    // After parsing, if font texture is null, we'll fall back on using
+    // a font texture with the same name as the font itself.
+    if(mFontTexture == nullptr)
+    {
+        mFontTexture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());
+    }
 
     // If we have an alpha channel apply it to the font texture.
     if(mFontTexture != nullptr && alphaTexture != nullptr)

@@ -8,9 +8,9 @@
 float VerbIcon::GetWidth() const
 {
     uint32_t width = 0;
-	if(upTexture != nullptr) { width = upTexture->GetWidth(); }
-	else if(downTexture != nullptr) { width = downTexture->GetWidth(); }
-	else if(hoverTexture != nullptr) { width = hoverTexture->GetWidth(); }
+    if(upTexture != nullptr) { width = upTexture->GetWidth(); }
+    else if(downTexture != nullptr) { width = downTexture->GetWidth(); }
+    else if(hoverTexture != nullptr) { width = hoverTexture->GetWidth(); }
     else if(disableTexture != nullptr) { width = disableTexture->GetWidth(); }
     return static_cast<float>(width);
 }
@@ -19,19 +19,19 @@ VerbManager gVerbManager;
 
 void VerbManager::Init()
 {
-	// Get VERBS text file.
-	TextAsset* text = gAssetManager.LoadText("VERBS.TXT", AssetScope::Manual);
-	
-	// Pass that along to INI parser, since it is plain text and in INI format.
-	IniParser parser(text->GetText(), text->GetTextLength());
-	parser.ParseAll();
-	
-	// Everything is contained within the "VERBS" section.
-	// There's only one section in the whole file.
-	IniSection section = parser.GetSection("VERBS");
-	
-	// Each line is a single button icon declaration.
-	// Format is: KEYWORD, up=, down=, hover=, disable=, type
+    // Get VERBS text file.
+    TextAsset* text = gAssetManager.LoadText("VERBS.TXT", AssetScope::Manual);
+
+    // Pass that along to INI parser, since it is plain text and in INI format.
+    IniParser parser(text->GetText(), text->GetTextLength());
+    parser.ParseAll();
+
+    // Everything is contained within the "VERBS" section.
+    // There's only one section in the whole file.
+    IniSection section = parser.GetSection("VERBS");
+
+    // Each line is a single button icon declaration.
+    // Format is: KEYWORD, up=, down=, hover=, disable=, type
     for(auto& line : section.lines)
     {
         IniKeyValue& entry = line.entries.front();
@@ -116,54 +116,54 @@ void VerbManager::Init()
 
 VerbIcon& VerbManager::GetInventoryIcon(const std::string& noun)
 {
-	auto it = mInventoryItems.find(noun);
-	if(it != mInventoryItems.end())
-	{
-		return it->second;
-	}
-	else
-	{
-		return mDefaultIcon;
-	}
+    auto it = mInventoryItems.find(noun);
+    if(it != mInventoryItems.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return mDefaultIcon;
+    }
 }
 
 VerbIcon& VerbManager::GetVerbIcon(const std::string& verb)
 {
-	auto it = mVerbs.find(verb);
-	if(it != mVerbs.end())
-	{
-		return it->second;
-	}
-	else
-	{
-		return mDefaultIcon;
-	}
+    auto it = mVerbs.find(verb);
+    if(it != mVerbs.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return mDefaultIcon;
+    }
 }
 
 VerbIcon& VerbManager::GetTopicIcon(const std::string& topic)
 {
-	auto it = mTopics.find(topic);
-	if(it != mTopics.end())
-	{
-		return it->second;
-	}
-	else
-	{
-		return mDefaultIcon;
-	}
+    auto it = mTopics.find(topic);
+    if(it != mTopics.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return mDefaultIcon;
+    }
 }
 
 bool VerbManager::IsVerb(const std::string& word)
 {
-	return mVerbs.find(word) != mVerbs.end();
+    return mVerbs.find(word) != mVerbs.end();
 }
 
 bool VerbManager::IsInventoryItem(const std::string& word)
 {
-	return mInventoryItems.find(word) != mInventoryItems.end();
+    return mInventoryItems.find(word) != mInventoryItems.end();
 }
 
 bool VerbManager::IsTopic(const std::string& word)
 {
-	return mTopics.find(word) != mTopics.end();
+    return mTopics.find(word) != mTopics.end();
 }

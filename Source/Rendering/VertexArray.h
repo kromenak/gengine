@@ -5,13 +5,11 @@
 // The lowest-level rendering object you can use.
 //
 // The VA creates/owns GPU resources.
-// 
+//
 // It also allocates and manages memory for vertex/index data.
 // You can assume any data passed to VA is copied internally - so buffers do not need to be dynamically allocated.
 //
 #pragma once
-#include <GL/glew.h>
-
 #include "GAPI.h"
 #include "MeshDefinition.h"
 
@@ -21,24 +19,24 @@ public:
     VertexArray() = default;
     VertexArray(const MeshDefinition& data);
     ~VertexArray();
-    
+
     // VertexArrays contain handles to GPU resources, so don't allow copying!
     VertexArray(const VertexArray& other) = delete;
     VertexArray& operator=(const VertexArray& other) = delete;
-    
+
     // VertexArrays can be moved to/from.
     VertexArray(VertexArray&& other) noexcept;
     VertexArray& operator=(VertexArray&& other) noexcept;
-    
+
     void DrawTriangles();
     void DrawTriangles(uint32_t offset, uint32_t count);
-    
+
     void DrawTriangleStrips();
     void DrawTriangleStrips(uint32_t offset, uint32_t count);
-    
+
     void DrawTriangleFans();
     void DrawTriangleFans(uint32_t offset, uint32_t count);
-    
+
     void DrawLines();
     void DrawLines(uint32_t offset, uint32_t count);
 
@@ -59,7 +57,7 @@ public:
 
     void ChangeIndexData(uint16_t* indexes);
     void ChangeIndexData(uint16_t* indexes, uint32_t count);
-    
+
 private:
     // Mesh data (vertices, normals, indexes, etc).
     // This is maintained and holds CPU-side copies of all mesh data.
@@ -70,7 +68,7 @@ private:
 
     // Handle to the (optional) index buffer in the graphics system.
     BufferHandle mIndexBuffer = nullptr;
-    
+
     void CreateVertexBuffer();
     void CreateIndexBuffer();
 };

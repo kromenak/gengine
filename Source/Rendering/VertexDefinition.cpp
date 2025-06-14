@@ -48,7 +48,7 @@ int VertexAttribute::GetSize() const
     //TODO: Since the only Type is "Float" right now, assume byte size of 4.
     //TODO: When more types are added, we'll need some sort of switch statement probably.
     int byteSize = 4;
-    
+
     // Size of an attribute is just byte size (based on type) and the count of the type.
     return byteSize * count;
 }
@@ -68,7 +68,7 @@ int VertexDefinition::CalculateStride() const
 {
     // When data is tightly packed, the stride should be zero.
     if(layout == VertexLayout::Packed) { return 0; }
-    
+
     // For interleaved data, the stride is really just the size of a single vertex.
     return CalculateSize();
 }
@@ -81,7 +81,7 @@ int VertexDefinition::CalculateAttributeOffset(int index, int vertexCount) const
     {
         // If an invalid index was specified, we'll just act like the last possible index was given (clamp).
         if(i >= attributes.size()) { break; }
-        
+
         // When data is tightly packed, the offset can only be determined if we know the vertex count.
         if(layout == VertexLayout::Packed)
         {

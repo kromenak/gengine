@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "Component.h"
-#include "Matrix4.h"
 #include "Quaternion.h"
 #include "Transform.h"
 #include "Vector3.h"
@@ -24,97 +23,97 @@ class Actor
 {
     TYPEINFO_BASE(Actor);
 public:
-	enum class State
-	{
-		Active,
-		Inactive,
-		Destroyed
-	};
-	
+    enum class State
+    {
+        Active,
+        Inactive,
+        Destroyed
+    };
+
     Actor();
-	Actor(TransformType transformType);
+    Actor(TransformType transformType);
     Actor(const std::string& name);
     Actor(const std::string& name, TransformType transformType);
     virtual ~Actor();
-    
-	void Update(float deltaTime);
+
+    void Update(float deltaTime);
     void LateUpdate(float deltaTime);
-    
+
     template<class T> T* AddComponent();
     template<class T, class... Args> T* AddComponent(Args&&... args);
     template<class T> T* GetComponent() const;
     template<class T> T* GetComponentInParents() const;
     template<class T> void GetComponents(std::vector<T*>& outComponents, bool includeChildren = false);
     const std::vector<Component*>& GetComponents() const { return mComponents; }
-    
+
     const std::string& GetName() const { return mName; }
     void SetName(const std::string& name) { mName = name; }
-	
-	// STATE
-	void SetActive(bool active);
-	bool IsActive() const;
-	
-	void Destroy();
-	bool IsDestroyed() const { return mState == State::Destroyed; }
-	
-	void SetIsDestroyOnLoad(bool destroyOnLoad) { mIsDestroyOnLoad = destroyOnLoad; }
-	bool IsDestroyOnLoad() const;
-    
+
+    // STATE
+    void SetActive(bool active);
+    bool IsActive() const;
+
+    void Destroy();
+    bool IsDestroyed() const { return mState == State::Destroyed; }
+
+    void SetIsDestroyOnLoad(bool destroyOnLoad) { mIsDestroyOnLoad = destroyOnLoad; }
+    bool IsDestroyOnLoad() const;
+
     void SetTimeScale(float timeScale) { mTimeScale = timeScale; }
     void SetUpdateEnabled(bool updateEnabled) { mUpdateEnabled = updateEnabled; }
-	
-	// TRANSFORM CONVENIENCE ACCESSORS
-	Transform* GetTransform() const { return mTransform; }
-	
-	Vector3 GetPosition() const { return mTransform->GetPosition(); }
-	void SetPosition(Vector3 position) { mTransform->SetPosition(position); }
-	
-	Quaternion GetRotation() const { return mTransform->GetRotation(); }
-	void SetRotation(Quaternion rotation) { mTransform->SetRotation(rotation); }
-	
-	Vector3 GetScale() const { return mTransform->GetScale(); }
-	void SetScale(Vector3 scale) { mTransform->SetScale(scale); }
-	
-	Vector3 GetForward() const { return mTransform->GetForward(); }
-	Vector3 GetRight() const { return mTransform->GetRight(); }
-	Vector3 GetUp() const { return mTransform->GetUp(); }
-	
-	Vector3 GetWorldPosition() const { return mTransform->GetWorldPosition(); }
-	void SetWorldPosition(const Vector3& position) { mTransform->SetWorldPosition(position); }
-	
-	Quaternion GetWorldRotation() const { return mTransform->GetWorldRotation(); }
-	void SetWorldRotation(const Quaternion& rotation) { mTransform->SetWorldRotation(rotation); }
-	
-	Vector3 GetWorldScale() const { return mTransform->GetWorldScale(); }
-	
+
+    // TRANSFORM CONVENIENCE ACCESSORS
+    Transform* GetTransform() const { return mTransform; }
+
+    Vector3 GetPosition() const { return mTransform->GetPosition(); }
+    void SetPosition(Vector3 position) { mTransform->SetPosition(position); }
+
+    Quaternion GetRotation() const { return mTransform->GetRotation(); }
+    void SetRotation(Quaternion rotation) { mTransform->SetRotation(rotation); }
+
+    Vector3 GetScale() const { return mTransform->GetScale(); }
+    void SetScale(Vector3 scale) { mTransform->SetScale(scale); }
+
+    Vector3 GetForward() const { return mTransform->GetForward(); }
+    Vector3 GetRight() const { return mTransform->GetRight(); }
+    Vector3 GetUp() const { return mTransform->GetUp(); }
+
+    Vector3 GetWorldPosition() const { return mTransform->GetWorldPosition(); }
+    void SetWorldPosition(const Vector3& position) { mTransform->SetWorldPosition(position); }
+
+    Quaternion GetWorldRotation() const { return mTransform->GetWorldRotation(); }
+    void SetWorldRotation(const Quaternion& rotation) { mTransform->SetWorldRotation(rotation); }
+
+    Vector3 GetWorldScale() const { return mTransform->GetWorldScale(); }
+
 protected:
-	virtual void OnActive() { }
-	virtual void OnInactive() { }
-	
-	virtual void OnUpdate(float deltaTime) { }
+    virtual void OnActive() { }
+    virtual void OnInactive() { }
+
+    virtual void OnUpdate(float deltaTime) { }
     virtual void OnLateUpdate(float deltaTime) { }
-    
+
 private:
     // The actor's name - meant for debugging purposes.
     std::string mName;
-    
+
     // State of the actor - used for lifetime management and whether the actor receives updates.
-	State mState = State::Active;
-	
-	// By default, actors are destroyed when a new scene loads.
-	bool mIsDestroyOnLoad = true;
-	
+    State mState = State::Active;
+
+    // By default, actors are destroyed when a new scene loads.
+    bool mIsDestroyOnLoad = true;
+
     // This actor's time scale.
     // Can use to make actor update faster, slower.
     float mTimeScale = 1.0f;
-    
+
     // Is update enabled for this actor?
     // Differs from time scale because timescale of 0.0 still calls update! This disables it entirely.
     bool mUpdateEnabled = true;
-    
-	// Transform is accessed pretty often, so seems good to cache it.
-	Transform* mTransform = nullptr;
-	
+
+    // Transform is accessed pretty often, so seems good to cache it.
+    Transform* mTransform = nullptr;
+
     // The components that are attached to this actor.
     std::vector<Component*> mComponents;
 };

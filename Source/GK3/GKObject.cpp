@@ -13,12 +13,12 @@ TYPEINFO_INIT(GKObject, Actor, 31)
 
 void GKObject::SetHeading(const Heading& heading)
 {
-	SetRotation(heading.ToQuaternion());
+    SetRotation(heading.ToQuaternion());
 }
 
 Heading GKObject::GetHeading() const
 {
-	return Heading::FromQuaternion(GetRotation());
+    return Heading::FromQuaternion(GetRotation());
 }
 
 void GKObject::DumpPosition()

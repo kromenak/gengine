@@ -38,7 +38,7 @@ public:
     void SetDropdownChoiceEnabled(size_t dropdownIndex, size_t choiceIndex, bool enabled);
     void ClearDropdownChoices(size_t dropdownIndex);
     size_t GetDropdownChoiceCount(size_t dropdownIndex) const { return mDropdowns[dropdownIndex].options.size(); }
-    
+
 private:
     // The root of the menu bar hierarchy.
     Actor* mRoot = nullptr;

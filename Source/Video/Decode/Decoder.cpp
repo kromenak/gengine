@@ -13,7 +13,7 @@ void Decoder::Init(AVCodecContext* codecContext, PacketQueue* packetQueue, SDL_c
     mCodecContext = codecContext;
     mPacketQueue = packetQueue;
     mEmptyQueueCondition = emptyQueueCond;
-    
+
     // Zero out ffmpeg structs (otherwise, could crash during cleanup due to garbage pointers).
     memset(&mPendingPacket, 0, sizeof(AVPacket));
     memset(&mFlushPtsTimeBase, 0, sizeof(AVRational));
@@ -30,7 +30,7 @@ int Decoder::Start(VideoState* is)
 {
     // Start packet queue.
     mPacketQueue->Start();
-    
+
     // Start appropriate decode thread.
     switch(mCodecContext->codec_type)
     {
@@ -47,14 +47,14 @@ int Decoder::Start(VideoState* is)
         av_log(NULL, AV_LOG_ERROR, "Unexpected codec type!");
         break;
     }
-    
+
     // Fail if couldn't create thread.
     if(mDecoderThread == nullptr)
     {
         av_log(NULL, AV_LOG_ERROR, "SDL_CreateThread(): %s\n", SDL_GetError());
         return AVERROR(ENOMEM);
     }
-    
+
     // All good.
     return 0;
 }
@@ -63,11 +63,11 @@ void Decoder::Abort(FrameQueue* frameQueue)
 {
     mPacketQueue->Abort();
     frameQueue->Signal();
-    
+
     // Wait for the decoder thread to abort.
     SDL_WaitThread(mDecoderThread, nullptr);
     mDecoderThread = nullptr;
-    
+
     mPacketQueue->Clear();
 }
 
@@ -75,7 +75,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
 {
     // This function is called by the decoder thread created in the "Start" function.
     int ret = AVERROR(EAGAIN);
-    
+
     // Loop until one of the following occurs:
     // 1) A frame is decoded, which populates the frame out variable.
     // 2) An abort is detected.
@@ -98,7 +98,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                 // Returns 0 when a frame is returned.
                 // Returns EAGAIN when there's no data to receive (meaning we must send it some packets first).
                 ret = avcodec_receive_frame(mCodecContext, frame);
-                
+
                 // Get a decoded frame!
                 if(ret >= 0)
                 {
@@ -121,7 +121,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                         {
                             frame->pts = av_rescale_q(mNextPts, mNextPtsTimeBase, timeBase);
                         }
-                        
+
                         // Save "next pts" value based on this frame's pts (if frame has pts set).
                         if(frame->pts != AV_NOPTS_VALUE)
                         {
@@ -130,7 +130,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                         }
                     }
                 }
-                
+
                 // If EOF is returned, set EOF serial, flush, and return.
                 // NOTE: In practice, I have not ever seen this occur. See "IsEofPacket" below for fallback.
                 if(ret == AVERROR_EOF)
@@ -139,7 +139,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                     avcodec_flush_buffers(mCodecContext);
                     return 0;
                 }
-                
+
                 // Received a decoded frame - return so it can be used.
                 if(ret >= 0)
                 {
@@ -148,7 +148,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
             } while(ret != AVERROR(EAGAIN)); // Loop until avcodec_receive_frame returns EAGAIN.
                                              // This signifies we must send data to be decoded (done next).
         }
-        
+
         // Get a packet to send to the decoder.
         // This is a loop b/c we'll keep grabbing packets until we find a valid one.
         AVPacket avPacket;
@@ -159,7 +159,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
             {
                 SDL_CondSignal(mEmptyQueueCondition);
             }
-            
+
             // If a pending packet exists, try to use that.
             // Otherwise, grab packet from queue.
             if(mPacketPending)
@@ -172,14 +172,14 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                 // Abort! "Get" only returns < 0 on abort.
                 return -1;
             }
-            
+
             // If retrieved packet's serial matches queue's serial, this is a valid packet!
             // Break out of while loop (drop down to send packet to decoder).
             if(mPacketQueue->serial == mSerial)
             {
                 break;
             }
-            
+
             // Got a packet, but serials don't match - this packet is stale.
             // Unref it, get it outta here!
             av_packet_unref(&avPacket);
@@ -205,7 +205,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
         else
         {
             // This is a real packet, so send it to be decoded!
-            
+
             // Decoding works a bit differently if it's a subtitle.
             if(mCodecContext->codec_type == AVMEDIA_TYPE_SUBTITLE)
             {
@@ -213,7 +213,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                 // "got_subtitle" is non-zero if a subtitle was decompressed.
                 int got_subtitle = 0;
                 ret = avcodec_decode_subtitle2(mCodecContext, sub, &got_subtitle, &avPacket);
-                
+
                 // Treat any error as "try again."
                 if(ret < 0)
                 {
@@ -228,7 +228,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                         mPacketPending = true;
                         av_packet_move_ref(&mPendingPacket, &avPacket);
                     }
-                    
+
                     // Got a subtitle? No problem.
                     // No subtitle but got data? Try again.
                     // No subtitle and no data? EOF.
@@ -253,7 +253,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                     av_packet_move_ref(&mPendingPacket, &avPacket);
                 }
             }
-            
+
             // Packet has been set to decoder and we are done with it.
             av_packet_unref(&avPacket);
         }

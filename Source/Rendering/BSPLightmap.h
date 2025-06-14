@@ -26,9 +26,9 @@ public:
     ~BSPLightmap();
 
     void Load(uint8_t* data, uint32_t dataLength);
-    
+
     const std::vector<Texture*>& GetLightmapTextures() const { return mLightmapTextures; }
-    
+
 private:
     // Textures loaded from the MUL file.
     // Order is important, and aligns with order of surfaces in BSP file.

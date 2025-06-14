@@ -12,7 +12,6 @@
 #include "AssetManager.h"
 #include "InventoryManager.h"
 #include "SidneyUtil.h"
-#include "StringUtil.h"
 
 class PersistState;
 class Sidney;
@@ -79,7 +78,7 @@ struct SidneyFile
 
     // Has the file ever been analyzed before? Affects the behavior of opening a file in the Analyze view.
     bool hasBeenAnalyzed = false;
-    
+
     SidneyFile() = default;
     SidneyFile(const SidneyFile&) = default;
     SidneyFile(SidneyFile&&) = default;
@@ -176,7 +175,7 @@ private:
 
     // Files UI root.
     Actor* mRoot = nullptr;
-    
+
     // A button used for each entry in the file list window.
     struct FileListButton
     {

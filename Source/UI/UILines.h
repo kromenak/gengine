@@ -31,7 +31,7 @@ public:
 
     const LineSegment& GetLine(size_t index) const { return mLines[index]; }
     size_t GetLinesCount() const { return mLines.size(); }
-    
+
 private:
     // The lines in the set.
     std::vector<LineSegment> mLines;

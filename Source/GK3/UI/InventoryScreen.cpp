@@ -96,7 +96,7 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 void InventoryScreen::Hide()
 {
     if(!IsActive()) { return; }
-	SetActive(false);
+    SetActive(false);
 
     // Pop off stack.
     gLayerManager.PopLayer(&mLayer);

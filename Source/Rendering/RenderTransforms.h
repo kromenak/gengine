@@ -20,7 +20,7 @@ namespace RenderTransforms
 {
     // View Matrix
     Matrix4 MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up);
-    
+
     // Projection Matrices
     Matrix4 MakePerspective(float fovAngle, float aspectRatio, float near, float far);
     Matrix4 MakeOrthographic(float left, float right, float bottom, float top, float near, float far);

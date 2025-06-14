@@ -45,12 +45,12 @@ void GameProgress::Init()
 
 void GameProgress::SetScore(int score)
 {
-	mScore = Math::Clamp(score, 0, mMaxScore);
+    mScore = Math::Clamp(score, 0, mMaxScore);
 }
 
 void GameProgress::IncreaseScore(int points)
 {
-	SetScore(mScore + points);
+    SetScore(mScore + points);
 }
 
 void GameProgress::ChangeScore(const std::string& scoreName)
@@ -88,11 +88,11 @@ void GameProgress::ChangeScore(const std::string& scoreName)
 
 void GameProgress::SetTimeblock(const Timeblock& timeblock)
 {
-	mLastTimeblock = mTimeblock;
-	mTimeblock = timeblock;
-	
-	// Chat counts are reset on time block change.
-	mChatCounts.clear();
+    mLastTimeblock = mTimeblock;
+    mTimeblock = timeblock;
+
+    // Chat counts are reset on time block change.
+    mChatCounts.clear();
 }
 
 std::string GameProgress::GetTimeblockDisplayName() const
@@ -154,42 +154,42 @@ void GameProgress::StartTimeblock(const Timeblock& timeblock, const std::functio
 
 int GameProgress::GetGameVariable(const std::string& varName) const
 {
-	auto it = mGameVariables.find(varName);
-	if(it != mGameVariables.end())
-	{
-		return it->second;
-	}
-	return 0;
+    auto it = mGameVariables.find(varName);
+    if(it != mGameVariables.end())
+    {
+        return it->second;
+    }
+    return 0;
 }
 
 void GameProgress::SetGameVariable(const std::string& varName, int value)
 {
-	mGameVariables[varName] = value;
+    mGameVariables[varName] = value;
 }
 
 void GameProgress::IncGameVariable(const std::string& varName)
 {
-	++mGameVariables[varName];
+    ++mGameVariables[varName];
 }
 
 int GameProgress::GetChatCount(const std::string& noun) const
 {
-	auto it = mChatCounts.find(noun);
-	if(it != mChatCounts.end())
-	{
-		return it->second;
-	}
-	return 0;
+    auto it = mChatCounts.find(noun);
+    if(it != mChatCounts.end())
+    {
+        return it->second;
+    }
+    return 0;
 }
 
 void GameProgress::SetChatCount(const std::string& noun, int count)
 {
-	mChatCounts[noun] = count;
+    mChatCounts[noun] = count;
 }
 
 void GameProgress::IncChatCount(const std::string& noun)
 {
-	++mChatCounts[noun];
+    ++mChatCounts[noun];
 }
 
 int GameProgress::GetTopicCount(const std::string& noun, const std::string& topic) const

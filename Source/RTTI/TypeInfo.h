@@ -14,7 +14,6 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include <unordered_map>
 
 #include "TypeId.h"
 #include "VariableInfo.h"

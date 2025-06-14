@@ -10,7 +10,6 @@
 #include "Scene.h"
 #include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UIUtil.h"
 
@@ -29,7 +28,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     // Add base background image, which shows the fingerprint box up-close.
     UIImage* baseImage = UI::CreateWidgetActor<UIImage>("Background", this);
     baseImage->SetTexture(gAssetManager.LoadTexture("FP_BASE.BMP"), true);
-    
+
     // Add exit button to bottom-left corner of screen.
     {
         UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", baseImage);
@@ -143,7 +142,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         FingerprintObject& object = mObjects["HAND_MIRROR"];
         object.textureName = "FP_LHOMIR.BMP";
         object.anchor = AnchorPreset::Center;
-        
+
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_LHOMIR_P1.BMP";
         object.fingerprints.back().position = Vector2(160.0f, 134.0f);
@@ -157,7 +156,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         object.textureName = "FP_COLT45.BMP";
         object.anchoredPosition = Vector2(0.0f, 12.0f);
         object.collectPrintLicensePlates.push_back("0A89N052H2");
-        
+
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_COLT45_P1.BMP";
         object.fingerprints.back().position = Vector2(65.0f, 279.0f);
@@ -170,7 +169,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         FingerprintObject& object = mObjects["CIG_PACK_IN_DRAWER"];
         object.textureName = "FP_CIGS.BMP";
         object.collectPrintLicensePlates.push_back("0A89N052H2");
-        
+
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_CIGS_P1.BMP";
         object.fingerprints.back().position = Vector2(101.0f, 201.0f);
@@ -184,7 +183,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         object.textureName = "FP_SUITCA.BMP";
         object.anchoredPosition = Vector2(0.0f, -8.0f);
         object.collectPrintLicensePlates.push_back("0A89N052H2");
-        
+
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_SUITCA_P1.BMP";
         object.fingerprints.back().position = Vector2(111.0f, 370.0f);
@@ -203,7 +202,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     {
         FingerprintObject& object = mObjects["BOOK_IN_DRAWER"];
         object.textureName = "FP_BOOKIMMORTALS.BMP";
-        
+
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_BOOKIMMORTALS_P1.BMP";
         object.fingerprints.back().position = Vector2(113.0f, 144.0f);
@@ -219,7 +218,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         object.textureName = "FP_OCTSHOT.BMP";
         object.anchor = AnchorPreset::Center;
         object.anchoredPosition = Vector2(0.0f, 8.0f);
-        
+
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_OCTSHOT_P1.BMP";
         object.fingerprints.back().position = Vector2(81.0f, 214.0f);
@@ -270,7 +269,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     {
         FingerprintObject& object = mObjects["LSR_ENVELOPE_INV"];
         object.textureName = "FP_LSRENV.BMP";
-        
+
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_LSRENV_P1.BMP";
         object.fingerprints.back().position = Vector2(178.0f, 305.0f);
@@ -361,7 +360,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         object.fingerprints.back().flagNameGrace = "GotWaterBottleEstellePrintGrace";
         object.fingerprints.back().scoreName = "e_303p_wod_fingerprint_kit_water_bottle";
     }
-    
+
     // Hide by default.
     SetActive(false);
 }
@@ -455,7 +454,7 @@ void FingerprintScreen::Show(const std::string& nounName)
     {
         mPrintsToCollect[imageIndex].image->SetEnabled(false);
     }
-        
+
     // Reset some state vars.
     PutDownBrush(); // resets cursor state and brush image state
     mDistanceDusted = 0.0f;

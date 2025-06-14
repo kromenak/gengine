@@ -7,7 +7,6 @@
 #include "SoundtrackPlayer.h"
 #include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UIUtil.h"
 #include "VideoPlayer.h"
@@ -90,7 +89,7 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     introButton->SetPressCallback([](UIButton* button) {
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
         gVideoPlayer.Play("intro.bik", true, true, nullptr);
-    });    
+    });
     if(GEngine::Instance()->IsDemoMode())
     {
         introButton->SetCanInteract(false);
@@ -101,7 +100,7 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
 void TitleScreen::Show()
 {
     SetActive(true);
-    
+
     // Play theme music via soundtrack system.
     SoundtrackPlayer* soundtrackPlayer = GetComponent<SoundtrackPlayer>();
     if(soundtrackPlayer == nullptr)

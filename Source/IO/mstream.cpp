@@ -67,7 +67,7 @@ std::streampos membuf::seekoff(std::streamoff off, std::ios_base::seekdir way, s
     {
         cur = beg;
     }
-    
+
     // Calc where we are in the stream.
     std::streampos offset = cur - beg;
 

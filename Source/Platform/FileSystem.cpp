@@ -20,19 +20,19 @@
 
 std::string Path::Combine(std::initializer_list<std::string> paths)
 {
-	// Can't combine zero paths!
-	if(paths.size() == 0) { return std::string(); }
+    // Can't combine zero paths!
+    if(paths.size() == 0) { return std::string(); }
 
-	// Start the combined path with the first path piece.
-	auto it = paths.begin();
-	std::string combined = *it;
-	it++;
+    // Start the combined path with the first path piece.
+    auto it = paths.begin();
+    std::string combined = *it;
+    it++;
 
-	// Append each path piece to the combined value.
-	while(it != paths.end())
-	{
-		// Skip empty pieces.
-		if(it->empty()) { continue; }
+    // Append each path piece to the combined value.
+    while(it != paths.end())
+    {
+        // Skip empty pieces.
+        if(it->empty()) { continue; }
 
         // Place path separator ('/' or '\') between elements.
         // Empty check stops us from putting separators at beginning of path accidentally.
@@ -44,53 +44,53 @@ std::string Path::Combine(std::initializer_list<std::string> paths)
         // Add path piece.
         combined += *it;
 
-		// Move to next element.
-		it++;
-	}
-	return combined;
+        // Move to next element.
+        it++;
+    }
+    return combined;
 }
 
 bool Path::FindFullPath(const std::string& fileName, const std::string& relativeSearchPath, std::string& outPath)
 {
     #if defined(PLATFORM_MAC)
-	// Get ref to the main bundle. This is the ".app" bundle the app is executing in.
-	// Even if NOT running in a bundle (like as a command line tool), this still works - OS just "pretends" the directory of the app is the bundle root.
-	// Supposedly though, this can be null in some case...so gotta check.
-	CFBundleRef bundleRef = CFBundleGetMainBundle();
-	if(bundleRef != nullptr)
-	{
-		// We're in Apple land...gotta use CFStrings.
-		CFStringRef searchPathCFStr = CFStringCreateWithCString(CFAllocatorGetDefault(), relativeSearchPath.c_str(), kCFStringEncodingUTF8);
-		CFStringRef fileNameCFStr = CFStringCreateWithCString(CFAllocatorGetDefault(), fileName.c_str(), kCFStringEncodingUTF8);
+    // Get ref to the main bundle. This is the ".app" bundle the app is executing in.
+    // Even if NOT running in a bundle (like as a command line tool), this still works - OS just "pretends" the directory of the app is the bundle root.
+    // Supposedly though, this can be null in some case...so gotta check.
+    CFBundleRef bundleRef = CFBundleGetMainBundle();
+    if(bundleRef != nullptr)
+    {
+        // We're in Apple land...gotta use CFStrings.
+        CFStringRef searchPathCFStr = CFStringCreateWithCString(CFAllocatorGetDefault(), relativeSearchPath.c_str(), kCFStringEncodingUTF8);
+        CFStringRef fileNameCFStr = CFStringCreateWithCString(CFAllocatorGetDefault(), fileName.c_str(), kCFStringEncodingUTF8);
 
-		// Moment of truth: ask for the resource's URL, using the file name and search path.
-		// The OS does a bunch of stuff to determine whether this asset exists and return it.
+        // Moment of truth: ask for the resource's URL, using the file name and search path.
+        // The OS does a bunch of stuff to determine whether this asset exists and return it.
         //TODO: This call is case-sensitive, even if OSX is not case-sensitive! Ideally, this should be case-insensitive like the OS is.
-		CFURLRef resourceUrl = CFBundleCopyResourceURL(bundleRef, fileNameCFStr, NULL, searchPathCFStr);
-		if(resourceUrl != nullptr)
-		{
-			// Converts the URL to a string that can be used to read from the file system.
-			// The URL probably is like "file://Dir1/Dir2/File.txt", while the string is like "/Dir1/Dir2/File.txt"
-			CFStringRef resourceUrlStr = CFURLCopyFileSystemPath(resourceUrl, kCFURLPOSIXPathStyle);
-			outPath = std::string(CFStringGetCStringPtr(resourceUrlStr, kCFStringEncodingUTF8));
-			CFRelease(resourceUrlStr);
-		}
+        CFURLRef resourceUrl = CFBundleCopyResourceURL(bundleRef, fileNameCFStr, NULL, searchPathCFStr);
+        if(resourceUrl != nullptr)
+        {
+            // Converts the URL to a string that can be used to read from the file system.
+            // The URL probably is like "file://Dir1/Dir2/File.txt", while the string is like "/Dir1/Dir2/File.txt"
+            CFStringRef resourceUrlStr = CFURLCopyFileSystemPath(resourceUrl, kCFURLPOSIXPathStyle);
+            outPath = std::string(CFStringGetCStringPtr(resourceUrlStr, kCFStringEncodingUTF8));
+            CFRelease(resourceUrlStr);
+        }
 
-		CFRelease(searchPathCFStr);
-		CFRelease(fileNameCFStr);
+        CFRelease(searchPathCFStr);
+        CFRelease(fileNameCFStr);
 
-		// File exists if resource URL is not null.
+        // File exists if resource URL is not null.
         if(resourceUrl != nullptr)
         {
             return true;
         }
-	}
-	//NOTE: if can't get a bundle ref or resource url, we purposely drop through to "failsafe" method below.
+    }
+    //NOTE: if can't get a bundle ref or resource url, we purposely drop through to "failsafe" method below.
     #endif
 
-	// Worst case, if no platform-specific way to get a file path, we can just combine the search path and filename.
-	// This'll probably give us something like "Assets/File.txt"
-	// C++ is able to load relative files, assuming the current working directory (cwd) is as expected.
+    // Worst case, if no platform-specific way to get a file path, we can just combine the search path and filename.
+    // This'll probably give us something like "Assets/File.txt"
+    // C++ is able to load relative files, assuming the current working directory (cwd) is as expected.
     outPath = Path::Combine({ relativeSearchPath, fileName });
 
     // Use some method to determine if the file exists or not.
@@ -101,53 +101,53 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
     return (stat(outPath.c_str(), &buffer) == 0);
     #else
     // Using just standard C++, we can tell if a file exists by opening a stream and seeing if it works.
-	std::ifstream f(outPath.c_str());
+    std::ifstream f(outPath.c_str());
     return f.good();
     #endif
 }
 
 std::string Path::GetFileName(const std::string& path)
 {
-	// Make sure there's any content in the path argument.
-	if(path.empty()) { return path; }
+    // Make sure there's any content in the path argument.
+    if(path.empty()) { return path; }
 
-	// Find the last index of the separator character.
-	size_t pos = path.find_last_of(kSeparator);
+    // Find the last index of the separator character.
+    size_t pos = path.find_last_of(kSeparator);
 
-	// If no separator exists, just return the path as-is...
-	// it's either invalid or a single element like "MyFile".
-	if(pos == std::string::npos)
-	{
-		return path;
-	}
+    // If no separator exists, just return the path as-is...
+    // it's either invalid or a single element like "MyFile".
+    if(pos == std::string::npos)
+    {
+        return path;
+    }
 
-	// If pos is at end of string, return empty string.
-	// Something like "/Users/Bob/" should return "".
-	if(pos + 1 >= path.size())
-	{
-		return "";
-	}
+    // If pos is at end of string, return empty string.
+    // Something like "/Users/Bob/" should return "".
+    if(pos + 1 >= path.size())
+    {
+        return "";
+    }
 
-	// Get everything after the separator and return it
-	return path.substr(pos + 1, std::string::npos);
+    // Get everything after the separator and return it
+    return path.substr(pos + 1, std::string::npos);
 }
 
 std::string Path::GetFileNameNoExtension(const std::string& path)
 {
-	// Get filename with extension first.
-	std::string filename = GetFileName(path);
+    // Get filename with extension first.
+    std::string filename = GetFileName(path);
 
-	// Find extension separator, if any.
-	size_t pos = filename.find_last_of('.');
+    // Find extension separator, if any.
+    size_t pos = filename.find_last_of('.');
 
-	// If no extension, we can just return the filename as-is.
-	if(pos == std::string::npos)
-	{
-		return filename;
-	}
+    // If no extension, we can just return the filename as-is.
+    if(pos == std::string::npos)
+    {
+        return filename;
+    }
 
-	// Return everything before the extension separator.
-	return filename.substr(0, pos);
+    // Return everything before the extension separator.
+    return filename.substr(0, pos);
 }
 
 bool Path::HasExtension(const std::string& path, const std::string& expectedExtension)

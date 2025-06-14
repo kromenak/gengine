@@ -13,51 +13,51 @@
 #include "Window.h"
 
 ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform),
-	mMini(mini)
+    mMini(mini)
 {
-	// Add canvas for UI rendering. Draws above most other stuff.
-	AddComponent<UICanvas>(100);
+    // Add canvas for UI rendering. Draws above most other stuff.
+    AddComponent<UICanvas>(100);
 
-	// Create screen-sized canvas.
-	RectTransform* canvasTransform = GetComponent<RectTransform>();
-	canvasTransform->SetSizeDelta(0.0f, 0.0f);
-	canvasTransform->SetAnchorMin(Vector2::Zero);
-	canvasTransform->SetAnchorMax(Vector2::One);
+    // Create screen-sized canvas.
+    RectTransform* canvasTransform = GetComponent<RectTransform>();
+    canvasTransform->SetSizeDelta(0.0f, 0.0f);
+    canvasTransform->SetAnchorMin(Vector2::Zero);
+    canvasTransform->SetAnchorMax(Vector2::One);
 
-	// Create background image actor and save transform (so we can move it around).
-	Actor* background = new Actor("Background", TransformType::RectTransform);
-	mBackgroundTransform = background->GetComponent<RectTransform>();
-	mBackgroundTransform->SetParent(canvasTransform);
+    // Create background image actor and save transform (so we can move it around).
+    Actor* background = new Actor("Background", TransformType::RectTransform);
+    mBackgroundTransform = background->GetComponent<RectTransform>();
+    mBackgroundTransform->SetParent(canvasTransform);
 
-	// Add background image that is tiled.
-	// Only difference between mini and full is a different background image.
-	UIImage* backgroundImage = background->AddComponent<UIImage>();
-	backgroundImage->SetRenderMode(UIImage::RenderMode::Tiled);
-	if(mini)
-	{
-		backgroundImage->SetTexture(gAssetManager.LoadTexture("MINISNAKY.BMP"));
-	}
-	else
-	{
-		backgroundImage->SetTexture(gAssetManager.LoadTexture("SNAKY.BMP"));
-	}
+    // Add background image that is tiled.
+    // Only difference between mini and full is a different background image.
+    UIImage* backgroundImage = background->AddComponent<UIImage>();
+    backgroundImage->SetRenderMode(UIImage::RenderMode::Tiled);
+    if(mini)
+    {
+        backgroundImage->SetTexture(gAssetManager.LoadTexture("MINISNAKY.BMP"));
+    }
+    else
+    {
+        backgroundImage->SetTexture(gAssetManager.LoadTexture("SNAKY.BMP"));
+    }
 
-	// Mini and full consoles have different anchoring properties.
-	// Mini is a box that is anchored to a corner of the screen.
-	// Full is a panel that fully covers the top or bottom parts of the screen.
-	if(mini)
-	{
+    // Mini and full consoles have different anchoring properties.
+    // Mini is a box that is anchored to a corner of the screen.
+    // Full is a panel that fully covers the top or bottom parts of the screen.
+    if(mini)
+    {
 
-	}
-	else
-	{
-		// Anchored along top edge of parent rect (anchor min/max).
-		// Grow from top down (pivot).
-		// No padding on left/right (sizeDelta.x).
-		mBackgroundTransform->SetAnchorMin(Vector2(0.0f, 1.0f));
-		mBackgroundTransform->SetAnchorMax(Vector2(1.0f, 1.0f));
-		mBackgroundTransform->SetPivot(0.5f, 1.0f);
-		mBackgroundTransform->SetSizeDelta(0.0f, 0.0f);
+    }
+    else
+    {
+        // Anchored along top edge of parent rect (anchor min/max).
+        // Grow from top down (pivot).
+        // No padding on left/right (sizeDelta.x).
+        mBackgroundTransform->SetAnchorMin(Vector2(0.0f, 1.0f));
+        mBackgroundTransform->SetAnchorMax(Vector2(1.0f, 1.0f));
+        mBackgroundTransform->SetPivot(0.5f, 1.0f);
+        mBackgroundTransform->SetSizeDelta(0.0f, 0.0f);
 
         // Create scrollback text area.
         {
@@ -76,60 +76,60 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
             mScrollbackBuffer->SetFont(gAssetManager.LoadFont("F_CONSOLE_DISPLAY"));
         }
 
-		// Add horizontal rule for full console.
-		{
-			mHorizontalRuleActor = new Actor("HR", TransformType::RectTransform);
-			RectTransform* hrTransform = mHorizontalRuleActor->GetComponent<RectTransform>();
-			hrTransform->SetParent(mBackgroundTransform);
+        // Add horizontal rule for full console.
+        {
+            mHorizontalRuleActor = new Actor("HR", TransformType::RectTransform);
+            RectTransform* hrTransform = mHorizontalRuleActor->GetComponent<RectTransform>();
+            hrTransform->SetParent(mBackgroundTransform);
 
-			// Horizontal rule uses a tiling line image.
-			mHorizontalRuleActor->AddComponent<UIImage>();
+            // Horizontal rule uses a tiling line image.
+            mHorizontalRuleActor->AddComponent<UIImage>();
 
-			// Anchor along bottom edge of the console, with enough space for the input line below.
-			hrTransform->SetAnchorMin(Vector2(0.0f, 0.0f));
-			hrTransform->SetAnchorMax(Vector2(1.0f, 0.0f));
-			hrTransform->SetSizeDelta(-8.0f, 1.0f);
-			hrTransform->SetAnchoredPosition(0.0f, kHorizontalRuleOffsetFromBottom);
-		}
+            // Anchor along bottom edge of the console, with enough space for the input line below.
+            hrTransform->SetAnchorMin(Vector2(0.0f, 0.0f));
+            hrTransform->SetAnchorMax(Vector2(1.0f, 0.0f));
+            hrTransform->SetSizeDelta(-8.0f, 1.0f);
+            hrTransform->SetAnchoredPosition(0.0f, kHorizontalRuleOffsetFromBottom);
+        }
 
-		// Create text input field.
-		{
-			Font* font = gAssetManager.LoadFont("F_CONSOLE_COMMAND");
+        // Create text input field.
+        {
+            Font* font = gAssetManager.LoadFont("F_CONSOLE_COMMAND");
 
-			Actor* textInputActor = new Actor("Input", TransformType::RectTransform);
-			RectTransform* textInputRT = textInputActor->GetComponent<RectTransform>();
-			textInputRT->SetParent(mBackgroundTransform);
+            Actor* textInputActor = new Actor("Input", TransformType::RectTransform);
+            RectTransform* textInputRT = textInputActor->GetComponent<RectTransform>();
+            textInputRT->SetParent(mBackgroundTransform);
 
-			// Input field takes up a single line below horizontal rule.
-			textInputRT->SetAnchorMin(Vector2(0.0f, 0.0f));
-			textInputRT->SetAnchorMax(Vector2(1.0f, 0.0f));
-			textInputRT->SetSizeDelta(0.0f, static_cast<float>(font->GetGlyphHeight()));
-			textInputRT->SetAnchoredPosition(4.0f, 5.0f);
+            // Input field takes up a single line below horizontal rule.
+            textInputRT->SetAnchorMin(Vector2(0.0f, 0.0f));
+            textInputRT->SetAnchorMax(Vector2(1.0f, 0.0f));
+            textInputRT->SetSizeDelta(0.0f, static_cast<float>(font->GetGlyphHeight()));
+            textInputRT->SetAnchoredPosition(4.0f, 5.0f);
             textInputRT->SetPivot(0.0f, 0.0f);
 
-			mTextInput = textInputActor->AddComponent<UITextInput>();
+            mTextInput = textInputActor->AddComponent<UITextInput>();
 
-			mTextInput->SetFont(font);
-			mTextInput->SetText("");
+            mTextInput->SetFont(font);
+            mTextInput->SetText("");
 
-			// Create text input field caret.
-			Actor* caretActor = new Actor("Caret", TransformType::RectTransform);
-			RectTransform* caretRT = caretActor->GetComponent<RectTransform>();
-			caretRT->SetParent(textInputRT);
+            // Create text input field caret.
+            Actor* caretActor = new Actor("Caret", TransformType::RectTransform);
+            RectTransform* caretRT = caretActor->GetComponent<RectTransform>();
+            caretRT->SetParent(textInputRT);
 
-			// Horizontal rule uses a tiling line image.
-			UIImage* caretImage = caretActor->AddComponent<UIImage>();
+            // Horizontal rule uses a tiling line image.
+            UIImage* caretImage = caretActor->AddComponent<UIImage>();
             caretImage->SetTexture(&Texture::White);
 
-			caretRT->SetAnchorMin(Vector2(0.0f, 0.0f));
-			caretRT->SetAnchorMax(Vector2(0.0f, 1.0f));
-			caretRT->SetPivot(0.0f, 0.0f);
-			caretRT->SetSizeDelta(1.0f, 4.0f);
-			caretRT->SetAnchoredPosition(0.0f, 0.0f);
+            caretRT->SetAnchorMin(Vector2(0.0f, 0.0f));
+            caretRT->SetAnchorMax(Vector2(0.0f, 1.0f));
+            caretRT->SetPivot(0.0f, 0.0f);
+            caretRT->SetSizeDelta(1.0f, 4.0f);
+            caretRT->SetAnchoredPosition(0.0f, 0.0f);
 
-			mTextInput->SetCaret(caretImage);
-			mTextInput->SetCaretBlinkInterval(0.5f);
-		}
+            mTextInput->SetCaret(caretImage);
+            mTextInput->SetCaretBlinkInterval(0.5f);
+        }
 
         // Create console activation image.
         {
@@ -152,90 +152,90 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 
         // Do a refresh so the initial state is correct.
         Refresh();
-	}
+    }
 }
 
 void ConsoleUI::OnUpdate(float deltaTime)
 {
-	if(mMini)
-	{
-		//TODO: Mini console stuff!
-		//TODO: Some key combo swaps mini console between the four corners of the screen
-	}
-	else
-	{
-		// Show an indicator when the console key is pressed down, but not yet released.
+    if(mMini)
+    {
+        //TODO: Mini console stuff!
+        //TODO: Some key combo swaps mini console between the four corners of the screen
+    }
+    else
+    {
+        // Show an indicator when the console key is pressed down, but not yet released.
         mConsoleToggleImage->SetEnabled(gInputManager.IsKeyPressed(SDL_SCANCODE_GRAVE));
 
-		// On release, toggle the display of the console.
-		if(gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_GRAVE))
-		{
+        // On release, toggle the display of the console.
+        if(gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_GRAVE))
+        {
             mConsoleActive = !mConsoleActive;
             Refresh();
 
             // Focus text field automatically on activate.
             // Also reset command history on show.
-			if(mConsoleActive)
-			{
-				mTextInput->Focus();
-				mCommandHistoryIndex = -1;
-			}
-			else
-			{
-				mTextInput->Unfocus();
-			}
-		}
+            if(mConsoleActive)
+            {
+                mTextInput->Focus();
+                mCommandHistoryIndex = -1;
+            }
+            else
+            {
+                mTextInput->Unfocus();
+            }
+        }
 
-		// Don't bother with other console updates unless it's opened.
-		if(!mConsoleActive) { return; }
+        // Don't bother with other console updates unless it's opened.
+        if(!mConsoleActive) { return; }
 
-		// If enter is pressed, execute command in the input window.
-		if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
-		{
+        // If enter is pressed, execute command in the input window.
+        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
+        {
             // Note that it is valid to execute an empty text input, which just outputs a dashed line to the console.
-			gConsole.ExecuteCommand(mTextInput->GetText());
-			mTextInput->Clear();
+            gConsole.ExecuteCommand(mTextInput->GetText());
+            mTextInput->Clear();
 
-			// Executing a command resets command history.
-			mCommandHistoryIndex = -1;
-		}
+            // Executing a command resets command history.
+            mCommandHistoryIndex = -1;
+        }
 
-		// Alt plus other keys affect the size of the full console.
-		if(gInputManager.IsKeyPressed(SDL_SCANCODE_LALT) || gInputManager.IsKeyPressed(SDL_SCANCODE_RALT))
-		{
-			// Alt+Down increases console size by one line.
-			if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
-			{
+        // Alt plus other keys affect the size of the full console.
+        if(gInputManager.IsKeyPressed(SDL_SCANCODE_LALT) || gInputManager.IsKeyPressed(SDL_SCANCODE_RALT))
+        {
+            // Alt+Down increases console size by one line.
+            if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
+            {
                 RefreshMaxScrollbackLineCount();
-				if(mScrollbackLineCount < mMaxScrollbackLineCount)
-				{
-					++mScrollbackLineCount;
-					Refresh();
-				}
-			}
-			// Alt+Up decreases console size by one line.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
-			{
-				if(mScrollbackLineCount > 0)
-				{
-					--mScrollbackLineCount;
-					Refresh();
-				}
-			}
-			// Alt+PgDown adds 10 lines.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
-			{
+                if(mScrollbackLineCount < mMaxScrollbackLineCount)
+                {
+                    ++mScrollbackLineCount;
+                    Refresh();
+                }
+            }
+            // Alt+Up decreases console size by one line.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
+            {
+                if(mScrollbackLineCount > 0)
+                {
+                    --mScrollbackLineCount;
+                    Refresh();
+                }
+            }
+            // Alt+PgDown adds 10 lines.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
+            {
                 RefreshMaxScrollbackLineCount();
-				mScrollbackLineCount += 10;
-				if(mScrollbackLineCount > mMaxScrollbackLineCount)
-				{
-					mScrollbackLineCount = mMaxScrollbackLineCount;
-				}
-				Refresh();
-			}
-			// Alt+PgUp removes 10 lines.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
-			{
+                mScrollbackLineCount += 10;
+                if(mScrollbackLineCount > mMaxScrollbackLineCount)
+                {
+                    mScrollbackLineCount = mMaxScrollbackLineCount;
+                }
+                Refresh();
+            }
+            // Alt+PgUp removes 10 lines.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
+            {
                 if(mScrollbackLineCount < 10)
                 {
                     mScrollbackLineCount = 0;
@@ -244,37 +244,37 @@ void ConsoleUI::OnUpdate(float deltaTime)
                 {
                     mScrollbackLineCount -= 10;
                 }
-				Refresh();
-			}
-			// Alt+Home hides all lines.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_HOME))
-			{
-				mScrollbackLineCount = 0;
-				Refresh();
-			}
-			// Alt+End shows max number of lines.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_END))
-			{
+                Refresh();
+            }
+            // Alt+Home hides all lines.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_HOME))
+            {
+                mScrollbackLineCount = 0;
+                Refresh();
+            }
+            // Alt+End shows max number of lines.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_END))
+            {
                 RefreshMaxScrollbackLineCount();
-				mScrollbackLineCount = mMaxScrollbackLineCount;
-				Refresh();
-			}
-		}
-		// Ctrl plus other keys affect the position within the scrollback buffer.
-		else if(gInputManager.IsKeyPressed(SDL_SCANCODE_LCTRL) || gInputManager.IsKeyPressed(SDL_SCANCODE_RCTRL))
-		{
-			// Ctrl+Down moves scrollback down one line.
-			if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
-			{
-				if(mScrollbackOffset > 0)
-				{
-					--mScrollbackOffset;
-					Refresh();
-				}
-			}
-			// Ctrl+Up moves scrollback up one line.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
-			{
+                mScrollbackLineCount = mMaxScrollbackLineCount;
+                Refresh();
+            }
+        }
+        // Ctrl plus other keys affect the position within the scrollback buffer.
+        else if(gInputManager.IsKeyPressed(SDL_SCANCODE_LCTRL) || gInputManager.IsKeyPressed(SDL_SCANCODE_RCTRL))
+        {
+            // Ctrl+Down moves scrollback down one line.
+            if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
+            {
+                if(mScrollbackOffset > 0)
+                {
+                    --mScrollbackOffset;
+                    Refresh();
+                }
+            }
+            // Ctrl+Up moves scrollback up one line.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
+            {
                 // To scroll up, the # of lines in the scrollback must be larger than what can fit on screen.
                 // The "+1" here accounts for the horizontal rule, which counts as a line in the scrollback.
                 if(gConsole.GetScrollback().size() + 1 > mScrollbackLineCount)
@@ -286,10 +286,10 @@ void ConsoleUI::OnUpdate(float deltaTime)
                         Refresh();
                     }
                 }
-			}
-			// Ctrl+PgDown moves scrollback down one page worth of lines.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
-			{
+            }
+            // Ctrl+PgDown moves scrollback down one page worth of lines.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
+            {
                 if(mScrollbackOffset > mScrollbackLineCount)
                 {
                     mScrollbackOffset -= mScrollbackLineCount;
@@ -299,10 +299,10 @@ void ConsoleUI::OnUpdate(float deltaTime)
                     mScrollbackOffset = 0;
                 }
                 Refresh();
-			}
-			// Ctrl+PgUp moves scrollback up one page worth of lines.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
-			{
+            }
+            // Ctrl+PgUp moves scrollback up one page worth of lines.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
+            {
                 size_t scrollbackSize = gConsole.GetScrollback().size();
                 if(scrollbackSize > 0 && scrollbackSize + 1 > mScrollbackLineCount)
                 {
@@ -313,11 +313,11 @@ void ConsoleUI::OnUpdate(float deltaTime)
                         mScrollbackOffset = maxOffset;
                     }
                 }
-				Refresh();
-			}
-			// Ctrl+Home moves scrollback to earliest line.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_HOME))
-			{
+                Refresh();
+            }
+            // Ctrl+Home moves scrollback to earliest line.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_HOME))
+            {
                 if(gConsole.GetScrollback().size() + 1 < mScrollbackLineCount)
                 {
                     mScrollbackOffset = 0;
@@ -326,15 +326,15 @@ void ConsoleUI::OnUpdate(float deltaTime)
                 {
                     mScrollbackOffset = gConsole.GetScrollback().size() + 1 - mScrollbackLineCount;
                 }
-				Refresh();
-			}
-			// Ctrl+End moves scrollback to the latest line.
-			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_END))
-			{
-				mScrollbackOffset = 0;
-				Refresh();
-			}
-		}
+                Refresh();
+            }
+            // Ctrl+End moves scrollback to the latest line.
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_END))
+            {
+                mScrollbackOffset = 0;
+                Refresh();
+            }
+        }
         else
         {
             if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
@@ -382,7 +382,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
                 }
             }
         }
-	}
+    }
 }
 
 void ConsoleUI::Refresh()
@@ -417,7 +417,7 @@ void ConsoleUI::Refresh()
     {
         height += mScrollbackBuffer->GetFont()->GetGlyphHeight() + 1;
     }
-	mBackgroundTransform->SetSizeDeltaY(height);
+    mBackgroundTransform->SetSizeDeltaY(height);
 }
 
 void ConsoleUI::RefreshMaxScrollbackLineCount()
@@ -432,11 +432,11 @@ void ConsoleUI::RefreshMaxScrollbackLineCount()
 float ConsoleUI::CalcInputFieldHeight() const
 {
     // HR is positioned at 25 units. So, everything below HR is 25 - half line height (since HR is considered a line).
-	// HR offset constant specifies center of last scrollback line as offset from bottom of console rect.
-	// HR is meant to take up space of one scrollback line, so subtract half scrollback line height to get height just for input field.
-	if(mScrollbackBuffer != nullptr)
-	{
-		return kHorizontalRuleOffsetFromBottom - (mScrollbackBuffer->GetFont()->GetGlyphHeight() / 2.0f);
-	}
-	return kHorizontalRuleOffsetFromBottom;
+    // HR offset constant specifies center of last scrollback line as offset from bottom of console rect.
+    // HR is meant to take up space of one scrollback line, so subtract half scrollback line height to get height just for input field.
+    if(mScrollbackBuffer != nullptr)
+    {
+        return kHorizontalRuleOffsetFromBottom - (mScrollbackBuffer->GetFont()->GetGlyphHeight() / 2.0f);
+    }
+    return kHorizontalRuleOffsetFromBottom;
 }

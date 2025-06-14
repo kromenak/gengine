@@ -15,16 +15,12 @@ trim_trailing_whitespace = true
 ###############################
 [*.{c++,cc,cpp,cxx,h,h++,hh,hpp,hxx,inl,ipp,tlh,tli}]
 cpp_indent_braces = false
-
 cpp_indent_multi_line_relative_to = innermost_parenthesis
 cpp_indent_within_parentheses = align_to_parenthesis
-
-cpp_indent_case_labels = false
+cpp_indent_case_labels = true
 cpp_indent_case_contents = true
-
 cpp_indent_goto_labels = leftmost_column
 cpp_indent_preprocessor = none
-
 cpp_indent_access_specifiers = false
 cpp_indent_namespace_contents = true
 

@@ -9,7 +9,6 @@
 #include "AssetManager.h"
 #include "BSPActor.h"
 #include "Camera.h"
-#include "CharacterManager.h"
 #include "Collisions.h"
 #include "Color32.h"
 #include "Debug.h"
@@ -20,10 +19,8 @@
 #include "GKProp.h"
 #include "InventoryManager.h"
 #include "LocationManager.h"
-#include "GMath.h"
 #include "MeshRenderer.h"
 #include "Profiler.h"
-#include "RectTransform.h"
 #include "Renderer.h"
 #include "ReportManager.h"
 #include "SceneFunctions.h"
@@ -79,12 +76,12 @@ Scene::Scene(const std::string& name) :
 {
     mLayer.SetScene(this);
 
-	// Create game camera.
-	mCamera = new GameCamera();
+    // Create game camera.
+    mCamera = new GameCamera();
 
-	// Create animation player.
-	Actor* animationActor = new Actor("Animator");
-	mAnimator = animationActor->AddComponent<Animator>();
+    // Create animation player.
+    Actor* animationActor = new Actor("Animator");
+    mAnimator = animationActor->AddComponent<Animator>();
 
     // Scene layer is now active!
     gLayerManager.PushLayer(&mLayer);
@@ -99,22 +96,22 @@ Scene::~Scene()
     }
 
     // Unload the scene if it wasn't done manually before deleting the scene.
-	if(mSceneData != nullptr)
-	{
-		Unload();
-	}
+    if(mSceneData != nullptr)
+    {
+        Unload();
+    }
 }
 
 void Scene::Load()
 {
     TIMER_SCOPED("Scene::Load");
 
-	// If this is true, we are calling load when scene is already loaded!
-	if(mSceneData != nullptr)
-	{
-		//TODO: Ignore for now, but maybe we should Unload and then re-Load?
-		return;
-	}
+    // If this is true, we are calling load when scene is already loaded!
+    if(mSceneData != nullptr)
+    {
+        //TODO: Ignore for now, but maybe we should Unload and then re-Load?
+        return;
+    }
 
     // Set location.
     gLocationManager.SetLocation(mLocation);
@@ -264,12 +261,12 @@ void Scene::Unload()
     }
 
     // Clear scene assets used in renderer/
-	gRenderer.SetBSP(nullptr);
-	gRenderer.SetSkybox(nullptr);
+    gRenderer.SetBSP(nullptr);
+    gRenderer.SetSkybox(nullptr);
 
     // We're done with the scene data.
-	delete mSceneData;
-	mSceneData = nullptr;
+    delete mSceneData;
+    mSceneData = nullptr;
 }
 
 void Scene::Init()
@@ -389,45 +386,45 @@ void Scene::Update(float deltaTime)
 
 bool Scene::InitEgoPosition(const std::string& positionName)
 {
-	if(mEgo == nullptr) { return false; }
+    if(mEgo == nullptr) { return false; }
 
-	// Get position.
+    // Get position.
     const ScenePosition* position = GetPosition(positionName);
-	if(position == nullptr) { return false; }
+    if(position == nullptr) { return false; }
 
     // Set position and heading.
     mEgo->SetPosition(position->position);
     mEgo->SetHeading(position->heading);
     mEgo->SnapToFloor();
 
-	// Should also set camera position/angle.
-	// Output a warning if specified position has no camera though.
-	if(position->cameraName.empty())
-	{
-		gReportManager.Log("Warning", "No camera information is supplied in position '" + positionName + "'.");
-		return true;
-	}
+    // Should also set camera position/angle.
+    // Output a warning if specified position has no camera though.
+    if(position->cameraName.empty())
+    {
+        gReportManager.Log("Warning", "No camera information is supplied in position '" + positionName + "'.");
+        return true;
+    }
 
-	// Move the camera to desired position/angle.
-	SetCameraPosition(position->cameraName);
-	return true;
+    // Move the camera to desired position/angle.
+    SetCameraPosition(position->cameraName);
+    return true;
 }
 
 void Scene::SetCameraPosition(const std::string& cameraName)
 {
-	// Find camera or fail. Any *named* camera type is valid.
-	const SceneCamera* camera = mSceneData->GetAnyCameraWithName(cameraName);
+    // Find camera or fail. Any *named* camera type is valid.
+    const SceneCamera* camera = mSceneData->GetAnyCameraWithName(cameraName);
 
-	// If couldn't find a camera with this name, error out!
-	if(camera == nullptr)
-	{
-		gReportManager.Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
-		return;
-	}
+    // If couldn't find a camera with this name, error out!
+    if(camera == nullptr)
+    {
+        gReportManager.Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
+        return;
+    }
 
-	// Set position/angle.
-	mCamera->SetPosition(camera->position);
-	mCamera->SetAngle(camera->angle);
+    // Set position/angle.
+    mCamera->SetPosition(camera->position);
+    mCamera->SetAngle(camera->angle);
     mCamera->GetCamera()->SetCameraFovDegrees(camera->fov);
 }
 
@@ -484,7 +481,7 @@ namespace
 
 SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** ignore, int ignoreCount) const
 {
-	// First, iterate all Props and Actors to find the closest one that was hit by the ray and meets our criteria (if any).
+    // First, iterate all Props and Actors to find the closest one that was hit by the ray and meets our criteria (if any).
     SceneCastResult result;
     for(GKObject* object : mPropsAndActors)
     {
@@ -522,10 +519,10 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
 
     // The raycast logic for Actors/Props doesn't automatically fill in the HitInfo name field.
     // So, if something was hit, do that now.
-	if(result.hitObject != nullptr)
-	{
-		result.hitInfo.name = result.hitObject->GetNoun();
-	}
+    if(result.hitObject != nullptr)
+    {
+        result.hitInfo.name = result.hitObject->GetNoun();
+    }
 
     // AT THIS POINT: we may or may not have hit a Prop or Actor with our ray. But now we need to see if any BSP geometry is closer.
 
@@ -595,7 +592,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
         Debug::DrawSphere(Sphere(ray.GetPoint(result.hitInfo.t - 0.1f), 1.0f), Color32::Red);
     }
     */
-	return result;
+    return result;
 }
 
 SceneCastResult Scene::RaycastAABBs(const Ray& ray, GKObject** ignore, int ignoreCount) const
@@ -651,34 +648,34 @@ SceneCastResult Scene::RaycastAABBs(const Ray& ray, GKObject** ignore, int ignor
 
 void Scene::Interact(const Ray& ray, GKObject* interactHint)
 {
-	// Ignore scene interaction while the action bar is showing.
-	if(gActionManager.IsActionBarShowing()) { return; }
+    // Ignore scene interaction while the action bar is showing.
+    if(gActionManager.IsActionBarShowing()) { return; }
 
-	// Also ignore scene interaction when inventory is up.
-	if(gInventoryManager.IsInventoryShowing()) { return; }
+    // Also ignore scene interaction when inventory is up.
+    if(gInventoryManager.IsInventoryShowing()) { return; }
 
-	// Get interacted object.
-	GKObject* interacted = interactHint;
-	if(interacted == nullptr)
-	{
-		SceneCastResult result = Raycast(ray, true);
-		interacted = result.hitObject;
-	}
+    // Get interacted object.
+    GKObject* interacted = interactHint;
+    if(interacted == nullptr)
+    {
+        SceneCastResult result = Raycast(ray, true);
+        interacted = result.hitObject;
+    }
 
-	// If interacted object is null, see if we hit the floor, in which case we want to walk.
-	if(interacted == nullptr)
-	{
+    // If interacted object is null, see if we hit the floor, in which case we want to walk.
+    if(interacted == nullptr)
+    {
         BSP* bsp = GetBSP();
-		if(bsp != nullptr)
-		{
-			// Cast ray against scene BSP to see if it intersects with anything.
-			// If so, it means we clicked on that thing.
-			RaycastHit hitInfo;
-			if(bsp->RaycastNearest(ray, hitInfo, true))
-			{
-				// Clicked on the floor - move ego to position.
-				if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
-				{
+        if(bsp != nullptr)
+        {
+            // Cast ray against scene BSP to see if it intersects with anything.
+            // If so, it means we clicked on that thing.
+            RaycastHit hitInfo;
+            if(bsp->RaycastNearest(ray, hitInfo, true))
+            {
+                // Clicked on the floor - move ego to position.
+                if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
+                {
                     // When the player clicks somewhere on the floor, we try to walk to that spot.
                     // However, we don't want to allow walking to unwalkable spots. So first find the nearest walkable spot on the walker boundary.
                     Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(ray.GetPoint(hitInfo.t));
@@ -686,30 +683,30 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
                     // Attempt to walk to the clicked position.
                     // It's 99% likely that a path exists to the walk pos, and the walk will succeed.
                     // The only edge case is if the walk pos clicked is on an isolated subsection of the walker boundary, in which case ego will walk as close as possible before giving up.
-					mEgo->WalkToBestEffort(walkPos, Heading::None, nullptr);
-				}
-			}
-		}
-		return;
-	}
+                    mEgo->WalkToBestEffort(walkPos, Heading::None, nullptr);
+                }
+            }
+        }
+        return;
+    }
 
     // Looks like we're interacting with something interesting.
     mActiveObject = interacted;
 
-	// We've got an object to interact with!
-	// See if it has a pre-defined verb with an associated action. If so, we will immediately execute that action (w/o showing action bar).
-	if(!interacted->GetVerb().empty())
-	{
+    // We've got an object to interact with!
+    // See if it has a pre-defined verb with an associated action. If so, we will immediately execute that action (w/o showing action bar).
+    if(!interacted->GetVerb().empty())
+    {
         const Action* action = gActionManager.GetAction(interacted->GetNoun(), interacted->GetVerb());
         if(action != nullptr)
         {
             ExecuteAction(action);
             return;
         }
-	}
+    }
 
-	// No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
-	gActionManager.ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
+    // No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
+    gActionManager.ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
     ActionBar* actionBar = gActionManager.GetActionBar();
 
     // Add INSPECT/UNINSPECT if not present.
@@ -788,13 +785,13 @@ BSPActor* Scene::GetHitTestObjectByModelName(const std::string& modelName) const
 
 GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 {
-	for(auto& object : mPropsAndActors)
-	{
+    for(auto& object : mPropsAndActors)
+    {
         if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
         {
             return object;
         }
-	}
+    }
     for(auto& object : mBSPActors)
     {
         if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
@@ -802,7 +799,7 @@ GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
             return object;
         }
     }
-	return nullptr;
+    return nullptr;
 }
 
 GKProp* Scene::GetPropByModelName(const std::string& modelName) const
@@ -850,29 +847,29 @@ GKProp* Scene::GetPropByNoun(const std::string& noun) const
 
 GKActor* Scene::GetActorByNoun(const std::string& noun) const
 {
-	for(auto& actor : mActors)
-	{
-		if(StringUtil::EqualsIgnoreCase(actor->GetNoun(), noun))
-		{
-			return actor;
-		}
-	}
-	gReportManager.Log("Error", "Error: Who the hell is '" + noun + "'?");
-	return nullptr;
+    for(auto& actor : mActors)
+    {
+        if(StringUtil::EqualsIgnoreCase(actor->GetNoun(), noun))
+        {
+            return actor;
+        }
+    }
+    gReportManager.Log("Error", "Error: Who the hell is '" + noun + "'?");
+    return nullptr;
 }
 
 const ScenePosition* Scene::GetPosition(const std::string& positionName) const
 {
-	const ScenePosition* position = nullptr;
-	if(mSceneData != nullptr)
-	{
-		position = mSceneData->GetScenePosition(positionName);
-	}
-	if(position == nullptr)
-	{
-		gReportManager.Log("Error", "Error: '" + positionName + "' is not a valid position. Call DumpPositions() to see valid positions.");
-	}
-	return position;
+    const ScenePosition* position = nullptr;
+    if(mSceneData != nullptr)
+    {
+        position = mSceneData->GetScenePosition(positionName);
+    }
+    if(position == nullptr)
+    {
+        gReportManager.Log("Error", "Error: '" + positionName + "' is not a valid position. Call DumpPositions() to see valid positions.");
+    }
+    return position;
 }
 
 float Scene::GetFloorY(const Vector3& position) const
@@ -923,12 +920,12 @@ void Scene::SetSceneModelVisibility(const std::string& modelName, bool visible)
 
 bool Scene::IsSceneModelVisible(const std::string& modelName) const
 {
-	return GetBSP()->IsVisible(modelName);
+    return GetBSP()->IsVisible(modelName);
 }
 
 bool Scene::DoesSceneModelExist(const std::string& modelName) const
 {
-	return GetBSP()->Exists(modelName);
+    return GetBSP()->Exists(modelName);
 }
 
 void Scene::SetFixedModelLighting(const std::string& modelName, const Color32& color)
@@ -1128,60 +1125,60 @@ BSP* Scene::GetBSP() const
 
 void Scene::ExecuteAction(const Action* action)
 {
-	// Ignore nulls.
-	if(action == nullptr) { return; }
+    // Ignore nulls.
+    if(action == nullptr) { return; }
 
-	// Log to "Actions" stream.
-	gReportManager.Log("Actions", "Playing NVC " + action->ToString());
+    // Log to "Actions" stream.
+    gReportManager.Log("Actions", "Playing NVC " + action->ToString());
 
-	// Before executing the NVC, we need to handle any approach.
-	switch(action->approach)
-	{
-		case Action::Approach::WalkTo:
-		{
-			const ScenePosition* scenePos = mSceneData->GetScenePosition(action->target);
-			if(scenePos != nullptr)
-			{
-				//Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
-				mEgo->WalkToExact(scenePos->position, scenePos->heading, [action]() {
+    // Before executing the NVC, we need to handle any approach.
+    switch(action->approach)
+    {
+        case Action::Approach::WalkTo:
+        {
+            const ScenePosition* scenePos = mSceneData->GetScenePosition(action->target);
+            if(scenePos != nullptr)
+            {
+                //Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
+                mEgo->WalkToExact(scenePos->position, scenePos->heading, [action]() {
                     if(!gActionManager.IsActionBarShowing())
                     {
                         gActionManager.ExecuteAction(action, nullptr, false);
                     }
-				});
-			}
-			else
-			{
-				gActionManager.ExecuteAction(action, nullptr, false);
-			}
-			break;
-		}
-		case Action::Approach::Anim: // Example use: R25 Open/Close Window, Open/Close Dresser, Open/Close Drawer
-		{
-			Animation* anim = gAssetManager.LoadAnimation(action->target, AssetScope::Scene);
-			if(anim != nullptr)
-			{
-				mEgo->WalkToAnimationStart(anim, [action]() {
+                });
+            }
+            else
+            {
+                gActionManager.ExecuteAction(action, nullptr, false);
+            }
+            break;
+        }
+        case Action::Approach::Anim: // Example use: R25 Open/Close Window, Open/Close Dresser, Open/Close Drawer
+        {
+            Animation* anim = gAssetManager.LoadAnimation(action->target, AssetScope::Scene);
+            if(anim != nullptr)
+            {
+                mEgo->WalkToAnimationStart(anim, [action]() {
                     if(!gActionManager.IsActionBarShowing())
                     {
                         gActionManager.ExecuteAction(action, nullptr, false);
                     }
-				});
-			}
-			else
-			{
-				gActionManager.ExecuteAction(action, nullptr, false);
-			}
-			break;
-		}
-		case Action::Approach::Near: // Never used in GK3.
-		{
-			std::cout << "Executed NEAR approach type!" << std::endl;
-			gActionManager.ExecuteAction(action, nullptr, false);
-			break;
-		}
-		case Action::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
-		{
+                });
+            }
+            else
+            {
+                gActionManager.ExecuteAction(action, nullptr, false);
+            }
+            break;
+        }
+        case Action::Approach::Near: // Never used in GK3.
+        {
+            std::cout << "Executed NEAR approach type!" << std::endl;
+            gActionManager.ExecuteAction(action, nullptr, false);
+            break;
+        }
+        case Action::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
+        {
             // Find the scene object from the model name.
             GKObject* obj = GetSceneObjectByModelName(action->target);
             if(obj != nullptr)
@@ -1210,52 +1207,52 @@ void Scene::ExecuteAction(const Action* action)
                 // Just do the action if model could not be found.
                 gActionManager.ExecuteAction(action, nullptr, false);
             }
-			break;
-		}
-		case Action::Approach::Region: // Never used in GK3 (it does appear once in a SIF file, but it is misconfigured with an invalid region anyway).
-		{
-			gActionManager.ExecuteAction(action, nullptr, false);
-			break;
-		}
-		case Action::Approach::TurnTo: // Never used in GK3.
-		{
-			gActionManager.ExecuteAction(action, nullptr, false);
-			break;
-		}
-		case Action::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
-		{
-			// Find position of the model.
-			Vector3 modelPosition;
-			GKObject* obj = GetSceneObjectByModelName(action->target);
-			if(obj != nullptr)
-			{
+            break;
+        }
+        case Action::Approach::Region: // Never used in GK3 (it does appear once in a SIF file, but it is misconfigured with an invalid region anyway).
+        {
+            gActionManager.ExecuteAction(action, nullptr, false);
+            break;
+        }
+        case Action::Approach::TurnTo: // Never used in GK3.
+        {
+            gActionManager.ExecuteAction(action, nullptr, false);
+            break;
+        }
+        case Action::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
+        {
+            // Find position of the model.
+            Vector3 modelPosition;
+            GKObject* obj = GetSceneObjectByModelName(action->target);
+            if(obj != nullptr)
+            {
                 // The AABB center seems to give better results than just "GetPosition".
                 // This is because some models have their visuals displaced from the actual position (coffee cups in Dining Room for example).
                 modelPosition = obj->GetAABB().GetCenter();
-			}
-			else
-			{
+            }
+            else
+            {
                 // BSP that had a BSPActor generated will actually still use the above AABB code.
                 // Worst case though, if we have some target that only exists in BSP, get its position directly.
-				modelPosition = GetBSP()->GetPosition(action->target);
-			}
+                modelPosition = GetBSP()->GetPosition(action->target);
+            }
 
-			// Get vector from Ego to model.
-			//Debug::DrawLine(mEgo->GetPosition(), modelPosition, Color32::Green, 60.0f);
-			Vector3 egoToModel = modelPosition - mEgo->GetPosition();
+            // Get vector from Ego to model.
+            //Debug::DrawLine(mEgo->GetPosition(), modelPosition, Color32::Green, 60.0f);
+            Vector3 egoToModel = modelPosition - mEgo->GetPosition();
 
-			// Do a "turn to" heading.
-			Heading turnToHeading = Heading::FromDirection(egoToModel);
-			mEgo->TurnTo(turnToHeading, [action]() -> void {
+            // Do a "turn to" heading.
+            Heading turnToHeading = Heading::FromDirection(egoToModel);
+            mEgo->TurnTo(turnToHeading, [action]() -> void {
                 if(!gActionManager.IsActionBarShowing())
                 {
                     gActionManager.ExecuteAction(action, nullptr, false);
                 }
-			});
-			break;
-		}
-		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser/Plant, RC1 Look Bench/Bookstore Sign
-		{
+            });
+            break;
+        }
+        case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser/Plant, RC1 Look Bench/Bookstore Sign
+        {
             // Find the target object by name.
             GKObject* obj = GetSceneObjectByModelName(action->target);
 
@@ -1275,19 +1272,19 @@ void Scene::ExecuteAction(const Action* action)
                 std::cout << "Could not find WalkToSee target " << action->target << std::endl;
                 gActionManager.ExecuteAction(action, nullptr, false);
             }
-			break;
-		}
-		case Action::Approach::None:
-		{
-			// Just do it!
-			gActionManager.ExecuteAction(action, nullptr, false);
-			break;
-		}
-		default:
-		{
-			gReportManager.Log("Error", "Invalid approach " + std::to_string(static_cast<int>(action->approach)));
-			gActionManager.ExecuteAction(action, nullptr, false);
-			break;
-		}
-	}
+            break;
+        }
+        case Action::Approach::None:
+        {
+            // Just do it!
+            gActionManager.ExecuteAction(action, nullptr, false);
+            break;
+        }
+        default:
+        {
+            gReportManager.Log("Error", "Invalid approach " + std::to_string(static_cast<int>(action->approach)));
+            gActionManager.ExecuteAction(action, nullptr, false);
+            break;
+        }
+    }
 }

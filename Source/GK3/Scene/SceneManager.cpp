@@ -5,8 +5,6 @@
 #include "Loader.h"
 #include "Profiler.h"
 
-#include "VertexAnimator.h"
-
 SceneManager gSceneManager;
 
 void SceneManager::Shutdown()
@@ -59,7 +57,7 @@ void SceneManager::UpdateLoading()
 
     // Wait until loader is idle before unloading or loading any scene.
     if(Loader::IsLoading()) { return; }
-    
+
     // FROM HERE: We want to unload the current scene and (possibly) load a new scene!
 
     // We either want to unload the scene only, or unload the current scene and load a new scene.

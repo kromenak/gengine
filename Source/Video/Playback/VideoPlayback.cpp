@@ -16,7 +16,7 @@ VideoPlayback::~VideoPlayback()
     // Free conversion contexts.
     sws_freeContext(mRGBAConvertContext);
     //sws_freeContext(sub_convert_ctx);
-    
+
     // Free texture.
     if(mVideoTexture != nullptr)
     {
@@ -46,7 +46,7 @@ retry:
         // "Last" is needed primarily to detect serial change and calc time diff between frames.
         Frame* lastvp = is->videoFrames.PeekLast();
         Frame* vp = is->videoFrames.Peek();
-        
+
         // If serials don't match, skip frame.
         if(vp->serial != is->videoPackets.serial)
         {
@@ -59,7 +59,7 @@ retry:
         {
             is->frameTimer = PtsClock::GetCurrentTimeSeconds();
         }
-        
+
         // If playback is paused, go directly to display.
         // Do not take a new frame for playback, just keep showing the current one.
         if(is->IsPaused())
@@ -81,7 +81,7 @@ retry:
 
         // Increase frame timer by delay.
         is->frameTimer += delay;
-        
+
         // Reset frame timer if beyond sync threshold.
         if(delay > 0 && time - is->frameTimer > AV_SYNC_THRESHOLD_MAX)
         {
@@ -113,7 +113,7 @@ retry:
                 goto retry;
             }
         }
-        
+
         // See if there's a new subtitle frame we should be showing.
         // And if so, update the subtitle texture.
         if(is->subtitleStream != nullptr)
@@ -122,7 +122,7 @@ retry:
             {
                 // Grab current subtitle frame.
                 Frame* sp = is->subtitleFrames.Peek();
-                
+
                 // Grab next subtitle frame.
                 Frame* sp2 = nullptr;
                 if(is->subtitleFrames.GetUndisplayedCount() > 1)
@@ -157,14 +157,14 @@ retry:
         // We're going to show a new video frame!
         is->videoFrames.Dequeue();
         //force_refresh = true;
-        
+
         // Got here with readable frame means...update video texture!
         if(is->videoFrames.HasReadableFrame())
         {
             UpdateVideoTexture(is->videoFrames.PeekLast());
             UpdateSubtitles(is);
         }
-        
+
         // If stepping and not paused...pause!
         if(mStep && !is->IsPaused())
         {
@@ -177,9 +177,9 @@ bool VideoPlayback::UpdateVideoTexture(Frame* videoFrame)
 {
     // Already uploaded video texture to GPU - don't do it again.
     if(videoFrame->uploaded) { return true; }
-    
+
     AVFrame* avFrame = videoFrame->frame;
-    
+
     // Make sure we have a properly sized video texture.
     if(mVideoTexture == nullptr || mVideoTexture->GetWidth() != avFrame->width || mVideoTexture->GetHeight() != avFrame->height)
     {
@@ -189,7 +189,7 @@ bool VideoPlayback::UpdateVideoTexture(Frame* videoFrame)
         }
         mVideoTexture = new Texture(avFrame->width, avFrame->height);
     }
-    
+
     // Create conversion context to go from input frame format to BGRA format.
     //TODO: There may be more efficient options for displaying a video frame. Ex: YUV420 data can be loaded into texture and rendered with special shader.
     //TODO: But for now, just convert all formats to RGBA for simplicity.
@@ -202,18 +202,18 @@ bool VideoPlayback::UpdateVideoTexture(Frame* videoFrame)
         av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
         return false;
     }
-    
+
     // Convert from source format to RGBA, copying RGBA data directly to Texture buffer.
     uint8_t* dest[4] { mVideoTexture->GetPixelData(), nullptr, nullptr, nullptr };
     int dest_linesize[4] = { static_cast<int>(mVideoTexture->GetWidth() * 4), 0, 0, 0 };
     sws_scale(mRGBAConvertContext,
               avFrame->data, avFrame->linesize, 0, avFrame->height, // source
               dest, dest_linesize); // dest
-    
+
     // Upload texture data to GPU.
     mVideoTexture->AddDirtyFlags(Texture::DirtyFlags::Pixels);
     mVideoTexture->UploadToGPU();
-    
+
     // Yep, we are uploaded.
     videoFrame->uploaded = true;
     //videoFrame->flipVertical = avFrame->linesize[0] < 0; //TODO: Deal with vertical flip if needed
@@ -230,7 +230,7 @@ void VideoPlayback::UpdateSubtitles(VideoState* is)
         {
             // Grab current subtitle frame.
             Frame* sp = is->subtitleFrames.Peek();
-            
+
             // Grab next subtitle frame.
             Frame* sp2 = nullptr;
             if(is->subtitleFrames.GetUndisplayedCount() > 1)
@@ -260,13 +260,13 @@ void VideoPlayback::UpdateSubtitles(VideoState* is)
             }
         }
     }
-    
+
     // Get subtitle, if any.
     if(is->subtitleStream != nullptr && is->subtitleFrames.GetUndisplayedCount() > 0)
     {
         Frame* videoFrame = is->videoFrames.PeekLast();
         Frame* subtitleFrame = is->subtitleFrames.Peek();
-        
+
         // If video pts is ahead of subtitle pts, we should show this subtitle!
         if(videoFrame->pts >= subtitleFrame->pts + ((float)subtitleFrame->sub.start_display_time / 1000))
         {
@@ -280,9 +280,9 @@ void VideoPlayback::UpdateSubtitles(VideoState* is)
                     subtitleFrame->width = videoFrame->width;
                     subtitleFrame->height = videoFrame->height;
                 }
-                
+
                 //TODO: Update subtitle texture pixels!
-                
+
                 subtitleFrame->uploaded = true;
             }
         }
@@ -302,11 +302,11 @@ double VideoPlayback::CalculateFrameDuration(VideoState* is, Frame* from, Frame*
     {
         return 0.0;
     }
-    
+
     // Max frame duration depends on whether format allows timestamp discontinuities.
     // If discontinuities are allowed, we can use a small max frame duration.
     double max_frame_duration = (is->format->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
-   
+
     // In theory, duration of a frame is diff between sequential frame pts.
     // But if that value doesn't make sense, fall back on estimated duration (calculated from video frame rate).
     double duration = to->pts - from->pts;
@@ -329,14 +329,14 @@ double VideoPlayback::SyncVideo(VideoState* is, double delay)
     {
         return delay;
     }
-    
+
     // Video is not master, so it is synced to audio or an external clock.
     // If video is slave, try to correct big delays by duplicating or deleting a frame.
-    
+
     // Calculate how far or behind video clock is from master clock.
     // Positive = video is ahead, negative = video is behind.
     double diff = is->videoClock.GetTime() - is->GetMasterClock();
-    
+
     // Max frame duration depends on whether format allows timestamp discontinuities.
     // If discontinuities are allowed, we can use a small max frame duration.
     double max_frame_duration = (is->format->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
@@ -359,7 +359,7 @@ double VideoPlayback::SyncVideo(VideoState* is, double delay)
             delay = 2 * delay;
         }
     }
-    
+
     //av_log(NULL, AV_LOG_TRACE, "video: delay=%0.3f A-V=%f\n", delay, -diff);
     return delay;
 }

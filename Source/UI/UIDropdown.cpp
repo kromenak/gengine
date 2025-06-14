@@ -117,7 +117,7 @@ UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, Tra
 
 UIDropdown::UIDropdown(Actor* parent) : UIDropdown("Dropdown", parent)
 {
-    
+
 }
 
 void UIDropdown::SetChoices(const std::vector<std::string>& choices)
@@ -186,7 +186,7 @@ void UIDropdown::RefreshChoicesUI()
         {
             break;
         }
-        
+
         // We may need to create a new selection.
         if(choiceUIIndex >= mChoiceUIs.size())
         {
@@ -210,7 +210,7 @@ void UIDropdown::RefreshChoicesUI()
             label->SetFont(gAssetManager.LoadFont("F_ARIAL_T8"));
             label->SetHorizonalAlignment(HorizontalAlignment::Center);
             label->SetVerticalAlignment(VerticalAlignment::Center);
-            
+
             mChoiceUIs.emplace_back();
             mChoiceUIs.back().transform = button->GetRectTransform();
             mChoiceUIs.back().button = button;

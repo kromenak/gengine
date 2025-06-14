@@ -395,7 +395,7 @@ void BinocsOverlay::OnZoomInButtonPressed()
 
     // Remember the camera's current position, for when we zoom back out.
     mZoomedOutCameraPos = mGameCamera->GetPosition();
-    
+
     // Temporarily change the BSP used to that of the zoomed location.
     SceneGeometryData geometryData;
     geometryData.Load(mCurrentZoomLocation->sceneAssetName);

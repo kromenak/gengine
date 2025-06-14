@@ -18,13 +18,13 @@ public:
     ~Cursor();
 
     void Load(uint8_t* data, uint32_t dataLength);
-    
+
     void Activate(bool animate = true);
-    
+
     void Update(float deltaTime);
 
     bool IsAnimating() const { return mAnimate; }
-    
+
 private:
     // The frames making up the cursor.
     // For animated cursors, there may be multiple entries.

@@ -3,7 +3,7 @@
 //
 // A stack container (last in, first out). New elements go on the back, elements are removed from the back.
 // Uses a fixed-size contiguous array of elements internally.
-// 
+//
 // Characteristics:
 // - Fixed size: max container size must be known at compile time.
 // - Contiguous: elements are contiguous in memory.

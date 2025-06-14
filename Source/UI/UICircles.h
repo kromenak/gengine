@@ -31,7 +31,7 @@ public:
 
     const Circle& GetCircle(size_t index) const { return mCircles[index]; }
     size_t GetCirclesCount() const { return mCircles.size(); }
-    
+
 private:
     // The circles in the set.
     std::vector<Circle> mCircles;

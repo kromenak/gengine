@@ -171,7 +171,7 @@ void Cursor::Update(float deltaTime)
     {
         mFrameIndex -= mCursorFrames.size();
     }
-    
+
     // Set frame.
     SDL_SetCursor(mCursorFrames[static_cast<int>(mFrameIndex)]);
 }

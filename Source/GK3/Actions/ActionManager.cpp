@@ -8,9 +8,7 @@
 #include "GameProgress.h"
 #include "GameCamera.h"
 #include "GEngine.h"
-#include "GKActor.h"
 #include "GK3UI.h"
-#include "IniParser.h"
 #include "Profiler.h"
 #include "ReportManager.h"
 #include "SceneManager.h"
@@ -60,19 +58,19 @@ ActionManager::~ActionManager()
 
 void ActionManager::Init()
 {
-	// Create action bar, which will be used to choose nouns/verbs by the player.
-	mActionBar = new ActionBar();
-	mActionBar->SetIsDestroyOnLoad(false);
+    // Create action bar, which will be used to choose nouns/verbs by the player.
+    mActionBar = new ActionBar();
+    mActionBar->SetIsDestroyOnLoad(false);
 }
 
 void ActionManager::AddActionSet(const std::string& assetName)
 {
     // Read in the asset.
-	NVC* actionSet = gAssetManager.LoadNVC(assetName, AssetScope::Scene);
+    NVC* actionSet = gAssetManager.LoadNVC(assetName, AssetScope::Scene);
     if(actionSet == nullptr) { return; }
 
     // Log that we're parsing this NVC.
-	gReportManager.Log("Generic", StringUtil::Format("Reading NVC file: %s", assetName.c_str()));
+    gReportManager.Log("Generic", StringUtil::Format("Reading NVC file: %s", assetName.c_str()));
 
     // Populate actions map.
     const std::vector<Action*>& actions = actionSet->GetActions();
@@ -109,44 +107,44 @@ void ActionManager::AddActionSet(const std::string& assetName)
             mVerbs.push_back(action->verb);
         }
     }
-		
-	// Also build custom case logic map.
+
+    // Also build custom case logic map.
     const std::string_map_ci<SheepScriptAndText>& caseLogic = actionSet->GetCases();
     mCaseLogic.insert(caseLogic.begin(), caseLogic.end());
 }
 
 void ActionManager::AddActionSetIfForTimeblock(const std::string& assetName, const Timeblock& timeblock)
 {
-	if(IsActionSetForTimeblock(assetName, timeblock))
-	{
-		AddActionSet(assetName);
-	}
+    if(IsActionSetForTimeblock(assetName, timeblock))
+    {
+        AddActionSet(assetName);
+    }
 }
 
 void ActionManager::AddGlobalActionSets(const Timeblock& timeblock)
 {
-	for(auto& actionSet : kGlobalActionSets)
-	{
-		AddActionSetIfForTimeblock(actionSet, timeblock);
-	}
+    for(auto& actionSet : kGlobalActionSets)
+    {
+        AddActionSetIfForTimeblock(actionSet, timeblock);
+    }
 }
 
 void ActionManager::AddInventoryActionSets(const Timeblock& timeblock)
 {
-	for(auto& actionSet : kInventoryActionSets)
-	{
-		AddActionSetIfForTimeblock(actionSet, timeblock);
-	}
+    for(auto& actionSet : kInventoryActionSets)
+    {
+        AddActionSetIfForTimeblock(actionSet, timeblock);
+    }
 }
 
 void ActionManager::ClearActionSets()
 {
     mActions.clear();
-	mCaseLogic.clear();
-	mNounToEnum.clear();
-	mNouns.clear();
-	mVerbToEnum.clear();
-	mVerbs.clear();
+    mCaseLogic.clear();
+    mNounToEnum.clear();
+    mNouns.clear();
+    mVerbToEnum.clear();
+    mVerbs.clear();
 }
 
 bool ActionManager::ExecuteAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback)
@@ -164,34 +162,34 @@ bool ActionManager::ExecuteAction(const std::string& noun, const std::string& ve
 void ActionManager::ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback, bool log)
 {
     // Early out if action is null.
-	if(action == nullptr)
-	{
+    if(action == nullptr)
+    {
         if(finishCallback != nullptr)
         {
             finishCallback(action);
         }
-		return;
-	}
-	
-	// We should only execute one action at a time.
-	if(mCurrentAction != nullptr)
-	{
+        return;
+    }
+
+    // We should only execute one action at a time.
+    if(mCurrentAction != nullptr)
+    {
         gReportManager.Log("Actions", StringUtil::Format("Skipping NVC %s - another action is in progress", action->ToString().c_str()));
-		return;
-	}
-	mCurrentAction = action;
+        return;
+    }
+    mCurrentAction = action;
     mCurrentActionFinishCallback = finishCallback;
-	
-	// Log it!
+
+    // Log it!
     // This is conditional b/c scene actions are actually logged earlier (before the approach finishes).
     if(log)
     {
         gReportManager.Log("Actions", StringUtil::Format("Playing NVC %s", action->ToString().c_str()));
     }
-	
-	// Increment action ID.
-	++mActionId;
-    
+
+    // Increment action ID.
+    ++mActionId;
+
     // Remember current camera FOV.
     gSceneManager.GetScene()->GetCamera()->SaveFov();
 
@@ -201,19 +199,19 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
     // Sometimes, an action can start that the user doesn't initiate (e.g. due to a timer expiring).
     // In those cases, the action bar should close if it was still up.
     HideActionBar();
-	
-	// If no script is associated with the action, that might be an error...
-	// But for now, we'll just treat it as action is immediately over.
-	if(action->script.script != nullptr)
-	{
-		// Execute action in Sheep system, call finished function when done.
-		gSheepManager.Execute(action->script.script, std::bind(&ActionManager::OnActionExecuteFinished, this), "SceneLayer");
-	}
-	else
-	{
-		//TODO: Log?
-		OnActionExecuteFinished();
-	}
+
+    // If no script is associated with the action, that might be an error...
+    // But for now, we'll just treat it as action is immediately over.
+    if(action->script.script != nullptr)
+    {
+        // Execute action in Sheep system, call finished function when done.
+        gSheepManager.Execute(action->script.script, std::bind(&ActionManager::OnActionExecuteFinished, this), "SceneLayer");
+    }
+    else
+    {
+        //TODO: Log?
+        OnActionExecuteFinished();
+    }
 }
 
 void ActionManager::ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback)
@@ -248,7 +246,7 @@ void ActionManager::ExecuteCustomAction(const std::string& noun, const std::stri
         delete mCustomAction.script.script;
         mCustomAction.script.script = nullptr;
     }
-    
+
     // Populate action.
     mCustomAction.noun = noun;
     mCustomAction.verb = verb;
@@ -350,47 +348,47 @@ void ActionManager::PerformPendingActionSkip()
 
 const Action* ActionManager::GetAction(const std::string& noun, const std::string& verb) const
 {
-	// For any noun/verb pair, there is only ONE possible action that can be performed at any given time.
-	// Keep track of the candidate as we iterate from most general/broad to most specific.
-	// The most specific valid action will be our candidate.
-	const Action* candidate = nullptr;
-	
-	// If the verb is an inventory item, handle ANY_OBJECT/ANY_INV_ITEM wildcards for noun/verb.
+    // For any noun/verb pair, there is only ONE possible action that can be performed at any given time.
+    // Keep track of the candidate as we iterate from most general/broad to most specific.
+    // The most specific valid action will be our candidate.
+    const Action* candidate = nullptr;
+
+    // If the verb is an inventory item, handle ANY_OBJECT/ANY_INV_ITEM wildcards for noun/verb.
     Action* action = nullptr;
-	bool verbIsInventoryItem = gVerbManager.IsInventoryItem(verb);
-	if(verbIsInventoryItem)
-	{
+    bool verbIsInventoryItem = gVerbManager.IsInventoryItem(verb);
+    if(verbIsInventoryItem)
+    {
         action = GetHighestPriorityAction("ANY_OBJECT", "ANY_INV_ITEM", VerbType::Normal);
         if(action != nullptr)
         {
             candidate = action;
         }
-	}
-	
-	// Find any matches for "ANY_OBJECT" and this verb next.
+    }
+
+    // Find any matches for "ANY_OBJECT" and this verb next.
     action = GetHighestPriorityAction("ANY_OBJECT", verb, VerbType::Normal);
     if(action != nullptr)
     {
         candidate = action;
     }
-	
-	// If the verb is an inventory item, handle noun/ANY_INV_ITEM combo.
-	if(verbIsInventoryItem)
-	{
+
+    // If the verb is an inventory item, handle noun/ANY_INV_ITEM combo.
+    if(verbIsInventoryItem)
+    {
         action = GetHighestPriorityAction(noun, "ANY_INV_ITEM", VerbType::Normal);
         if(action != nullptr)
         {
             candidate = action;
         }
-	}
-	
-	// Finally, check for any exact noun/verb matches.
+    }
+
+    // Finally, check for any exact noun/verb matches.
     action = GetHighestPriorityAction(noun, verb, VerbType::Normal);
     if(action != nullptr)
     {
         candidate = action;
     }
-	return candidate;
+    return candidate;
 }
 
 std::vector<const Action*> ActionManager::GetActions(const std::string& noun, VerbType verbType) const
@@ -533,7 +531,7 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 
 bool ActionManager::HasTopicsLeft(const std::string &noun) const
 {
-	return GetActions(noun, VerbType::Topic).size() > 0;
+    return GetActions(noun, VerbType::Topic).size() > 0;
 }
 
 bool ActionManager::IsActionAllowed(const std::string& noun, const std::string& verb, const std::string& caseLabel)
@@ -543,18 +541,18 @@ bool ActionManager::IsActionAllowed(const std::string& noun, const std::string& 
 
 std::string& ActionManager::GetNoun(int nounEnum)
 {
-	return mNouns[Math::Clamp(nounEnum, 0, (int)mNouns.size() - 1)];
+    return mNouns[Math::Clamp(nounEnum, 0, (int)mNouns.size() - 1)];
 }
 
 std::string& ActionManager::GetVerb(int verbEnum)
 {
-	return mVerbs[Math::Clamp(verbEnum, 0, (int)mVerbs.size() - 1)];
+    return mVerbs[Math::Clamp(verbEnum, 0, (int)mVerbs.size() - 1)];
 }
 
 void ActionManager::ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
 {
-	std::vector<const Action*> actions = GetActions(noun, VerbType::Normal);
-	mActionBar->Show(noun, VerbType::Normal, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
+    std::vector<const Action*> actions = GetActions(noun, VerbType::Normal);
+    mActionBar->Show(noun, VerbType::Normal, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
 }
 
 void ActionManager::ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback, bool centerOnPointer)
@@ -574,7 +572,7 @@ void ActionManager::ShowTopicBar(const std::string& noun, std::function<void(con
 
 bool ActionManager::IsActionBarShowing() const
 {
-	return mActionBar->IsShowing();
+    return mActionBar->IsShowing();
 }
 
 void ActionManager::HideActionBar() const
@@ -601,13 +599,13 @@ bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const 
 
 bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, const std::string& caseLabel, VerbType verbType) const
 {
-	// Empty condition is automatically met.
-	if(caseLabel.empty()) { return true; }
-    
-	// Is this custom case logic? If so, check the custom case!
-	auto it = mCaseLogic.find(caseLabel);
-	if(it != mCaseLogic.end())
-	{
+    // Empty condition is automatically met.
+    if(caseLabel.empty()) { return true; }
+
+    // Is this custom case logic? If so, check the custom case!
+    auto it = mCaseLogic.find(caseLabel);
+    if(it != mCaseLogic.end())
+    {
         // For topics, the case logic indicates when a topic should be available, but it DOES NOT indicate when it should no longer be available!
         // As a general rule, topics should only be discussable once (when the case is met), and then they do not appear again after being discussed.
         if(verbType == VerbType::Topic)
@@ -640,19 +638,19 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
             }
         }
 
-		// Case evaluation logic may have magic variables n$ and v$.
-		// These variables should hold int-based identifiers for the noun/verb of the action we're evaluating.
-		// So, look those up and save the indexes!
-		int n = mNounToEnum.at(noun);
-		int v = mVerbToEnum.at(verb);
-		
-		// Evaluate our condition logic with our n$ and v$ values.
-		return gSheepManager.Evaluate(it->second.script, n, v);
-	}
-	
-	// Check global case conditions.
-	if(StringUtil::EqualsIgnoreCase(caseLabel, "ALL"))
-	{
+        // Case evaluation logic may have magic variables n$ and v$.
+        // These variables should hold int-based identifiers for the noun/verb of the action we're evaluating.
+        // So, look those up and save the indexes!
+        int n = mNounToEnum.at(noun);
+        int v = mVerbToEnum.at(verb);
+
+        // Evaluate our condition logic with our n$ and v$ values.
+        return gSheepManager.Evaluate(it->second.script, n, v);
+    }
+
+    // Check global case conditions.
+    if(StringUtil::EqualsIgnoreCase(caseLabel, "ALL"))
+    {
         // For topics, "ALL" has some strange behavior. Despite appearances, it is not ALWAYS available! It is the last thing to be said about a topic.
         // For example, take JEAN:T_TWO_MEN in Lobby on Day 1, 10AM. If you don't do this special logic, the last dialogue can be played forever.
         // So, get total things that can be said about this topic, and if we are one away from that, this condition is met.
@@ -671,72 +669,72 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
             return gGameProgress.GetTopicCount(noun, verb) == (topicCount - 1);
         }
 
-		// "ALL" is always met!
-		return true;
-	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "GABE_ALL"))
-	{
-		// Condition is met if Ego is Gabriel.
+        // "ALL" is always met!
+        return true;
+    }
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "GABE_ALL"))
+    {
+        // Condition is met if Ego is Gabriel.
         return StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel");
-	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "GRACE_ALL"))
-	{
-		// Condition is met if Ego is Grace.
+    }
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "GRACE_ALL"))
+    {
+        // Condition is met if Ego is Grace.
         return StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace");
-	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "1ST_TIME"))
-	{
+    }
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "1ST_TIME"))
+    {
         // Condition is met if this is the first time we've executed this action (noun/verb combo).
         return GetNounVerbCount(noun, verb, verbType) == 0;
-	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "2CD_TIME") || StringUtil::EqualsIgnoreCase(caseLabel, "2ND_TIME"))
-	{
-		// A surprising way to abbreviate "2nd time"...
+    }
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "2CD_TIME") || StringUtil::EqualsIgnoreCase(caseLabel, "2ND_TIME"))
+    {
+        // A surprising way to abbreviate "2nd time"...
         // Condition is met if this is the 2nd time we did the action.
         return GetNounVerbCount(noun, verb, verbType) == 1;
-	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "3RD_TIME"))
-	{
-		// And again for good measure. True if this is the 3rd time we did the action.
+    }
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "3RD_TIME"))
+    {
+        // And again for good measure. True if this is the 3rd time we did the action.
         return GetNounVerbCount(noun, verb, verbType) == 2;
-	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "OTR_TIME"))
-	{
-		// Condition is met if this IS NOT the first time we've executed this action (noun/verb combo).
+    }
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "OTR_TIME"))
+    {
+        // Condition is met if this IS NOT the first time we've executed this action (noun/verb combo).
         // However, if 2nd/3rd time actions exist, they will have higher priority than this one.
         return GetNounVerbCount(noun, verb, verbType) > 0;
-	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "DIALOGUE_TOPICS_LEFT"))
-	{
-		// Condition is met if there are any "topic" type actions available for this noun.
-		return HasTopicsLeft(noun);
-	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "NOT_DIALOGUE_TOPICS_LEFT"))
-	{
-		// Condition is met if there are no more "topic" type actions available for this noun.
-		return !HasTopicsLeft(noun);
-	}
+    }
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "DIALOGUE_TOPICS_LEFT"))
+    {
+        // Condition is met if there are any "topic" type actions available for this noun.
+        return HasTopicsLeft(noun);
+    }
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "NOT_DIALOGUE_TOPICS_LEFT"))
+    {
+        // Condition is met if there are no more "topic" type actions available for this noun.
+        return !HasTopicsLeft(noun);
+    }
     else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK"))
     {
         // This condition always returns true.
         // In an NVC file, it typically signifies a variant action for the specific timeblock that overrides one of the general SIF actions.
         return true;
     }
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK_OVERRIDE"))
-	{
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK_OVERRIDE"))
+    {
         // This condition is identical to TIME_BLOCK, but it has higher priority when multiple actions can be used.
         return true;
-	}
+    }
     else if(StringUtil::EqualsIgnoreCase(caseLabel, "EGG"))
     {
         //TODO: Return true if easter eggs are enabled.
         return false;
     }
-	//TODO: Add any more global conditions.
-	
-	// Assume any not found case is false by default.
-	std::cout << "Unknown NVC case " << caseLabel << std::endl;
-	return false;
+    //TODO: Add any more global conditions.
+
+    // Assume any not found case is false by default.
+    std::cout << "Unknown NVC case " << caseLabel << std::endl;
+    return false;
 }
 
 Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const std::string& verb, VerbType verbType) const
@@ -816,7 +814,7 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                 {
                     // Custom case logic is only overridden by 1st/2nd/3rd time cases.
                     caseScore = 7;
-                
+
                     // If we already encountered a valid custom case, AND this custom case is also valid, we have a tie.
                     // Each action has a type - more specific types (e.g. timeblock vs global) win out.
                     //
@@ -956,14 +954,14 @@ void ActionManager::OnActionBarCanceled()
 
 void ActionManager::OnActionExecuteFinished()
 {
-	// This function should only be called if an action is playing.
-	assert(mCurrentAction != nullptr);
+    // This function should only be called if an action is playing.
+    assert(mCurrentAction != nullptr);
 
     // Clear current action.
     // Do this BEFORE callback and topic bar checks, as those may want to start an action themselves.
     mLastAction = mCurrentAction;
     mCurrentAction = nullptr;
-    
+
     // Restore current camera FOV.
     gSceneManager.GetScene()->GetCamera()->RestoreFov();
 
@@ -982,7 +980,7 @@ void ActionManager::OnActionExecuteFinished()
     {
         gGameProgress.IncChatCount(mLastAction->noun);
     }
-    
+
     // Execute finish callback if specified.
     if(mCurrentActionFinishCallback != nullptr)
     {
@@ -1000,10 +998,10 @@ void ActionManager::OnActionExecuteFinished()
     {
         ShowTopicBar(mLastAction->talkTo, nullptr, true);
     }
-	else if(gVerbManager.IsTopic(mLastAction->verb))
-	{
-		ShowTopicBar(mLastAction->noun, nullptr, false);
-	}
+    else if(gVerbManager.IsTopic(mLastAction->verb))
+    {
+        ShowTopicBar(mLastAction->noun, nullptr, false);
+    }
     else if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "Z_CHAT")) // chatting always seems to end the current convo/action bar.
     {
         OnActionBarCanceled();

@@ -9,17 +9,17 @@ Vector2 Vector2::UnitY(0.0f, 1.0f);
 
 Vector2::Vector2(float x, float y) : x(x), y(y)
 {
-    
+
 }
 
 Vector2::Vector2(const Vector2& other) : x(other.x), y(other.y)
 {
-    
+
 }
 
 Vector2::Vector2(const Vector3& other) : x(other.x), y(other.y)
 {
-	
+
 }
 
 Vector2& Vector2::operator=(const Vector2& other)
@@ -105,7 +105,7 @@ Vector2& Vector2::operator/=(float scalar)
 
 Vector2 Vector2::operator*(const Vector2& other) const
 {
-	return Vector2(x * other.x, y * other.y);
+    return Vector2(x * other.x, y * other.y);
 }
 
 Vector2& Vector2::Normalize()
@@ -116,7 +116,7 @@ Vector2& Vector2::Normalize()
     {
         return *this;
     }
-    
+
     // To normalize, we divide each component by the length of the vector.
     // Or in other words, we can multiply by (1 / length).
     float oneOverLength = Math::InvSqrt(lengthSq);
@@ -139,7 +139,7 @@ Vector2& Vector2::Normalize()
 
 /*static*/ Vector2 Vector2::Lerp(const Vector2& from, const Vector2& to, float t)
 {
-	return ((1.0f - t) * from) + (t * to);
+    return ((1.0f - t) * from) + (t * to);
 }
 
 /*static*/ Vector2 Vector2::Project(const Vector2& a, const Vector2& b)

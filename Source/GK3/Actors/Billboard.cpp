@@ -33,7 +33,7 @@ void Billboard::OnUpdate(float deltaTime)
             camForwardDir = camera->GetForward();
         }
     }
-    
+
     // Use heading helpers to convert from facing direction to quaternion (ignoring Y axis).
     // This creates a rotation that points in the direction of the camera's forward vector.
     Quaternion rotation = Heading::FromDirection(camForwardDir).ToQuaternion();

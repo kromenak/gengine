@@ -274,14 +274,14 @@ void GKActor::WalkToSee(GKObject* target, const std::function<void()>& finishCal
 
 void GKActor::WalkToAnimationStart(Animation* anim, const std::function<void()>& finishCallback)
 {
-	// Need a valid anim.
-	if(anim == nullptr) { return; }
+    // Need a valid anim.
+    if(anim == nullptr) { return; }
 
-	// GOAL: walk the actor to the initial position/rotation of this anim.
-	// Retrieve vertex animation that matches this actor's model.
-	// If no vertex anim exists, we can't walk to animation start! This is probably a developer error.
+    // GOAL: walk the actor to the initial position/rotation of this anim.
+    // Retrieve vertex animation that matches this actor's model.
+    // If no vertex anim exists, we can't walk to animation start! This is probably a developer error.
     VertexAnimNode* vertexAnimNode = anim->GetVertexAnimationOnFrameForModel(0, mMeshRenderer->GetModelName());
-	if(vertexAnimNode == nullptr) { return; }
+    if(vertexAnimNode == nullptr) { return; }
 
     // Sample position/pose on first frame of animation.
     // That gives our walk pos/rotation, BUT it is in the actor's local space.
@@ -318,8 +318,8 @@ void GKActor::WalkToAnimationStart(Animation* anim, const std::function<void()>&
 
 Vector3 GKActor::GetWalkDestination() const
 {
-	if(!mWalker->IsWalking()) { return GetPosition(); }
-	return mWalker->GetDestination();
+    if(!mWalker->IsWalking()) { return GetPosition(); }
+    return mWalker->GetDestination();
 }
 
 void GKActor::SnapToFloor()
@@ -357,9 +357,9 @@ Vector3 GKActor::GetHeadPosition() const
     }
 
     // If head mesh isn't present for some reason, approximate based on position and height.
-	Vector3 position = GetFloorPosition();
-	position.y += mCharConfig->walkerHeight;
-	return position;
+    Vector3 position = GetFloorPosition();
+    position.y += mCharConfig->walkerHeight;
+    return position;
 }
 
 Vector3 GKActor::GetFloorPosition() const

@@ -90,7 +90,7 @@ void UIGrids::GenerateMesh()
 
         // We need two lines per division, and 2 vertices per line.
         vertexCount += (grid.divisions - 1) * 2 * 2;
-        
+
         // If we're drawing the border, we need 8 vertices (4 lines with 2 vertices each).
         if(grid.drawBorder)
         {
@@ -201,7 +201,7 @@ void UIGrids::GenerateMesh()
     meshDefinition.SetVertexLayout(VertexLayout::Packed);
     meshDefinition.AddVertexData(VertexAttribute::Position, positions);
 
-    // Create submesh from definition. 
+    // Create submesh from definition.
     Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
 
     // Render it in "lines" mode, since this is a set of lines!

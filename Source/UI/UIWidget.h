@@ -24,9 +24,9 @@ public:
     // Called when pointer down/up when within the bounds of this widget.
     virtual void OnPointerDown() { }
     virtual void OnPointerUp() { }
-    
+
     RectTransform* GetRectTransform() const { return mRectTransform; }
-    
+
     void SetReceivesInput(bool receivesInput) { mReceivesInput = receivesInput; }
     bool ReceivesInput() const { return mReceivesInput; }
 

@@ -300,7 +300,7 @@ void SidneyMakeId::PrintId()
                 }
                 else
                 {
-                    // Play VO for printing this ID. 
+                    // Play VO for printing this ID.
                     gActionManager.ExecuteSheepAction(vo);
 
                     // Play a print SFX.

@@ -3,7 +3,7 @@
 //
 // A scrollbar is a compound widget that consists of a slider, a drag handle, and two buttons.
 // Scrollbars can be either vertical or horizontal (though this class is limited to vertical scrolling for now).
-// 
+//
 // The most common use case for a scrollbar is to navigate some UI content that is larger than its visible area.
 // For example, controlling which portion of a scroll are is visible.
 //

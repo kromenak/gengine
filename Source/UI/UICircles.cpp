@@ -96,7 +96,7 @@ void UICircles::GenerateMesh()
     meshDefinition.SetVertexLayout(VertexLayout::Packed);
     meshDefinition.AddVertexData(VertexAttribute::Position, positions);
 
-    // Create submesh from definition. 
+    // Create submesh from definition.
     Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
 
     // A circle is actually rendered as a bunch of small lines, with the last line connecting to the first one.

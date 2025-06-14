@@ -418,7 +418,7 @@ void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std
             {
                 fileButton.label->SetText("  " + file->GetDisplayName());
                 topLeft.y -= 16.0f;
-            }   
+            }
         }
     }
 }

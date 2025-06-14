@@ -12,7 +12,7 @@
 
 TYPEINFO_INIT(SheepScript, Asset, GENERATE_TYPE_ID)
 {
-    
+
 }
 
 /*static*/ bool SheepScript::IsSheepDataCompiled(uint8_t* data, uint32_t dataLength)
@@ -77,12 +77,12 @@ std::string* SheepScript::GetStringConst(int offset)
     {
         return &it->second;
     }
-	return nullptr;
+    return nullptr;
 }
 
 int SheepScript::GetFunctionOffset(const std::string& functionName)
 {
-	// Find it and return it, or fail with -1 offset.
+    // Find it and return it, or fail with -1 offset.
     auto it = mFunctions.find(functionName);
     if(it != mFunctions.end())
     {
@@ -309,13 +309,13 @@ void SheepScript::ParseFunctionsSection(BinaryReader& reader)
         reader.ReadString16(name);
         reader.Skip(1); // skip null terminator, baked into data
 
-		// 2 bytes: unknown
+        // 2 bytes: unknown
         reader.Skip(2);
 
-		// 4 bytes: code offset for this function.
+        // 4 bytes: code offset for this function.
         int codeOffset = reader.ReadInt();
 
-		// Save mapping of function name to code offset.
+        // Save mapping of function name to code offset.
         mFunctions[name] = codeOffset;
     }
 }

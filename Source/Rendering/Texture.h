@@ -9,8 +9,6 @@
 
 #include <string>
 
-#include <GL/glew.h>
-
 #include "Color32.h"
 #include "EnumClassFlags.h"
 
@@ -20,12 +18,12 @@ class Texture : public Asset
 {
     TYPEINFO_SUB(Texture, Asset);
 public:
-	enum class RenderType
-	{
-		Opaque,		// Texture is fully opaque
-		AlphaTest,	// Texture has only opaque and transparent pixels
-		Translucent	// Texture has pixels that are partially transparent
-	};
+    enum class RenderType
+    {
+        Opaque,		// Texture is fully opaque
+        AlphaTest,	// Texture has only opaque and transparent pixels
+        Translucent	// Texture has pixels that are partially transparent
+    };
 
     // Dictates how the texture acts when it is magnified or minified.
     enum class FilterMode
@@ -51,18 +49,18 @@ public:
         Properties = 4, // Other properties (filter mode, wrap mode, etc) have changed.
     };
 
-	static Texture White;
-	static Texture Black;
+    static Texture White;
+    static Texture Black;
 
     Texture(uint32_t width, uint32_t height);
-	Texture(uint32_t width, uint32_t height, Color32 color);
+    Texture(uint32_t width, uint32_t height, Color32 color);
     Texture(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     Texture(BinaryReader& reader);
-	~Texture();
+    ~Texture();
 
     void Load(uint8_t* data, uint32_t dataLength);
 
-	// Activates the texture in the graphics library.
+    // Activates the texture in the graphics library.
     void Activate(uint8_t textureUnit);
     static void Deactivate();
 
@@ -70,7 +68,7 @@ public:
     uint32_t GetHeight() const { return mHeight; }
     uint8_t* GetPixelData() const { return mPixels; }
 
-	RenderType GetRenderType() const { return mRenderType; }
+    RenderType GetRenderType() const { return mRenderType; }
 
     void SetFilterMode(FilterMode filterMode);
     FilterMode GetFilterMode() const { return mFilterMode; }
@@ -82,22 +80,22 @@ public:
 
     // Coordinates are from top-left corner of texture.
     void SetPixelColor32(int x, int y, const Color32& color);
-	Color32 GetPixelColor32(int x, int y) const;
+    Color32 GetPixelColor32(int x, int y) const;
 
     void SetPaletteIndex(int x, int y, uint8_t val);
     uint8_t GetPaletteIndex(int x, int y) const;
 
-	//void Blit(Texture* source, int destX, int destY);
+    //void Blit(Texture* source, int destX, int destY);
 
-	// Blend's source pixels into dest based on source's alpha channel.
-	static void BlendPixels(const Texture& source, Texture& dest, int destX, int destY);
+    // Blend's source pixels into dest based on source's alpha channel.
+    static void BlendPixels(const Texture& source, Texture& dest, int destX, int destY);
     static void BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
                             Texture& dest, int destX, int destY);
 
-	// Alpha and transparency
-	void SetTransparentColor(const Color32& color);
+    // Alpha and transparency
+    void SetTransparentColor(const Color32& color);
     void ClearTransparentColor();
-	void ApplyAlphaChannel(const Texture& alphaTexture, bool useRGB = false);
+    void ApplyAlphaChannel(const Texture& alphaTexture, bool useRGB = false);
 
     // Image Modifications
     void FlipVertically();
@@ -110,21 +108,21 @@ public:
 
     // GPU upload
     void AddDirtyFlags(DirtyFlags flags);
-	void UploadToGPU();
+    void UploadToGPU();
 
     // Export/save
-	void WriteToFile(const std::string& filePath);
+    void WriteToFile(const std::string& filePath);
 
 private:
     // Texture width and height.
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
 
-	// Some textures have palettes.
+    // Some textures have palettes.
     uint8_t* mPalette = nullptr;
     uint32_t mPaletteSize = 0;
 
-	// If a texture has a palette, the indexes into the palette are stored here.
+    // If a texture has a palette, the indexes into the palette are stored here.
     uint8_t* mPaletteIndexes = nullptr;
 
     // Pixel data, from the top-left corner of the image.
@@ -135,10 +133,10 @@ private:
     // Handle to texture in underlying graphics API.
     void* mTextureHandle = nullptr;
 
-	// If there's no alpha, it is an opaque texture.
-	// If it has alpha, but only 255 or 0 (on or off), it's an alpha test texture.
-	// If it has semi-alpha pixels, it is a translucent texture.
-	RenderType mRenderType = RenderType::Opaque;
+    // If there's no alpha, it is an opaque texture.
+    // If it has alpha, but only 255 or 0 (on or off), it's an alpha test texture.
+    // If it has semi-alpha pixels, it is a translucent texture.
+    RenderType mRenderType = RenderType::Opaque;
 
     // Texture's filter mode.
     FilterMode mFilterMode = FilterMode::Point;
@@ -153,11 +151,11 @@ private:
     // A newly created texture will automatically have its "dirty pixels" flag set, since we must upload pixel data before use.
     DirtyFlags mDirtyFlags = DirtyFlags::Pixels;
 
-	static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
+    static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
 
     void ParseFromData(BinaryReader& reader);
-	void ParseFromCompressedFormat(BinaryReader& reader);
-	void ParseFromBmpFormat(BinaryReader& reader);
+    void ParseFromCompressedFormat(BinaryReader& reader);
+    void ParseFromBmpFormat(BinaryReader& reader);
     void ParseFromPngFormat(BinaryReader& reader);
 };
 

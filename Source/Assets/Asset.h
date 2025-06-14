@@ -3,11 +3,10 @@
 //
 // Base class for any game asset.
 // An asset is any piece of game content - textures, meshes, audio, scripts, etc.
-// 
+//
 // Usually loaded from the disk, but could be created at runtime as well.
 //
 #pragma once
-#include <cstdint>
 #include <string>
 
 #include "TypeInfo.h"
@@ -26,13 +25,13 @@ class Asset
     TYPEINFO_BASE(Asset);
 public:
     virtual ~Asset() = default;
-    
+
     const std::string& GetName() const { return mName; }
     std::string GetNameNoExtension() const;
 
     void SetScope(AssetScope scope) { mScope = scope; }
     AssetScope GetScope() const { return mScope; }
-    
+
 protected:
     // You should not be able to create an instance of this class - only subclasses are allowed.
     explicit Asset(const std::string& name, AssetScope scope);

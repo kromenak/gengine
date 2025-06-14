@@ -68,7 +68,7 @@ void LayerManager::PushLayer(Layer* layer)
         fromLayer = mLayerStack.back();
         fromLayer->Exit(layer);
     }
-    
+
     // Add new layer to top, enter it.
     mLayerStack.push_back(layer);
     mLayerStack.back()->Pushed();
@@ -83,23 +83,23 @@ void LayerManager::PopLayer(Layer* expectedLayer)
         std::cout << "Attempting to pop layer, but stack is empty!" << std::endl;
         return;
     }
-    
+
     // Caller can provide an "expected layer", kind of as a way to assert that they are popping what they think they're popping.
     if(expectedLayer != nullptr && !IsTopLayer(expectedLayer))
     {
         std::cout << "Expected to pop " << expectedLayer->GetName() << ", but top layer is actually " << mLayerStack.back()->GetName() << std::endl;
         return;
     }
-    
+
     // Figure out layer being popped and layer entering.
     Layer* fromLayer = mLayerStack.back();
     Layer* toLayer = mLayerStack.size() > 1 ? mLayerStack[mLayerStack.size() - 2] : nullptr;
-    
+
     // Exit from layer and pop off stack.
     fromLayer->Exit(toLayer);
     mLayerStack.pop_back();
     fromLayer->Popped();
-    
+
     // New top of stack is now entered.
     if(toLayer != nullptr)
     {
@@ -138,7 +138,7 @@ void LayerManager::DumpLayerStack()
 {
     std::stringstream ss;
     ss << "Dumping layer info...";
-    
+
     // Output layer stack from top to bottom.
     // Since top is end of vector, we have to iterate backwards.
     for(int i = mLayerStack.size() - 1; i >= 0; --i)
@@ -146,7 +146,7 @@ void LayerManager::DumpLayerStack()
         ss << std::endl;
         ss << StringUtil::Format("Layer %0i (%s): ambient='%s' rect=%s", mLayerStack.size() - 1 - i, mLayerStack[i]->GetName().c_str(), "do not save", "{0, 0, 1024, 768}");
     }
-    
+
     // Log to dump stream.
     gReportManager.Log("Dump", ss.str());
 }

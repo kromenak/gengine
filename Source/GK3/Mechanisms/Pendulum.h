@@ -28,7 +28,7 @@ protected:
 private:
     //
     // PENDULUM SWINGING
-    // 
+    //
     // The approximate radius of the pendulum arm.
     static constexpr float kPendulumArmRadius = 2000.0f;
 
@@ -61,7 +61,7 @@ private:
         InDangerZoneRight
     };
     PendulumState mPendulumState = PendulumState::Swinging;
-    
+
     void UpdatePendulum(float deltaTime);
 
     void SetPendulumActorRotation(float angle);
@@ -72,7 +72,7 @@ private:
 
     //
     // PENDULUM PLATFORMS
-    // 
+    //
     // The platforms rotating around the pendulum.
     static const int kPlatformCount = 24;
     GKObject* mPlatforms[kPlatformCount] = { 0 };
@@ -110,7 +110,7 @@ private:
 
     // Cached start position for Gabe.
     Vector3 mGabeStartPosition;
-    
+
     // The index of the platform Gabe is currently on.
     int mGabePlatformIndex = -1;
 
@@ -162,7 +162,7 @@ private:
     void UpdateGabeInteract();
 
     void ResetAtEntryway();
-    
+
     void OnForwardJumpStarted();
     void OnLeftJumpStarted(int toPlatformIndex);
     void OnRightJumpStarted(int toPlatformIndex);

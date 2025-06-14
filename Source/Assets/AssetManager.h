@@ -42,7 +42,7 @@ public:
     void Shutdown();
 
     // Loose Files
-	// Adds a filesystem path to search for assets and bundles at.
+    // Adds a filesystem path to search for assets and bundles at.
     void AddSearchPath(const std::string& searchPath);
 
     // Given a filename, finds the path to the file if it exists on one of the search paths.
@@ -51,23 +51,23 @@ public:
     std::string GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions);
 
     // Barn Files
-	// Load or unload a barn bundle.
+    // Load or unload a barn bundle.
     bool LoadBarn(const std::string& barnName, BarnSearchPriority priority = BarnSearchPriority::Normal);
     void UnloadBarn(const std::string& barnName);
 
-	// Write an asset from a bundle to a file.
+    // Write an asset from a bundle to a file.
     void WriteBarnAssetToFile(const std::string& assetName);
-	void WriteBarnAssetToFile(const std::string& assetName, const std::string& outputDir);
+    void WriteBarnAssetToFile(const std::string& assetName, const std::string& outputDir);
 
-	// Write all assets from a bundle that match a search string.
-	void WriteAllBarnAssetsToFile(const std::string& search);
-	void WriteAllBarnAssetsToFile(const std::string& search, const std::string& outputDir);
+    // Write all assets from a bundle that match a search string.
+    void WriteAllBarnAssetsToFile(const std::string& search);
+    void WriteAllBarnAssetsToFile(const std::string& search, const std::string& outputDir);
 
     // Loading (or Getting) Assets
     Audio* LoadAudio(const std::string& name, AssetScope scope = AssetScope::Global);
     Audio* LoadAudioAsync(const std::string& name, AssetScope scope = AssetScope::Global);
     Soundtrack* LoadSoundtrack(const std::string& name, AssetScope scope = AssetScope::Global);
-	Animation* LoadYak(const std::string& name, AssetScope scope = AssetScope::Global);
+    Animation* LoadYak(const std::string& name, AssetScope scope = AssetScope::Global);
 
     Model* LoadModel(const std::string& name, AssetScope scope = AssetScope::Global);
     Texture* LoadTexture(const std::string& name, AssetScope scope = AssetScope::Global);
@@ -92,7 +92,7 @@ public:
 
     Cursor* LoadCursor(const std::string& name, AssetScope scope = AssetScope::Global);
     Cursor* LoadCursorAsync(const std::string& name, AssetScope scope = AssetScope::Global);
-	Font* LoadFont(const std::string& name, AssetScope scope = AssetScope::Global);
+    Font* LoadFont(const std::string& name, AssetScope scope = AssetScope::Global);
 
     TextAsset* LoadText(const std::string& name, AssetScope scope = AssetScope::Global);
     Config* LoadConfig(const std::string& name);
@@ -150,9 +150,9 @@ private:
 
     AssetCache<Shader> mShaderCache;
 
-	// Retrieve a barn bundle by name, or by contained asset.
-	BarnFile* GetBarn(const std::string& barnName);
-	BarnFile* GetBarnContainingAsset(const std::string& assetName);
+    // Retrieve a barn bundle by name, or by contained asset.
+    BarnFile* GetBarn(const std::string& barnName);
+    BarnFile* GetBarnContainingAsset(const std::string& assetName);
 
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
 

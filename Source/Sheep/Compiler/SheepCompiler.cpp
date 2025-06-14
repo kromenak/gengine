@@ -5,7 +5,6 @@
 #include <sstream>
 
 #include "FileSystem.h"
-#include "mstream.h"
 #include "ReportManager.h"
 #include "SheepScriptBuilder.h"
 #include "StringUtil.h"
@@ -68,26 +67,26 @@ bool SheepCompiler::Compile(const std::string& name, std::istream& stream)
 
 void SheepCompiler::Warning(SheepScriptBuilder* builder, const Sheep::location& location, const std::string& message)
 {
-	int line = location.begin.line;
-	int col = location.begin.column;
-	const std::string& section = builder->GetSection();
-	
-	// Format and log message.
-	std::string reportMsg = StringUtil::Format("GK3 compiler warning at '%s' (line %d, col %d) <%s>\n%s",
-											   mName.c_str(), line, col, section.c_str(),
-											   message.c_str());
-	gReportManager.Log("SheepCompilerWarning", reportMsg);
+    int line = location.begin.line;
+    int col = location.begin.column;
+    const std::string& section = builder->GetSection();
+
+    // Format and log message.
+    std::string reportMsg = StringUtil::Format("GK3 compiler warning at '%s' (line %d, col %d) <%s>\n%s",
+                                               mName.c_str(), line, col, section.c_str(),
+                                               message.c_str());
+    gReportManager.Log("SheepCompilerWarning", reportMsg);
 }
 
 void SheepCompiler::Error(SheepScriptBuilder* builder, const Sheep::location& location, const std::string& message)
 {
-	int line = location.begin.line;
-	int col = location.begin.column;
-	const std::string& section = builder->GetSection();
-	
-	// Format and log message.
-	std::string reportMsg = StringUtil::Format("GK3 compiler error at '%s' (line %d, col %d) <%s>\n%s",
-											   mName.c_str(), line, col, section.c_str(),
-											   message.c_str());
-	gReportManager.Log("SheepCompilerError", reportMsg);
+    int line = location.begin.line;
+    int col = location.begin.column;
+    const std::string& section = builder->GetSection();
+
+    // Format and log message.
+    std::string reportMsg = StringUtil::Format("GK3 compiler error at '%s' (line %d, col %d) <%s>\n%s",
+                                               mName.c_str(), line, col, section.c_str(),
+                                               message.c_str());
+    gReportManager.Log("SheepCompilerError", reportMsg);
 }

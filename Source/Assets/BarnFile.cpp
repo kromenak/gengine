@@ -19,25 +19,25 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
     // Make sure we can actually read this file.
     if(!mReader.OK())
     {
-		std::cout << "Can't read barn file at " << filePath << std::endl;
+        std::cout << "Can't read barn file at " << filePath << std::endl;
         return;
     }
-    
-	// 8 bytes: two specific 4-byte ints must appear at the beginning of the file.
+
+    // 8 bytes: two specific 4-byte ints must appear at the beginning of the file.
     // In text form, this is a string "GK3!Barn".
     uint32_t gameIdentifier = mReader.ReadUInt();
     uint32_t barnIdentifier = mReader.ReadUInt();
     if(gameIdentifier != kGameIdentifier && barnIdentifier != kBarnIdentifier)
     {
-		std::cout << "Invalid file type!" << std::endl;
+        std::cout << "Invalid file type!" << std::endl;
         return;
     }
-    
+
     // 4-bytes: unknown constant value (65536)
-	// 4-bytes: unknown constant value (65536)
-	// 4-bytes: appears to be file size, or size of assets in BRN bundle.
-	mReader.Skip(12);
-    
+    // 4-bytes: unknown constant value (65536)
+    // 4-bytes: appears to be file size, or size of assets in BRN bundle.
+    mReader.Skip(12);
+
     // This value indicates the offset past the file header data to what I'd
     // call the "table of contents" or "toc".
     uint32_t tocOffset = mReader.ReadUInt();
@@ -49,10 +49,10 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
         // 4-bytes: EXE/Content build # (119 in both cases)
         mReader.ReadUInt();
         mReader.ReadUInt();
-        
+
         // 4-bytes: unknown value
         mReader.ReadUInt();
-        
+
         // Two dates, 2-bytes per element.
         // The dates are both on the same day, just a few minutes apart.
         // Maybe like a build start/end time for the bundles?
@@ -65,10 +65,10 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
         minute = mReader.ReadShort();
         second = mReader.ReadShort();
         cout << year << "/" << month << "/" << day << ", " << hour << ":" << minute << ":" << second << endl;
-        
+
         // 2-bytes: unknown variable value.
         mReader.ReadShort();
-        
+
         year = mReader.ReadShort();
         month = mReader.ReadShort();
         mReader.ReadShort(); // unknown value
@@ -77,10 +77,10 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
         minute = mReader.ReadShort();
         second = mReader.ReadShort();
         cout << year << "/" << month << "/" << day << ", " << hour << ":" << minute << ":" << second << endl;
-        
+
         // 2-bytes: unknown variable value.
         mReader.ReadShort();
-        
+
         // Copyright notice
         char copyright[65];
         mReader.Read(copyright, 64);
@@ -88,20 +88,20 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
         cout << copyright << endl;
     }
     */
-    
+
     // Seek to table of contents offset.
     mReader.Seek(tocOffset);
-    
+
     // First value in TOC is number of TOC entries.
     uint32_t tocEntryCount = mReader.ReadUInt();
-    
+
     // Each toc entry will specify a header offset and a data offset.
-	std::vector<uint32_t> headerOffsets;
+    std::vector<uint32_t> headerOffsets;
     headerOffsets.reserve(tocEntryCount);
-    
-	std::vector<uint32_t> dataOffsets;
+
+    std::vector<uint32_t> dataOffsets;
     dataOffsets.reserve(tocEntryCount);
-    
+
     // For each toc entry, read in relevant data.
     for(uint32_t i = 0; i < tocEntryCount; ++i)
     {
@@ -109,14 +109,14 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
         // DDir specifies a directory of assets.
         // Data specifies file offset to start reading actual data.
         uint32_t type = mReader.ReadUInt();
-        
+
         // Some unknown values.
         mReader.Skip(16);
-        
+
         // Read header and data offsets.
         uint32_t headerOffset = mReader.ReadUInt();
         uint32_t dataOffset = mReader.ReadUInt();
-        
+
         // For DDir, we'll save the offsets so we can iterate over them below.
         // For Data, we'll just save the data offset value.
         if(type == kDDirIdentifier)
@@ -129,14 +129,14 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
             mDataOffset = headerOffset;
         }
     }
-    
+
     // Now we need to iterate over each header/data offset pair in turn.
     // The header specifies data that is common to all assets in the data section.
     mReferencedBarns.resize(tocEntryCount);
     for(size_t i = 0; i < headerOffsets.size(); ++i)
     {
         mReader.Seek(headerOffsets[i]);
-        
+
         // The name of the Barn file for these assets. NOTE that it appears
         // a Barn file can contain "pointers" to assets in other Barn files.
         // If this name is empty, it means the asset is contained within THIS Barn file.
@@ -150,38 +150,38 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
         mReader.Skip(48);
 
         uint32_t numAssets = mReader.ReadUInt();
-		mReader.Seek(dataOffsets[i]);
+        mReader.Seek(dataOffsets[i]);
         for(uint32_t j = 0; j < numAssets; ++j)
         {
             BarnAsset asset;
-            
+
             // The asset should save which Barn file it is in.
             // This will help later when trying to load assets.
             if(isPointer)
             {
                 asset.barnFileName = &mReferencedBarns[i];
             }
-            
+
             // Asset size, in bytes.
             // But we need to read compression type before we know whether this is compressed or uncompressed size.
             asset.size = mReader.ReadUInt();
-            
+
             // Read in the asset offset. This is the offset from the start of the data section.
             asset.offset = mReader.ReadUInt();
-            
+
             // Unknown values.
             mReader.Skip(5);
-            
+
             // Read in compression type.
             asset.compressionType = static_cast<CompressionType>(mReader.ReadByte());
-            
+
             // Compression type 3 should just be treated as type none.
             // Not sure if type 3 is actually different in some way?
             if(static_cast<int>(asset.compressionType) == 3)
             {
                 asset.compressionType = CompressionType::None;
             }
-			
+
             // Read in asset name.
             mReader.ReadString8(asset.name);
             mReader.Skip(1); // null terminator is also present - skip it
@@ -195,7 +195,7 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
 
 BarnAsset* BarnFile::GetAsset(const std::string& assetName)
 {
-	auto it = mAssetMap.find(assetName);
+    auto it = mAssetMap.find(assetName);
     if(it != mAssetMap.end())
     {
         return &it->second;
@@ -250,7 +250,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     mReader.Skip(4);
     uint32_t readCount = mReader.Read(compressedBuffer, asset->size);
     mReaderMutex.unlock();
-    
+
     // Make sure we read what we were expecting.
     // The "-1" case can happen when reading the last file in the barn, but asset is still valid.
     if(readCount != asset->size && readCount != asset->size - 1)
@@ -259,7 +259,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         delete[] compressedBuffer;
         return nullptr;
     }
-        
+
     // Create buffer for uncompressed data.
     uint8_t* buffer = new uint8_t[outBufferSize];
 
@@ -325,14 +325,14 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
                 return nullptr;
             }
         }
-        
+
         // Decompress using LZO library. GK3 data appears to be compressed with lzo1x.
         //std::cout << asset->name << ": decompressing " << asset->compressedSize << " bytes to a buffer of size " << bufferSize << std::endl;
         lzo_bytep compressedPtr = static_cast<lzo_bytep>(compressedBuffer);
         lzo_bytep bufferPtr = static_cast<lzo_bytep>(buffer);
         lzo_uint bufferSize = 0;
         int result = lzo1x_decompress(compressedPtr, asset->size, bufferPtr, &bufferSize, nullptr);
-        
+
         // For some reason *most* GK3 data decompresses with result of LZO_E_INPUT_NOT_CONSUMED.
         // This still works OK. It may indicate that "compressedSize" passed is larger than the compressed data.
         // I'll let it slide for now...but it might indicate an earlier read error, or I'm missing something somewhere.
@@ -364,62 +364,62 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
 
 bool BarnFile::WriteToFile(const std::string& assetName)
 {
-	return WriteToFile(assetName, "");
+    return WriteToFile(assetName, "");
 }
 
 bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outputDir)
 {
-	// Retrieve the asset handle, first of all.
-	BarnAsset* asset = GetAsset(assetName);
-	if(asset == nullptr)
-	{
-		std::cout << "No asset named " << assetName << " in Barn file!" << std::endl;
-		return false;
-	}
-	
-	// Make sure we're not trying to write out an asset pointer.
-	// In this case, the caller needs to redirect to the correct bundle before writing out.
-	if(asset->IsPointer())
-	{
-		std::cout << "Asset " << assetName << " can't be extracted from Barn - it is only an asset pointer!" << std::endl;
-		return false;
-	}
-	
-	// If output directory is provided, make sure the directory exists. If not, create it.
-	// Our final output path will also be different.
-	std::string outputPath;
-	if(!outputDir.empty())
-	{
-		Directory::CreateAll(outputDir);
-		if(!Directory::Exists(outputDir))
-		{
-			outputPath = asset->name;
-		}
-		else
-		{
-			outputPath = Path::Combine({ outputDir, asset->name });
-		}
-	}
-	else
-	{
-		outputPath = asset->name;
-	}
-	
-	// Extract the asset and write it to file.
-	bool result = false;
+    // Retrieve the asset handle, first of all.
+    BarnAsset* asset = GetAsset(assetName);
+    if(asset == nullptr)
+    {
+        std::cout << "No asset named " << assetName << " in Barn file!" << std::endl;
+        return false;
+    }
+
+    // Make sure we're not trying to write out an asset pointer.
+    // In this case, the caller needs to redirect to the correct bundle before writing out.
+    if(asset->IsPointer())
+    {
+        std::cout << "Asset " << assetName << " can't be extracted from Barn - it is only an asset pointer!" << std::endl;
+        return false;
+    }
+
+    // If output directory is provided, make sure the directory exists. If not, create it.
+    // Our final output path will also be different.
+    std::string outputPath;
+    if(!outputDir.empty())
+    {
+        Directory::CreateAll(outputDir);
+        if(!Directory::Exists(outputDir))
+        {
+            outputPath = asset->name;
+        }
+        else
+        {
+            outputPath = Path::Combine({ outputDir, asset->name });
+        }
+    }
+    else
+    {
+        outputPath = asset->name;
+    }
+
+    // Extract the asset and write it to file.
+    bool result = false;
     unsigned int bufferSize = 0;
     uint8_t* assetData = CreateAssetBuffer(assetName, bufferSize);
-	if(assetData != nullptr)
-	{
-		// Textures can't be written directly to file and open correctly.
-		// Handle those separately (TODO: More modular/extendable way to do this?)
-		if(assetName.find(".BMP") != std::string::npos)
-		{
+    if(assetData != nullptr)
+    {
+        // Textures can't be written directly to file and open correctly.
+        // Handle those separately (TODO: More modular/extendable way to do this?)
+        if(assetName.find(".BMP") != std::string::npos)
+        {
             Texture tex(assetName, AssetScope::Manual);
             tex.Load(assetData, bufferSize);
-			tex.WriteToFile(outputPath);
-			result = true;
-		}
+            tex.WriteToFile(outputPath);
+            result = true;
+        }
         else if(assetName.find(".SHP") != std::string::npos &&
                 SheepScript::IsSheepDataCompiled(assetData, bufferSize))
         {
@@ -429,55 +429,55 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
             script.Decompile(outputPath);
             result = true;
         }
-		else
-		{
-			// Most other assets can just be written out directly.
-			std::ofstream fileStream(outputPath, std::istream::out | std::istream::binary);
-			if(fileStream.good())
-			{
-				fileStream.write(reinterpret_cast<char*>(assetData), bufferSize);
-				fileStream.close();
-				result = true;
-			}
-		}
-	}
-	
-	// Output the result of the write.
-	if(result)
-	{
-		std::cout << "Wrote out " << asset->name << std::endl;
-	}
-	else
-	{
-		std::cout << "Error while extracting " << asset->name << std::endl;
-	}
-	
-	// Delete our new'd asset data array, no longer needed.
-	delete[] assetData;
-	
-	// Return success or failure.
-	return result;
+        else
+        {
+            // Most other assets can just be written out directly.
+            std::ofstream fileStream(outputPath, std::istream::out | std::istream::binary);
+            if(fileStream.good())
+            {
+                fileStream.write(reinterpret_cast<char*>(assetData), bufferSize);
+                fileStream.close();
+                result = true;
+            }
+        }
+    }
+
+    // Output the result of the write.
+    if(result)
+    {
+        std::cout << "Wrote out " << asset->name << std::endl;
+    }
+    else
+    {
+        std::cout << "Error while extracting " << asset->name << std::endl;
+    }
+
+    // Delete our new'd asset data array, no longer needed.
+    delete[] assetData;
+
+    // Return success or failure.
+    return result;
 }
 
 void BarnFile::WriteAllToFile(const std::string& search)
 {
-	return WriteAllToFile(search, "");
+    return WriteAllToFile(search, "");
 }
 
 void BarnFile::WriteAllToFile(const std::string& search, const std::string& outputDir)
 {
-	// Search through all assets for the search term.
-	// If it's found, write the asset to file.
-	for(auto& entry : mAssetMap)
-	{
-		// Can't write out asset pointers anyway.
-		if(entry.second.IsPointer()) { continue; }
-		
-		if(entry.first.find(search) != std::string::npos)
-		{
-			WriteToFile(entry.first, outputDir);
-		}
-	}
+    // Search through all assets for the search term.
+    // If it's found, write the asset to file.
+    for(auto& entry : mAssetMap)
+    {
+        // Can't write out asset pointers anyway.
+        if(entry.second.IsPointer()) { continue; }
+
+        if(entry.first.find(search) != std::string::npos)
+        {
+            WriteToFile(entry.first, outputDir);
+        }
+    }
 }
 
 void BarnFile::OutputAssetList() const

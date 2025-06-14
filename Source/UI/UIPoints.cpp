@@ -104,7 +104,7 @@ void UIPoints::GenerateMesh()
     meshDefinition.SetVertexLayout(VertexLayout::Packed);
     meshDefinition.AddVertexData(VertexAttribute::Position, positions);
 
-    // Create submesh from definition. 
+    // Create submesh from definition.
     Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
 
     // Render it in "points" mode, since this is a set of points!

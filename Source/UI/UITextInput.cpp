@@ -10,54 +10,54 @@ TYPEINFO_INIT(UITextInput, UILabel, 28)
 
 UITextInput::UITextInput(Actor* owner) : UILabel(owner)
 {
-	mTextInput.SetExcludeChar(0, '`');
+    mTextInput.SetExcludeChar(0, '`');
 }
 
 void UITextInput::Focus()
 {
-	// If we are going from unfocused to focused...
-	if(!mFocused)
-	{
-		// Start capturing keyboard input with current input contents as starter value.
-		mTextInput.SetText(GetText());
-		gInputManager.StartTextInput(&mTextInput);
-		
-		// Reset caret blink info.
-		mCaretBlickTimer = mCaretBlinkInterval;
-		if(mCaret != nullptr)
-		{
-			mCaret->SetEnabled(true);
-		}
-	}
-	
-	// We're now focused!
-	mFocused = true;
+    // If we are going from unfocused to focused...
+    if(!mFocused)
+    {
+        // Start capturing keyboard input with current input contents as starter value.
+        mTextInput.SetText(GetText());
+        gInputManager.StartTextInput(&mTextInput);
+
+        // Reset caret blink info.
+        mCaretBlickTimer = mCaretBlinkInterval;
+        if(mCaret != nullptr)
+        {
+            mCaret->SetEnabled(true);
+        }
+    }
+
+    // We're now focused!
+    mFocused = true;
 }
 
 void UITextInput::Unfocus()
 {
-	// If going from focused to unfocused...
-	if(mFocused)
-	{
-		// Stop capturing keyboard input.
-		gInputManager.StopTextInput();
-		
-		// Turn off any caret.
-		if(mCaret != nullptr)
-		{
-			mCaret->SetEnabled(false);
-		}
-	}
-	
-	// No longer focused!
-	mFocused = false;
+    // If going from focused to unfocused...
+    if(mFocused)
+    {
+        // Stop capturing keyboard input.
+        gInputManager.StopTextInput();
+
+        // Turn off any caret.
+        if(mCaret != nullptr)
+        {
+            mCaret->SetEnabled(false);
+        }
+    }
+
+    // No longer focused!
+    mFocused = false;
 }
 
 void UITextInput::Clear()
 {
-	mTextInput.SetText("");
-	SetText("");
-	//TODO: Reset caret position
+    mTextInput.SetText("");
+    SetText("");
+    //TODO: Reset caret position
 }
 
 void UITextInput::SetCaret(UIWidget* caret)
@@ -88,7 +88,7 @@ void UITextInput::OnUpdate(float deltaTime)
 {
     UILabel::OnUpdate(deltaTime);
 
-	// If mouse is down in the rect, let's assume that means we are focused.
+    // If mouse is down in the rect, let's assume that means we are focused.
     if(mAllowInputToChangeFocus)
     {
         if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
@@ -104,44 +104,44 @@ void UITextInput::OnUpdate(float deltaTime)
             }
         }
     }
-	
-	// When focused, keep text up-to-date.
-	if(mFocused)
-	{
-		SetText(mTextInput.GetText());
-	}
-	
-	// Update caret based on focus and blink state.
-	if(mCaret != nullptr)
-	{
-		// When focused, the caret is either visible or blinking.
-		// When not focused, the caret is not visible.
-		if(mFocused)
-		{
-			// If a blink interval was set, the caret should blink.
-			// Otherwise, we assume "no blink" - always on.
-			if(mCaretBlinkInterval > 0.0f)
-			{
-				mCaretBlickTimer -= deltaTime;
-				if(mCaretBlickTimer <= 0.0f)
-				{
-					mCaret->SetEnabled(!mCaret->IsEnabled());
-					mCaretBlickTimer = mCaretBlinkInterval;
-				}
-			}
-			else
-			{
-				mCaret->SetEnabled(true);
-			}
-		}
-		else
-		{
-			mCaret->SetEnabled(false);
-		}
+
+    // When focused, keep text up-to-date.
+    if(mFocused)
+    {
+        SetText(mTextInput.GetText());
+    }
+
+    // Update caret based on focus and blink state.
+    if(mCaret != nullptr)
+    {
+        // When focused, the caret is either visible or blinking.
+        // When not focused, the caret is not visible.
+        if(mFocused)
+        {
+            // If a blink interval was set, the caret should blink.
+            // Otherwise, we assume "no blink" - always on.
+            if(mCaretBlinkInterval > 0.0f)
+            {
+                mCaretBlickTimer -= deltaTime;
+                if(mCaretBlickTimer <= 0.0f)
+                {
+                    mCaret->SetEnabled(!mCaret->IsEnabled());
+                    mCaretBlickTimer = mCaretBlinkInterval;
+                }
+            }
+            else
+            {
+                mCaret->SetEnabled(true);
+            }
+        }
+        else
+        {
+            mCaret->SetEnabled(false);
+        }
 
         // Put caret in correct spot.
         UpdateCaretPosition();
-	}
+    }
 }
 
 void UITextInput::UpdateCaretPosition()

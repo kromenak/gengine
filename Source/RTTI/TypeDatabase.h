@@ -13,7 +13,7 @@ public:
     {
         // A global doesn't work due to order-of-initialization issues.
         // In short, static TypeInfos may try to register with TypeDatabase *before* TypeDatabase is initialized itself!
-        
+
         // To fix that, use a static local variable to take control of when initialization occurs!
         static TypeDatabase database;
         return database;

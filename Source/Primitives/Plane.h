@@ -26,8 +26,8 @@ class Matrix4;
 class Plane
 {
 public:
-	Plane() = default;
-	Plane(const Vector3& normal, float distance);
+    Plane() = default;
+    Plane(const Vector3& normal, float distance);
     Plane(const Vector3& normal, const Vector3& p0);
     Plane(float normalX, float normalY, float normalZ, float distance);
     Plane(const Vector4& normalAndDist);
@@ -37,21 +37,21 @@ public:
     static Plane Normalize(const Plane& plane);
 
     void Transform(const Matrix4& aToBTransform, bool preInverted = false);
-    
+
     float GetSignedDistance(const Vector3& point) const;
-	float GetDistance(const Vector3& point) const;
-    
+    float GetDistance(const Vector3& point) const;
+
     bool ContainsPoint(const Vector3& point) const;
     Vector3 GetClosestPoint(const Vector3& point) const;
-	
-	// Given three planes, calculate point of intersection.
-	static bool GetIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& outPoint);
-    
+
+    // Given three planes, calculate point of intersection.
+    static bool GetIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& outPoint);
+
     // The plane's normal - assumed to be normalized.
     // The normal indicates the direction the plane is facing - the front side of the plane.
     // Points on the front side of the plane have positive signed distance, points on the back side have negative signed distance.
     Vector3 normal = Vector3::UnitX;
-    
+
     // Distance of the plane. Note that negative distances are valid!
     // A positive distance means the plane is facing the origin, a negative distance means the plane is not facing the origin.
     float distance = 0.0f;

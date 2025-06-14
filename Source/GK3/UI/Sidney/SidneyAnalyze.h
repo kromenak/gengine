@@ -85,7 +85,7 @@ private:
         Text
     };
     State mState = State::Empty;
-    
+
     // Pre-analyze UI - displays the file name/image before you press the analyze button.
     Actor* mPreAnalyzeWindow = nullptr;
     UILabel* mPreAnalyzeTitleLabel = nullptr;
@@ -99,7 +99,7 @@ private:
 
     // There's at least one time when a character enters input into a popup.
     SidneyFakeInputPopup* mSetTextPopup = nullptr;
-    
+
     void SetState(State state);
     void SetStateFromFile();
 
@@ -134,7 +134,7 @@ private:
 
     // The anagram parser.
     SidneyAnagramParser* mAnagramParser = nullptr;
-    
+
     void AnalyzeText_Init();
     void AnalyzeText_EnterState();
     void AnalyzeText_ExitState();
@@ -186,7 +186,7 @@ private:
             UIGrids* grids = nullptr;
             UIGrids* lockedGrids = nullptr;
 
-            // Hexagrams that have been placed 
+            // Hexagrams that have been placed
             UIHexagrams* hexagrams = nullptr;
             UIHexagrams* lockedHexagrams = nullptr;
 

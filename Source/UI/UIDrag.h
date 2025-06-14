@@ -27,7 +27,7 @@ public:
 
     void SetBoundaryRectTransform(RectTransform* rectTransform) { mBoundaryRectTransform = rectTransform; }
     void SetAllowedDragDirection(const Vector2& direction) { mAllowedDragDirection = Vector2::Normalize(direction); }
-    
+
     bool IsDragging() const { return mDragging; }
 
 protected:

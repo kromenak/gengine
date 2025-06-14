@@ -30,6 +30,7 @@
 #include "SceneManager.h"
 #include "TextInput.h"
 #include "ThreadPool.h"
+#include "ThreadUtil.h"
 #include "Tools.h"
 #include "UICanvas.h"
 #include "VerbManager.h"

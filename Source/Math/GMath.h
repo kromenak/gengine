@@ -36,7 +36,7 @@ namespace Math
 
     inline bool IsZero(float val)
     {
-		return (::fabsf(val) < kEpsilon);
+        return (::fabsf(val) < kEpsilon);
     }
 
     inline bool AreEqual(float a, float b)
@@ -49,20 +49,20 @@ namespace Math
         return (::fabs(a - b) < epsilon);
     }
 
-	inline float Pow(float base, float exp)
-	{
-		return std::pow(base, exp);
-	}
+    inline float Pow(float base, float exp)
+    {
+        return std::pow(base, exp);
+    }
 
-	inline int PowBase2(int exp)
-	{
-		return 1 << exp;
-	}
+    inline int PowBase2(int exp)
+    {
+        return 1 << exp;
+    }
 
     inline float Mod(float num1, float num2)
     {
-		// floating-point equivalent of "return num1 % num2;"
-		return std::fmod(num1, num2);
+        // floating-point equivalent of "return num1 % num2;"
+        return std::fmod(num1, num2);
     }
 
     inline float Sin(float radians)
@@ -99,10 +99,10 @@ namespace Math
         return ::atanf(ratio);
     }
 
-	inline float Atan2(float y, float x)
-	{
-		return std::atan2(y, x);
-	}
+    inline float Atan2(float y, float x)
+    {
+        return std::atan2(y, x);
+    }
 
     inline float Floor(float val)
     {
@@ -179,12 +179,12 @@ namespace Math
         return std::abs(val);
     }
 
-	inline float MagnitudeSign(float mag, float sign)
-	{
+    inline float MagnitudeSign(float mag, float sign)
+    {
         // Take magnitude of first number and sign of second number.
         // Return product of those two things. (e.g. 35, -18 => -35)
-		return std::copysign(mag, sign);
-	}
+        return std::copysign(mag, sign);
+    }
 
     inline constexpr float ToDegrees(float radians)
     {
@@ -196,13 +196,13 @@ namespace Math
         return (degrees * (kPi / 180.0f));
     }
 
-	inline float Lerp(float a, float b, float t)
-	{
-		return a + ((b - a) * t);
-	}
+    inline float Lerp(float a, float b, float t)
+    {
+        return a + ((b - a) * t);
+    }
 
-	inline unsigned char Lerp(unsigned char a, unsigned char b, float t)
-	{
-		return static_cast<unsigned char>(static_cast<float>(a) + (static_cast<float>(b - a) * t));
-	}
+    inline unsigned char Lerp(unsigned char a, unsigned char b, float t)
+    {
+        return static_cast<unsigned char>(static_cast<float>(a) + (static_cast<float>(b - a) * t));
+    }
 }

@@ -3,12 +3,12 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
-#include "CursorManager.h"
 #include "GameProgress.h"
 #include "RectTransform.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
 #include "Texture.h"
+#include "Timers.h"
 #include "UIImage.h"
 #include "UIUtil.h"
 #include "VideoPlayer.h"
@@ -92,7 +92,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("POUSSIN.BMP"), true);
 
         mMenuBar.SetDropdownEnabled(kTextDropdownIdx, false);
-        
+
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ViewGeometryIdx, true);
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_RotateShapeIdx, false);
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ZoomClarifyIdx, true);
@@ -361,7 +361,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
             videoImagePos.y += 20.0f;
             mAnalyzeVideoImages[i]->GetRectTransform()->SetAnchoredPosition(videoImagePos);
         }
-        
+
         // Says "analyzing..."
         ShowAnalyzeMessage("GeometryTenier1", Vector2(190.0f, -160.0f), HorizontalAlignment::Center);
 
@@ -423,7 +423,7 @@ void SidneyAnalyze::AnalyzeImage_OnRotateShapeButtonPressed()
 
             // Turn off video image once this video finishes.
             mAnalyzeVideoImages[2]->SetEnabled(false);
-            
+
             // Show an image popup with the rotated image.
             mAnalyzePopup->ResetToDefaults();
             mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("RotateParch2"));
@@ -508,7 +508,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
             // This popup has yes/no options.
             // If yes is pressed, we "reach out to the internet" to get the text.
             mAnalyzePopup->ShowTwoButton([this](){
-                
+
                 // Play a modem SFX, so it seems like we're reaching out to the internet...
                 gActionManager.StartManualAction();
                 gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDMODEM.WAV", AssetScope::Scene));

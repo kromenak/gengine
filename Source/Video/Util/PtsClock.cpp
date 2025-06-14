@@ -22,7 +22,7 @@ PtsClock::PtsClock(int* queueSerial)
     {
         mPacketQueueSerial = &mSerial;
     }
-    
+
     mLastUpdateTime = GetCurrentTimeSeconds();
 }
 
@@ -53,7 +53,7 @@ double PtsClock::GetTime()
     {
         return std::numeric_limits<double>::quiet_NaN();
     }
-    
+
     // When paused, clock time can just be equal to last pts.
     if(mPaused)
     {

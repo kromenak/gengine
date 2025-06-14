@@ -10,7 +10,6 @@
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
 #include "TextAsset.h"
-#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -81,7 +80,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
         footerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomStretch);
         footerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, 29.0f);
         footerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
-        
+
         // In the header, create all the data fields.
         Font* font = gAssetManager.LoadFont("SID_TEXT_14.FON");
         {
@@ -351,7 +350,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
     mAllEmails["email5"].scoreEvent = "e_sidney_email_open_symbols_from_serres";
     mAllEmails["email5"].flag = "OpenedHermeticDiagram";
-    
+
     // Hide by default.
     Hide();
 }
@@ -488,11 +487,11 @@ void SidneyEmail::ShowEmailList()
             mEmailListItems.push_back(label);
         }
         label->GetRectTransform()->SetAnchoredPosition(listItemPos);
-        
+
         // Font color depends on whether we've read this email already or not.
         bool alreadyReadThisEmail = mReadEmails.find(emailId) != mReadEmails.end();
         label->SetFont(alreadyReadThisEmail ? yellowFont : greenFont);
-        
+
         // Set subject text.
         label->SetText(mAllEmails[emailId].subject);
 

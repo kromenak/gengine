@@ -129,7 +129,7 @@ void Soundtrack::Load(uint8_t* data, uint32_t dataLength)
             WaitNode* node = new WaitNode();
             for(auto& line : section.lines)
             {
-				IniKeyValue& entry = line.entries[0];
+                IniKeyValue& entry = line.entries[0];
                 if(StringUtil::EqualsIgnoreCase(entry.key, "MinWaitMs"))
                 {
                     node->minWaitTimeMs = entry.GetValueAsInt();
@@ -175,7 +175,7 @@ void Soundtrack::Load(uint8_t* data, uint32_t dataLength)
         {
             for(auto& line : section.lines)
             {
-				IniKeyValue& entry = line.entries[0];
+                IniKeyValue& entry = line.entries[0];
                 if(StringUtil::EqualsIgnoreCase(entry.key, "SoundType"))
                 {
                     if(StringUtil::EqualsIgnoreCase(entry.value, "Music"))
@@ -209,7 +209,7 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
     SoundNode* node = new SoundNode();
     for(auto& line : section.lines)
     {
-		IniKeyValue& entry = line.entries[0];
+        IniKeyValue& entry = line.entries[0];
         if(StringUtil::EqualsIgnoreCase(entry.key, "Name"))
         {
             node->soundName = entry.value;
@@ -273,7 +273,7 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "X"))
         {
-			node->position.x = entry.GetValueAsFloat();
+            node->position.x = entry.GetValueAsFloat();
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "Y"))
         {

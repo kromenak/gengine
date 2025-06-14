@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 
-#include "Platform.h"
 #include "SaveManager.h"
 #include "StringUtil.h"
 
@@ -11,7 +10,7 @@ namespace Window
 {
     // The game window. We only support one!
     SDL_Window* window = nullptr;
-    
+
     // Default window width & height, if no other preference is specified.
     const int kDefaultWidth = 640;
     const int kDefaultHeight = 480;
@@ -28,13 +27,13 @@ namespace Window
         // Not a great hash...but it does the trick.
         return static_cast<int>(res.width) * 1000 + static_cast<int>(res.height);
     }
-    
+
     void DetectSupportedResolutions(bool fullscreen)
     {
         // Clear, in case this is called multiple times.
         // Possibly monitors could be plugged in or removed, in which case calling this again is a good idea.
         supportedResolutions.clear();
-        
+
         // For each display, generate a list of supported resolutions.
         int displayCount = SDL_GetNumVideoDisplays();
         for(int i = 0; i < displayCount; ++i)
@@ -85,7 +84,7 @@ namespace Window
             }
         }
     }
-    
+
     void DumpVideoInfo(SDL_Window* dumpWindow)
     {
         // Output drivers.
@@ -122,7 +121,7 @@ namespace Window
                 SDL_Log("  (%i x %i @ %iHz)\n", mode.w, mode.h, mode.refresh_rate);
             }
         }
-        
+
         // Output display that window is currently showing on.
         SDL_Log("Current Display Index: %i\n", SDL_GetWindowDisplayIndex(dumpWindow));
     }
@@ -154,7 +153,7 @@ namespace Window
         }
 
         // Otherwise, the window is smaller than the desktop, so the player can move it wherever they'd like.
-        
+
         // In windowed mode, when fiddling with resolutions and fullscreen toggles, you can sometimes get in an unfortunate situation:
         // The window title bar is off-screen, and you can't grab it anymore!
         // Sure, you could maybe use a keyboard shortcut to reposition the window, but it's a tricky spot to be in.
@@ -178,7 +177,7 @@ void Window::Create(const char* title)
 {
     // Determine whether window should be fullscreen.
     bool fullscreen = gSaveManager.GetPrefs()->GetBool(PREFS_ENGINE, PREF_FULLSCREEN, false);
-    
+
     // Determine desired window position.
     std::string xStr = gSaveManager.GetPrefs()->GetString(PREFS_ENGINE, PREF_WINDOW_X, "center");
     int xPos = SDL_WINDOWPOS_CENTERED;
@@ -197,19 +196,19 @@ void Window::Create(const char* title)
     // Determine desired window size.
     currentResolution.width = gSaveManager.GetPrefs()->GetInt(PREFS_ENGINE, PREF_SCREEN_WIDTH, kDefaultWidth);
     currentResolution.height = gSaveManager.GetPrefs()->GetInt(PREFS_ENGINE, PREF_SCREEN_HEIGHT, kDefaultHeight);
-    
+
     // Determine flags.
     Uint32 flags = 0;
     if(fullscreen)
     {
         flags |= SDL_WINDOW_FULLSCREEN;
     }
-    
+
     // These flags are just about the only thing tying window creation to specific graphics APIs.
     // They don't *seem* necessary on all platforms...but just pass them in case I suppose.
     flags |= SDL_WINDOW_OPENGL; //TODO: is this flag even needed for OGL to work? Doesn't seem like it.
     //flags |= SDL_WINDOW_VULKAN; // doesn't work on Mac
-    
+
     // Create window from preferences.
     Window::Create(title, xPos, yPos, currentResolution.width, currentResolution.height, flags);
 }
@@ -222,16 +221,16 @@ void Window::Create(const char* title, int x, int y, int w, int h, Uint32 flags)
     {
         Destroy();
     }
-    
+
     // SDL video subsystem is required to create a window.
     if(SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
     {
         return;
     }
-    
+
     // This is good a time as any to query and store available resolutions.
     DetectSupportedResolutions((flags & SDL_WINDOW_FULLSCREEN) != 0);
-    
+
     // Create the window.
     window = SDL_CreateWindow(title, x, y, w, h, flags);
     if(window == nullptr)
@@ -250,7 +249,7 @@ void Window::Destroy()
     {
         SDL_DestroyWindow(window);
         window = nullptr;
-        
+
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
 }
@@ -300,7 +299,7 @@ void Window::SetResolution(const Resolution& resolution)
 {
     int width = static_cast<int>(resolution.width);
     int height = static_cast<int>(resolution.height);
-    
+
     // The way we set the window size depends on whether we're fullscreen or not.
     bool isFullscreen = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
     if(isFullscreen)
@@ -331,7 +330,7 @@ void Window::SetResolution(const Resolution& resolution)
     // Regardless of fullscreen or not, it *seems* that you must set the window size as well for the correct result.
     // If you don't do this in fullscreen mode, changed resolutions are cropped or don't take up the full screen as expected.
     SDL_SetWindowSize(window, width, height);
-    
+
     // Save preference.
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_SCREEN_WIDTH, width);
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_SCREEN_HEIGHT, height);
@@ -354,7 +353,7 @@ void Window::OnPositionChanged()
     // Save new display index, in case window moved to new display.
     int displayIndex = SDL_GetWindowDisplayIndex(window);
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_MONITOR, displayIndex);
-    
+
     // Save new x/y position of window.
     int x, y;
     SDL_GetWindowPosition(window, &x, &y);

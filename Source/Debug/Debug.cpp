@@ -11,6 +11,7 @@
 #include "Rect.h"
 #include "Renderer.h"
 #include "RenderTransforms.h"
+#include "Sphere.h"
 #include "Triangle.h"
 #include "Vector3.h"
 
@@ -94,41 +95,41 @@ void Debug::Render()
 
 void Debug::DrawLine(const Vector3& from, const Vector3& to, const Color32& color, float duration)
 {
-	// The line "starts at" the from position.
-	// Scale the line to the end point with appropriate scale matrix.
-	Matrix4 translateMatrix = Matrix4::MakeTranslate(from);
-	Matrix4 scaleMatrix = Matrix4::MakeScale(to - from);
+    // The line "starts at" the from position.
+    // Scale the line to the end point with appropriate scale matrix.
+    Matrix4 translateMatrix = Matrix4::MakeTranslate(from);
+    Matrix4 scaleMatrix = Matrix4::MakeScale(to - from);
 
-	// Combine in order (Scale, Rotate, Translate) to generate world transform matrix.
-	DrawCommand command;
-	command.mesh = line;
-	command.worldTransformMatrix = translateMatrix * scaleMatrix;
-	command.color = color;
-	command.timer = duration;
-	sDrawCommands.push_back(command);
+    // Combine in order (Scale, Rotate, Translate) to generate world transform matrix.
+    DrawCommand command;
+    command.mesh = line;
+    command.worldTransformMatrix = translateMatrix * scaleMatrix;
+    command.color = color;
+    command.timer = duration;
+    sDrawCommands.push_back(command);
 }
 
 void Debug::DrawAxes(const Vector3& position, float duration)
 {
-	DrawAxes(Matrix4::MakeTranslate(position), duration);
+    DrawAxes(Matrix4::MakeTranslate(position), duration);
 }
 
 void Debug::DrawAxes(const Matrix4& worldTransform, float duration)
 {
-	DrawCommand command;
-	command.mesh = axes;
-	command.worldTransformMatrix = worldTransform;
-	command.timer = duration;
-	sDrawCommands.push_back(command);
+    DrawCommand command;
+    command.mesh = axes;
+    command.worldTransformMatrix = worldTransform;
+    command.timer = duration;
+    sDrawCommands.push_back(command);
 }
 
 void Debug::DrawRect(const Rect& rect, const Color32& color, float duration, const Matrix4* transformMatrix)
 {
     // Corners of the rect.
-	Vector2 bottomLeft = rect.GetMin();
-	Vector2 topRight = rect.GetMax();
-	Vector2 topLeft = Vector2(bottomLeft.x, topRight.y);
-	Vector2 bottomRight = Vector2(topRight.x, bottomLeft.y);
+    Vector2 bottomLeft = rect.GetMin();
+    Vector2 topRight = rect.GetMax();
+    Vector2 topLeft = Vector2(bottomLeft.x, topRight.y);
+    Vector2 bottomRight = Vector2(topRight.x, bottomLeft.y);
 
     // May need to transform to world space before drawing.
     if(transformMatrix != nullptr)
@@ -140,10 +141,10 @@ void Debug::DrawRect(const Rect& rect, const Color32& color, float duration, con
     }
 
     // Draw rect sides.
-	DrawLine(bottomLeft, topLeft, color, duration);
-	DrawLine(topLeft, topRight, color, duration);
-	DrawLine(topRight, bottomRight, color, duration);
-	DrawLine(bottomRight, bottomLeft, color, duration);
+    DrawLine(bottomLeft, topLeft, color, duration);
+    DrawLine(topLeft, topRight, color, duration);
+    DrawLine(topRight, bottomRight, color, duration);
+    DrawLine(bottomRight, bottomLeft, color, duration);
 }
 
 void Debug::DrawRectXZ(const Rect& rect, float height, const Color32& color, float duration, const Matrix4* transformMatrix)

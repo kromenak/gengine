@@ -14,7 +14,7 @@ Frame::Frame()
     {
         av_log(nullptr, AV_LOG_FATAL, "Could not allocate AVFrame!");
     }
-    
+
     // Clear memory for these structs.
     memset(&sub, 0, sizeof(AVSubtitle));
     memset(&aspectRatio, 0, sizeof(AVRational));
@@ -37,7 +37,7 @@ int FrameQueue::Init(PacketQueue* packetQueue, int maxSize, bool keepLast)
     mPacketQueue = packetQueue;
     mMaxSize = FFMIN(maxSize, FRAME_QUEUE_SIZE);
     mKeepLastFrame = keepLast;
-    
+
     // Create mutex or fail.
     mMutex = SDL_CreateMutex();
     if(mMutex == nullptr)
@@ -45,7 +45,7 @@ int FrameQueue::Init(PacketQueue* packetQueue, int maxSize, bool keepLast)
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateMutex(): %s\n", SDL_GetError());
         return AVERROR(ENOMEM);
     }
-    
+
     // Create condition or fail.
     mSizeChangedCondition = SDL_CreateCond();
     if(mSizeChangedCondition == nullptr)
@@ -70,7 +70,7 @@ void FrameQueue::Enqueue()
     {
         mWriteIndex = 0;
     }
-    
+
     // Increment size and signal to anyone waiting in Peek functons that they should try again.
     SDL_LockMutex(mMutex);
     mSize++;
@@ -87,18 +87,18 @@ void FrameQueue::Dequeue()
         mReadIndexOffset = 1;
         return;
     }
-    
+
     // Clear refs for current read frame.
     // This allows it to be used for writing.
     mQueue[mReadIndex].Unref();
-    
+
     // Increment read index (with wraparound).
     ++mReadIndex;
     if(mReadIndex == mMaxSize)
     {
         mReadIndex = 0;
     }
-    
+
     // Decrement size and signal to anyone waiting in peek functions to try again.
     SDL_LockMutex(mMutex);
     mSize--;
@@ -115,7 +115,7 @@ Frame* FrameQueue::PeekWritable()
         SDL_CondWait(mSizeChangedCondition, mMutex);
     }
     SDL_UnlockMutex(mMutex);
-    
+
     // Null if packet queue was aborted.
     if(mPacketQueue->Aborted())
     {
@@ -141,7 +141,7 @@ Frame* FrameQueue::PeekReadable()
     {
         return NULL;
     }
-    
+
     return &mQueue[(mReadIndex + mReadIndexOffset) % mMaxSize];
 }
 

@@ -21,21 +21,21 @@ struct SysFuncImport;
 // Basically, a loaded instance of a sheep script with variables and such.
 struct SheepInstance
 {
-	// The script being executed in this context.
-	SheepScript* mSheepScript = nullptr;
-	
-	// Instanced variables from the sheep script.
-	// These'll likely be modified during execution.
-	std::vector<SheepValue> mVariables;
-	
-	// For debugging, the last time this object was in use during a sheep thread execution.
-	uint32_t mLastUsedTimeMs = 0;
-	
-	// Number of references. Multiple sheep threads can be using the same executing context.
-	// For example, if one function calls another in the same SheepScript.
-	int mReferenceCount = 0;
-	
-	std::string GetName();
+    // The script being executed in this context.
+    SheepScript* mSheepScript = nullptr;
+
+    // Instanced variables from the sheep script.
+    // These'll likely be modified during execution.
+    std::vector<SheepValue> mVariables;
+
+    // For debugging, the last time this object was in use during a sheep thread execution.
+    uint32_t mLastUsedTimeMs = 0;
+
+    // Number of references. Multiple sheep threads can be using the same executing context.
+    // For example, if one function calls another in the same SheepScript.
+    int mReferenceCount = 0;
+
+    std::string GetName();
 };
 
 // Allows a SheepThread to wait for a callback, but also allows it to detach if it no longer cares.
@@ -54,7 +54,7 @@ struct NotifyLink
     // This can be helpful to debug unexpectedly long callbacks.
     //int id = 0;
     //Stopwatch stopwatch;
-    
+
     std::function<void()> AddNotify();
     void OnNotify();
 };
@@ -73,7 +73,7 @@ enum class SheepInstruction
     BeginWait           = 0x09,
     EndWait             = 0x0A,	// 10
     ReturnV             = 0x0B,
-	//Unknown1          = 0x0C, // May be "Export" instruction; mentioned in docs as deprecated.
+    //Unknown1          = 0x0C, // May be "Export" instruction; mentioned in docs as deprecated.
     StoreI              = 0x0D,
     StoreF              = 0x0E,
     StoreS              = 0x0F,
@@ -118,22 +118,22 @@ enum class SheepInstruction
 
 class SheepVM
 {
-	friend struct SheepThread;
+    friend struct SheepThread;
     friend struct NotifyLink;
 public:
-	SheepVM() = default;
-	~SheepVM();
-    
-	SheepThreadId Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag = "");
+    SheepVM() = default;
+    ~SheepVM();
+
+    SheepThreadId Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag = "");
     SheepThreadId Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag = "");
-	
+
     bool Evaluate(SheepScript* script, int n, int v);
 
     void StopExecution(const std::string& tag);
     void FlagExecutionError() { mExecutionError = true; }
 
-	SheepThread* GetCurrentThread() const { return mCurrentThread; }
-	bool IsAnyThreadRunning() const;
+    SheepThread* GetCurrentThread() const { return mCurrentThread; }
+    bool IsAnyThreadRunning() const;
     bool IsThreadRunning(SheepThreadId id) const;
 
 private:
@@ -142,26 +142,26 @@ private:
     SheepThreadId mNextExecutionId = 1;
 
     // Instances of SheepScripts that have been created for execution.
-	std::vector<SheepInstance*> mSheepInstances;
+    std::vector<SheepInstance*> mSheepInstances;
 
     // Threads that have been created for executing SheepScript instances.
-	std::vector<SheepThread*> mSheepThreads;
+    std::vector<SheepThread*> mSheepThreads;
 
     // Notify links that have been created.
     std::vector<NotifyLink*> mNotifyLinks;
 
     // The thread that is currently executing, if any.
-	SheepThread* mCurrentThread = nullptr;
+    SheepThread* mCurrentThread = nullptr;
 
     // If true, the current Sheep thread has encountered an execution error.
-	bool mExecutionError = false;
-		
-	SheepInstance* GetInstance(SheepScript* script);
-	SheepThread* GetIdleThread();
+    bool mExecutionError = false;
+
+    SheepInstance* GetInstance(SheepScript* script);
+    SheepThread* GetIdleThread();
     NotifyLink* GetNotifyLink();
-	
+
     Value CallSysFunc(SheepThread* thread, SysFuncImport* sysImport);
 
-	SheepThread* StartExecution(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag);
-	void ContinueExecution(SheepThread* thread);
+    SheepThread* StartExecution(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag);
+    void ContinueExecution(SheepThread* thread);
 };

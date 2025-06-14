@@ -7,9 +7,7 @@
 #include "Actor.h"
 
 #include <string>
-#include <vector>
 
-#include "InputManager.h"
 #include "SidneyAddData.h"
 #include "SidneyAnalyze.h"
 #include "SidneyEmail.h"
@@ -18,7 +16,6 @@
 #include "SidneySearch.h"
 #include "SidneySuspects.h"
 #include "SidneyTranslate.h"
-#include "StringUtil.h"
 
 class PersistState;
 class UIButton;

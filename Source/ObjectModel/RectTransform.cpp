@@ -1,6 +1,5 @@
 #include "RectTransform.h"
 
-#include "Camera.h"
 #include "Debug.h"
 #include "RectUtil.h"
 #include "Window.h"

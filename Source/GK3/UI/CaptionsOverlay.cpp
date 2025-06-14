@@ -155,7 +155,7 @@ void CaptionsOverlay::AdvanceCaption(float delay)
         RemoveOldestCaption();
         mAdvanceTimer = 0.0f;
     }
-    
+
     // Only bothet if there's actually stuff to remove!
     if(!mActiveCaptions.empty())
     {

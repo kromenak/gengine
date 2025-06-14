@@ -81,7 +81,7 @@ private:
 
     // Similarly, a pending load game path.
     std::string mPendingLoadPath;
-    
+
     // A list of saves found on disk, for displaying in save/load screens.
     std::vector<SaveSummary> mSaves;
 

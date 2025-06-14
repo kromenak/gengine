@@ -12,7 +12,7 @@
 #pragma once
 #include <unordered_map>
 
-#include "TypeInfo.h"
+#include "TypeId.h"
 
 class Services
 {
@@ -33,9 +33,9 @@ public:
         }
         return nullptr;
     }
-    
+
 private:
-	// General-purpose mapping from class Type to class instance.
-	// Use "Set" to add an entry and "Get" to retrieve an entry.
-	static std::unordered_map<TypeId, void*> sTypeToInstancePointer;
+    // General-purpose mapping from class Type to class instance.
+    // Use "Set" to add an entry and "Get" to retrieve an entry.
+    static std::unordered_map<TypeId, void*> sTypeToInstancePointer;
 };

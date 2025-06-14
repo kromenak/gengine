@@ -3,7 +3,6 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
-#include "AudioManager.h"
 #include "Font.h"
 #include "GameProgress.h"
 #include "IniParser.h"
@@ -242,7 +241,7 @@ void SidneySearch::Init(Actor* parent)
     SidneyUtil::CreateMainMenuButton(mRoot, [&](){
         Hide();
     });
-    
+
     // Add menu bar.
     // This menu bar only has one dropdown (web page history) that is oddly positioned...
     mMenuBar.Init(mRoot, SidneyUtil::GetSearchLocalizer().GetText("ScreenName"));
@@ -251,7 +250,7 @@ void SidneySearch::Init(Actor* parent)
 
     // Create popup.
     mPopup = new SidneyPopup(mRoot);
-    
+
     // Add search bar (top area).
     {
         // Background w/ border.
@@ -260,7 +259,7 @@ void SidneySearch::Init(Actor* parent)
         searchBarPanel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
         searchBarPanel->GetRectTransform()->SetAnchoredPosition(60.0f, -88.0f);
         searchBarPanel->GetRectTransform()->SetSizeDelta(kWebpageWidth, 48.0f);
-        
+
         // Reset button.
         SidneyButton* resetButton = SidneyUtil::CreateSmallButton(searchBarPanel->GetOwner());
         resetButton->SetName("ResetButton");
@@ -355,7 +354,7 @@ void SidneySearch::Init(Actor* parent)
         resultsPanel->GetRectTransform()->SetAnchoredPosition(60.0f, -136.0f);
         resultsPanel->GetRectTransform()->SetSizeDelta(kWebpageWidth, 254.0f);
         mWebPageRoot = resultsPanel->GetOwner();
-        
+
         mWebPageWidgetsCanvas = UI::CreateCanvas("WebPage", resultsPanel, 1);
         mWebPageWidgetsCanvas->SetMasked(true);
         mWebPageWidgetsCanvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
@@ -515,7 +514,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
     // Parse the HTML text to an in-memory HTML tree representation.
     HtmlElement root;
     ParseHtml(html, root);
-    
+
     // At this point, we've got a fully fleshed out HTML structure.
     // Next, we need to create the UI elements to graphically reflect that.
 
@@ -543,7 +542,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
         HtmlElement* parentElement = parseStack.back();
         int& index = parseIndexes.back();
 
-        // If we've parsed all the contents for this element, pop it off the parse stack - we're done with it. 
+        // If we've parsed all the contents for this element, pop it off the parse stack - we're done with it.
         if(index >= parentElement->contents.size())
         {
             parseStack.pop_back();
@@ -1034,7 +1033,7 @@ void SidneySearch::ClearWebPage()
 
     // Clear list of web page links (they were destroyed in the previous for loop).
     mWebPageLinks.clear();
-    
+
     // Hide the web page root entirely.
     mWebPageRoot->SetActive(false);
 }

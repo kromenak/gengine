@@ -50,7 +50,7 @@ void SceneData::ResolveSceneData()
     {
         mGeneralSettings = mGeneralSIF->FindCurrentGeneralBlock();
     }
-    
+
     // If there's a specific SIF, also get that general block and merge with the other one.
     // Specific SIF settings override general SIF settings, if set.
     if(mSpecificSIF != nullptr)
@@ -58,10 +58,10 @@ void SceneData::ResolveSceneData()
         GeneralBlock specificBlock = mSpecificSIF->FindCurrentGeneralBlock();
         mGeneralSettings.TakeOverridesFrom(specificBlock);
     }
-    
+
     // Load the desired scene asset - chosen based on settings block.
     mSceneAsset = gAssetManager.LoadSceneAsset(mGeneralSettings.sceneAssetName, AssetScope::Scene);
-    
+
     // Load the BSP data, which is specified by the scene model.
     // If this is null, the game will still work...but there's no BSP geometry!
     if(mSceneAsset != nullptr)
@@ -72,10 +72,10 @@ void SceneData::ResolveSceneData()
     {
         mBSP = gAssetManager.LoadBSP("DEFAULT.BSP");
     }
-    
+
     // Load BSP lightmap data.
     mBSPLightmap = gAssetManager.LoadBSPLightmap(mGeneralSettings.sceneAssetName, AssetScope::Scene);
-    
+
     // Configure BSP, if we have one.
     if(mBSP != nullptr)
     {
@@ -88,7 +88,7 @@ void SceneData::ResolveSceneData()
         // Save floor name in BSP. This enables easier querying of floor data.
         mBSP->SetFloorObjectName(mGeneralSettings.floorModelName);
     }
-    
+
     // Figure out if we have a skybox, and set it to be rendered.
     // The skybox can be defined in any SIF or in the SceneAsset.
     // We'll give the SceneAsset priority, since most seem to be defined there.
@@ -101,7 +101,7 @@ void SceneData::ResolveSceneData()
         mSkybox = mGeneralSettings.CreateSkybox();
         mOwnsSkybox = true;
     }
-    
+
     // Also figure out whether we have a walker boundary - if so, create one.
     if(!mGeneralSettings.walkerBoundaryTextureName.empty())
     {
@@ -114,7 +114,7 @@ void SceneData::ResolveSceneData()
         mWalkerBoundary->SetSize(mGeneralSettings.walkerBoundarySize);
         mWalkerBoundary->SetOffset(mGeneralSettings.walkerBoundaryOffset);
     }
-    
+
     // Build list of actors to use in the scene based on contents of the two SIFs.
     if(mGeneralSIF != nullptr)
     {
@@ -124,7 +124,7 @@ void SceneData::ResolveSceneData()
     {
         AddActorBlocks(mSpecificSIF->GetActorBlocks());
     }
-    
+
     // Build list of models to use in the scene based on contents of the two SIFS.
     if(mGeneralSIF != nullptr)
     {
@@ -134,7 +134,7 @@ void SceneData::ResolveSceneData()
     {
         AddModelBlocks(mSpecificSIF->GetModelBlocks());
     }
-    
+
     // And so on...
     if(mGeneralSIF != nullptr)
     {
@@ -207,25 +207,25 @@ void SceneData::ResolveSceneData()
     {
         AddConversationBlocks(mSpecificSIF->GetConversationBlocks());
     }
-    
+
     // Clear actions from previous scene - we're about to populate here!
     gActionManager.ClearActionSets();
-    
+
     // Add inventory action sets first (global-to-specific).
     gActionManager.AddInventoryActionSets(mTimeblock);
-    
+
     // Add current scene general SIF action sets conditionally (in order defined in SIF file).
     if(mGeneralSIF != nullptr)
     {
         AddActionBlocks(mGeneralSIF->GetActionBlocks(), true);
     }
-    
+
     // Add current scene specific SIFs action sets unconditionally (in order defined in SIF file).
     if(mSpecificSIF != nullptr)
     {
         AddActionBlocks(mSpecificSIF->GetActionBlocks(), false);
     }
-    
+
     // Add global action sets (global-to-specific).
     gActionManager.AddGlobalActionSets(mTimeblock);
 }

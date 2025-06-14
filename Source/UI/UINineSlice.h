@@ -2,7 +2,7 @@
 // Clark Kromenaker
 //
 // A set of UI images that resize to create a flexible bordered area.
-// 
+//
 // Called "nine-slice" because it's a single image sliced into 9 parts.
 // And some of the parts resize dynamically to fill the space.
 //

@@ -10,12 +10,10 @@
 #include <vector>
 
 #include <fmod.hpp>
-#include <fmod_errors.h>
 
 #include "Vector3.h"
 
 class Audio;
-class Vector3;
 
 // Handle to a playing sound. Returned by audio manager to represent a playing sound.
 // After sound stops/finishes, the handle is no longer valid. But it can still be passed around, used, and stored just fine.
@@ -30,7 +28,7 @@ public:
     void Pause();
     void Resume();
     bool IsPlaying() const;
-    
+
     void SetVolume(float volume);
     void SetPosition(const Vector3& position);
 
@@ -44,7 +42,7 @@ private:
 
     // Sound data being played.
     FMOD::Sound* sound = nullptr;
-    
+
     // Callback to execute when sound finishes playing (either naturally or via stop).
     std::function<void()> mFinishCallback = nullptr;
 
@@ -139,7 +137,7 @@ class AudioManager
 public:
     bool Initialize();
     void Shutdown();
-    
+
     void Update(float deltaTime);
     void UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up);
 
@@ -155,19 +153,19 @@ public:
 
     void SetMasterVolume(float volume);
     float GetMasterVolume() const;
-    
+
     void SetVolume(AudioType audioType, float volume);
     float GetVolume(AudioType audioType) const;
-    
+
     void SetMuted(bool mute);
     bool GetMuted();
-    
+
     void SetMuted(AudioType audioType, bool mute);
     bool GetMuted(AudioType audioType);
-    
+
     void SaveAudioState(bool sfx, bool vo, bool ambient, AudioSaveState& saveState);
     void RestoreAudioState(AudioSaveState& audioState);
-    
+
 private:
     // Underlying FMOD system - portal to audio greatness.
     FMOD::System* mSystem = nullptr;
@@ -201,7 +199,7 @@ private:
     // If calling code doesn't provide specific min/max 3D dists, we'll use these.
     float mDefault3DMinDist = 200.0f;
     float mDefault3DMaxDist = 2000.0f;
-    
+
     // Sounds that are currently playing.
     std::vector<PlayingSoundHandle> mPlayingSounds;
 
@@ -212,7 +210,7 @@ private:
     // When an Audio asset is deleted, we want to release the underlying FMOD sound data too.
     // However, if the sound is still playing, we don't want to release until it ends or stops.
     std::vector<FMOD::Sound*> mWaitingToRelease;
-    
+
     FMOD::Sound* CreateSound(Audio* audio, AudioType audioType, bool is3D, bool isLooping);
     void DestroySound(FMOD::Sound* sound);
 

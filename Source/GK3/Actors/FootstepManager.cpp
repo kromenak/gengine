@@ -9,7 +9,7 @@ FootstepManager gFootstepManager;
 
 void FootstepManager::Init()
 {
-	// STEP 1: FLOORMAP maps texture names to a floor type.
+    // STEP 1: FLOORMAP maps texture names to a floor type.
     {
         // Get FLOORMAP text file as a raw buffer.
         TextAsset* textFile = gAssetManager.LoadText("FLOORMAP.TXT", AssetScope::Manual);
@@ -40,8 +40,8 @@ void FootstepManager::Init()
         // Done with this asset.
         delete textFile;
     }
-	
-	// STEP 2: FOOTSTEPS maps floor types to audio files for footsteps.
+
+    // STEP 2: FOOTSTEPS maps floor types to audio files for footsteps.
     {
         // Next up: read in all the footstep data.
         TextAsset* textFile = gAssetManager.LoadText("FOOTSTEPS.TXT", AssetScope::Manual);
@@ -85,8 +85,8 @@ void FootstepManager::Init()
         // Done with this asset.
         delete textFile;
     }
-	
-	// STEP 3: FOOTSCUFFS maps floor types to audio files for footscuffs.
+
+    // STEP 3: FOOTSCUFFS maps floor types to audio files for footscuffs.
     {
         // Finally, very similar thing with the footscuff data.
         TextAsset* textFile = gAssetManager.LoadText("FOOTSCUFFS.TXT", AssetScope::Manual);
@@ -134,70 +134,70 @@ void FootstepManager::Init()
 
 Audio* FootstepManager::GetFootstep(const std::string& shoeType, const std::string& floorTextureName)
 {
-	// First off, look up the floor type that correlates to this floor texture.
-	// If we can't find it, no footstep sound!
-	auto floorTypeIt = mTextureNameToFloorType.find(floorTextureName);
-	if(floorTypeIt == mTextureNameToFloorType.end())
-	{
-		return nullptr;
-	}
-	
-	// Look up the shoe sounds based on shoe type.
-	// Again, if we can't find it, no footstep sound!
-	auto shoeTypeIt = mShoeTypeToShoeSounds.find(shoeType);
-	if(shoeTypeIt == mShoeTypeToShoeSounds.end())
-	{
-		return nullptr;
-	}
-	
-	// For this shoe type, grab the list of sounds we can use for this floor type.
-	// Yet again, if we can't find any sounds, no footstep sound!
-	auto& floorTypeToFootsteps = shoeTypeIt->second.floorTypeToFootsteps;
-	auto footstepSoundsIt = floorTypeToFootsteps.find(floorTypeIt->second);
-	if(footstepSoundsIt == floorTypeToFootsteps.end())
-	{
-		return nullptr;
-	}
-	
-	// We finally have the list of sounds. Hopefully it's not empty...
-	auto& footstepSounds = footstepSoundsIt->second;
-	if(footstepSounds.size() <= 0) { return nullptr; }
-	
-	// Return one randomly.
-	return footstepSounds[Random::Range(0, (int)footstepSounds.size())];
+    // First off, look up the floor type that correlates to this floor texture.
+    // If we can't find it, no footstep sound!
+    auto floorTypeIt = mTextureNameToFloorType.find(floorTextureName);
+    if(floorTypeIt == mTextureNameToFloorType.end())
+    {
+        return nullptr;
+    }
+
+    // Look up the shoe sounds based on shoe type.
+    // Again, if we can't find it, no footstep sound!
+    auto shoeTypeIt = mShoeTypeToShoeSounds.find(shoeType);
+    if(shoeTypeIt == mShoeTypeToShoeSounds.end())
+    {
+        return nullptr;
+    }
+
+    // For this shoe type, grab the list of sounds we can use for this floor type.
+    // Yet again, if we can't find any sounds, no footstep sound!
+    auto& floorTypeToFootsteps = shoeTypeIt->second.floorTypeToFootsteps;
+    auto footstepSoundsIt = floorTypeToFootsteps.find(floorTypeIt->second);
+    if(footstepSoundsIt == floorTypeToFootsteps.end())
+    {
+        return nullptr;
+    }
+
+    // We finally have the list of sounds. Hopefully it's not empty...
+    auto& footstepSounds = footstepSoundsIt->second;
+    if(footstepSounds.size() <= 0) { return nullptr; }
+
+    // Return one randomly.
+    return footstepSounds[Random::Range(0, (int)footstepSounds.size())];
 }
 
 Audio* FootstepManager::GetFootscuff(const std::string& shoeType, const std::string& floorTextureName)
 {
-	// First off, look up the floor type that correlates to this floor texture.
-	// If we can't find it, no footstep sound!
-	auto floorTypeIt = mTextureNameToFloorType.find(floorTextureName);
-	if(floorTypeIt == mTextureNameToFloorType.end())
-	{
-		return nullptr;
-	}
-	
-	// Look up the shoe sounds based on shoe type.
-	// Again, if we can't find it, no footstep sound!
-	auto shoeTypeIt = mShoeTypeToShoeSounds.find(shoeType);
-	if(shoeTypeIt == mShoeTypeToShoeSounds.end())
-	{
-		return nullptr;
-	}
-	
-	// For this shoe type, grab the list of sounds we can use for this floor type.
-	// Yet again, if we can't find any sounds, no footstep sound!
-	auto& floorTypeToFootscuffs = shoeTypeIt->second.floorTypeToFootscuffs;
-	auto footscuffSoundsIt = floorTypeToFootscuffs.find(floorTypeIt->second);
-	if(footscuffSoundsIt == floorTypeToFootscuffs.end())
-	{
-		return nullptr;
-	}
-	
-	// We finally have the list of sounds. Hopefully it's not empty...
-	auto& footscuffSounds = footscuffSoundsIt->second;
-	if(footscuffSounds.size() <= 0) { return nullptr; }
-	
-	// Return one randomly.
-	return footscuffSounds[Random::Range(0, (int)footscuffSounds.size())];
+    // First off, look up the floor type that correlates to this floor texture.
+    // If we can't find it, no footstep sound!
+    auto floorTypeIt = mTextureNameToFloorType.find(floorTextureName);
+    if(floorTypeIt == mTextureNameToFloorType.end())
+    {
+        return nullptr;
+    }
+
+    // Look up the shoe sounds based on shoe type.
+    // Again, if we can't find it, no footstep sound!
+    auto shoeTypeIt = mShoeTypeToShoeSounds.find(shoeType);
+    if(shoeTypeIt == mShoeTypeToShoeSounds.end())
+    {
+        return nullptr;
+    }
+
+    // For this shoe type, grab the list of sounds we can use for this floor type.
+    // Yet again, if we can't find any sounds, no footstep sound!
+    auto& floorTypeToFootscuffs = shoeTypeIt->second.floorTypeToFootscuffs;
+    auto footscuffSoundsIt = floorTypeToFootscuffs.find(floorTypeIt->second);
+    if(footscuffSoundsIt == floorTypeToFootscuffs.end())
+    {
+        return nullptr;
+    }
+
+    // We finally have the list of sounds. Hopefully it's not empty...
+    auto& footscuffSounds = footscuffSoundsIt->second;
+    if(footscuffSounds.size() <= 0) { return nullptr; }
+
+    // Return one randomly.
+    return footscuffSounds[Random::Range(0, (int)footscuffSounds.size())];
 }

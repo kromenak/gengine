@@ -37,7 +37,7 @@ public:
 
     const UIRectangle& GetRectangle(size_t index) const { return mRectangles[index]; }
     size_t GetCount() const { return mRectangles.size(); }
-    
+
 private:
     // The rectangles in the set.
     std::vector<UIRectangle> mRectangles;

@@ -28,7 +28,7 @@ void UIToggle::SetValue(bool isOn)
 {
     // Change value.
     mIsOn = isOn;
-    
+
     // Update texture used.
     SetUpTexture(mIsOn ? mOnTexture : mOffTexture);
 }
@@ -36,7 +36,7 @@ void UIToggle::SetValue(bool isOn)
 void UIToggle::OnPressed()
 {
     SetValue(!mIsOn);
-    
+
     if(mToggleCallback)
     {
         mToggleCallback(mIsOn);

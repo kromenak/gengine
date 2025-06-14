@@ -49,7 +49,7 @@ private:
 
     // A list of all actors that currently exist in the game.
     std::vector<Actor*> mActors;
-    
+
     void LoadSceneInternal();
     void UnloadSceneInternal();
 

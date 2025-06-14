@@ -715,7 +715,7 @@ void SidneyAnagramParser::OnAvailableWordSelected(int index)
                 });
             }
         }
-        
+
         // Since we have selected words, the erase button should be active.
         mEraseButton->GetButton()->SetCanInteract(mState == State::SelectWords || mState == State::Unsolved);
     }

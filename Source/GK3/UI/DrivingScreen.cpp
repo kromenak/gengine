@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include "ActionManager.h"
-#include "Animator.h"
 #include "AssetManager.h"
 #include "DrivingScreenBlip.h"
 #include "GameProgress.h"
@@ -14,7 +13,6 @@
 #include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UIUtil.h"
 #include "Window.h"
@@ -530,7 +528,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
         }
         else if(gGameProgress.GetTimeblock() == Timeblock(2, 2, Timeblock::PM))
         {
-            // Lady Howard & Estelle drive in circles, starting at PL3. 
+            // Lady Howard & Estelle drive in circles, starting at PL3.
             if(gLocationManager.IsActorAtLocation("ESTELLE", "MAP"))
             {
                 mBlips[kNpc1Index]->SetActive(true);

@@ -58,7 +58,7 @@ private:
     std::vector<SheepValue> mVariables;
 
     // Maps a function name to it's offset in the bytecode.
-	std::string_map_ci<int> mFunctions;
+    std::string_map_ci<int> mFunctions;
 
     // The bytecode, grabbed directly from the code section.
     // Just pass this to the VM and aaaaawayyyyy we go!

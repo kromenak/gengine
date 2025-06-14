@@ -26,7 +26,7 @@ Camera::~Camera()
 Matrix4 Camera::GetLookAtMatrix()
 {
     Vector3 eye = GetOwner()->GetPosition();
-    
+
     // World space axes directions are all a matter of perspective.
     // Here, we say that view forward equals Actor forward (mapped to Z axis).
     // And view up equals Actor up (mapped to Y axis).
@@ -39,7 +39,7 @@ Matrix4 Camera::GetLookAtMatrixNoTranslate()
 {
     Vector3 lookAt = GetOwner()->GetForward();
     Vector3 up = GetOwner()->GetUp();
-	return RenderTransforms::MakeLookAt(Vector3::Zero, lookAt, up);
+    return RenderTransforms::MakeLookAt(Vector3::Zero, lookAt, up);
 }
 
 Matrix4 Camera::GetProjectionMatrix()
@@ -82,11 +82,11 @@ Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 
 void Camera::SetCameraFovRadians(float fovRad)
 {
-	mFovAngleRad = Math::Clamp(fovRad, 0.0f, Math::kPi);
+    mFovAngleRad = Math::Clamp(fovRad, 0.0f, Math::kPi);
 }
 
 void Camera::SetCameraFovDegrees(float fovDeg)
 {
-	mFovAngleRad = Math::ToRadians(Math::Clamp(fovDeg, 0.0f, 180.0f));
+    mFovAngleRad = Math::ToRadians(Math::Clamp(fovDeg, 0.0f, 180.0f));
 }
 

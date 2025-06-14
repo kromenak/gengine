@@ -9,7 +9,6 @@
 #include "LayerManager.h"
 #include "RectTransform.h" // AnchorPreset
 #include "StringUtil.h"
-#include "Timeblock.h"
 
 class Cursor;
 class UIButton;
@@ -19,14 +18,14 @@ class FingerprintScreen : public Actor
 {
 public:
     FingerprintScreen();
-	
-	void Show(const std::string& nounName);
-	void Hide();
+
+    void Show(const std::string& nounName);
+    void Hide();
     bool IsShowing() const;
 
 protected:
     void OnUpdate(float deltaTime) override;
-	
+
 private:
     // This screen's layer.
     Layer mLayer;
@@ -49,7 +48,7 @@ private:
 
     // Image of brush in the kit. Turned on and off when you select it.
     UIImage* mBrushImage = nullptr;
-    
+
     // Represents one object that can be dusted for prints.
     struct FingerprintObject
     {
@@ -120,7 +119,7 @@ private:
 
     // The number of prints we've collected for the current object.
     int mCollectedPrintCount = 0;
-    
+
     // The cursor on this screen is pretty complex and changes based on whether you're holding the brush, holding tape, etc.
     enum class CursorState
     {
@@ -138,7 +137,7 @@ private:
     // When dusting, the total distance we've dragged the brush across the object.
     // Mainly used when an object has no prints - after dragging X distance, "no print" dialogue plays.
     float mDistanceDusted = 0.0f;
-    
+
     void PickUpBrush();
     void PutDownBrush();
 
@@ -147,7 +146,7 @@ private:
     void OnDustButtonPressed();
     void OnTapeButtonPressed();
     void OnClothButtonPressed();
-    
+
     void OnRightPanelPressed();
     void OnFingerprintPressed(int printToCollectIndex);
     void OnCollectedFingerprint(int printToCollectIndex);

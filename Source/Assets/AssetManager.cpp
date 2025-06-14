@@ -113,7 +113,7 @@ void AssetManager::Init()
 
 void AssetManager::Shutdown()
 {
-	// Unload all assets.
+    // Unload all assets.
     UnloadAssets(AssetScope::Global);
 
     // Clear all loaded barns.
@@ -175,7 +175,7 @@ bool AssetManager::LoadBarn(const std::string& barnName, BarnSearchPriority prio
     std::string assetPath = GetAssetPath(barnName);
     if(assetPath.empty())
     {
-		return false;
+        return false;
     }
 
     // Remember if this is the highest search priority we've seen.
@@ -186,7 +186,7 @@ bool AssetManager::LoadBarn(const std::string& barnName, BarnSearchPriority prio
 
     // Load barn file.
     mLoadedBarns.emplace(std::piecewise_construct, std::forward_as_tuple(barnName), std::forward_as_tuple(assetPath, priority));
-	return true;
+    return true;
 }
 
 void AssetManager::UnloadBarn(const std::string& barnName)
@@ -201,30 +201,30 @@ void AssetManager::UnloadBarn(const std::string& barnName)
 
 void AssetManager::WriteBarnAssetToFile(const std::string& assetName)
 {
-	WriteBarnAssetToFile(assetName, "");
+    WriteBarnAssetToFile(assetName, "");
 }
 
 void AssetManager::WriteBarnAssetToFile(const std::string& assetName, const std::string& outputDir)
 {
-	BarnFile* barn = GetBarnContainingAsset(assetName);
-	if(barn != nullptr)
-	{
-		barn->WriteToFile(assetName, outputDir);
-	}
+    BarnFile* barn = GetBarnContainingAsset(assetName);
+    if(barn != nullptr)
+    {
+        barn->WriteToFile(assetName, outputDir);
+    }
 }
 
 void AssetManager::WriteAllBarnAssetsToFile(const std::string& search)
 {
-	WriteAllBarnAssetsToFile(search, "");
+    WriteAllBarnAssetsToFile(search, "");
 }
 
 void AssetManager::WriteAllBarnAssetsToFile(const std::string& search, const std::string& outputDir)
 {
-	// Pass the buck to all loaded barn files.
-	for(auto& entry : mLoadedBarns)
-	{
-		entry.second.WriteAllToFile(search, outputDir);
-	}
+    // Pass the buck to all loaded barn files.
+    for(auto& entry : mLoadedBarns)
+    {
+        entry.second.WriteAllToFile(search, outputDir);
+    }
 }
 
 Audio* AssetManager::LoadAudio(const std::string& name, AssetScope scope)
@@ -364,7 +364,7 @@ Cursor* AssetManager::LoadCursorAsync(const std::string& name, AssetScope scope)
 
 Font* AssetManager::LoadFont(const std::string& name, AssetScope scope)
 {
-	return LoadAsset<Font>(SanitizeAssetName(name, ".FON"), scope, &mFontCache);
+    return LoadAsset<Font>(SanitizeAssetName(name, ".FON"), scope, &mFontCache);
 }
 
 TextAsset* AssetManager::LoadText(const std::string& name, AssetScope scope)
@@ -413,9 +413,9 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
     delete vertShader;
     delete fragShader;
 
-	// Cache and return.
+    // Cache and return.
     mShaderCache.Set(shaderName, shader);
-	return shader;
+    return shader;
 }
 
 void AssetManager::UnloadAssets(AssetScope scope)
@@ -453,15 +453,15 @@ void AssetManager::UnloadAssets(AssetScope scope)
 
 BarnFile* AssetManager::GetBarn(const std::string& barnName)
 {
-	// If we find it, return it.
-	auto iter = mLoadedBarns.find(barnName);
-	if(iter != mLoadedBarns.end())
-	{
-		return &iter->second;
-	}
+    // If we find it, return it.
+    auto iter = mLoadedBarns.find(barnName);
+    if(iter != mLoadedBarns.end())
+    {
+        return &iter->second;
+    }
 
-	//TODO: Maybe load barn if not loaded?
-	return nullptr;
+    //TODO: Maybe load barn if not loaded?
+    return nullptr;
 }
 
 BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
@@ -502,8 +502,8 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
         priority = static_cast<BarnSearchPriority>(static_cast<int>(priority) - 1);
     }
 
-	// Didn't find the Barn containing this asset.
-	return nullptr;
+    // Didn't find the Barn containing this asset.
+    return nullptr;
 }
 
 std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
@@ -566,7 +566,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, Asset
     {
         delete[] buffer;
     }
-	return asset;
+    return asset;
 }
 
 template<typename T>
@@ -643,24 +643,24 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
 
 uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize)
 {
-	// First, see if the asset exists at any asset search path.
-	// If so, we load the asset directly from file.
-	// Loose files take precedence over packaged barn assets.
-	std::string assetPath = GetAssetPath(assetName);
-	if(!assetPath.empty())
-	{
+    // First, see if the asset exists at any asset search path.
+    // If so, we load the asset directly from file.
+    // Loose files take precedence over packaged barn assets.
+    std::string assetPath = GetAssetPath(assetName);
+    if(!assetPath.empty())
+    {
         return File::ReadIntoBuffer(assetPath, outBufferSize);
-	}
+    }
 
-	// If no file to load, we'll get the asset from a barn.
-	BarnFile* barn = GetBarnContainingAsset(assetName);
-	if(barn != nullptr)
-	{
+    // If no file to load, we'll get the asset from a barn.
+    BarnFile* barn = GetBarnContainingAsset(assetName);
+    if(barn != nullptr)
+    {
         return barn->CreateAssetBuffer(assetName, outBufferSize);
-	}
+    }
 
-	// Couldn't find this asset!
-	return nullptr;
+    // Couldn't find this asset!
+    return nullptr;
 }
 
 template<class T>

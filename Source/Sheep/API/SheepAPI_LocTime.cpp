@@ -2,12 +2,9 @@
 
 #include "CharacterManager.h"
 #include "GameProgress.h"
-#include "GK3UI.h"
 #include "LocationManager.h"
 #include "ReportManager.h"
 #include "SceneManager.h"
-#include "TimeblockScreen.h"
-#include "VideoPlayer.h"
 
 using namespace std;
 

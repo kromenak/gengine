@@ -12,7 +12,7 @@ class DrivingScreenBlip : public Actor
 {
 public:
     DrivingScreenBlip(const DrivingScreen::PathData& pathData);
-    
+
     // Appearance
     void SetImage(UIImage* image) { mImage = image; }
     void SetColor(const Color32& color) { mImage->SetColor(color); }
@@ -32,10 +32,10 @@ public:
     void SetMapScale(const Vector2& mapScale) { mMapScale = mapScale; }
     void SetMapPosition(const std::string& nodeName);
     void SetMapPosition(const Vector2& position);
-    
+
 protected:
     void OnUpdate(float deltaTime) override;
-    
+
 private:
     // The blip's image.
     UIImage* mImage = nullptr;

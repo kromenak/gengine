@@ -1,12 +1,10 @@
 //
 // Clark Kromenaker
-// 
+//
 // A popup UI that shows a progress bar and a short message.
 //
 #pragma once
 #include "Actor.h"
-
-#include <string>
 
 #include "LayerManager.h"
 
@@ -39,6 +37,6 @@ private:
     UIImage* mBackground = nullptr;
 
     UICanvas* mProgressBarCanvas = nullptr;
-    
+
     UIImage* mProgressBarImage = nullptr;
 };

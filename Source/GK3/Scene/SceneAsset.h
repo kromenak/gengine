@@ -45,26 +45,26 @@ struct SceneLight
 class SceneAsset : public Asset
 {
     TYPEINFO_SUB(SceneAsset, Asset);
-public:   
+public:
     static void FixGK3SkyboxTextures(SkyboxTextures& skyboxTextures);
 
     SceneAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }
-	~SceneAsset();
+    ~SceneAsset();
 
     void Load(uint8_t* data, uint32_t dataLength);
-	
-	const std::string& GetBSPName() const { return mBspName; }
+
+    const std::string& GetBSPName() const { return mBspName; }
     Skybox* GetSkybox() const { return mSkybox; }
-    
+
 private:
     // Often, the BSP name is equal to the SCN name.
     std::string mBspName;
-    
+
     // A skybox to use for the scene. This might also be specified in the SIF.
     Skybox* mSkybox = nullptr;
 
     // Lights defined for this scene.
     //std::vector<SceneLight> mLights;
-    
+
     void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

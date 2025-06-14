@@ -3,7 +3,6 @@
 #include "AssetManager.h"
 #include "Texture.h"
 #include "UIButton.h"
-#include "UIDrag.h"
 #include "UIImage.h"
 #include "UINineSlice.h"
 #include "UISlider.h"

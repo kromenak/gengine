@@ -48,27 +48,27 @@ void InventoryManager::Init()
 
         delete textFile;
     });
-    
-	// Create inventory screen UI.
-	mInventoryScreen = new InventoryScreen();
-	mInventoryScreen->SetIsDestroyOnLoad(false);
-	
-	// Create inventory inspect UI.
-	mInventoryInspectScreen = new InventoryInspectScreen();
-	mInventoryInspectScreen->SetIsDestroyOnLoad(false);
-	
-	// Give Gabe starting inventory items.
-	//TODO: Obviously, this should be data-driven, but not sure where this is defined?
-	AddInventoryItem("GABRIEL", "DAGGER");
-	AddInventoryItem("GABRIEL", "GABES_PASSPORT");
-	AddInventoryItem("GABRIEL", "NOTEPAD");
-	AddInventoryItem("GABRIEL", "PRINCE_JAMES_CARD");
-	AddInventoryItem("GABRIEL", "R25_ROOM_KEY");
-	AddInventoryItem("GABRIEL", "TALISMAN");
-	AddInventoryItem("GABRIEL", "TAPE_RECORDER");
-	AddInventoryItem("GABRIEL", "WALLET");
-	
-	// Give Grace starting inventory items.
+
+    // Create inventory screen UI.
+    mInventoryScreen = new InventoryScreen();
+    mInventoryScreen->SetIsDestroyOnLoad(false);
+
+    // Create inventory inspect UI.
+    mInventoryInspectScreen = new InventoryInspectScreen();
+    mInventoryInspectScreen->SetIsDestroyOnLoad(false);
+
+    // Give Gabe starting inventory items.
+    //TODO: Obviously, this should be data-driven, but not sure where this is defined?
+    AddInventoryItem("GABRIEL", "DAGGER");
+    AddInventoryItem("GABRIEL", "GABES_PASSPORT");
+    AddInventoryItem("GABRIEL", "NOTEPAD");
+    AddInventoryItem("GABRIEL", "PRINCE_JAMES_CARD");
+    AddInventoryItem("GABRIEL", "R25_ROOM_KEY");
+    AddInventoryItem("GABRIEL", "TALISMAN");
+    AddInventoryItem("GABRIEL", "TAPE_RECORDER");
+    AddInventoryItem("GABRIEL", "WALLET");
+
+    // Give Grace starting inventory items.
     AddInventoryItem("GRACE", "GRACE_WALLET");
     AddInventoryItem("GRACE", "GRACES_PASSPORT");
     AddInventoryItem("GRACE", "R25_ROOM_KEY_GRACE");
@@ -77,7 +77,7 @@ void InventoryManager::Init()
 
 bool InventoryManager::IsValidInventoryItem(const std::string& itemName) const
 {
-	return mInventoryItems.find(itemName) != mInventoryItems.end();
+    return mInventoryItems.find(itemName) != mInventoryItems.end();
 }
 
 void InventoryManager::AddInventoryItem(const std::string& itemName)
@@ -88,8 +88,8 @@ void InventoryManager::AddInventoryItem(const std::string& itemName)
 void InventoryManager::AddInventoryItem(const std::string& actorName, const std::string& itemName)
 {
     // Add to inventory.
-	std::set<std::string>& items = mInventories[actorName];
-	items.insert(StringUtil::ToUpperCopy(itemName));
+    std::set<std::string>& items = mInventories[actorName];
+    items.insert(StringUtil::ToUpperCopy(itemName));
 
     // Inventory item can be added while screen is showing (ex: combining items to create a new item).
     if(mInventoryScreen->IsActive())
@@ -106,8 +106,8 @@ void InventoryManager::RemoveInventoryItem(const std::string& itemName)
 void InventoryManager::RemoveInventoryItem(const std::string& actorName, const std::string& itemName)
 {
     // Remove from inventory.
-	std::set<std::string>& items = mInventories[actorName];
-	items.erase(StringUtil::ToUpperCopy(itemName));
+    std::set<std::string>& items = mInventories[actorName];
+    items.erase(StringUtil::ToUpperCopy(itemName));
 
     // If this was the active inventory item, clear that.
     if(StringUtil::EqualsIgnoreCase(GetActiveInventoryItem(actorName), itemName))
@@ -129,9 +129,9 @@ bool InventoryManager::HasInventoryItem(const std::string& itemName) const
 
 bool InventoryManager::HasInventoryItem(const std::string& actorName, const std::string& itemName) const
 {
-	auto it = mInventories.find(actorName);
-	if(it == mInventories.end()) { return false; }
-	return it->second.find(StringUtil::ToUpperCopy(itemName)) != it->second.end();
+    auto it = mInventories.find(actorName);
+    if(it == mInventories.end()) { return false; }
+    return it->second.find(StringUtil::ToUpperCopy(itemName)) != it->second.end();
 }
 
 std::string InventoryManager::GetActiveInventoryItem() const
@@ -141,12 +141,12 @@ std::string InventoryManager::GetActiveInventoryItem() const
 
 std::string InventoryManager::GetActiveInventoryItem(const std::string& actorName) const
 {
-	auto it = mActiveInventoryItems.find(actorName);
-	if(it == mActiveInventoryItems.end())
-	{
-		return "";
-	}
-	return it->second;
+    auto it = mActiveInventoryItems.find(actorName);
+    if(it == mActiveInventoryItems.end())
+    {
+        return "";
+    }
+    return it->second;
 }
 
 void InventoryManager::SetActiveInventoryItem(const std::string& itemName)
@@ -156,7 +156,7 @@ void InventoryManager::SetActiveInventoryItem(const std::string& itemName)
 
 void InventoryManager::SetActiveInventoryItem(const std::string& actorName, const std::string& itemName)
 {
-	mActiveInventoryItems[actorName] = itemName;
+    mActiveInventoryItems[actorName] = itemName;
 
     // Active item can be changed via sheep calls while inventory is showing.
     if(mInventoryScreen->IsActive())
@@ -172,17 +172,17 @@ void InventoryManager::ShowInventory()
 
 void InventoryManager::ShowInventory(const std::string& actorName)
 {
-	mInventoryScreen->Show(actorName, mInventories[actorName]);
+    mInventoryScreen->Show(actorName, mInventories[actorName]);
 }
 
 void InventoryManager::HideInventory()
 {
-	mInventoryScreen->Hide();
+    mInventoryScreen->Hide();
 }
 
 bool InventoryManager::IsInventoryShowing() const
 {
-	return mInventoryScreen->IsShowing();
+    return mInventoryScreen->IsShowing();
 }
 
 void InventoryManager::InventoryInspect()
@@ -192,12 +192,12 @@ void InventoryManager::InventoryInspect()
 
 void InventoryManager::InventoryInspect(const std::string& itemName)
 {
-	mInventoryInspectScreen->Show(itemName);
+    mInventoryInspectScreen->Show(itemName);
 }
 
 void InventoryManager::InventoryUninspect()
 {
-	mInventoryInspectScreen->Hide();
+    mInventoryInspectScreen->Hide();
 }
 
 bool InventoryManager::IsInventoryInspectShowing() const

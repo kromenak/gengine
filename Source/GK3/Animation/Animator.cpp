@@ -2,9 +2,6 @@
 
 #include "Animation.h"
 #include "AnimationNodes.h"
-#include "Mesh.h"
-#include "MeshRenderer.h"
-#include "VertexAnimation.h"
 
 TYPEINFO_INIT(Animator, Component, 8)
 {
@@ -60,7 +57,7 @@ void Animator::Start(const AnimParams& animParams, std::function<void()> finishC
 
 void Animator::Stop(Animation* animation, bool skipFinishCallback)
 {
-	if(animation == nullptr) { return; }
+    if(animation == nullptr) { return; }
 
     // Prematurely stop any active anim states matching this animation.
     for(auto& animState : mActiveAnimations)
@@ -88,17 +85,17 @@ void Animator::StopAll()
 
 void Animator::Sample(Animation* animation, int frame)
 {
-	if(animation == nullptr) { return; }
+    if(animation == nullptr) { return; }
 
-	// Sample any anim nodes for the desired frame.
-	std::vector<AnimNode*>* frameData = animation->GetFrame(frame);
-	if(frameData != nullptr)
-	{
-		for(auto& node : *frameData)
-		{
-			node->Sample(frame);
-		}
-	}
+    // Sample any anim nodes for the desired frame.
+    std::vector<AnimNode*>* frameData = animation->GetFrame(frame);
+    if(frameData != nullptr)
+    {
+        for(auto& node : *frameData)
+        {
+            node->Sample(frame);
+        }
+    }
 }
 
 void Animator::Sample(Animation* animation, int frame, const std::string& modelName)
@@ -121,7 +118,7 @@ void Animator::Sample(Animation* animation, int frame, const std::string& modelN
 
 void Animator::OnUpdate(float deltaTime)
 {
-	// Iterate over each active animation state and update it.
+    // Iterate over each active animation state and update it.
     int size = mActiveAnimations.size();
     for(int i = 0; i < size; ++i)
     {
@@ -131,37 +128,37 @@ void Animator::OnUpdate(float deltaTime)
         // Increment animation timer.
         mActiveAnimations[i].timer += deltaTime;
 
-		/*
-		 Say we have a 6-frame animation:
-		 0----1----2----3----4----5-----
+        /*
+         Say we have a 6-frame animation:
+         0----1----2----3----4----5-----
 
-		 Frame 0 executes immediately when the animation starts.
-		 After that, each frame executes after X seconds have passed.
+         Frame 0 executes immediately when the animation starts.
+         After that, each frame executes after X seconds have passed.
 
-		 One issue that arises with "looped" animations particularly is that
-		 the first and last frames are the same pose (0/5 in above example). And in that
-		 case, you don't want that extra "time" after frame 5 to occur, or the
-		 looped animation stutters when it loops.
-		 That's why we use "-1" to decide when to loop/finish the anim.
-		*/
+         One issue that arises with "looped" animations particularly is that
+         the first and last frames are the same pose (0/5 in above example). And in that
+         case, you don't want that extra "time" after frame 5 to occur, or the
+         looped animation stutters when it loops.
+         That's why we use "-1" to decide when to loop/finish the anim.
+        */
 
-		// Based on how much time has passed, we may need to increment multiple frames of animation in one update loop.
-		// For example, if timer is 0.3, and timePerFrame is 0.1, we need to update 3 times.
-		float timePerFrame = mActiveAnimations[i].params.animation->GetFrameDuration();
-		while(mActiveAnimations[i].timer >= timePerFrame)
-		{
-			// WE ARE EXECUTING A FRAME!
+        // Based on how much time has passed, we may need to increment multiple frames of animation in one update loop.
+        // For example, if timer is 0.3, and timePerFrame is 0.1, we need to update 3 times.
+        float timePerFrame = mActiveAnimations[i].params.animation->GetFrameDuration();
+        while(mActiveAnimations[i].timer >= timePerFrame)
+        {
+            // WE ARE EXECUTING A FRAME!
 
-			// Decrement timer by amount for one frame.
-			// "timer" now contains how much time we are ahead of the current frame.
+            // Decrement timer by amount for one frame.
+            // "timer" now contains how much time we are ahead of the current frame.
             mActiveAnimations[i].timer -= timePerFrame;
 
-			// Increment the frame.
-			// Frame 0 happens immediately on anim start. Each executed frame is then one more.
+            // Increment the frame.
+            // Frame 0 happens immediately on anim start. Each executed frame is then one more.
             mActiveAnimations[i].currentFrame++;
 
-			// If looping, wrap around the current frame when we reach the end!
-			// Note the "-1" because first and last frames are the same for a looping anim!
+            // If looping, wrap around the current frame when we reach the end!
+            // Note the "-1" because first and last frames are the same for a looping anim!
             if(mActiveAnimations[i].params.loop)
             {
                 mActiveAnimations[i].currentFrame %= mActiveAnimations[i].params.animation->GetFrameCount() - 1;
@@ -176,9 +173,9 @@ void Animator::OnUpdate(float deltaTime)
 
             // Execute any actions/anim nodes on the current frame.
             ExecuteFrame(i, mActiveAnimations[i].currentFrame);
-		}
+        }
 
-		// If the animation has finished, mark it as done.
+        // If the animation has finished, mark it as done.
         // We know the animation is finished when the last frame, at index (frameCount - 1), has executed.
         if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount() - 1)
         {
@@ -223,11 +220,11 @@ void Animator::ExecuteFrame(int animIndex, int frameNumber)
     mActiveAnimations[animIndex].executingFrame = frameNumber;
 
     // Get all anim nodes that begin on this frame and start them.
-	std::vector<AnimNode*>* animNodes = mActiveAnimations[animIndex].params.animation->GetFrame(frameNumber);
-	if(animNodes != nullptr)
-	{
-		for(auto& node : *animNodes)
-		{
+    std::vector<AnimNode*>* animNodes = mActiveAnimations[animIndex].params.animation->GetFrame(frameNumber);
+    if(animNodes != nullptr)
+    {
+        for(auto& node : *animNodes)
+        {
             // If current frame != executing frame, we are "fast forwarding" - executing this frame to catch up.
             // Most nodes don't support this (mostly just vertex anim nodes). So, skip unsupported nodes during catchup.
             if(mActiveAnimations[animIndex].currentFrame != mActiveAnimations[animIndex].executingFrame && !node->PlayDuringCatchup())
@@ -236,9 +233,9 @@ void Animator::ExecuteFrame(int animIndex, int frameNumber)
             }
 
             // Play the node!
-			node->Play(&mActiveAnimations[animIndex]);
-		}
-	}
+            node->Play(&mActiveAnimations[animIndex]);
+        }
+    }
 }
 
 void AnimationState::Stop()

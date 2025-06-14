@@ -10,7 +10,6 @@
 // Examples of layers: the 3D scene, title screen, movie player, inventory screen, help overlay, etc.
 //
 #pragma once
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -30,11 +29,11 @@ public:
 
     void OverrideAudioState(bool override);
     void OverrideAudioState(bool overrideSFX, bool overrideVO, bool overrideAmbient);
-    
+
 protected:
     virtual void OnEnter(Layer* fromLayer) { }
     virtual void OnExit(Layer* toLayer) { }
-    
+
 private:
     // Name of the layer.
     std::string mName;
@@ -59,11 +58,11 @@ class LayerManager
 {
 public:
     LayerManager();
-    
+
     // Push/pop from top of stack.
     void PushLayer(Layer* layer);
     void PopLayer(Layer* expectedLayer = nullptr);
-    
+
     // Query layer state.
     bool IsTopLayer(const Layer* layer) const;
     bool IsTopLayer(const std::string& name) const;
@@ -73,10 +72,10 @@ public:
     // Query current state.
     const std::string& GetTopLayerName() const { return mLayerStack.back()->GetName(); }
     const std::string& GetBottomLayerName() const { return mLayerStack.front()->GetName(); }
-    
+
     // Debug output.
     void DumpLayerStack();
-    
+
 private:
     // Current layer stack, higher indexes are "on top".
     // Active layer is the one on top of the stack.

@@ -5,24 +5,24 @@ Matrix4 RenderTransforms::MakeLookAt(const Vector3& eye, const Vector3& lookAt, 
     // Using look-at point and eye position, calculate forward (view) direction.
     Vector3 viewFwd = lookAt - eye;
     viewFwd.Normalize();
-    
+
     // Using forward and up, calculate side vector (using left-hand rule, this is pointing right).
     Vector3 viewSide = Vector3::Cross(up, viewFwd);
     viewSide.Normalize();
-    
+
     // Calculate up from forward and side.
     // No need to normalize because cross product between perpendicular unit vectors is also unit.
     Vector3 viewUp = Vector3::Cross(viewFwd, viewSide);
-    
+
     // Traditionally, OpenGL has +Z point away from view forward (RH system).
     // However, we can ignore this and use LH if we account for it in the projection matrix math.
     #if VIEW_HAND == VIEW_RH
     viewFwd *= -1;
     #endif
-    
+
     // Negating the side axis is one way we can reflect the view space, which has the effect of making world space appear right-handed!
     //viewSide *= -1;
-    
+
     // This commented out code explains the full algorithm for calculating the "world to view" matrix.
     // But the actual code below this does the same thing in a more compact (and less clear) way.
     /*
@@ -32,16 +32,16 @@ Matrix4 RenderTransforms::MakeLookAt(const Vector3& eye, const Vector3& lookAt, 
     rotate[0] = viewSide; // X axis is side
     rotate[1] = viewUp;   // Y axis is up
     rotate[2] = viewFwd;  // Z axis is forward
-    
+
     // The matrix defines a "view to world" rotation matrix. But we actually need a "world to view" rotation matrix!
     // To fix this, invert the rotation matrix. Since the rotation matrix is orthoganal, we can simply transpose to get the same effect.
     rotate.Transpose();
-    
+
     // We have the rotation part of the "world to view" matrix, now we need the translation part.
     // The eye is in world space, but it defines the origin of view space - we need to use it for the translation part of the "world to view" matrix.
     // Multiply eye by the "world to view" rotation to properly rotate it.
     Vector3 eyeInv = -(rotate * eye);
-    
+
     // Make a 4x4 transform matrix based on the 3x3 rotation matrix.
     // Then manually fill in the translation bits.
     Matrix4 worldToViewMatrix = Matrix4::MakeRotate(rotate);
@@ -50,7 +50,7 @@ Matrix4 RenderTransforms::MakeLookAt(const Vector3& eye, const Vector3& lookAt, 
     worldToViewMatrix(2, 3) = eyeInv.z;
     return worldToViewMatrix;
     */
-    
+
     // This does exactly what the above commented out code is doing, just more compactly/efficiently.
     Matrix4 lookAtMatrix(viewSide.x, viewSide.y, viewSide.z, -Vector3::Dot(viewSide, eye),
                          viewUp.x,   viewUp.y,   viewUp.z,   -Vector3::Dot(viewUp, eye),
@@ -63,17 +63,17 @@ Matrix4 RenderTransforms::MakePerspective(float fovAngle, float aspectRatio, flo
 {
     // Perspective projection matrix converts a point from view space to clip space.
     // Once in clip space, dividing by w-component (perspective divide) puts point in normalized device coordinates (NDC).
-    
+
     // If view space is left-handed (+Z is view dir), near and far are positive in view space.
     // If view space is right-handed (-Z is view dir), near and far are negative in view space.
     // That difference causes some math between LH and RH calculations.
-    
+
     // Also, the coordinate system in NDC differs depending on graphics system, which affects the math.
     // Everyone maps X/Y to [-1, 1], but OpenGL maps Z to [-1, 1] and DirectX maps Z to [0, 1].
-    
+
     // Start with zeroed out matrix.
     Matrix4 m = Matrix4::Zero;
-    
+
     // Calculate width and height of the projection, which converts x and y components from view space to clip space.
     // One way to do this is with fov and aspect ratio. Another option is use near/top/bottom/left/right values to calc this.
     // This is consistent between DirectX, OpenGL, LH, and RH - nice and easy. And all map this to [-1, 1] range in NDC.
@@ -81,7 +81,7 @@ Matrix4 RenderTransforms::MakePerspective(float fovAngle, float aspectRatio, flo
     float width = height / aspectRatio;
     m(0, 0) = width;
     m(1, 1) = height;
-    
+
     // NDC uses a LH coordinate system, so if view space is RH, the matrix needs to flip that.
     // To do this, we can force the w-component in clip space to be either positive or negative, depending on our needs.
     // We want it to be negative (resulting in an axis flip) if view space is RH.
@@ -90,7 +90,7 @@ Matrix4 RenderTransforms::MakePerspective(float fovAngle, float aspectRatio, flo
     #else
     m(3, 2) = -1.0f; // If view space is RH
     #endif
-    
+
     // Converting z component from view to clip space is most complex.
     // It depends on LH/RH (because Z-axis direction differs) and graphics system (GL maps to [-1, 1] while DX maps to [0, 1]).
     // These equations are derived from known values (e.g. "near" equals -1 or 0). See http://www.songho.ca/opengl/gl_projectionmatrix.html for a good explanation.
@@ -103,7 +103,7 @@ Matrix4 RenderTransforms::MakePerspective(float fovAngle, float aspectRatio, flo
     m(2, 2) = -(far + near) / (far - near);
     m(2, 3) = -(2.0f * near * far) / (far - near);
     #endif
-    
+
     // DirectX, LH view space
     //m(2, 2) = far / (far - near);
     //m(2, 3) = -near * (far / (far - near));
@@ -118,18 +118,18 @@ Matrix4 RenderTransforms::MakeOrthographic(float left, float right, float bottom
 {
     // As with perspective projection, the math can differ somewhat depending on
     // whether view space is LH or RH, and whether Z-axis is mapped to [-1, 1] or [0, 1].
-    
+
     // Start with identity.
     Matrix4 m = Matrix4::Identity;
-    
+
     // Calculate conversion of x component to clip space (row 0).
     m(0, 0) = 2.0f / (right - left);
     m(0, 3) = -(right + left) / (right - left);
-    
+
     // Calculate conversion of x component to clip space (row 1).
     m(1, 1) = 2.0f / (top - bottom);
     m(1, 3) = -(top + bottom) / (top - bottom);
-    
+
     // Converting z component is more complex (row 3).
     // If view space is RH, the z-axis must flip during conversion.
     // And again, GL uses [-1, 1] while DX uses [0, 1].
@@ -142,11 +142,11 @@ Matrix4 RenderTransforms::MakeOrthographic(float left, float right, float bottom
     m(2, 2) = -2.0f / (far - near);
     m(2, 3) = -(far + near) / (far - near);
     #endif
-    
+
     // DirectX, LH view space
     //m(2, 2) = 1.0f / (far - near);
     //m(2, 3) = -near / (far - near);
-    
+
     // DirectX, RH view space
     //m(2, 2) = -1.0f / (far - near);
     //m(2, 3) = -near / (far - near);
@@ -158,15 +158,15 @@ Matrix4 RenderTransforms::MakeOrthoBottomLeft(float width, float height)
     // An orthographic projection with origin in bottom-left corner; useful for UI rendering.
     // This assumes left/bottom are 0, right/top are width/height, near/far are defaults.
     Matrix4 m = Matrix4::Identity;
-    
+
     // Convert x component to clip space (row 0).
     m(0, 0) = 2.0f / width;
     m(0, 3) = -1.0f;        // -(width + 0) / (width - 0)
-    
+
     // Convert y component to clip space (row 1).
     m(1, 1) = 2.0f / height;
     m(1, 3) = -1.0f;        // -(height + 0) / (height - 0)
-    
+
     // Convert z component to clip space (row 2).
     // Again, differs by LH/RH and graphics API
     #if VIEW_HAND == VIEW_LH
@@ -178,11 +178,11 @@ Matrix4 RenderTransforms::MakeOrthoBottomLeft(float width, float height)
     m(2, 2) = -1.0f;
     //m(2, 3) = 0.0f;
     #endif
-    
+
     // DirectX, LH view space
     //m(2, 2) = 1.0f;
     //m(2, 3) = 0.0f;
-    
+
     // DirectX, RH view space
     //m(2, 2) = -1.0f;
     //m(2, 3) = 0.0f;
@@ -199,12 +199,12 @@ Vector4 RenderTransforms::ScreenPointToNDCPoint(const Vector2& screenPoint, floa
     //                  |           |
     //  (0, 0) (-1, -1) |-----------|
     //
-    
+
     // X and Y are similar and consistent.
     // Both should map [-1, 1] in NDC, regardless of LH/RH and regardless of GL/DX.
     float ndcX = (2.0f * (screenPoint.x / screenWidth)) - 1.0f;
     float ndcY = (2.0f * (screenPoint.y / screenHeight)) - 1.0f;
-    
+
     // As we say with the projection matrix calculations, Z is more complex.
     // For GL, map to [-1, 1]. For DX, map [0, 1].
     // If LH, the value must also be negated.
@@ -213,7 +213,7 @@ Vector4 RenderTransforms::ScreenPointToNDCPoint(const Vector2& screenPoint, floa
     #if VIEW_HAND == VIEW_LH
     ndcZ *= -1.0f;
     #endif
-    
+
     // Return NDC point.
     return Vector4(ndcX, ndcY, ndcZ, 1.0f);
 }

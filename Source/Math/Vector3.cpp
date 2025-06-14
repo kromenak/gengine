@@ -1,5 +1,7 @@
 #include "Vector3.h"
 
+#include <iomanip> // std::setprecision
+
 #include "Vector2.h"
 
 Vector3 Vector3::Zero(0.0f, 0.0f, 0.0f);
@@ -10,22 +12,22 @@ Vector3 Vector3::UnitZ(0.0f, 0.0f, 1.0f);
 
 Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z)
 {
-    
+
 }
 
 Vector3::Vector3(float x, float y) : x(x), y(y), z(0.0f)
 {
-	
+
 }
 
 Vector3::Vector3(const Vector2& other) : x(other.x), y(other.y), z(0.0f)
 {
-	
+
 }
 
 Vector3::Vector3(const Vector3& other) : x(other.x), y(other.y), z(other.z)
 {
-    
+
 }
 
 Vector3& Vector3::operator=(const Vector3& other)
@@ -118,7 +120,7 @@ Vector3& Vector3::operator/=(float scalar)
 
 Vector3 Vector3::operator*(const Vector3& other) const
 {
-	return Vector3(x * other.x, y * other.y, z * other.z);
+    return Vector3(x * other.x, y * other.y, z * other.z);
 }
 
 Vector3& Vector3::Normalize()
@@ -129,7 +131,7 @@ Vector3& Vector3::Normalize()
     {
         return *this;
     }
-    
+
     // To normalize, we divide each component by the length of the vector.
     // Or in other words, we can multiply by (1 / length).
     float oneOverLength = Math::InvSqrt(lengthSq);
@@ -166,7 +168,7 @@ Vector3& Vector3::Normalize()
 /*static*/ Vector3 Vector3::Project(const Vector3& a, const Vector3& b)
 {
     // Calculates projection of vector a onto vector b. Requires that b is unit length.
-    
+
     // This math actually does scalar projection ((a dot b) / ||b||).
     // And then it multiplies by (b / ||b||) to get a vector rather than a scalar.
     // Fortunately, we can avoid sqrt because b is normalized twice!

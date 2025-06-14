@@ -195,7 +195,7 @@ void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& l
     {
         ++labelWidth;
     }
-    
+
     for(SidneyButton* option : dropdown.options)
     {
         if(option->GetWidth() > labelWidth)

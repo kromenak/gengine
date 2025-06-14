@@ -4,15 +4,11 @@
 #include "AssetManager.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
-#include "Random.h"
 #include "Scene.h"
 #include "Sidney.h"
-#include "SidneyButton.h"
 #include "SidneyFakeInputPopup.h"
 #include "SidneyFiles.h"
 #include "SidneyUtil.h"
-#include "UIButton.h"
-#include "UIImage.h"
 #include "UILabel.h"
 #include "UINineSlice.h"
 #include "UIUtil.h"
@@ -111,7 +107,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 mAddDataLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("AbortInput"));
                 mAddDataLabel->SetFont(mGreenFont);
                 mAddDataColorTimer = -1.0f;
-                
+
                 // This puts the player in a non-interactive state for a moment (so they can read the text box) and then puts them back on the main screen.
                 gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2);", [this](const Action* action){
                     mAddDataBox->SetActive(false);
@@ -130,7 +126,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                     gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O4G716R1\", 1)");
                 }
             }
-            else 
+            else
             {
                 // CASE 3: Valid object selected, not scanned yet.
                 // Show box (and SFX) indicating we are scanning an item.
@@ -141,7 +137,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 mAddDataLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("ScanningItem"));
                 mAddDataLabel->SetFont(mGreenFont);
                 mAddDataColorTimer = kAddDataColorToggleInterval;
-                
+
                 // This puts the player in a non-interactive state for a moment (so they can read the text box and hear SFX).
                 gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2);", [this, sidneyFileId](const Action* action){
 

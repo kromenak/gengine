@@ -40,7 +40,7 @@ public:
 
     const UIGrid& GetGrid(size_t index) const { return mGrids[index]; }
     size_t GetCount() const { return mGrids.size(); }
-    
+
 private:
     // The lines in the set.
     std::vector<UIGrid> mGrids;

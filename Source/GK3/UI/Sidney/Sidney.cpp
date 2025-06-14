@@ -2,15 +2,12 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
-#include "GameProgress.h"
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Scene.h"
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
-#include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UIUtil.h"
@@ -53,7 +50,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         button->SetPressCallback([this](){
             Hide();
         });
-        
+
         button->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
         button->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
         button->GetRectTransform()->SetAnchoredPosition(-10.0f, 10.0f); // 10x10 offset from Bottom-Right

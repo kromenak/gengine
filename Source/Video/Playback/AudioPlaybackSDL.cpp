@@ -53,7 +53,7 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
         wanted_channel_layout &= ~AV_CH_LAYOUT_STEREO_DOWNMIX;
     }
     wanted_nb_channels = av_get_channel_layout_nb_channels(wanted_channel_layout);
-    
+
     // Populate wanted specification.
     SDL_AudioSpec wanted_spec;
     wanted_spec.channels = wanted_nb_channels;
@@ -68,7 +68,7 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
     wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));
     wanted_spec.callback = AudioCallback;
     wanted_spec.userdata = is;
-    
+
     // Determine lowest acceptable sample rate given wanted frequency.
     static const int next_sample_rates[] = { 0, 44100, 48000, 96000, 192000 };
     int next_sample_rate_idx = FF_ARRAY_ELEMS(next_sample_rates) - 1;
@@ -76,7 +76,7 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
     {
         next_sample_rate_idx--;
     }
-    
+
     // Loop and try to create audio device until it succeeds or we run out of options.
     SDL_AudioDeviceID audio_dev = 0;
     SDL_AudioSpec spec;
@@ -88,15 +88,15 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
         {
             break;
         }
-        
+
         // Couldn't open audio device with desired spec, so need to fall back on other options.
         av_log(NULL, AV_LOG_WARNING, "SDL_OpenAudio (%d channels, %d Hz): %s\n",
                wanted_spec.channels, wanted_spec.freq, SDL_GetError());
-        
+
         // Try a different number of channels (using a complicated system of channels->index).
         static const int next_nb_channels[] = { 0, 0, 1, 6, 2, 6, 4, 6 };
         wanted_spec.channels = next_nb_channels[FFMIN(7, wanted_spec.channels)];
-        
+
         // If zero channels, go down one sample rate...until we run out of sample rates...and fail.
         if(wanted_spec.channels == 0)
         {
@@ -110,17 +110,17 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
         }
         wanted_channel_layout = av_get_default_channel_layout(wanted_spec.channels);
     }
-    
+
     // Got an opened audio device! Save the device ID.
     mAudioDeviceId = audio_dev;
-    
+
     // Fail if audio format doesn't match what we want.
     if(spec.format != AUDIO_S16SYS)
     {
         av_log(NULL, AV_LOG_ERROR, "SDL advised audio format %d is not supported!\n", spec.format);
         return -1;
     }
-    
+
     // The supported channel spec may not match our desired channel spec.
     // In that case, try to update channel layout or fail.
     if(spec.channels != wanted_spec.channels)
@@ -132,13 +132,13 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
             return -1;
         }
     }
-    
+
     // Populate audio output format data.
     mAudioOutParams.fmt = AV_SAMPLE_FMT_S16;
     mAudioOutParams.freq = spec.freq;
     mAudioOutParams.channel_layout = wanted_channel_layout;
     mAudioOutParams.channels =  spec.channels;
-    
+
     mAudioOutParams.frame_size = av_samples_get_buffer_size(NULL, mAudioOutParams.channels, 1, mAudioOutParams.fmt, 1);
     mAudioOutParams.bytes_per_sec = av_samples_get_buffer_size(NULL, mAudioOutParams.channels, mAudioOutParams.freq, mAudioOutParams.fmt, 1);
     if(mAudioOutParams.bytes_per_sec <= 0 || mAudioOutParams.frame_size <= 0)
@@ -146,12 +146,12 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
         av_log(NULL, AV_LOG_ERROR, "av_samples_get_buffer_size failed\n");
         return -1;
     }
-    
+
     // By default, set audio input format equal to output format.
     // When we actually get audio data, if this ends up being incorrect,
     // we'll repopulate the input format and establish a resampling context.
     mAudioInParams = mAudioOutParams;
-    
+
     // Init buffer info.
     mAudioDeviceBufferSize = spec.size;
     mAudioBufferSize  = 0;
@@ -160,11 +160,11 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
     // Init averaging filter (for syncing audio to video or external clock).
     audio_diff_avg_coef  = exp(log(0.01) / AUDIO_DIFF_AVG_NB);
     audio_diff_avg_count = 0;
-    
+
     /* since we do not have a precise anough audio FIFO fullness,
        we correct audio sync only if larger than this threshold */
     audio_diff_threshold = (double)(mAudioDeviceBufferSize) / mAudioOutParams.bytes_per_sec;
-    
+
     // Make sure audio is not paused.
     SDL_PauseAudioDevice(mAudioDeviceId, 0);
     return 0;
@@ -174,10 +174,10 @@ void AudioPlaybackSDL::Close()
 {
     swr_free(&mResampleContext);
     av_freep(&mResampleBuffer);
-    
+
     mResampleBufferSize = 0;
     mAudioBuffer = nullptr;
-    
+
     SDL_CloseAudioDevice(mAudioDeviceId);
 }
 
@@ -186,10 +186,10 @@ void AudioPlaybackSDL::Close()
 {
     VideoState* is = static_cast<VideoState*>(opaque);
     AudioPlaybackSDL* ap = is->audioPlayback;
-    
+
     // Save callback time.
     mAudioCallbackTime = av_gettime_relative();
-    
+
     // Loop until the stream is completely filled.
     while(len > 0)
     {
@@ -210,14 +210,14 @@ void AudioPlaybackSDL::Close()
            }
            ap->mAudioBufferIndex = 0;
         }
-        
+
         // Amount of data available for playback is size - index (capped at size of stream).
         int len1 = ap->mAudioBufferSize - ap->mAudioBufferIndex;
         if(len1 > len)
         {
             len1 = len;
         }
-        
+
         // If muted or missing audio buffer, just fill stream with silence.
         if(ap->mMuted || ap->mAudioBuffer == nullptr)
         {
@@ -236,17 +236,17 @@ void AudioPlaybackSDL::Close()
                 SDL_MixAudioFormat(stream, (uint8_t *)ap->mAudioBuffer + ap->mAudioBufferIndex, AUDIO_S16SYS, len1, ap->mVolume);
             }
         }
-        
+
         // Reduce length and increase stream pointer.
         // If len is still >0 (more stream to populate, we loop back around).
         len -= len1;
         stream += len1;
-        
+
         // Increment audio buffer index as well.
         // If index surpasses available data in buffer, we need to get more data from frame queue before we can play back anymore.
         ap->mAudioBufferIndex += len1;
     }
-    
+
     // Update audio clock so others can sync to us.
     if(!isnan(ap->audio_clock))
     {
@@ -271,7 +271,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
     {
         return -1;
     }
-    
+
     // Find a frame that's ready to play (and part of current serial).
     Frame* af = nullptr;
     do
@@ -287,7 +287,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
             av_usleep(1000);
         }
         #endif
-        
+
         // Get playback frame or fail.
         af = is->audioFrames.PeekReadable();
         if(af == nullptr)
@@ -296,7 +296,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
         }
         is->audioFrames.Dequeue();
     } while(af->serial != is->audioPackets.serial);
-    
+
     // Get buffer size required to hold data in this frame.
     int data_size = av_samples_get_buffer_size(nullptr, af->frame->channels,
                                                af->frame->nb_samples,
@@ -307,7 +307,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
     int64_t dec_channel_layout =
         (af->frame->channel_layout != 0 && af->frame->channels == av_get_channel_layout_nb_channels(af->frame->channel_layout)) ?
         af->frame->channel_layout : av_get_default_channel_layout(af->frame->channels);
-    
+
     // Determine wanted number of samples (which may differ from actual number of samples in the frame
     // if audio needs to sync to video or an external clock).
     int wanted_nb_samples = SyncAudio(is, af->frame->nb_samples);
@@ -334,7 +334,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
             swr_free(&mResampleContext);
             return -1;
         }
-        
+
         // Update audio source format info (since it clearly didn't match what was in the frame).
         mAudioInParams.channel_layout = dec_channel_layout;
         mAudioInParams.channels = af->frame->channels;
@@ -356,7 +356,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
             av_log(NULL, AV_LOG_ERROR, "av_samples_get_buffer_size() failed\n");
             return -1;
         }
-    
+
         // Set sample compensation if frame samples and desired samples don't match.
         if(wanted_nb_samples != af->frame->nb_samples)
         {
@@ -367,7 +367,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
                 return -1;
             }
         }
-        
+
         // Allocate large enough resample buffer.
         // Note that "fast_malloc" reuses existing buffer if already allocated and big enough.
         av_fast_malloc(&mResampleBuffer, &mResampleBufferSize, out_size);
@@ -375,11 +375,11 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
         {
             return AVERROR(ENOMEM);
         }
-        
+
         // Read IN from frame buffer and write resampled data OUT to resample buffer.
         const uint8_t** in = (const uint8_t**)af->frame->extended_data;
         uint8_t** out = &mResampleBuffer;
-        
+
         // Convert frame data to resampled format, storing in the resample buffer.
         int createdCount = swr_convert(mResampleContext, out, out_count, in, af->frame->nb_samples);
         if(createdCount < 0)
@@ -387,7 +387,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
             av_log(NULL, AV_LOG_ERROR, "swr_convert() failed\n");
             return -1;
         }
-        
+
         // swr_convert returns number of samples created.
         // If equal to size of output buffer, this likely means the buffer was completely filled and some data was missed.
         if(createdCount == out_count)
@@ -398,7 +398,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
                 swr_free(&mResampleContext);
             }
         }
-        
+
         // Use resample buffer as the audio buffer.
         mAudioBuffer = mResampleBuffer;
         resampled_data_size = createdCount * mAudioOutParams.channels * av_get_bytes_per_sample(mAudioOutParams.fmt);
@@ -415,7 +415,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
     double prevAudioClock = audio_clock;
     #endif
     */
-    
+
     // Update the audio clock with latest frame pts.
     if(!isnan(af->pts))
     {
@@ -446,20 +446,20 @@ int AudioPlaybackSDL::SyncAudio(VideoState* is, int nb_samples)
     {
         return nb_samples;
     }
-    
+
     // Not the master, so we need to sync to someone else (either video or external clock).
     // We may need to remove samples (to catch up) or add samples (to slow down).
     int wanted_nb_samples = nb_samples;
-    
+
     // See if we are ahead (positive number) or behind (negative number).
     double diff = is->audioClock.GetTime() - is->GetMasterClock();
-    
+
     // If within sync range, we'll try to correct.
     if(!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD)
     {
         // Add to cumulative diff.
         audio_diff_cum = diff + audio_diff_avg_coef * audio_diff_cum;
-        
+
         // Must calculate a min number of diffs before average is good enough
         // to properly estimate changing samples for sync purposes.
         if(audio_diff_avg_count < AUDIO_DIFF_AVG_NB)
@@ -474,7 +474,7 @@ int AudioPlaybackSDL::SyncAudio(VideoState* is, int nb_samples)
             {
                 // Calculate number of samples wanted (smaller if ahead, bigger if behind).
                 wanted_nb_samples = nb_samples + (int)(diff * mAudioInParams.freq);
-                
+
                 // Make sure corrected sample count is within min/max range to avoid too large jumps.
                 int min_nb_samples = (nb_samples * (100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100);
                 int max_nb_samples = (nb_samples * (100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100);

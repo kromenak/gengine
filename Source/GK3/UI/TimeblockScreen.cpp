@@ -177,7 +177,7 @@ void TimeblockScreen::OnUpdate(float deltaTime)
         timeblockIndex = Math::Clamp(timeblockIndex - 1, 0, 16);
         Show(timeblockTextPositions[timeblockIndex].first);
     }
-    
+
     Vector2 anchoredPos = mTextImage->GetRectTransform()->GetAnchoredPosition();
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
     {

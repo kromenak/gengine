@@ -42,27 +42,27 @@ struct BasicValue
 {
     TypeHandler* typeHandler;
     void* data;
-    
+
     BasicValue() = default;
     template<typename T> BasicValue(T* x) : typeHandler(GetTypeHandler<T>()), data(x) { }
-    
+
     void* Copy()
     {
         return typeHandler->copyFrom(data);
     }
-    
+
     void Delete()
     {
         typeHandler->destroy(data);
         data = nullptr;
     }
-    
+
     void DeleteArray()
     {
         typeHandler->destroyArray(data);
         data = nullptr;
     }
-    
+
     // Allows us to convert a value back to the original type.
     // But note you MUST know the correct type. The assert will fail otherwise!
     template<typename T>
@@ -80,11 +80,11 @@ struct Value
     // explains how to manipulate that piece of memory, based on whether it's an int, string, float, etc.
     TypeHandler* typeHandler;
     void* data;
-    
+
     template<typename T> Value(const T& x) : typeHandler(GetTypeHandler<T>()), data(new T(x)) { }
     Value(const Value& other) : typeHandler(other.typeHandler), data(typeHandler->copyFrom(other.data)) { }
     ~Value() { typeHandler->destroy(data); }
-    
+
     // Assignment between Value objects.
     Value& operator=(const Value& other)
     {
@@ -96,7 +96,7 @@ struct Value
         }
         return *this;
     }
-    
+
     // Allows us to assign any type for the value to hold.
     template<typename T>
     Value& operator=(const T& other)
@@ -106,7 +106,7 @@ struct Value
         data = new T(other);
         return *this;
     }
-    
+
     // Allows us to convert a value back to the original type.
     // But note you MUST know the correct type. The assert will fail otherwise!
     template<typename T>

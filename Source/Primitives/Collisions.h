@@ -20,14 +20,14 @@ class Vector3;
 
 struct RaycastHit
 {
-	// The "t" value at which the hit occurred.
-	float t = FLT_MAX;
-	
-	// A name/identifier for the thing hit.
-	std::string name;
-	
-	// An actor hit.
-	Actor* actor = nullptr;
+    // The "t" value at which the hit occurred.
+    float t = FLT_MAX;
+
+    // A name/identifier for the thing hit.
+    std::string name;
+
+    // An actor hit.
+    Actor* actor = nullptr;
 };
 
 //
@@ -58,7 +58,7 @@ namespace Intersect
     bool TestRayTriangle(const Ray& r, const Triangle& t, float& outRayT);
     bool TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& p1, const Vector3& p2, float& outRayT);
     bool TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& p1, const Vector3& p2, float& outRayT, float& outU, float& outV);
-    
+
     //bool TestRaySphere(const Ray& r, const Sphere& s);
     //bool TestRayPlane(const Ray& r, const Plane& p);
 

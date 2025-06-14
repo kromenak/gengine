@@ -17,7 +17,7 @@ BinaryReader::BinaryReader(const uint8_t* memory, uint32_t memoryLength)
 BinaryReader::BinaryReader(const char* memory, uint32_t memoryLength) :
     BinaryReader(reinterpret_cast<const uint8_t*>(memory), memoryLength)
 {
-    
+
 }
 
 BinaryReader::~BinaryReader()
@@ -27,12 +27,12 @@ BinaryReader::~BinaryReader()
 
 void BinaryReader::Seek(uint32_t position)
 {
-	// It's possible we've hit EOF, especially if we're jumping around a lot.
-	// If we are trying to seek on an EOF stream, clear the error flags and do the seek.
-	if(!mStream->good() && mStream->eof())
-	{
-		mStream->clear();
-	}
+    // It's possible we've hit EOF, especially if we're jumping around a lot.
+    // If we are trying to seek on an EOF stream, clear the error flags and do the seek.
+    if(!mStream->good() && mStream->eof())
+    {
+        mStream->clear();
+    }
     mStream->seekg(static_cast<std::streamoff>(position), std::ios::beg);
 }
 

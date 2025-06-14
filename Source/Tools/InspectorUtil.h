@@ -1,6 +1,6 @@
 //
 // Clark Kromenaker
-// 
+//
 // Multiple tools need to render arbitrary lists of object properties using general "inspector" behavior.
 // For example, the Hierarchy Tool shows a list of Actor properties, the Assets Tool shows a list of Asset properties.
 //

@@ -44,16 +44,16 @@ std::vector<AnimNode*>* Animation::GetFrame(int frameNumber)
 
 VertexAnimNode* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, const std::string& modelName)
 {
-	for(auto& node : mVertexAnimNodes)
-	{
-		if(node->frameNumber == frameNumber &&
-		   node->vertexAnimation != nullptr &&
-		   StringUtil::EqualsIgnoreCase(node->vertexAnimation->GetModelName(), modelName))
-		{
-			return node;
-		}
-	}
-	return nullptr;
+    for(auto& node : mVertexAnimNodes)
+    {
+        if(node->frameNumber == frameNumber &&
+           node->vertexAnimation != nullptr &&
+           StringUtil::EqualsIgnoreCase(node->vertexAnimation->GetModelName(), modelName))
+        {
+            return node;
+        }
+    }
+    return nullptr;
 }
 
 void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
@@ -65,39 +65,39 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
         // Header section has only one value: number of frames.
         if(StringUtil::EqualsIgnoreCase(section.name, "HEADER"))
         {
-			if(section.lines.size() > 0)
+            if(section.lines.size() > 0)
             {
                 mFrameCount = section.lines[0].entries.front().GetValueAsInt();
             }
         }
-		// Actions section contains vertex animations to start playing on certain frames.
+        // Actions section contains vertex animations to start playing on certain frames.
         else if(StringUtil::EqualsIgnoreCase(section.name, "ACTIONS"))
         {
-			// First line is number of action entries...but we can just determine that from the number of lines!
-			// Read in 2+ lines as actions.
+            // First line is number of action entries...but we can just determine that from the number of lines!
+            // Read in 2+ lines as actions.
             for(size_t i = 1; i < section.lines.size(); ++i)
             {
-				IniLine& line = section.lines[i];
-				
+                IniLine& line = section.lines[i];
+
                 // Each line has up to 10 (!!!) fields. Most are optional, but they must be in a certain order.
-				
-				// Frame number must be specified.
+
+                // Frame number must be specified.
                 // <frame_num>, <act_name>, <x1>, <y1>, <z1>, <angle1>, <x2>, <y2>, <z2>, <angle2>
                 // <frame_num>, <act_name>, ABSOLUTE
                 int frameNumber = line.entries[0].GetValueAsInt();
-                
-				// Vertex animation must be specified.
-				VertexAnimation* vertexAnim = gAssetManager.LoadVertexAnimation(line.entries[1].key, GetScope());
+
+                // Vertex animation must be specified.
+                VertexAnimation* vertexAnim = gAssetManager.LoadVertexAnimation(line.entries[1].key, GetScope());
                 if(vertexAnim == nullptr)
                 {
                     printf("Failed to load vertex animation %s!\n", line.entries[1].key.c_str());
                     continue;
                 }
-                
-				// Create and push back the animation node. Remaining fields are optional.
+
+                // Create and push back the animation node. Remaining fields are optional.
                 VertexAnimNode* node = new VertexAnimNode();
                 node->frameNumber = frameNumber;
-				node->vertexAnimation = vertexAnim;
+                node->vertexAnimation = vertexAnim;
 
                 //HACK: If this is a facing direction helper (DOR), make sure it animated *before* other objects.
                 //HACK: Some logic in GKActor for calculating facing direction only works if the DOR gets sampled first.
@@ -115,12 +115,12 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
 
                 //TODO: Some animations have a keyword here (ABSOLUTE). Which I guess indicates that this is an absolute animation.
                 //TODO: I'm guessing this might be shorthand for "0, 0, 0, 0, 0, 0, 0, 0" which is frequently used for absolute anims.
-				
-				// See if there are enough args for the (x1, y1, z1) and (angle1) values.
-				if(line.entries.size() < 6) { continue; }
-				
-				// If an animation defines more entries, it means it is an absolute animation.
-				node->absolute = true;
+
+                // See if there are enough args for the (x1, y1, z1) and (angle1) values.
+                if(line.entries.size() < 6) { continue; }
+
+                // If an animation defines more entries, it means it is an absolute animation.
+                node->absolute = true;
 
                 // (x1, y1, z1) and (angle1) represent an offset/heading used to calculate position to play absolute anim.
                 // The offset in the asset goes "actor to model" but we need it to be "model to actor" later. So, that's why we negate them!
@@ -131,113 +131,113 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 node->absoluteModelToActorHeading = line.entries[5].GetValueAsFloat();
 
                 // Enough args for the final set of arguments?
-				if(line.entries.size() < 10) { continue; }
+                if(line.entries.size() < 10) { continue; }
 
                 // Next are (x2, z2, y2) and (angle2). These represent an offset/heading ALSO used to calculate position to play absolute anims.
-                // The previous vector is rotated by this heading and then added to this offset to get final position - crazy stuff! 
+                // The previous vector is rotated by this heading and then added to this offset to get final position - crazy stuff!
                 // Note z/y are flipped due to Maya->Game conversion.
-				node->absoluteWorldToModelOffset.x = line.entries[6].GetValueAsFloat();
-				node->absoluteWorldToModelOffset.z = line.entries[7].GetValueAsFloat();
-				node->absoluteWorldToModelOffset.y = line.entries[8].GetValueAsFloat();
-				node->absoluteWorldToModelHeading = line.entries[9].GetValueAsFloat();
+                node->absoluteWorldToModelOffset.x = line.entries[6].GetValueAsFloat();
+                node->absoluteWorldToModelOffset.z = line.entries[7].GetValueAsFloat();
+                node->absoluteWorldToModelOffset.y = line.entries[8].GetValueAsFloat();
+                node->absoluteWorldToModelHeading = line.entries[9].GetValueAsFloat();
             }
         }
-		// "STextures" changes textures on a scene (BSP) model.
+        // "STextures" changes textures on a scene (BSP) model.
         else if(StringUtil::EqualsIgnoreCase(section.name, "STEXTURES"))
         {
-			// First line is number of entries...but we can just determine that from the number of lines!
-			for(size_t i = 1; i < section.lines.size(); ++i)
+            // First line is number of entries...but we can just determine that from the number of lines!
+            for(size_t i = 1; i < section.lines.size(); ++i)
             {
-				IniLine& line = section.lines[i];
-				
+                IniLine& line = section.lines[i];
+
                 // <frame_num>, <scn_name>, <scn_model_name>, <texture_name>
                 int frameNumber = line.entries[0].GetValueAsInt();
-                
+
                 // Read the scene name.
                 std::string sceneName = line.entries[1].key;
-                
+
                 // Read the scene model name.
                 std::string sceneModelName = line.entries[2].key;
-                
+
                 // Read the texture name.
-				std::string textureName = line.entries[3].key;
-				
-				// Create and add the anim node.
-				SceneTextureAnimNode* node = new SceneTextureAnimNode();
-				node->frameNumber = frameNumber;
-				node->sceneName = sceneName;
-				node->sceneModelName = sceneModelName;
-				node->textureName = textureName;
+                std::string textureName = line.entries[3].key;
+
+                // Create and add the anim node.
+                SceneTextureAnimNode* node = new SceneTextureAnimNode();
+                node->frameNumber = frameNumber;
+                node->sceneName = sceneName;
+                node->sceneModelName = sceneModelName;
+                node->textureName = textureName;
                 mFrames[frameNumber].push_back(node);
             }
         }
-		// "SVisibility" changes the visibility of a scene (BSP) model.
+        // "SVisibility" changes the visibility of a scene (BSP) model.
         else if(StringUtil::EqualsIgnoreCase(section.name, "SVISIBILITY"))
         {
-			// First line is number of entries...but we can just determine that from the number of lines!
-			// Read in 2+ lines as actions.
+            // First line is number of entries...but we can just determine that from the number of lines!
+            // Read in 2+ lines as actions.
             for(size_t i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
-                
+
                 // <frame_num>, <scn_name>, <scn_model_name>, <on/off>
                 int frameNumber = line.entries[0].GetValueAsInt();
-                
+
                 // Read the scene name.
                 std::string sceneName = line.entries[1].key;
-                
+
                 // Read the scene model name.
                 std::string sceneModelName = line.entries[2].key;
-                
+
                 // Read the on/off value.
                 bool visible = line.entries[3].GetValueAsBool();
-				
-				// Create and add the anim node.
-				SceneModelVisibilityAnimNode* node = new SceneModelVisibilityAnimNode();
-				node->sceneName = sceneName;
-				node->sceneModelName = sceneModelName;
-				node->visible = visible;
+
+                // Create and add the anim node.
+                SceneModelVisibilityAnimNode* node = new SceneModelVisibilityAnimNode();
+                node->sceneName = sceneName;
+                node->sceneModelName = sceneModelName;
+                node->visible = visible;
                 mFrames[frameNumber].push_back(node);
             }
         }
-		// "MTextures" changes textures on a model or actor.
+        // "MTextures" changes textures on a model or actor.
         else if(StringUtil::EqualsIgnoreCase(section.name, "MTEXTURES"))
         {
-			// First line is number of entries...but we can just determine that from the number of lines!
-			// Read in 2+ lines as actions.
+            // First line is number of entries...but we can just determine that from the number of lines!
+            // Read in 2+ lines as actions.
             for(size_t i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
-                
+
                 // <frame_num>, <model_name>, <mesh_index>, <group_index>, <texture_name>
                 int frameNumber = line.entries[0].GetValueAsInt();
-                
+
                 // Read the model name.
                 std::string modelName = line.entries[1].key;
-                
+
                 // Read the model mesh index.
                 int meshIndex = line.entries[2].GetValueAsInt();
-                
+
                 // Read the model mesh group index.
                 int submeshIndex = line.entries[3].GetValueAsInt();
-                
+
                 // Read the texture name.
                 std::string textureName = line.entries[4].key;
-				
-				// Create and add node.
-				ModelTextureAnimNode* node = new ModelTextureAnimNode();
-				node->modelName = modelName;
-				node->meshIndex = static_cast<unsigned char>(meshIndex);
-				node->submeshIndex = static_cast<unsigned char>(submeshIndex);
-				node->textureName = textureName;
-				mFrames[frameNumber].push_back(node);
+
+                // Create and add node.
+                ModelTextureAnimNode* node = new ModelTextureAnimNode();
+                node->modelName = modelName;
+                node->meshIndex = static_cast<unsigned char>(meshIndex);
+                node->submeshIndex = static_cast<unsigned char>(submeshIndex);
+                node->textureName = textureName;
+                mFrames[frameNumber].push_back(node);
             }
         }
-		// "MVisibility" changes visibility on a model or actor.
+        // "MVisibility" changes visibility on a model or actor.
         else if(StringUtil::EqualsIgnoreCase(section.name, "MVISIBILITY"))
         {
-			// First line is number of entries...but we can just determine that from the number of lines!
-			// Read in 2+ lines as actions.
+            // First line is number of entries...but we can just determine that from the number of lines!
+            // Read in 2+ lines as actions.
             for(size_t i = 1; i < section.lines.size(); ++i)
             {
                 IniLine& line = section.lines[i];
@@ -246,7 +246,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 // <frame_num>, <model_name>, <on/off>
                 // <frame_num>, <model_name>, <mesh_index>, <submesh_index>, <on/off>
                 int frameNumber = line.entries[0].GetValueAsInt();
-                
+
                 // Read the model name.
                 std::string modelName = line.entries[1].key;
 
@@ -268,35 +268,35 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
             }
         }
-		// Triggers sounds to play on certain frames at certain locations.
+        // Triggers sounds to play on certain frames at certain locations.
         else if(StringUtil::EqualsIgnoreCase(section.name, "SOUNDS"))
         {
-			// First line is number of entries...but we can just determine that from the number of lines!
-			// Read in lines 2+ as sounds.
+            // First line is number of entries...but we can just determine that from the number of lines!
+            // Read in lines 2+ as sounds.
             for(size_t i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
-                
-				// Possible versions of these lines:
-				// <frame_num>, <sound_name>, <volume> (2D sound)
-				// <frame_num>, <sound_name>, <volume>, <model_name> (3D sound attached to model)
+
+                // Possible versions of these lines:
+                // <frame_num>, <sound_name>, <volume> (2D sound)
+                // <frame_num>, <sound_name>, <volume>, <model_name> (3D sound attached to model)
                 // <frame_num>, <sound_name>, <volume>, <model_name>, <min_dist>, <max_dist> (3D sound attached to model w/ min/max distances)
                 // <frame_num>, <sound_name>, <volume>, <x>, <y>, <z> (3D sound at position)
-				// <frame_num>, <sound_name>, <volume>, <x>, <y>, <z>, <min_dist>, <max_dist> (3D sound at position w/ min/max distances)
+                // <frame_num>, <sound_name>, <volume>, <x>, <y>, <z>, <min_dist>, <max_dist> (3D sound at position w/ min/max distances)
                 // Read frame number.
                 int frameNumber = line.entries[0].GetValueAsInt();
-                
+
                 // Read the sound name.
                 std::string soundName = line.entries[1].key;
-                
+
                 // Read the volume.
                 int volume = line.entries[2].GetValueAsInt();
-				
-				// Create node.
-				SoundAnimNode* node = new SoundAnimNode();
-				node->frameNumber = frameNumber;
+
+                // Create node.
+                SoundAnimNode* node = new SoundAnimNode();
+                node->frameNumber = frameNumber;
                 node->audio = gAssetManager.LoadAudio(soundName, GetScope());
-				node->volume = volume;
+                node->volume = volume;
 
                 // Remaining arguments are optional.
                 if(line.entries.size() >= 4)
@@ -339,30 +339,30 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 mFrames[frameNumber].push_back(node);
             }
         }
-		// Allows specifying of additional options that affect the entire animation.
+        // Allows specifying of additional options that affect the entire animation.
         else if(StringUtil::EqualsIgnoreCase(section.name, "OPTIONS"))
         {
-			// First line is number of entries...but we can just determine that from the number of lines!
+            // First line is number of entries...but we can just determine that from the number of lines!
             for(size_t i = 1; i < section.lines.size(); i++)
             {
-				IniLine& line = section.lines[i];
-				
+                IniLine& line = section.lines[i];
+
                 // <frame_num>, <option>, <value>
-                
+
                 // Read frame number.
                 //int frameNumber = line.entries[0].GetValueAsInt();
-                
+
                 // Read in the option.
-				std::string option = line.entries[1].key;
+                std::string option = line.entries[1].key;
                 if(StringUtil::EqualsIgnoreCase(option, "SIMPLE"))
                 {
                     //int simpleValue = entry->GetValueAsInt();
                 }
                 else if(StringUtil::EqualsIgnoreCase(option, "NOINTERPOLATE"))
                 {
-                    
+
                 }
-				// Allows us to dictate the rate at which the animation proceeds.
+                // Allows us to dictate the rate at which the animation proceeds.
                 else if(StringUtil::EqualsIgnoreCase(option, "FRAMERATE"))
                 {
                     // In theory, the engine supports the ability to CHANGE an animations frame rate DURING the animation!
@@ -377,20 +377,20 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
             }
         }
-		// Contains some options specifically for GK3. I imagine this engine
-		// was initially meant to be reused on future projects, so they tried
-		// to isolate extremely specific to GK3 stuff here?
+        // Contains some options specifically for GK3. I imagine this engine
+        // was initially meant to be reused on future projects, so they tried
+        // to isolate extremely specific to GK3 stuff here?
         else if(StringUtil::EqualsIgnoreCase(section.name, "GK3"))
         {
             for(size_t i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
-                
+
                 // Read frame number.
                 int frameNumber = line.entries[0].GetValueAsInt();
-                
+
                 // Read in the option.
-				std::string keyword = line.entries[1].key;
+                std::string keyword = line.entries[1].key;
                 if(StringUtil::EqualsIgnoreCase(keyword, "FOOTSTEP"))
                 {
                     // [FRAME] FOOTSTEP [NOUN]
@@ -459,10 +459,10 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "STOPALLSOUNDTRACKS"))
                 {
-					// Create and add node.
+                    // Create and add node.
                     StopSoundtrackAnimNode* node = new StopSoundtrackAnimNode();
                     node->frameNumber = frameNumber;
-					mFrames[frameNumber].push_back(node);
+                    mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "CAMERA"))
                 {
@@ -602,8 +602,8 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                         mFrames[frameNumber].push_back(node);
                     }
                 }
-				else if(StringUtil::EqualsIgnoreCase(keyword, "MOOD"))
-				{
+                else if(StringUtil::EqualsIgnoreCase(keyword, "MOOD"))
+                {
                     // [FRAME] MOOD [NOUN] [MOOD]
                     if(line.entries.size() >= 4)
                     {
@@ -620,7 +620,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                         node->moodName = moodName;
                         mFrames[frameNumber].push_back(node);
                     }
-				}
+                }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "EXPRESSION"))
                 {
                     // [FRAME] EXPRESSION [NOUN] [EXPRESSION]
@@ -640,7 +640,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                         mFrames[frameNumber].push_back(node);
                     }
                 }
-				else if(StringUtil::EqualsIgnoreCase(keyword, "SPEAKER"))
+                else if(StringUtil::EqualsIgnoreCase(keyword, "SPEAKER"))
                 {
                     // [FRAME] SPEAKER [NOUN]
                     if(line.entries.size() >= 3)
@@ -707,14 +707,14 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                         mFrames[frameNumber].push_back(node);
                     }
                 }
-				else if(StringUtil::EqualsIgnoreCase(keyword, "DIALOGUECUE"))
+                else if(StringUtil::EqualsIgnoreCase(keyword, "DIALOGUECUE"))
                 {
-					// No options for this one.
-					
+                    // No options for this one.
+
                     // Create and add node.
-					DialogueCueAnimNode* node = new DialogueCueAnimNode();
+                    DialogueCueAnimNode* node = new DialogueCueAnimNode();
                     node->frameNumber = frameNumber;
-					mFrames[frameNumber].push_back(node);
+                    mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "DIALOGUE"))
                 {

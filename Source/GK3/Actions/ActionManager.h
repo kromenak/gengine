@@ -2,7 +2,7 @@
 // Clark Kromenaker
 //
 // Manages which actions are available for which nouns given current game state.
-// 
+//
 // Also provides an API for showing the action bar and executing actions.
 //
 #pragma once

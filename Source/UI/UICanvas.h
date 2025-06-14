@@ -20,42 +20,42 @@ class UICanvas : public Component
 {
     TYPEINFO_SUB(UICanvas, Component);
 public:
-	static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
-	static void UpdateMouseInput();
+    static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
+    static void UpdateMouseInput();
     static void RenderCanvases();
-	static bool DidWidgetEatInput() { return sMouseOverWidget != nullptr; }
+    static bool DidWidgetEatInput() { return sMouseOverWidget != nullptr; }
     static void NotifyWidgetDestruct(UIWidget* widget);
 
-	UICanvas(Actor* owner);
+    UICanvas(Actor* owner);
     UICanvas(Actor* owner, int order);
-	~UICanvas();
-	
-	void Render();
-    
-	void AddWidget(UIWidget* widget);
-	void RemoveWidget(UIWidget* widget);
-	void RemoveAllWidgets() { mWidgets.clear(); }
+    ~UICanvas();
+
+    void Render();
+
+    void AddWidget(UIWidget* widget);
+    void RemoveWidget(UIWidget* widget);
+    void RemoveAllWidgets() { mWidgets.clear(); }
 
     void SetMasked(bool masked) { mMasked = masked; }
     bool IsMasked() const { return mMasked; }
 
     RectTransform* GetRectTransform() const { return mRectTransform; }
-	
+
 private:
-	// An array of all canvases that currently exist.
-	static std::vector<UICanvas*> sCanvases;
-    
-	// At any time, the mouse can be over exactly one widget.
-	// (at least, unless we add multi-pointer support...shudders)
-	static UIWidget* sMouseOverWidget;
+    // An array of all canvases that currently exist.
+    static std::vector<UICanvas*> sCanvases;
+
+    // At any time, the mouse can be over exactly one widget.
+    // (at least, unless we add multi-pointer support...shudders)
+    static UIWidget* sMouseOverWidget;
 
     // The canvas's rect transform.
     RectTransform* mRectTransform = nullptr;
 
     // Desired draw order for the canvas. Zero is drawn before one, one is drawn before two, etc.
     int mDrawOrder = INT_MAX;
-	
-	// All widgets on this canvas.
+
+    // All widgets on this canvas.
     std::vector<UIWidget*> mWidgets;
 
     // If true, the canvas only renders within its RectTransform borders, masking anything outside of it.

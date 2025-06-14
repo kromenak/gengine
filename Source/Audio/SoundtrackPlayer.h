@@ -52,15 +52,15 @@ class SoundtrackPlayer : public Component
 public:
     SoundtrackPlayer(Actor* owner);
     ~SoundtrackPlayer();
-    
+
     void Play(Soundtrack* soundtrack);
     void Stop(Soundtrack* soundtrack, bool force = false);
     void Stop(const std::string& soundtrackName);
     void StopAll(bool force = false);
-	
+
 protected:
-	void OnUpdate(float deltaTime) override;
-    
+    void OnUpdate(float deltaTime) override;
+
 private:
     std::vector<PlayingSoundtrack> mPlaying;
 };

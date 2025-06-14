@@ -55,7 +55,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
             });
         });
     }
-    
+
     // Create window for translation area.
     {
         mTranslateWindow = new Actor(TransformType::RectTransform);
@@ -114,7 +114,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
         scrollRect->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
         scrollRect->SetScrollbarWidth(5.0f);
         mTranslateTextScrollRect = scrollRect;
-        
+
         // Create text as child of background. Fill that area, with some margins on left/right.
         mTranslateTextLabel = UI::CreateWidgetActor<UILabel>("TranslateText", scrollRect);
         mTranslateTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
@@ -494,7 +494,7 @@ void SidneyTranslate::OnTranslateButtonPressed()
         }
         else
         {
-            
+
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02oc02zq91\", 1)");
         }
         return;

@@ -134,7 +134,7 @@ void HierarchyTool::AddTreeNodeForActor(Actor* actor)
     {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
-    
+
     // Draw the tree node.
     bool node_open = ImGui::TreeNodeEx("Object", flags, "%s [%s]", actor->GetName().c_str(), GetBestTypeLabelForActor(actor));
 
@@ -150,7 +150,7 @@ void HierarchyTool::AddTreeNodeForActor(Actor* actor)
             camera->SetPosition(Vector3::Lerp(camera->GetWorldPosition(), mSelectedActor->GetWorldPosition(), 0.9f));
         }
     }
-    
+
     // If node is open, draw it's child contents.
     if(node_open)
     {

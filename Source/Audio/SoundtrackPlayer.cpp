@@ -1,7 +1,8 @@
 #include "SoundtrackPlayer.h"
 
 #include "ActionManager.h"
-#include "GKActor.h"
+#include "Actor.h"
+#include "GKObject.h"
 #include "StringUtil.h"
 
 PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
@@ -110,7 +111,7 @@ SoundtrackPlayer::~SoundtrackPlayer()
 {
     // When a soundtrack player is destructed, all its playing soundtracks should stop.
     // This causes audio to either end immediately or fade out.
-    // 
+    //
     // For sounds with a stop mode of "PlayToEnd", they WILL actually continue to play - that's expected!
     // Any "PlayToEnd" sound that should be stopped when the player is destroyed should have Stop explicitly called with the force flag set.
     StopAll();

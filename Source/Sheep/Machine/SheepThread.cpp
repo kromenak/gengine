@@ -27,11 +27,11 @@ void SheepThread::Reset()
 
 std::string SheepThread::GetName() const
 {
-	if(mContext != nullptr)
-	{
-		return mContext->GetName() + ":" + mFunctionName;
-	}
-	return ":" + mFunctionName;
+    if(mContext != nullptr)
+    {
+        return mContext->GetName() + ":" + mFunctionName;
+    }
+    return ":" + mFunctionName;
 }
 
 std::function<void()> SheepThread::AddWait()
@@ -52,7 +52,7 @@ void SheepThread::RemoveWait()
     assert(mWaitCounter > 0);
     --mWaitCounter;
     //std::cout << GetName() << " removed wait (" << mWaitCounter << " waits remain)" << std::endl;
-    
+
     if(mBlocked && mWaitCounter == 0)
     {
         mVirtualMachine->ContinueExecution(this);

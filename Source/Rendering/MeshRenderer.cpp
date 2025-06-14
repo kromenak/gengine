@@ -1,7 +1,5 @@
 #include "MeshRenderer.h"
 
-#include <cassert>
-
 #include "Actor.h"
 #include "AssetManager.h"
 #include "Collisions.h"
@@ -38,14 +36,14 @@ void MeshRenderer::Render(bool opaque, bool translucent)
     // There can potentially be more submeshes than materials defined.
     // If so, any additional submeshes just use the last material.
     int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
-    
+
     // Iterate meshes and render each in turn.
     Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
     for(size_t i = 0; i < mMeshes.size(); i++)
     {
         // Mesh vertices are in "mesh space". Create matrix to convert to world space.
         Matrix4 meshToWorldMatrix = localToWorldMatrix * mMeshes[i]->GetMeshToLocalMatrix();
-        
+
         // Iterate each submesh.
         const std::vector<Submesh*>& submeshes = mMeshes[i]->GetSubmeshes();
         for(size_t j = 0; j < submeshes.size(); j++)
@@ -105,7 +103,7 @@ void MeshRenderer::Render(bool opaque, bool translucent)
             ++submeshIndex;
         }
     }
-    
+
     // Optionally some AABB drawing.
     if(Debug::RenderAABBs())
     {
@@ -115,8 +113,8 @@ void MeshRenderer::Render(bool opaque, bool translucent)
 
 void MeshRenderer::SetModel(Model* model)
 {
-	mModel = model;
-    
+    mModel = model;
+
     // Clear any existing.
     mMeshes.clear();
     mMaterials.clear();
@@ -151,23 +149,23 @@ void MeshRenderer::AddMesh(Mesh* mesh)
         return;
     }
 
-	// Add mesh to array.
-	mMeshes.push_back(mesh);
-	
-	// Create a material for each submesh.
-	const std::vector<Submesh*>& submeshes = mesh->GetSubmeshes();
-	for(auto& submesh : submeshes)
-	{
-		// Generate materials for each mesh.
+    // Add mesh to array.
+    mMeshes.push_back(mesh);
+
+    // Create a material for each submesh.
+    const std::vector<Submesh*>& submeshes = mesh->GetSubmeshes();
+    for(auto& submesh : submeshes)
+    {
+        // Generate materials for each mesh.
         Material m(mShader);
-		
-		// Load and set texture reference.
-		if(!submesh->GetTextureName().empty())
-		{
+
+        // Load and set texture reference.
+        if(!submesh->GetTextureName().empty())
+        {
             // The scope here would depend on whether this MeshRenderer is scene-specific or persists between scenes.
-			Texture* tex = gAssetManager.LoadSceneTexture(submesh->GetTextureName(), GetOwner()->IsDestroyOnLoad() ? AssetScope::Scene : AssetScope::Global);
-			m.SetDiffuseTexture(tex);
-		}
+            Texture* tex = gAssetManager.LoadSceneTexture(submesh->GetTextureName(), GetOwner()->IsDestroyOnLoad() ? AssetScope::Scene : AssetScope::Global);
+            m.SetDiffuseTexture(tex);
+        }
         else
         {
             m.SetDiffuseTexture(&Texture::White);
@@ -175,36 +173,36 @@ void MeshRenderer::AddMesh(Mesh* mesh)
 
         // Set color.
         m.SetColor(submesh->GetColor());
-		
-		// Add to materials list.
-		mMaterials.push_back(m);
-	}
+
+        // Add to materials list.
+        mMaterials.push_back(m);
+    }
 }
 
 void MeshRenderer::SetMaterial(int index, const Material& material)
 {
-	if(index >= 0 && index < mMaterials.size())
-	{
-		mMaterials[index] = material;
-	}
+    if(index >= 0 && index < mMaterials.size())
+    {
+        mMaterials[index] = material;
+    }
 }
 
 Material* MeshRenderer::GetMaterial(int index)
 {
-	if(index >= 0 && index < mMaterials.size())
-	{
-		return &mMaterials[index];
-	}
-	return nullptr;
+    if(index >= 0 && index < mMaterials.size())
+    {
+        return &mMaterials[index];
+    }
+    return nullptr;
 }
 
 Material* MeshRenderer::GetMaterial(int meshIndex, int submeshIndex)
 {
-	if(meshIndex >= 0 && meshIndex < mMeshes.size())
-	{
-		return GetMaterial(GetIndexFromMeshSubmeshIndexes(meshIndex, submeshIndex));
-	}
-	return nullptr;
+    if(meshIndex >= 0 && meshIndex < mMeshes.size())
+    {
+        return GetMaterial(GetIndexFromMeshSubmeshIndexes(meshIndex, submeshIndex));
+    }
+    return nullptr;
 }
 
 void MeshRenderer::SetVisibility(int meshIndex, int submeshIndex, bool visible)
@@ -218,11 +216,11 @@ void MeshRenderer::SetVisibility(int meshIndex, int submeshIndex, bool visible)
 
 Mesh* MeshRenderer::GetMesh(int index) const
 {
-	if(index >= 0 && index < mMeshes.size())
-	{
-		return mMeshes[index];
-	}
-	return nullptr;
+    if(index >= 0 && index < mMeshes.size())
+    {
+        return mMeshes[index];
+    }
+    return nullptr;
 }
 
 bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
@@ -233,25 +231,25 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
     // Get our local to world matrix.
     const Matrix4& localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
 
-	// Go through each mesh and see if the ray has hit the mesh.
-	for(Mesh* mesh : mMeshes)
-	{
-		// Calculate world->local space transform by creating object->local and inverting.
-		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
+    // Go through each mesh and see if the ray has hit the mesh.
+    for(Mesh* mesh : mMeshes)
+    {
+        // Calculate world->local space transform by creating object->local and inverting.
+        Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
         Matrix4 worldToMeshMatrix = Matrix4::InverseTransform(meshToWorldMatrix);
-		
-		// Transform the ray to object space.
+
+        // Transform the ray to object space.
         Vector3 rayLocalPos = worldToMeshMatrix.TransformPoint(ray.origin);
         Vector3 rayLocalDir = worldToMeshMatrix.TransformVector(ray.direction);
-		rayLocalDir.Normalize();
-		Ray localRay(rayLocalPos, rayLocalDir);
-		
-		// See if the local ray intersects the local space triangles of the mesh.
+        rayLocalDir.Normalize();
+        Ray localRay(rayLocalPos, rayLocalDir);
+
+        // See if the local ray intersects the local space triangles of the mesh.
         float meshRayT = FLT_MAX;
         int submeshIndex = -1;
         Vector2 uvCoord;
-		if(mesh->Raycast(localRay, meshRayT, submeshIndex, uvCoord))
-		{
+        if(mesh->Raycast(localRay, meshRayT, submeshIndex, uvCoord))
+        {
             bool wasAHit = true;
 
             // The ray definitely hit a submesh of this mesh.
@@ -281,11 +279,11 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
                     hitInfo.t = worldT;
                 }
             }
-		}
-	}
-	
-	// Ray did not intersect with any part of the mesh renderer.
-	return hitInfo.t < FLT_MAX;
+        }
+    }
+
+    // Ray did not intersect with any part of the mesh renderer.
+    return hitInfo.t < FLT_MAX;
 }
 
 AABB MeshRenderer::GetAABB() const
@@ -318,17 +316,17 @@ AABB MeshRenderer::GetAABB() const
 void MeshRenderer::DebugDrawAABBs(const Color32& color, const Color32& meshColor)
 {
     // The local-to-world matrix for this Actor is required for all meshes.
-	Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
-	
-	// Raycast against triangles in the mesh.
-	for(auto& mesh : mMeshes)
-	{
-		// Calculate mesh->world matrix.
-		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
-	
-		// Debug draw the AABB.
+    Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
+
+    // Raycast against triangles in the mesh.
+    for(auto& mesh : mMeshes)
+    {
+        // Calculate mesh->world matrix.
+        Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
+
+        // Debug draw the AABB.
         Debug::DrawAABB(mesh->GetAABB(), meshColor, 0.0f, &meshToWorldMatrix);
-	}
+    }
 
     // Also draw the MeshRenderer's OVERALL AABB in a different color.
     Debug::DrawAABB(GetAABB(), color);

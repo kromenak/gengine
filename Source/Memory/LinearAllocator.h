@@ -15,24 +15,24 @@ class LinearAllocator
 {
 public:
     LinearAllocator(void* memory, size_t size);
-    
+
     void* Allocate(size_t size, unsigned short alignment = 4);
     void Deallocate(void* memory);
-    
+
     void Reset();
-    
+
     size_t GetAllocationCount() const { return mAllocationCount; }
     size_t GetAllocatedSize() const { return mAllocatedSize; }
-    
+
 private:
     // The allocator's memory block.
     void* mMemory = nullptr;
     size_t mSize = 0;
-    
+
     // Allocation stats.
     size_t mAllocationCount = 0;
     size_t mAllocatedSize = 0;
-    
+
     // This represents the position in the memory buffer we will allocate from next.
     void* mTop = nullptr;
 };

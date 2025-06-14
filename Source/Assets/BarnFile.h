@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <mutex>
 #include <string>
-#include <unordered_map>
+#include <vector>
 
 #include "BinaryReader.h"
 #include "StringUtil.h"
@@ -40,7 +40,7 @@ struct BarnAsset
     // Compression type for this asset.
     // If set, the asset needs to be decompressed to be usable.
     CompressionType compressionType = CompressionType::None;
-    
+
     // True if this BarnAsset is just a pointer to another barn file.
     bool IsPointer() const { return barnFileName != nullptr; }
 };
@@ -57,45 +57,45 @@ class BarnFile
 public:
     BarnFile(const std::string& filePath, BarnSearchPriority searchPriority = BarnSearchPriority::Normal);
 
-	// Retrieves an asset handle, if it exists in this bundle.
+    // Retrieves an asset handle, if it exists in this bundle.
     BarnAsset* GetAsset(const std::string& assetName);
 
     // Creates a buffer containing the desired asset. Caller owns the returned buffer.
     uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
 
-	// For debugging, write assets to file.
+    // For debugging, write assets to file.
     bool WriteToFile(const std::string& assetName);
-	bool WriteToFile(const std::string& assetName, const std::string& outputDir);
-	
-	// For debugging, write assets to file whose names match a search string.
-	void WriteAllToFile(const std::string& search);
-	void WriteAllToFile(const std::string& search, const std::string& outputDir);
-	
-	// For debugging, output asset list to cout.
-	void OutputAssetList() const;
-    
-	const std::string& GetName() const { return mName; }
+    bool WriteToFile(const std::string& assetName, const std::string& outputDir);
+
+    // For debugging, write assets to file whose names match a search string.
+    void WriteAllToFile(const std::string& search);
+    void WriteAllToFile(const std::string& search, const std::string& outputDir);
+
+    // For debugging, output asset list to cout.
+    void OutputAssetList() const;
+
+    const std::string& GetName() const { return mName; }
     BarnSearchPriority GetSearchPriority() const { return mSearchPriority; }
-	
+
 private:
-	// Identifiers required to verify file type.
+    // Identifiers required to verify file type.
     const uint32_t kGameIdentifier = 0x21334B47; // GK3!
     const uint32_t kBarnIdentifier = 0x6E726142; // Barn
-	
-	// Identifiers required to identify data section.
+
+    // Identifiers required to identify data section.
     const uint32_t kDDirIdentifier = 0x44446972; // DDir
     const uint32_t kDataIdentifier = 0x44617461; // Data
-    
+
     // The name of the barn file.
     std::string mName;
 
     // Specifies the priority of this Barn vs. other Barns for finding assets.
     // Higher priority Barns are searched first, so they can override lower priority Barn files.
     BarnSearchPriority mSearchPriority = BarnSearchPriority::Normal;
-    
+
     // Offset within the file to where the data is located.
     uint32_t mDataOffset = 0;
-    
+
     // Binary reader for extracting data.
     // Extraction may occur on multiple threads at once, so a mutex is required to guard access.
     BinaryReader mReader;
@@ -104,7 +104,7 @@ private:
     // If *this* Barn contains pointers to *other* Barns, this contains the names of those other Barns.
     // Individual assets that are pointers will point to these elements.
     std::vector<std::string> mReferencedBarns;
-    
+
     // Map of asset name to an asset handle. Assets must be extracted before being used.
     // Asset names are case-insensitive.
     std::string_map_ci<BarnAsset> mAssetMap;

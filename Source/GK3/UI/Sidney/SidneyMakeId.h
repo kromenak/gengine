@@ -14,7 +14,7 @@ class SidneyMakeId
 {
 public:
     void Init(Actor* parent);
-    
+
     void Show();
     void Hide();
 

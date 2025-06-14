@@ -25,7 +25,7 @@ namespace Interpolate
         inline float CubicOut(float t) { return Flip(CubicIn(Flip(t))); }
         inline float CubicInOut(float t) { return Linear(CubicIn(t), CubicOut(t), t); }
     }
-    
+
     template<typename T>
     T QuadraticIn(T a, T b, float t)
     {

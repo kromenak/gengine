@@ -26,7 +26,7 @@ struct VertexAnimationPose
 };
 
 struct VertexAnimationVertexPose : public VertexAnimationPose
-{   
+{
     std::vector<Vector3> vertexPositions;
 };
 
@@ -47,39 +47,39 @@ public:
     // Queries transform (position, rotation, scale) for a mesh at a frame/time.
     VertexAnimationTransformPose SampleTransformPose(int frame, int meshIndex);
     VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);
-    
-	// Queries ALL vertices for a submesh at a frame/time.
+
+    // Queries ALL vertices for a submesh at a frame/time.
     VertexAnimationVertexPose SampleVertexPose(int frame, int meshIndex, int submeshIndex);
     VertexAnimationVertexPose SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex);
-	
+
     // Queries single vertex for a submesh at a frame/time.
     Vector3 SampleVertexPosition(int frame, int meshIndex, int submeshIndex, int vertexIndex);
     Vector3 SampleVertexPosition(float time, int framesPerSecond, int meshIndex, int submeshIndex, int vertexIndex);
-    
-	// Length and duration.
-	int GetFrameCount() const { return mFrameCount; }
+
+    // Length and duration.
+    int GetFrameCount() const { return mFrameCount; }
     float GetDuration(int framesPerSecond) const { return (float)mFrameCount / (float)framesPerSecond; }
-	
-	const std::string& GetModelName() const { return mModelName; }
-	
+
+    const std::string& GetModelName() const { return mModelName; }
+
 private:
     // The number of frames in this animation.
     int mFrameCount = 0;
-	
-	// The name of the model that is meant to play this animation.
-	// If we ever play the animation on a mismatched model, the graphics will probably glitch out.
-	std::string mModelName;
-    
-	// Each array element is the FIRST vertex pose for each mesh/submesh index.
-	// Subsequent poses for the mesh are stored in the "next" of the first pose.
-	std::unordered_map<int, std::unordered_map<int, VertexAnimationVertexPose*>> mVertexPoses;
-	
-	// Each element of array is the FIRST transform poses for each mesh index.
-	// Subsequent poses for the mesh are stored in the "next" of the first pose.
+
+    // The name of the model that is meant to play this animation.
+    // If we ever play the animation on a mismatched model, the graphics will probably glitch out.
+    std::string mModelName;
+
+    // Each array element is the FIRST vertex pose for each mesh/submesh index.
+    // Subsequent poses for the mesh are stored in the "next" of the first pose.
+    std::unordered_map<int, std::unordered_map<int, VertexAnimationVertexPose*>> mVertexPoses;
+
+    // Each element of array is the FIRST transform poses for each mesh index.
+    // Subsequent poses for the mesh are stored in the "next" of the first pose.
     std::vector<VertexAnimationTransformPose*> mTransformPoses;
-    
+
     void ParseFromData(uint8_t* data, uint32_t dataLength);
-    
+
     float DecompressFloatFromByte(unsigned char val);
     float DecompressFloatFromUShort(unsigned short val);
 };

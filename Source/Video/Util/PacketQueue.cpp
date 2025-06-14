@@ -9,7 +9,7 @@ int PacketQueue::Init()
 {
     // Clear all fields.
     memset(this, 0, sizeof(PacketQueue));
-    
+
     // Create mutex or fail.
     mMutex = SDL_CreateMutex();
     if(!mMutex)
@@ -17,7 +17,7 @@ int PacketQueue::Init()
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateMutex(): %s\n", SDL_GetError());
         return AVERROR(ENOMEM);
     }
-    
+
     // Create condition variable or fail.
     mNewPacketCondition = SDL_CreateCond();
     if(!mNewPacketCondition)
@@ -108,19 +108,19 @@ int PacketQueue::Dequeue(bool block, AVPacket* avPacket, int* avPacketSerial)
             {
                 mLastPacket = nullptr;
             }
-            
+
             // Queue packet count, size, duration all decrease.
             mPacketCount--;
             mSizeBytes -= firstPacket->pkt.size + sizeof(*firstPacket);
             mDuration -= firstPacket->pkt.duration;
-            
+
             // Set out vars.
             *avPacket = firstPacket->pkt;
             if(avPacketSerial)
             {
                 *avPacketSerial = firstPacket->serial;
             }
-            
+
             delete firstPacket;
             ret = 1;
             break;
@@ -137,7 +137,7 @@ int PacketQueue::Dequeue(bool block, AVPacket* avPacket, int* avPacketSerial)
             SDL_CondWait(mNewPacketCondition, mMutex);
         }
     }
-    
+
     SDL_UnlockMutex(mMutex);
     return ret;
 }
@@ -145,26 +145,26 @@ int PacketQueue::Dequeue(bool block, AVPacket* avPacket, int* avPacketSerial)
 void PacketQueue::Clear()
 {
     SDL_LockMutex(mMutex);
-    
+
     // Clean up all packets in queue.
     Packet* pkt = mFirstPacket;
     while(pkt != nullptr)
     {
         Packet* temp = pkt;
         pkt = temp->next;
-        
+
         // Unref packet - we're discarding it.
         av_packet_unref(&temp->pkt);
         delete temp; // av_freep(&temp);
     }
-    
+
     // Queue is now empty.
     mLastPacket = nullptr;
     mFirstPacket = nullptr;
     mPacketCount = 0;
     mSizeBytes = 0;
     mDuration = 0;
-    
+
     SDL_UnlockMutex(mMutex);
 }
 
@@ -172,14 +172,14 @@ int PacketQueue::PutInternal(AVPacket* avPacket)
 {
     // Don't put anything if aborting.
     if(mAborted) { return -1; }
-    
+
     // Create packet or fail.
     Packet* packet = new Packet(); //static_cast<Packet*>(av_malloc(sizeof(Packet)));
     if(packet == nullptr) { return -1; }
-    
+
     // Store AVPacket inside of packet.
     packet->pkt = *avPacket;
-    
+
     // If it is the flush packet, increment serial.
     // The flush packet indicates that a skip/discontinuity has occurred in playback.
     // So, following packets are from a different segment than previous packets.
@@ -187,7 +187,7 @@ int PacketQueue::PutInternal(AVPacket* avPacket)
     {
         serial++;
     }
-    
+
     // Save packet's serial.
     packet->serial = serial;
 
@@ -201,13 +201,13 @@ int PacketQueue::PutInternal(AVPacket* avPacket)
         mLastPacket->next = packet;
     }
     mLastPacket = packet;
-    
+
     // Increase count/size/duration.
     mPacketCount++;
     mSizeBytes += packet->pkt.size + sizeof(*packet);
     mDuration += packet->pkt.duration;
     /* XXX: should duplicate packet data in DV case */
-    
+
     // If anybody's waiting on the "more packets" condition, let them know we have more packets.
     SDL_CondSignal(mNewPacketCondition);
     return 0;

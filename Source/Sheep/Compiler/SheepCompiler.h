@@ -6,7 +6,6 @@
 //
 #pragma once
 #include <istream>
-#include <map>
 #include <string>
 
 #include "SheepScanner.h"
@@ -28,9 +27,9 @@ public:
     const SheepScriptBuilder& GetCompiledBuilder() const { return mBuilder; }
 
     // For logging warnings & errors.
-	void Warning(SheepScriptBuilder* builder, const Sheep::location& location, const std::string& message);
+    void Warning(SheepScriptBuilder* builder, const Sheep::location& location, const std::string& message);
     void Error(SheepScriptBuilder* builder, const Sheep::location& location, const std::string& message);
-	
+
 private:
     // Name of the SheepScript being compiled (for warning/error output).
     std::string mName;

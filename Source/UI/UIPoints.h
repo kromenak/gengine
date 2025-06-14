@@ -32,7 +32,7 @@ public:
 
     const Vector2& GetPoint(size_t index) const { return mPoints[index]; }
     size_t GetPointsCount() const { return mPoints.size(); }
-    
+
 private:
     // The points in the set.
     std::vector<Vector2> mPoints;

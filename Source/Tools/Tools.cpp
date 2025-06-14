@@ -16,7 +16,7 @@ namespace
 {
     // Have tools been initialized?
     bool toolsInitialized = false;
-    
+
     // Are tools active globally?
     bool toolsActive = false;
 
@@ -107,7 +107,7 @@ void Tools::ProcessEvent(const SDL_Event& event)
 
 bool Tools::EatingMouseInputs()
 {
-    return toolsActive && ImGui::GetIO().WantCaptureMouse;   
+    return toolsActive && ImGui::GetIO().WantCaptureMouse;
 }
 
 bool Tools::EatingKeyboardInputs()

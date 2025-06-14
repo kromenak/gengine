@@ -14,7 +14,7 @@ public:
     BinaryWriter(uint8_t* memory, uint32_t memoryLength);
     ~BinaryWriter();
 
-	// Should only write if OK is true.
+    // Should only write if OK is true.
     // Remember, "good" returns true as long as fail/bad/eof bits are all false.
     bool OK() const { return mStream->good(); }
 

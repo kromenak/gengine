@@ -139,11 +139,11 @@ struct PersistHeader
 
                 static const size_t kPngScratchSize = 83886080;
                 static uint8_t pngScratch[kPngScratchSize];
-                
+
                 PNG::Encode(imageData, pngScratch, kPngScratchSize, thumbnailSize);
                 thumbnailBytes = pngScratch;
             }
-            
+
             ps.Xfer("Thumbnail-size", thumbnailSize);
             ps.Xfer("Thumbnail", thumbnailBytes, thumbnailSize);
         }

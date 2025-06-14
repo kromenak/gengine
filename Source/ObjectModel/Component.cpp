@@ -9,7 +9,7 @@ TYPEINFO_INIT(Component, NoBaseClass, 1)
 
 Component::Component(Actor* owner) : mOwner(owner)
 {
-    
+
 }
 
 void Component::SetEnabled(bool enabled)
@@ -30,5 +30,5 @@ void Component::SetEnabled(bool enabled)
 
 bool Component::IsActiveAndEnabled() const
 {
-	return mEnabled && mOwner != nullptr && mOwner->IsActive();
+    return mEnabled && mOwner != nullptr && mOwner->IsActive();
 }

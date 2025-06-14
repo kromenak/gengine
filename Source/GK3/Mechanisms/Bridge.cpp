@@ -9,7 +9,6 @@
 #include "GKActor.h"
 #include "GKObject.h"
 #include "InputManager.h"
-#include "MeshRenderer.h"
 #include "SceneManager.h"
 
 namespace

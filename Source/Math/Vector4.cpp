@@ -11,7 +11,7 @@ Vector4 Vector4::UnitW(0.0f, 0.0f, 0.0f, 1.0f);
 
 Vector4::Vector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w)
 {
-    
+
 }
 
 Vector4::Vector4(float w) : w(w)
@@ -21,12 +21,12 @@ Vector4::Vector4(float w) : w(w)
 
 Vector4::Vector4(const Vector3& other, float w) : Vector4(other.x, other.y, other.z, w)
 {
-	
+
 }
 
 Vector4::Vector4(const Vector4& other) : x(other.x), y(other.y), z(other.z), w(other.w)
 {
-    
+
 }
 
 Vector4& Vector4::operator=(const Vector4& other)
@@ -126,7 +126,7 @@ Vector4& Vector4::operator/=(float scalar)
 
 Vector4 Vector4::operator*(const Vector4& other) const
 {
-	return Vector4(x * other.x, y * other.y, z * other.z, w * other.w);
+    return Vector4(x * other.x, y * other.y, z * other.z, w * other.w);
 }
 
 Vector4& Vector4::Normalize()
@@ -137,7 +137,7 @@ Vector4& Vector4::Normalize()
     {
         return *this;
     }
-    
+
     // To normalize, we divide each component by the length of the vector.
     // Or in other words, we can multiply by (1 / length).
     float oneOverLength = Math::InvSqrt(lengthSq);
@@ -164,7 +164,7 @@ Vector4 Vector4::Cross(const Vector4& lhs, const Vector4& rhs)
 {
     // Cross product isn't really defined for Vector4.
     // What we really mean here is to treat the x/y/z part as two 3D vectors.
-    
+
     // For the w component, we'll multiply the two values for the return.
     // So, 1*1=1, 0*1=0, 0*0=0.
     // I don't know at all whether this makes sense, but it seems reasonable at the moment ;D

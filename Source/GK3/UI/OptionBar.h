@@ -23,13 +23,13 @@ class OptionBar : public Actor
 {
 public:
     OptionBar();
-    
+
     void Show();
     void Hide();
-    
+
 protected:
     void OnUpdate(float deltaTime) override;
-    
+
 private:
     // A large clickable area behind the action bar that stops scene interaction while visible.
     UIButton* mSceneBlockerButton = nullptr;
@@ -47,7 +47,7 @@ private:
     UIButton* mCinematicsOnButton = nullptr;
     UIButton* mHelpButton = nullptr;
     UIButton* mOptionsButton = nullptr;
-    
+
     // Camera section.
     Actor* mCamerasSection = nullptr;
 
@@ -85,7 +85,7 @@ private:
     UIToggle* mCaptionsToggle = nullptr;
 
     void KeepOnScreen();
-    
+
     void CreateMainSection(std::unordered_map<std::string, IniKeyValue>& config);
     void CreateCamerasSection(std::unordered_map<std::string, IniKeyValue>& config);
     void CreateOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
@@ -100,7 +100,7 @@ private:
 
     void OnCinematicsButtonPressed(UIButton* button);
     void RefreshCinematicsButtonState();
-    
+
     void OnSoundOptionsButtonPressed(UIButton* button);
     void OnGlobalVolumeSliderValueChanged(float value);
 

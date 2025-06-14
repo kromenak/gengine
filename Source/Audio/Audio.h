@@ -13,7 +13,7 @@ class Audio : public Asset
     TYPEINFO_SUB(Audio, Asset);
 public:
     Audio(const std::string& name, AssetScope scope) : Asset(name, scope) { }
-	~Audio() override;
+    ~Audio() override;
 
     void Load(uint8_t* data, uint32_t dataLength);
 
@@ -23,8 +23,8 @@ public:
     float GetDuration() const { return mDuration; }
 
 private:
-	const unsigned short kFormatPCM = 0x0001;
-	//const unsigned short kMp3Format = 0x0055;
+    const unsigned short kFormatPCM = 0x0001;
+    //const unsigned short kMp3Format = 0x0055;
 
     // Audio data buffer - the contents of WAV file in memory.
     uint8_t* mDataBuffer = nullptr;

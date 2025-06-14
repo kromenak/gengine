@@ -45,7 +45,7 @@ struct MeshDefinition
     // Vertex/index data is usually "owned" by this object.
     // But in rare circumstances, data lifetime may be owned by external systems - so keep track of that here!
     bool ownsData = true;
-    
+
     MeshDefinition() = default;
     MeshDefinition(MeshUsage usage, unsigned int vertexCount);
 
@@ -58,7 +58,7 @@ struct MeshDefinition
     // For interleaved data: specify attributes separately from singular data buffer.
     void AddVertexAttribute(const VertexAttribute& attribute);
     template<typename T> void SetVertexData(T* data);
-    
+
     void SetIndexData(unsigned int count, unsigned short* data);
 
     template<typename T> T* GetVertexData(const VertexAttribute& attribute) const;
@@ -79,7 +79,7 @@ void MeshDefinition::SetVertexData(T* data)
 {
     // "Set" overwrites all existing data.
     ClearVertexData();
-    
+
     // Set data as only element.
     vertexData.emplace_back(std::forward<T*>(data));
     vertexDataTypeHandlers.emplace_back(GetTypeHandler<T>());

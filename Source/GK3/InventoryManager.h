@@ -13,7 +13,6 @@
 #pragma once
 #include <set>
 #include <string>
-#include <unordered_map>
 
 #include "PersistState.h"
 #include "StringUtil.h"
@@ -26,45 +25,45 @@ class InventoryManager
 {
 public:
     void Init();
-	
-	bool IsValidInventoryItem(const std::string& itemName) const;
+
+    bool IsValidInventoryItem(const std::string& itemName) const;
 
     void AddInventoryItem(const std::string& itemName);
-	void AddInventoryItem(const std::string& actorName, const std::string& itemName);
+    void AddInventoryItem(const std::string& actorName, const std::string& itemName);
 
     void RemoveInventoryItem(const std::string& itemName);
-	void RemoveInventoryItem(const std::string& actorName, const std::string& itemName);
+    void RemoveInventoryItem(const std::string& actorName, const std::string& itemName);
 
     bool HasInventoryItem(const std::string& itemName) const;
-	bool HasInventoryItem(const std::string& actorName, const std::string& itemName) const;
+    bool HasInventoryItem(const std::string& actorName, const std::string& itemName) const;
 
     std::string GetActiveInventoryItem() const;
-	std::string GetActiveInventoryItem(const std::string& actorName) const;
+    std::string GetActiveInventoryItem(const std::string& actorName) const;
     void SetActiveInventoryItem(const std::string& itemName);
-	void SetActiveInventoryItem(const std::string& actorName, const std::string& itemName);
-	
+    void SetActiveInventoryItem(const std::string& actorName, const std::string& itemName);
+
     void ShowInventory();
-	void ShowInventory(const std::string& actorName);
-	void HideInventory();
-	bool IsInventoryShowing() const;
+    void ShowInventory(const std::string& actorName);
+    void HideInventory();
+    bool IsInventoryShowing() const;
 
     void InventoryInspect();
-	void InventoryInspect(const std::string& itemName);
-	void InventoryUninspect();
+    void InventoryInspect(const std::string& itemName);
+    void InventoryUninspect();
     bool IsInventoryInspectShowing() const;
 
     void InventoryInspectTurnLSRPageLeft();
     void InventoryInspectTurnLSRPageRight();
 
     Texture* GetInventoryItemIconTexture(const std::string& itemName);
-	Texture* GetInventoryItemListTexture(const std::string& itemName);
-	Texture* GetInventoryItemCloseupTexture(const std::string& itemName);
+    Texture* GetInventoryItemListTexture(const std::string& itemName);
+    Texture* GetInventoryItemCloseupTexture(const std::string& itemName);
 
     void OnPersist(PersistState& ps);
-	
+
 private:
-	// Maps an inventory item's name to its graphical representations.
-	// Allows us to look up inventory textures AND determine whether an inventory item is "valid".
+    // Maps an inventory item's name to its graphical representations.
+    // Allows us to look up inventory textures AND determine whether an inventory item is "valid".
     struct InventoryItemTextures
     {
         // String used as a prefix to load these textures.
@@ -85,20 +84,20 @@ private:
         InventoryItemTextures() = default;
         InventoryItemTextures(const std::string& prefix) : textureNamePrefix(prefix) { }
     };
-	std::string_map_ci<InventoryItemTextures> mInventoryItems;
-	
-	// Inventories for actors.
-	// Key is actor name, value is a set. If a value is present in the set, the actor "has" that inventory item.
-	// Set is used (rather than unordered_set) b/c we want items to display in UI in alphabetical order.
-	std::string_map_ci<std::set<std::string>> mInventories;
-	
-	// Each actor can have one active inventory item.
-	// It's also possible for an actor to have NO active item!
-	std::string_map_ci<std::string> mActiveInventoryItems;
-    
-	// UI for inventory.
-	InventoryScreen* mInventoryScreen = nullptr;
-	InventoryInspectScreen* mInventoryInspectScreen = nullptr;
+    std::string_map_ci<InventoryItemTextures> mInventoryItems;
+
+    // Inventories for actors.
+    // Key is actor name, value is a set. If a value is present in the set, the actor "has" that inventory item.
+    // Set is used (rather than unordered_set) b/c we want items to display in UI in alphabetical order.
+    std::string_map_ci<std::set<std::string>> mInventories;
+
+    // Each actor can have one active inventory item.
+    // It's also possible for an actor to have NO active item!
+    std::string_map_ci<std::string> mActiveInventoryItems;
+
+    // UI for inventory.
+    InventoryScreen* mInventoryScreen = nullptr;
+    InventoryInspectScreen* mInventoryInspectScreen = nullptr;
 };
 
 extern InventoryManager gInventoryManager;

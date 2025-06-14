@@ -124,7 +124,7 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
 
 bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo, bool forWalk)
 {
-	// Values for tracking closest found hit.
+    // Values for tracking closest found hit.
     outHitInfo.t = FLT_MAX;
     std::string* closest = nullptr;
 
@@ -153,24 +153,24 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo, bool forWalk)
         }
     }
 
-	// If no closest object was found, no hits occurred. Early out.
-	if(closest == nullptr) { return false; }
+    // If no closest object was found, no hits occurred. Early out.
+    if(closest == nullptr) { return false; }
 
-	// Otherwise, fill in out hit info and return.
-	outHitInfo.name = *closest;
-	return true;
+    // Otherwise, fill in out hit info and return.
+    outHitInfo.name = *closest;
+    return true;
 }
 
 bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo)
 {
     // BSP polygons are made up of "triangle fans", so the first vertex is shared by all triangles in the polygon.
-	Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndexOffset]];
+    Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndexOffset]];
 
     // Check the ray against all triangles that make up this polygon.
-	for(int i = 1; i < polygon->vertexIndexCount - 1; i++)
-	{
-		Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i]];
-		Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i + 1]];
+    for(int i = 1; i < polygon->vertexIndexCount - 1; i++)
+    {
+        Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i]];
+        Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i + 1]];
 
         // If the ray hits the backside of the polygon, it is not a valid hit - must hit the front side.
         // We can ensure the ray and triangle are facing towards one another using dot product.
@@ -215,10 +215,10 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
                 }
             }
         }
-	}
+    }
 
     // The ray did not intersect any triangle in this polygon.
-	return false;
+    return false;
 }
 
 void BSP::SetFloorObjectName(const std::string& floorObjectName)
@@ -281,18 +281,18 @@ bool BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outT
 
 void BSP::SetVisible(const std::string& objectName, bool visible)
 {
-	// Find index of the object name.
+    // Find index of the object name.
     uint32_t index = GetObjectIndex(objectName);
-	if(index == UINT32_MAX) { return; }
+    if(index == UINT32_MAX) { return; }
 
-	// All surfaces belonging to this object will be hidden.
-	for(auto& surface : mSurfaces)
-	{
+    // All surfaces belonging to this object will be hidden.
+    for(auto& surface : mSurfaces)
+    {
         if(surface.objectIndex == index)
-		{
+        {
             surface.visible = visible;
-		}
-	}
+        }
+    }
 }
 
 void BSP::SetTexture(const std::string& objectName, Texture* texture)
@@ -301,14 +301,14 @@ void BSP::SetTexture(const std::string& objectName, Texture* texture)
     uint32_t index = GetObjectIndex(objectName);
     if(index == UINT32_MAX) { return; }
 
-	// All surfaces belonging to this object will be hidden.
-	for(auto& surface : mSurfaces)
-	{
+    // All surfaces belonging to this object will be hidden.
+    for(auto& surface : mSurfaces)
+    {
         if(surface.objectIndex == index)
-		{
+        {
             surface.texture = texture;
-		}
-	}
+        }
+    }
 }
 
 void BSP::SetHitTest(const std::string& objectName, bool isHitTest)
@@ -334,57 +334,57 @@ bool BSP::Exists(const std::string& objectName) const
 
 bool BSP::IsVisible(const std::string& objectName) const
 {
-	// Find index of the object name.
-	uint32_t index = GetObjectIndex(objectName);
-	if(index == UINT32_MAX) { return false; }
+    // Find index of the object name.
+    uint32_t index = GetObjectIndex(objectName);
+    if(index == UINT32_MAX) { return false; }
 
-	// Find any surface belonging to this object and see if it is visible.
-	for(auto& surface : mSurfaces)
-	{
+    // Find any surface belonging to this object and see if it is visible.
+    for(auto& surface : mSurfaces)
+    {
         if(surface.objectIndex == index)
-		{
+        {
             return surface.visible;
-		}
-	}
+        }
+    }
 
-	// Worst case, no surfaces belong to this object. Must not be visible then!
-	return false;
+    // Worst case, no surfaces belong to this object. Must not be visible then!
+    return false;
 }
 
 Vector3 BSP::GetPosition(const std::string& objectName) const
 {
-	// Find index of the object name.
+    // Find index of the object name.
     uint32_t objectIndex = GetObjectIndex(objectName);
 
-	//TODO: Maybe we should return true/false with an out parameter?
-	if(objectIndex == UINT32_MAX) { return Vector3::Zero; }
+    //TODO: Maybe we should return true/false with an out parameter?
+    if(objectIndex == UINT32_MAX) { return Vector3::Zero; }
 
-	// Find all surfaces that belong to this object and sum their positions.
-	Vector3 pos = Vector3::Zero;
-	int vertexCount = 0;
-	for(size_t i = 0; i < mSurfaces.size(); i++)
-	{
+    // Find all surfaces that belong to this object and sum their positions.
+    Vector3 pos = Vector3::Zero;
+    int vertexCount = 0;
+    for(size_t i = 0; i < mSurfaces.size(); i++)
+    {
         if(mSurfaces[i].objectIndex == objectIndex)
-		{
-			for(size_t j = 0; j < mPolygons.size(); j++)
-			{
+        {
+            for(size_t j = 0; j < mPolygons.size(); j++)
+            {
                 if(mPolygons[j].surfaceIndex == i)
-				{
+                {
                     int start = mPolygons[j].vertexIndexOffset;
                     int end = start + mPolygons[j].vertexIndexCount;
 
-					for(int k = start; k < end; k++)
-					{
-						pos += mVertices[mVertexIndices[k]];
-						vertexCount++;
-					}
-				}
-			}
-		}
-	}
+                    for(int k = start; k < end; k++)
+                    {
+                        pos += mVertices[mVertexIndices[k]];
+                        vertexCount++;
+                    }
+                }
+            }
+        }
+    }
 
-	// Get average position.
-	return pos / static_cast<float>(vertexCount);
+    // Get average position.
+    return pos / static_cast<float>(vertexCount);
 }
 
 void BSP::ApplyLightmap(const BSPLightmap& lightmap)

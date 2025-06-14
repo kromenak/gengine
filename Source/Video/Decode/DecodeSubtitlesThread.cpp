@@ -8,7 +8,7 @@
 int DecodeSubtitlesThread(void* arg)
 {
     VideoState* is = static_cast<VideoState*>(arg);
-    
+
     // Loop, decoding subtitles and putting in frame queue.
     while(true)
     {
@@ -31,7 +31,7 @@ int DecodeSubtitlesThread(void* arg)
         {
             // Pass along serial.
             sp->serial = is->subtitleDecoder.GetSerial();
-            
+
             // Store pts.
             double pts = 0.0;
             if(sp->sub.pts != AV_NOPTS_VALUE)
@@ -39,15 +39,15 @@ int DecodeSubtitlesThread(void* arg)
                 pts = sp->sub.pts / (double)AV_TIME_BASE;
             }
             sp->pts = pts;
-            
+
             // Save width/height of subtitles.
             AVCodecContext* avctx = is->subtitleDecoder.GetCodecContext();
             sp->width = avctx->width;
             sp->height = avctx->height;
-            
+
             // Subtitles need to be uploaded to GPU.
             sp->uploaded = false;
-            
+
             // Enqueue frame that was peeked.
             // Indicates that our peeked frame is ready for playback.
             is->subtitleFrames.Enqueue();

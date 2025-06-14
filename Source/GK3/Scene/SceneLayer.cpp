@@ -6,7 +6,7 @@
 
 SceneLayer::SceneLayer() : Layer("SceneLayer")
 {
-    
+
 }
 
 void SceneLayer::OnEnter(Layer* fromLayer)

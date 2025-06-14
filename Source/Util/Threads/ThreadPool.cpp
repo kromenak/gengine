@@ -2,6 +2,8 @@
 
 #include <thread>
 
+#include "ThreadUtil.h"
+
 ThreadedTaskQueue::ThreadedTaskQueue(int threadCount)
 {
     AddThreads(threadCount);

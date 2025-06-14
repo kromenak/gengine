@@ -7,7 +7,6 @@
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "StringUtil.h"
-#include "UICanvas.h"
 #include "UILabel.h"
 #include "UIUtil.h"
 
@@ -15,12 +14,12 @@ StatusOverlay::StatusOverlay() : Actor("Status", TransformType::RectTransform)
 {
     // Needs to be a canvas so it can render stuff.
     UI::AddCanvas(this, 10);
-    
+
     // Create status text actor at top of screen.
     mStatusLabel = UI::CreateWidgetActor<UILabel>("Label", this);
     mStatusLabel->SetFont(gAssetManager.LoadFont("F_STATUS_FADE"));
     mStatusLabel->SetVerticalAlignment(VerticalAlignment::Top);
-    
+
     // Status text is anchored to top of screen with pivot at top-center.
     // The size of this RT is the "hover area" for showing the status text.
     mStatusLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
@@ -31,7 +30,7 @@ StatusOverlay::StatusOverlay() : Actor("Status", TransformType::RectTransform)
 
     // Move down a little bit to give padding on top.
     mStatusLabel->GetRectTransform()->SetAnchoredPosition(0.0f, -6.0f);
-   
+
     // Refresh text with latest location, timeblock, score, etc.
     Refresh();
 }
@@ -40,12 +39,12 @@ void StatusOverlay::Refresh()
 {
     std::string locationName = gLocationManager.GetLocationDisplayName();
     std::string timeblockName = gGameProgress.GetTimeblockDisplayName();
-    
+
     std::string scoreLoc = gLocalizer.GetText("ScoreText");
     std::string scoreText = StringUtil::Format(scoreLoc.c_str(),
                                                gGameProgress.GetScore(),
                                                gGameProgress.GetMaxScore());
-    
+
     // Set status label using retrieved location, timeblock, and score data.
     // In one case (map), there is no location name, so exclude the location name if it's invalid!
     std::string statusText;
@@ -58,7 +57,7 @@ void StatusOverlay::Refresh()
         statusText = StringUtil::Format("%s, %s, %s", locationName.c_str(), timeblockName.c_str(), scoreText.c_str());
     }
     mStatusLabel->SetText(statusText);
-    
+
     // Refreshing the text should force the overlay to show.
     mShowTimer = kShowTime;
 }

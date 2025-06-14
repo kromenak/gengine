@@ -10,7 +10,6 @@
 #include "Component.h"
 
 #include <functional>
-#include <string>
 #include <vector>
 
 #include "Vector3.h"

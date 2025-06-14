@@ -1,6 +1,6 @@
 //
 // Clark Kromenaker
-// 
+//
 // UI for the "Suspects" section of Sidney.
 //
 #pragma once
@@ -10,7 +10,6 @@
 #include "PersistState.h"
 #include "SidneyMenuBar.h"
 #include "SidneyPopup.h"
-#include "StringUtil.h"
 
 class Actor;
 class SidneyFiles;
@@ -135,7 +134,7 @@ private:
         { 6, "e_sidney_suspect_link_fingerprint_wilkes", "" },      // Wilkes
         { 8, "e_sidney_suspect_link_fingerprint_larry", "" },       // Larry Chester
         { 5, "e_sidney_suspect_link_fingerprint_montreaux", "" },   // Montreaux
-        { 7, "", "" }                                               // Mosely's print isn't added directly by the player, so no score event. 
+        { 7, "", "" }                                               // Mosely's print isn't added directly by the player, so no score event.
     };
 
     // The index of the opened suspect, if any.

@@ -43,7 +43,7 @@ public:
     ~Skybox();
 
     void Render();
-    
+
     void SetAzimuth(float radians) { mRotationMatrix = Matrix4::MakeRotateY(radians); }
 
     uint8_t Raycast(const Ray& ray);
@@ -51,16 +51,16 @@ public:
 private:
     // Vertex array for the big cube we will render the skybox onto.
     Mesh* mSkyboxMesh = nullptr;
-    
+
     // An ID for the texture object generated in OpenGL.
     TextureHandle mCubemapHandle = nullptr;
 
     // In GK3, skyboxes can be rotated (via the azimuth keyword).
     // This is occasionally used to put landmarks on the skybox in correct spots in the sky.
     Matrix4 mRotationMatrix = Matrix4::Identity;
-	
-	// Material used for rendering.
-	Material mMaterial;
+
+    // Material used for rendering.
+    Material mMaterial;
 
     // Textures used for the sides of the skybox.
     SkyboxTextures mTextures;

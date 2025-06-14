@@ -7,12 +7,12 @@
 #include "Color32.h"
 #include "CursorManager.h"
 #include "GameProgress.h"
+#include "InputManager.h"
 #include "LocationManager.h"
 #include "RectTransform.h"
 #include "Sidney.h"
 #include "SidneyFakeInputPopup.h"
 #include "SidneyFiles.h"
-#include "SidneyPopup.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UICircles.h"
@@ -1012,7 +1012,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
 
     // Update interaction with the zoomed in map.
     AnalyzeMap_UpdateZoomedInMap(deltaTime);
-    
+
     // To complete Pisces, you must place three points on the map AND align a circle to them.
     bool aquariusDone = gGameProgress.GetFlag("Aquarius");
     bool piscesDone = gGameProgress.GetFlag("Pisces");
@@ -1729,7 +1729,7 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedInMap(float deltaTime)
                         });
                     });
                 }
-                
+
             }
         }
     }

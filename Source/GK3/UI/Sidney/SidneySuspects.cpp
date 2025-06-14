@@ -11,6 +11,7 @@
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"
 #include "Texture.h"
+#include "Timers.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
@@ -258,7 +259,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
                     // Hide by default.
                     mLinkedEvidenceItems[i].root->SetActive(false);
-                }   
+                }
             }
         }
     }
@@ -272,7 +273,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
         mFilePreviewWindow->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::TopLeft);
         mFilePreviewWindow->GetComponent<RectTransform>()->SetAnchoredPosition(13.0f, -92.0f);
-        
+
         mFilePreviewWindow->SetActive(false);
     }
 
@@ -550,7 +551,7 @@ void SidneySuspects::ShowSuspect(int index)
     {
         mLinkedEvidenceItems[evidenceItemIndex].root->SetActive(false);
     }
-    
+
     // Save the opened suspect index.
     mOpenedSuspectIndex = index;
 
@@ -658,7 +659,7 @@ void SidneySuspects::OnLinkToSuspectPressed()
                 }
             }
             if(alreadyLinked) { break; }
-        }   
+        }
     }
     else
     {
@@ -675,7 +676,7 @@ void SidneySuspects::OnLinkToSuspectPressed()
         mPopup->ShowOneButton();
         return;
     }
-    
+
     // Link the file.
     info.linkedFileIds.push_back(mOpenedFileId);
 

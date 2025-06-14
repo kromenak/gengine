@@ -5,11 +5,9 @@
 #include "GK3UI.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
-#include "Scene.h"
 #include "StringUtil.h"
 #include "UIButton.h"
 #include "UICanvas.h"
-#include "UILabel.h"
 #include "VerbManager.h"
 #include "Window.h"
 

@@ -29,17 +29,17 @@ Matrix4::Matrix4(float v00, float v01, float v02, float v03,
     mVals[1] = v10;
     mVals[2] = v20;
     mVals[3] = v30;
-    
+
     mVals[4] = v01;
     mVals[5] = v11;
     mVals[6] = v21;
     mVals[7] = v31;
-    
+
     mVals[8] = v02;
     mVals[9] = v12;
     mVals[10] = v22;
     mVals[11] = v32;
-    
+
     mVals[12] = v03;
     mVals[13] = v13;
     mVals[14] = v23;
@@ -87,17 +87,17 @@ void Matrix4::SetRows(const Vector4& row1, const Vector4& row2, const Vector4& r
     mVals[4] = row1[1];
     mVals[8] = row1[2];
     mVals[12] = row1[3];
-    
+
     mVals[1] = row2[0];
     mVals[5] = row2[1];
     mVals[9] = row2[2];
     mVals[13] = row2[3];
-    
+
     mVals[2] = row3[0];
     mVals[6] = row3[1];
     mVals[10] = row3[2];
     mVals[14] = row3[3];
-    
+
     mVals[3] = row4[0];
     mVals[7] = row4[1];
     mVals[11] = row4[2];
@@ -110,17 +110,17 @@ void Matrix4::GetRows(Vector4& row1, Vector4& row2, Vector4& row3, Vector4& row4
     row1[1] = mVals[4];
     row1[2] = mVals[8];
     row1[3] = mVals[12];
-    
+
     row2[0] = mVals[1];
     row2[1] = mVals[5];
     row2[2] = mVals[9];
     row2[3] = mVals[13];
-    
+
     row3[0] = mVals[2];
     row3[1] = mVals[6];
     row3[2] = mVals[10];
     row3[3] = mVals[14];
-    
+
     row4[0] = mVals[3];
     row4[1] = mVals[7];
     row4[2] = mVals[11];
@@ -133,17 +133,17 @@ void Matrix4::SetColumns(const Vector4& col1, const Vector4& col2, const Vector4
     mVals[1] = col1[1];
     mVals[2] = col1[2];
     mVals[3] = col1[3];
-    
+
     mVals[4] = col2[0];
     mVals[5] = col2[1];
     mVals[6] = col2[2];
     mVals[7] = col2[3];
-    
+
     mVals[8] = col3[0];
     mVals[9] = col3[1];
     mVals[10] = col3[2];
     mVals[11] = col3[3];
-    
+
     mVals[12] = col4[0];
     mVals[13] = col4[1];
     mVals[14] = col4[2];
@@ -156,17 +156,17 @@ void Matrix4::GetColumns(Vector4& col1, Vector4& col2, Vector4& col3, Vector4& c
     col1[1] = mVals[1];
     col1[2] = mVals[2];
     col1[3] = mVals[3];
-    
+
     col2[0] = mVals[4];
     col2[1] = mVals[5];
     col2[2] = mVals[6];
     col2[3] = mVals[7];
-    
+
     col3[0] = mVals[8];
     col3[1] = mVals[9];
     col3[2] = mVals[10];
     col4[3] = mVals[11];
-    
+
     col4[0] = mVals[12];
     col4[1] = mVals[13];
     col4[2] = mVals[14];
@@ -229,19 +229,19 @@ Matrix4 Matrix4::operator*(const Matrix4& rhs) const
     result.mVals[1] = mVals[1] * rhs.mVals[0] + mVals[5] * rhs.mVals[1] + mVals[9] * rhs.mVals[2] + mVals[13] * rhs.mVals[3];
     result.mVals[2] = mVals[2] * rhs.mVals[0] + mVals[6] * rhs.mVals[1] + mVals[10] * rhs.mVals[2] + mVals[14] * rhs.mVals[3];
     result.mVals[3] = mVals[3] * rhs.mVals[0] + mVals[7] * rhs.mVals[1] + mVals[11] * rhs.mVals[2] + mVals[15] * rhs.mVals[3];
-    
+
     // Column 2
     result.mVals[4] = mVals[0] * rhs.mVals[4] + mVals[4] * rhs.mVals[5] + mVals[8] * rhs.mVals[6] + mVals[12] * rhs.mVals[7];
     result.mVals[5] = mVals[1] * rhs.mVals[4] + mVals[5] * rhs.mVals[5] + mVals[9] * rhs.mVals[6] + mVals[13] * rhs.mVals[7];
     result.mVals[6] = mVals[2] * rhs.mVals[4] + mVals[6] * rhs.mVals[5] + mVals[10] * rhs.mVals[6] + mVals[14] * rhs.mVals[7];
     result.mVals[7] = mVals[3] * rhs.mVals[4] + mVals[7] * rhs.mVals[5] + mVals[11] * rhs.mVals[6] + mVals[15] * rhs.mVals[7];
-    
+
     // Column 3
     result.mVals[8] = mVals[0] * rhs.mVals[8] + mVals[4] * rhs.mVals[9] + mVals[8] * rhs.mVals[10] + mVals[12] * rhs.mVals[11];
     result.mVals[9] = mVals[1] * rhs.mVals[8] + mVals[5] * rhs.mVals[9] + mVals[9] * rhs.mVals[10] + mVals[13] * rhs.mVals[11];
     result.mVals[10] = mVals[2] * rhs.mVals[8] + mVals[6] * rhs.mVals[9] + mVals[10] * rhs.mVals[10] + mVals[14] * rhs.mVals[11];
     result.mVals[11] = mVals[3] * rhs.mVals[8] + mVals[7] * rhs.mVals[9] + mVals[11] * rhs.mVals[10] + mVals[15] * rhs.mVals[11];
-    
+
     // Column 4
     result.mVals[12] = mVals[0] * rhs.mVals[12] + mVals[4] * rhs.mVals[13] + mVals[8] * rhs.mVals[14] + mVals[12] * rhs.mVals[15];
     result.mVals[13] = mVals[1] * rhs.mVals[12] + mVals[5] * rhs.mVals[13] + mVals[9] * rhs.mVals[14] + mVals[13] * rhs.mVals[15];
@@ -305,23 +305,23 @@ void Matrix4::Transpose()
     float temp = mVals[1];
     mVals[1] = mVals[4];
     mVals[4] = temp;
-    
+
     temp = mVals[2];
     mVals[2] = mVals[8];
     mVals[8] = temp;
-    
+
     temp = mVals[3];
     mVals[3] = mVals[12];
     mVals[12] = temp;
-    
+
     temp = mVals[6];
     mVals[6] = mVals[9];
     mVals[9] = temp;
-    
+
     temp = mVals[7];
     mVals[7] = mVals[13];
     mVals[13] = temp;
-    
+
     temp = mVals[11];
     mVals[11] = mVals[14];
     mVals[14] = temp;
@@ -362,19 +362,19 @@ void Matrix4::Invert()
     const Vector3& col1 = reinterpret_cast<const Vector3&>((*this)[1]);
     const Vector3& col2 = reinterpret_cast<const Vector3&>((*this)[2]);
     const Vector3& col3 = reinterpret_cast<const Vector3&>((*this)[3]);
-    
+
     // Grab 4D row vector values from last row of matrix.
     const float& x = mVals[3];
     const float& y = mVals[7];
     const float& z = mVals[11];
     const float& w = mVals[15];
-    
+
     // Calculate intermediate vectors.
     Vector3 s = Vector3::Cross(col0, col1);
     Vector3 t = Vector3::Cross(col2, col3);
     Vector3 u = col0 * y - col1 * x;
     Vector3 v = col2 * w - col3 * z;
-    
+
     // Calculate determinant from intermediate values.
     // If determinant is zero, no inverse exists!
     float determinant = Vector3::Dot(s, v) + Vector3::Dot(t, u);
@@ -382,46 +382,46 @@ void Matrix4::Invert()
     {
         return;
     }
-    
+
     // Now we just need to calculate adjugate matrix and multiply by inverse determinant to get the inverse matrix!
     float invDet = 1.0f / determinant;
-    
+
     // Pre-multiply each intermediate vector by inverse determinant.
     // By doing this now, we can avoid multiplying final result my inverse determinant.
     s *= invDet;
     t *= invDet;
     u *= invDet;
     v *= invDet;
-    
+
     // Calculate left 4x3 rows of the inverse matrix.
     // Because we multiplied by invDet earlier, these are FINAL values.
     Vector3 row0 = Vector3::Cross(col1, v) + t * y;
     Vector3 row1 = Vector3::Cross(v, col0) - t * x;
     Vector3 row2 = Vector3::Cross(col3, u) + s * w;
     Vector3 row3 = Vector3::Cross(u, col2) - s * z;
-    
+
     // Calculate right 4x1 column.
     float colX = -Vector3::Dot(col1, t);
     float colY =  Vector3::Dot(col0, t);
     float colZ = -Vector3::Dot(col3, s);
     float colW =  Vector3::Dot(col2, s);
-    
+
     // Construct final 4x4 matrix.
     mVals[0] = row0.x;
     mVals[1] = row1.x;
     mVals[2] = row2.x;
     mVals[3] = row3.x;
-    
+
     mVals[4] = row0.y;
     mVals[5] = row1.y;
     mVals[6] = row2.y;
     mVals[7] = row3.y;
-    
+
     mVals[8] = row0.z;
     mVals[9] = row1.z;
     mVals[10] = row2.z;
     mVals[11] = row3.z;
-    
+
     mVals[12] = colX;
     mVals[13] = colY;
     mVals[14] = colZ;
@@ -469,7 +469,7 @@ Quaternion Matrix4::GetRotation() const
     q.x = (Math::Sqrt(Math::Max(0.0f, 1.0f + mVals[0] - mVals[5] - mVals[10])) / 2.0f);
     q.y = (Math::Sqrt(Math::Max(0.0f, 1.0f - mVals[0] + mVals[5] - mVals[10])) / 2.0f);
     q.z = (Math::Sqrt(Math::Max(0.0f, 1.0f - mVals[0] - mVals[5] + mVals[10])) / 2.0f);
-    
+
     q.x = (Math::MagnitudeSign(q.x, mVals[6] - mVals[9]));
     q.y = (Math::MagnitudeSign(q.y, mVals[8] - mVals[2]));
     q.z = (Math::MagnitudeSign(q.z, mVals[1] - mVals[4]));
@@ -526,13 +526,13 @@ Vector3 Matrix4::TransformNormal(const Vector3& normal) const
         //TODO: If we transform a normalized vector against an orthogonal matrix, is the resulting vector normalized? If so, this Normalize call my be unneeded.
         return Vector3::Normalize(TransformVector(normal));
     }
-       
+
     // But if not orthonormal, we must calculate inverse and perform (nA * InvM).
     Matrix4 inverse = Inverse(*this);
     Vector3 newNormal(normal.x * inverse.mVals[0] + normal.y * inverse.mVals[1] + normal.z * inverse.mVals[2],
                       normal.x * inverse.mVals[4] + normal.y * inverse.mVals[5] + normal.z * inverse.mVals[6],
                       normal.x * inverse.mVals[8] + normal.y * inverse.mVals[9] + normal.z * inverse.mVals[10]);
-    
+
     // Transforming the normal often leaves it no longer unit length.
     // But a quick normalize puts it back in order...and it's pointing in the right direction!
     return Vector3::Normalize(newNormal);
@@ -544,51 +544,51 @@ void Matrix4::InvertTransform()
     // When a matrix is a transform, the inverse math can be optimized.
     // A transform matrix's fourth row is always (0, 0, 0, 1).
     // See normal Inverse function for more in-depth explanation.
-    
+
     // Grab 4 3D column vectors from the matrix.
     const Vector3& col0 = reinterpret_cast<const Vector3&>((*this)[0]);
     const Vector3& col1 = reinterpret_cast<const Vector3&>((*this)[1]);
     const Vector3& col2 = reinterpret_cast<const Vector3&>((*this)[2]);
     const Vector3& col3 = reinterpret_cast<const Vector3&>((*this)[3]);
-    
+
     // Calculate intermediate vectors.
     // Because this is a transform, u cancels out entirely and v just equals col2!
     Vector3 s = Vector3::Cross(col0, col1);
     Vector3 t = Vector3::Cross(col2, col3);
     Vector3 v = col2;
-    
+
     // Because this is a transform, determinant calc is simpler.
     // We will also assume that determinant is non-zero for transforms.
     float invDet = 1.0f / Vector3::Dot(s, col2);
     s *= invDet;
     t *= invDet;
     v *= invDet;
-    
+
     // Calculate final result and return. row2 is not needed in this version
     Vector3 row0 = Vector3::Cross(col1, v);
     Vector3 row1 = Vector3::Cross(v, col0);
-    
+
     // Calculate right 3x1 column.
     float colX = -Vector3::Dot(col1, t);
     float colY =  Vector3::Dot(col0, t);
     float colZ = -Vector3::Dot(col3, s);
-    
+
     // Construct final 4x4 matrix.
     mVals[0] = row0.x;
     mVals[1] = row1.x;
     mVals[2] = s.x;
     mVals[3] = 0.0f;
-    
+
     mVals[4] = row0.y;
     mVals[5] = row1.y;
     mVals[6] = s.y;
     mVals[7] = 0.0f;
-    
+
     mVals[8] = row0.z;
     mVals[9] = row1.z;
     mVals[10] = s.z;
     mVals[11] = 0.0f;
-    
+
     mVals[12] = colX;
     mVals[13] = colY;
     mVals[14] = colZ;
@@ -650,7 +650,7 @@ void Matrix4::InvertTransform()
     if(Math::IsZero(dot)) { return Matrix4::Identity; }
 
     float s = 2.0f / dot;
-    
+
     float xs = s * quat.x;
     float ys = s * quat.y;
     float zs = s * quat.z;
@@ -663,23 +663,23 @@ void Matrix4::InvertTransform()
     float yy = quat.y * ys;
     float yz = quat.y * zs;
     float zz = quat.z * zs;
-    
+
     Matrix4 m;
     m.mVals[0] = 1.0f - (yy + zz);
     m.mVals[1] = xy + wz;
     m.mVals[2] = xz - wy;
     m.mVals[3] = 0.0f;
-    
+
     m.mVals[4] = xy - wz;
     m.mVals[5] = 1.0f - (xx + zz);
     m.mVals[6] = yz + wx;
     m.mVals[7] = 0.0f;
-    
+
     m.mVals[8] = xz + wy;
     m.mVals[9] = yz - wx;
     m.mVals[10] = 1.0f - (xx + yy);
     m.mVals[11] = 0.0f;
-    
+
     m.mVals[12] = 0.0f;
     m.mVals[13] = 0.0f;
     m.mVals[14] = 0.0f;

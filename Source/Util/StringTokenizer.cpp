@@ -19,7 +19,7 @@ StringTokenizer::StringTokenizer(const std::string& str, std::initializer_list<c
             }
         }
     }
-    
+
     if(str.size() - startIndex >= 1)
     {
         mTokens.push_back(str.substr(startIndex, str.size() - startIndex));

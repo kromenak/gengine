@@ -96,7 +96,7 @@ private:
         // Requirement to be within a certain LSR step.
         int lsrMin = -1;
         int lsrMax = -1;
-        
+
         // The dialogue to play when this triggers.
         std::string licensePlate;
 
@@ -145,7 +145,7 @@ private:
         { "AlchemyTiltedSquare.html", "AlchemyTiltedSquare" },
         { "TempleFloorplan.html", "TempleFloorplan" }
     };
-    
+
     void ShowWebPage(const std::string& pageName);
     void ClearWebPage();
     UILabel* CreateWebPageText(const std::string& text, Font* font, const Vector2& pos, float width, std::string& link);

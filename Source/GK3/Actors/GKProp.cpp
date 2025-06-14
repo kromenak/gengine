@@ -5,9 +5,7 @@
 #include "GasPlayer.h"
 #include "MeshRenderer.h"
 #include "Model.h"
-#include "Quaternion.h"
 #include "SceneData.h"
-#include "Vector3.h"
 #include "VertexAnimator.h"
 
 TYPEINFO_INIT(GKProp, GKObject, 32)
