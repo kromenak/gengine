@@ -19,20 +19,20 @@ class Camera : public Component
 public:
     Camera(Actor* owner);
     ~Camera();
-    
+
     Matrix4 GetLookAtMatrix();
     Matrix4 GetLookAtMatrixNoTranslate();
     Matrix4 GetProjectionMatrix();
 
     Frustum GetWorldSpaceViewFrustum();
-    
+
     Vector3 ScreenToWorldPoint(const Vector2& screenPoint, float distance);
     static Vector3 ScreenToWorldPoint(const Vector2& screenPoint, float distance, const Matrix4& viewMatrix, const Matrix4& projectionMatrix);
-    
-	float GetCameraFovRadians() const { return mFovAngleRad; }
-	float GetCameraFovDegrees() const { return Math::ToDegrees(mFovAngleRad); }
-	
-	void SetCameraFovRadians(float fovRad);
+
+    float GetCameraFovRadians() const { return mFovAngleRad; }
+    float GetCameraFovDegrees() const { return Math::ToDegrees(mFovAngleRad); }
+
+    void SetCameraFovRadians(float fovRad);
     void SetCameraFovDegrees(float fovDeg);
 
     float GetNearClipPlaneDistance() const { return mNearClipPlane; }
@@ -40,11 +40,11 @@ public:
 
     float GetFarClipPlaneDistance() const { return mFarClipPlane; }
     void SetFarClipPlaneDistance(float distance) { mFarClipPlane = distance; }
-	
+
 private:
     // Field of view angle, in radians, for perspective projection.
     float mFovAngleRad = 1.0472f;
-    
+
     // Near and far clipping planes, for any projection type.
     // GK3 seems to use 12.0f/24000.0f, but 12.0f doesn't look great in GEngine, so going to use a smaller value.
     float mNearClipPlane = 1.0f;

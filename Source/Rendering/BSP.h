@@ -34,16 +34,16 @@ struct BSPNode
     // These appear to be 65535 (ushort max value) if invalid/null.
     uint16_t frontChildIndex = 0;
     uint16_t backChildIndex = 0;
-    
+
     // Each node has a plane that divides child geometry into "front" and "back".
     // By testing what side of the plane the camera is on, correct order to draw geometry can be determined.
     uint16_t planeIndex = 0;
-    
+
     // Polygons associated with this node (offset + count into polygon list).
     // This makes up the majority of the BSP geometry.
     uint16_t polygonIndex = 0;
     uint16_t polygonCount = 0;
-    
+
     // Less commonly used, but a second set of polygons for this node.
     // These appear to be used for rendering 2-sided polygons (though I haven't totally figured that out yet).
     uint16_t polygonIndex2 = 0;
@@ -56,13 +56,13 @@ struct BSPPolygon
     // Index of surface this polygon belongs to.
     // The surface defines appearance (texture, lightmap) and other properties.
     uint16_t surfaceIndex = 0;
-    
+
     // BSP is rendered using indexed geometry.
     // These are an offset + count into the index array, defining what vertices make up this polygon.
     uint16_t vertexIndexOffset = 0;
     uint16_t vertexIndexCount = 0;
-	
-	// Used for creating a linked list of alpha surfaces.
+
+    // Used for creating a linked list of alpha surfaces.
     BSPPolygon* next = nullptr;
 };
 
@@ -73,19 +73,19 @@ struct BSPSurface
     // An "object" is really just a name - a way to group surfaces logically.
     // For example, several surfaces could make up a "door" object.
     uint32_t objectIndex = 0;
-    
+
     // The texture used for this surface.
     Texture* texture = nullptr;
-    
+
     // An optional lightmap texture - applied from a lightmap asset.
     //TODO: this works OK, but it'd be more efficient to use a lightmap atlas instead of many individual textures.
     Texture* lightmapTexture = nullptr;
-    
+
     // UVs used for the lightmap are often different from the UVs used for diffuse textures.
     // The surface defines offset/scale to apply to each UV to properly render a lightmap on that surface.
     Vector2 lightmapUvOffset;
     Vector2 lightmapUvScale;
-    
+
     // Flags defining surface properties.
     uint32_t flags = 0;
     static const uint32_t kUnknownFlag1 = 1; // applied on certain walls, ceilings, and floors
@@ -95,12 +95,12 @@ struct BSPSurface
     static const uint32_t kUnknownFlag5 = 16; // lamp shades, light fixtures, lanterns, stained glass, chandilier, sconces, etc.
     static const uint32_t kUnknownFlag6 = 32; // possibly never used - couldn't find in any BSP
     static const uint32_t kShadowTextureFlag = 64; // some RC1, ARM, CDB, LHE, PLO, TE5 (shadow bridge) objects have this
-    
+
     // If true, this surface is rendered.
     bool visible = true;
-	
-	// If true, interactive (can be hit by raycasts).
-	bool interactive = true;
+
+    // If true, interactive (can be hit by raycasts).
+    bool interactive = true;
 
     // If true, this surface has been flagged as a hit test surface.
     // This means we need to do a bit more processing for raycasts, to ensure they hit a visible pixel on the 3D object.
@@ -143,10 +143,10 @@ class BSP : public Asset
 public:
     BSP(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     void Load(uint8_t* data, uint32_t dataLength);
-    
+
     // Raycasting
     bool RaycastNearest(const Ray& ray, RaycastHit& outHitInfo, bool forWalk = false);
-	bool RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo);
+    bool RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo);
 
     // Floors
     void SetFloorObjectName(const std::string& floorObjectName);
@@ -154,14 +154,14 @@ public:
 
     // Object Modification
     BSPActor* CreateBSPActor(const std::string& objectName);
-	void SetVisible(const std::string& objectName, bool visible);
-	void SetTexture(const std::string& objectName, Texture* texture);
+    void SetVisible(const std::string& objectName, bool visible);
+    void SetTexture(const std::string& objectName, Texture* texture);
     void SetHitTest(const std::string& objectName, bool isHitTest);
 
     // Object Queries
-	bool Exists(const std::string& objectName) const;
-	bool IsVisible(const std::string& objectName) const;
-	Vector3 GetPosition(const std::string& objectName) const;
+    bool Exists(const std::string& objectName) const;
+    bool IsVisible(const std::string& objectName) const;
+    Vector3 GetPosition(const std::string& objectName) const;
 
     // Lightmaps
     void ApplyLightmap(const BSPLightmap& lightmap);
@@ -171,22 +171,22 @@ public:
     // Rendering
     void RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirection);
     void RenderTranslucent();
-	
+
 private:
     // Identifies the root node in the node list.
     // Rendering always starts from this node.
     uint32_t mRootNodeIndex = 0;
-    
+
     // List of nodes. These all reference one another to form a tree structure.
     std::vector<BSPNode> mNodes;
-    
+
     // Planes used by nodes to determine camera location during tree traversal.
     std::vector<Plane> mPlanes;
-    
+
     // All the polygons that make up the scene - nodes traversed during rendering,
     // reference polygons to be rendered at that node.
     std::vector<BSPPolygon> mPolygons;
-    
+
     // Opaque rendering occurs front-to-back, and a linked list of translucent polygons are generated.
     // The linked list can be iterated afterwards to render translucent geometry in the correct order.
     // Saw this in id's Quake/Doom code and thought it was pretty cool!
@@ -196,22 +196,22 @@ private:
 
     // Surfaces are referenced by polygons, define surface properties like texture and lighting.
     std::vector<BSPSurface> mSurfaces;
-    
+
     // Each BSP map is logically divided into objects.
     std::vector<std::string> mObjectNames;
-    
+
     // Vertex attributes for BSP mesh.
     std::vector<Vector3> mVertices;
     std::vector<Vector2> mUVs;
-    
+
     // Vertex indices for BSP mesh.
     std::vector<unsigned short> mVertexIndices;
-    
+
     // Vertex array is loaded up with vertices/uvs/indices to perform rendering.
     VertexArray mVertexArray;
-    
+
     // Material for rendering BSP.
-	Material mMaterial;
+    Material mMaterial;
 
     // Data used for determining ambient lighting for dynamic models navigating the BSP environment.
     // Kind of like light probes, but way simpler/jankier.
@@ -221,7 +221,7 @@ private:
     uint32_t mFloorObjectIndex = UINT32_MAX;
 
     uint32_t GetObjectIndex(const std::string& objectName) const;
-    
+
     void ParseFromData(uint8_t* data, uint32_t dataLength);
 
     #if defined(USE_TRUE_BSP_RENDERING)

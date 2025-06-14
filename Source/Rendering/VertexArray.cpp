@@ -18,7 +18,7 @@ VertexArray::~VertexArray()
     {
         // Delete vertex data.
         mData.ClearVertexData();
-        
+
         // Delete index data.
         delete[] mData.indexData;
     }
@@ -219,7 +219,7 @@ void VertexArray::ChangeIndexData(uint16_t* indexes, uint32_t count)
     // Update index count and index data.
     mData.indexCount = count;
     memcpy(mData.indexData, indexes, count * sizeof(uint16_t));
-    
+
     // If the index buffer exists, update the data in it.
     if(mIndexBuffer != nullptr)
     {
@@ -260,7 +260,7 @@ void VertexArray::CreateVertexBuffer()
     else // Interleaved vertex layout.
     {
         // With interleaved data, we just have one big array of vertex data.
-        // So we can create the buffer and set it's data in one command. 
+        // So we can create the buffer and set it's data in one command.
         mVertexBuffer = GAPI::Get()->CreateVertexBuffer(mData.vertexCount, mData.vertexDefinition, mData.vertexData[0], mData.meshUsage);
     }
 }

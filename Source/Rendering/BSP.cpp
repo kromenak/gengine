@@ -127,7 +127,7 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo, bool forWalk)
 	// Values for tracking closest found hit.
     outHitInfo.t = FLT_MAX;
     std::string* closest = nullptr;
-	
+
     // Iterate polygons and check each one for intersection with the ray.
     // We must iterate ALL polygons (can't stop at first hit) in case a subsequent polygon is nearer to the start of the ray.
     for(BSPPolygon& polygon : mPolygons)
@@ -152,10 +152,10 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo, bool forWalk)
             }
         }
     }
-	
+
 	// If no closest object was found, no hits occurred. Early out.
 	if(closest == nullptr) { return false; }
-	
+
 	// Otherwise, fill in out hit info and return.
 	outHitInfo.name = *closest;
 	return true;
@@ -284,7 +284,7 @@ void BSP::SetVisible(const std::string& objectName, bool visible)
 	// Find index of the object name.
     uint32_t index = GetObjectIndex(objectName);
 	if(index == UINT32_MAX) { return; }
-	
+
 	// All surfaces belonging to this object will be hidden.
 	for(auto& surface : mSurfaces)
 	{
@@ -300,7 +300,7 @@ void BSP::SetTexture(const std::string& objectName, Texture* texture)
     // Find index of the object name.
     uint32_t index = GetObjectIndex(objectName);
     if(index == UINT32_MAX) { return; }
-	
+
 	// All surfaces belonging to this object will be hidden.
 	for(auto& surface : mSurfaces)
 	{
@@ -337,7 +337,7 @@ bool BSP::IsVisible(const std::string& objectName) const
 	// Find index of the object name.
 	uint32_t index = GetObjectIndex(objectName);
 	if(index == UINT32_MAX) { return false; }
-	
+
 	// Find any surface belonging to this object and see if it is visible.
 	for(auto& surface : mSurfaces)
 	{
@@ -346,7 +346,7 @@ bool BSP::IsVisible(const std::string& objectName) const
             return surface.visible;
 		}
 	}
-	
+
 	// Worst case, no surfaces belong to this object. Must not be visible then!
 	return false;
 }
@@ -358,7 +358,7 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
 
 	//TODO: Maybe we should return true/false with an out parameter?
 	if(objectIndex == UINT32_MAX) { return Vector3::Zero; }
-	
+
 	// Find all surfaces that belong to this object and sum their positions.
 	Vector3 pos = Vector3::Zero;
 	int vertexCount = 0;
@@ -372,7 +372,7 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
 				{
                     int start = mPolygons[j].vertexIndexOffset;
                     int end = start + mPolygons[j].vertexIndexCount;
-					
+
 					for(int k = start; k < end; k++)
 					{
 						pos += mVertices[mVertexIndices[k]];
@@ -382,7 +382,7 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
 			}
 		}
 	}
-	
+
 	// Get average position.
 	return pos / static_cast<float>(vertexCount);
 }
@@ -473,7 +473,7 @@ Color32 BSP::CalculateAmbientLightColor(const Vector3& position)
             count++;
         }
     }
-    
+
     return Color32(static_cast<int>(Math::Sqrt(sum.x / count)),
                    static_cast<int>(Math::Sqrt(sum.y / count)),
                    static_cast<int>(Math::Sqrt(sum.z / count)));
@@ -505,7 +505,7 @@ void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirec
     // ALTERNATIVE BSP RENDERING
     // Just render every surface lol.
     // Surprisingly more efficient than "correct" BSP rendering, since it's fewer draw calls.
-    for(auto& surface : mSurfaces)
+    for(BSPSurface& surface : mSurfaces)
     {
         if(!surface.visible) { continue; }
         if(surface.IsTranslucent()) { continue; }
@@ -521,7 +521,7 @@ void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirec
         }
     }
     #endif
-    
+
     //std::cout << "Rendered " << renderedPolygonCount << " polygons." << std::endl;
 }
 
@@ -572,7 +572,7 @@ uint32_t BSP::GetObjectIndex(const std::string& objectName) const
 void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     BinaryReader reader(data, dataLength);
-    
+
     // 4 bytes: file identifier "NECS" (SCEN backwards).
     std::string identifier = reader.ReadString(4);
     if(identifier != "NECS")
@@ -584,10 +584,10 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
     // 4 bytes: version number
     // 4 bytes: content size in bytes
     reader.Skip(8);
-    
+
     // 4 bytes: index of root node for BSP tree.
     mRootNodeIndex = reader.ReadUInt();
-    
+
     // 36 bytes: Read in all the header count values.
     uint32_t nameCount = reader.ReadUInt();
     uint32_t vertexCount = reader.ReadUInt();
@@ -598,7 +598,7 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
     uint32_t planeCount = reader.ReadUInt();
     uint32_t nodeCount = reader.ReadUInt();
     uint32_t polygonCount = reader.ReadUInt();
-    
+
     // Iterate and read all names.
     mObjectNames.resize(nameCount);
     for(uint32_t i = 0; i < nameCount; ++i)
@@ -609,7 +609,7 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
     // When reading surfaces, we need to keep track of whether we've previously processed a shadow texture.
     // We don't want to process a single texture more than once!
     std::vector<Texture*> processedShadowTextures;
-    
+
     // Iterate and read surfaces.
     mSurfaces.resize(surfaceCount);
     for(uint32_t i = 0; i < surfaceCount; ++i)
@@ -618,12 +618,12 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
         surface.objectIndex = reader.ReadUInt();
 
         surface.texture = gAssetManager.LoadSceneTexture(reader.ReadString(32), GetScope());
-        
+
         surface.lightmapUvOffset = reader.ReadVector2();
         surface.lightmapUvScale = reader.ReadVector2();
-        
+
         reader.ReadFloat(); // Unknown - I had assumed this was a scale earlier, but I'm not sure.
-        
+
         // Read in flags. See header for known flags.
         surface.flags = reader.ReadUInt();
         /*
@@ -634,39 +634,39 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
         }
         */
     }
-    
+
     // Iterate and read nodes.
     mNodes.resize(nodeCount);
     for(uint32_t i = 0; i < nodeCount; ++i)
     {
         BSPNode& node = mNodes[i];
-        node.frontChildIndex = reader.ReadUShort(); 
+        node.frontChildIndex = reader.ReadUShort();
         node.backChildIndex = reader.ReadUShort();
-        
+
         node.planeIndex = reader.ReadUShort();
-        
+
         node.polygonIndex = reader.ReadUShort();
         node.polygonIndex2 = reader.ReadUShort();
-        
+
         node.polygonCount = reader.ReadUShort();
         node.polygonCount2 = reader.ReadUShort();
-        
+
         // Unknown value - only known values: 0 for root node, 348, 1007, 1009, 1010, 1012, 1074, 30723 for other nodes.
         // Values seem to be the same for all nodes in a single BSP file?
         reader.ReadUShort();
     }
-    
+
     // Iterate and read polygons.
     mPolygons.resize(polygonCount);
     for(uint32_t i = 0; i < polygonCount; ++i)
     {
         BSPPolygon& polygon = mPolygons[i];
         polygon.vertexIndexOffset = reader.ReadUShort();
-        
+
         // Unknown value - sometimes zero, but almost always 1073.
         // Mysteriously stuck right in the middle of each polygon hmm...
         reader.ReadUShort();
-        
+
         polygon.vertexIndexCount = reader.ReadUShort();
         polygon.surfaceIndex = reader.ReadUShort();
 
@@ -676,7 +676,7 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
         mSurfaces[polygon.surfaceIndex].polygons.push_back(polygon);
         #endif
     }
-    
+
     // Iterate and read planes.
     mPlanes.reserve(planeCount);
     for(uint32_t i = 0; i < planeCount; ++i)
@@ -687,33 +687,33 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
         float distance = reader.ReadFloat();
         mPlanes.emplace_back(normalX, normalY, normalZ, distance);
     }
-    
+
     // Iterate and read vertices.
     mVertices.resize(vertexCount);
     for(uint32_t i = 0; i < vertexCount; ++i)
     {
         mVertices[i] = reader.ReadVector3();
     }
-    
+
     // Iterate and read UVs.
     mUVs.resize(uvCount);
     for(uint32_t i = 0; i < uvCount; ++i)
     {
         mUVs[i] = reader.ReadVector2();
     }
-    
+
     // Iterate and read vertex indexes.
     mVertexIndices.resize(vertexIndexCount);
     for(uint32_t i = 0; i < vertexIndexCount; ++i)
     {
         mVertexIndices[i] = reader.ReadUShort();
     }
-    
+
     // Iterate and read other indexes.
     // After reviewing all BSP files, these always exactly match the vertex indexes? Why bother?
     // Skipped for now - not sure if we'll ever need these.
     reader.Skip(otherIndexCount * 2); // 2 bytes per index.
-    
+
     // Next up are spheres centers with radiis for each node. Not sure what these are for.
     reader.Skip(nodeCount * 16); // 4 floats per node, each float is 4 bytes
 
@@ -768,9 +768,16 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
 
     meshDefinition.SetIndexData(mVertexIndices.size(), &mVertexIndices[0]);
     meshDefinition.ownsData = false;
-    
+
     // Create vertex array.
     mVertexArray = VertexArray(meshDefinition);
+
+    // RC3 has a single notable surface that is stretched and z-fights pretty bad. It's even present in the original game.
+    // Force it invisible to fix that!
+    if(StringUtil::StartsWith(GetName(), "RC3") && mSurfaces.size() > 582)
+    {
+        mSurfaces[582].visible = false;
+    }
 }
 
 #if defined(USE_TRUE_BSP_RENDERING)
