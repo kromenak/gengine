@@ -69,6 +69,6 @@ private:
 
     Vector2 FindNearestWalkableTexturePosToWorldPos(const Vector3& worldPos) const;
 
-    bool FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath, int graphFidelity = 1) const;
+    bool FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath, int nodeSkipInterval = 1) const;
     bool FindPathAStar(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const;
 };

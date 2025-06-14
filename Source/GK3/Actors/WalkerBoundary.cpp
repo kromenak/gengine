@@ -7,6 +7,30 @@
 #include "ResizableQueue.h"
 #include "Texture.h"
 
+namespace
+{
+    void MoveToward(Vector2& current, const Vector2& end)
+    {
+        // Move current toward end, one unit at a time.
+        if(current.x < end.x)
+        {
+            current.x += 1;
+        }
+        else if(current.x > end.x)
+        {
+            current.x -= 1;
+        }
+        if(current.y < end.y)
+        {
+            current.y += 1;
+        }
+        else if(current.y > end.y)
+        {
+            current.y -= 1;
+        }
+    }
+}
+
 bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorldPos, std::vector<Vector3>& outPath)
 {
     // Make sure path vector is empty.
@@ -160,22 +184,7 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
                 bool canWalk = true;
                 while(current != end)
                 {
-                    if(current.x < end.x)
-                    {
-                        current.x += 1;
-                    }
-                    else if(current.x > end.x)
-                    {
-                        current.x -= 1;
-                    }
-                    if(current.y < end.y)
-                    {
-                        current.y += 1;
-                    }
-                    else if(current.y > end.y)
-                    {
-                        current.y -= 1;
-                    }
+                    MoveToward(current, end);
 
                     if(!IsTexturePosWalkable(current))
                     {
@@ -589,10 +598,19 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
             if(neighborNode.closed) { continue; }
 
             // Ignore any neighbor that is not walkable.
-            if(!IsTexturePosWalkable(neighbor))
+            // When pathing at higher skip intervals, we still need to check in-between nodes, in case they are unwalkable.
+            bool walkable = true;
+            Vector2 checkWalkableValue = currentValue;
+            while(checkWalkableValue != neighbor)
             {
-                continue;
+                MoveToward(checkWalkableValue, neighbor);
+                if(!IsTexturePosWalkable(checkWalkableValue))
+                {
+                    walkable = false;
+                    break;
+                }
             }
+            if(!walkable) { continue; }
 
             // Add to open set.
             neighborNode.parentIndex = currentIndex;
