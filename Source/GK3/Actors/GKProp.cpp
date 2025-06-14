@@ -12,7 +12,7 @@
 
 TYPEINFO_INIT(GKProp, GKObject, 32)
 {
-    
+
 }
 
 GKProp::GKProp() : GKObject()
@@ -21,7 +21,7 @@ GKProp::GKProp() : GKObject()
     mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit"));
 
     mVertexAnimator = AddComponent<VertexAnimator>();
-    
+
     mGasPlayer = AddComponent<GasPlayer>();
 }
 
@@ -80,7 +80,7 @@ void GKProp::Init(const SceneData& sceneData)
     {
         StartFidget(mFidgetGas);
     }
-    
+
     // If this is a billboard, force-update it right away.
     // Doing this on Init, and not waiting for Billboard::OnUpdate to run, avoids a single rendered frame with billboards facing the wrong way.
     Billboard* billboard = GetComponent<Billboard>();
@@ -109,20 +109,20 @@ void GKProp::StartAnimation(VertexAnimParams& animParams)
 {
     // Don't let a GAS anim override a non-GAS anim.
     if(animParams.fromAutoScript && mVertexAnimator->IsPlayingNotAutoscript()) { return; }
-    
+
     // If this is not a GAS anim, pause any running GAS.
     if(!animParams.fromAutoScript)
     {
         mGasPlayer->Pause();
     }
-    
+
     // Set anim stop callback.
     animParams.stopCallback = std::bind(&GKProp::OnVertexAnimationStop, this);
-    
+
     // Start the animation.
     // Note that this will sample the first frame of the animation, updating the model's positions/rotations.
     mVertexAnimator->Start(animParams);
-    
+
     // For absolute anims, position model exactly as specified.
     if(animParams.absolute)
     {

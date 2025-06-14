@@ -29,21 +29,21 @@ Texture::Texture(uint32_t width, uint32_t height) : Asset("", AssetScope::Manual
 }
 
 Texture::Texture(uint32_t width, uint32_t height, Color32 color) : Asset("", AssetScope::Manual),
-	mWidth(width),
-	mHeight(height)
+    mWidth(width),
+    mHeight(height)
 {
-	// Create pixel array of desired size.
-	int pixelsSize = mWidth * mHeight * 4;
-	mPixels = new uint8_t[pixelsSize];
+    // Create pixel array of desired size.
+    int pixelsSize = mWidth * mHeight * 4;
+    mPixels = new uint8_t[pixelsSize];
 
-	// Flood-fill pixels with desired color.
-	for(int i = 0; i < pixelsSize; i += 4)
-	{
-		mPixels[i] = color.GetR();
-		mPixels[i + 1] = color.GetG();
-		mPixels[i + 2] = color.GetB();
-		mPixels[i + 3] = color.GetA();
-	}
+    // Flood-fill pixels with desired color.
+    for(int i = 0; i < pixelsSize; i += 4)
+    {
+        mPixels[i] = color.GetR();
+        mPixels[i + 1] = color.GetG();
+        mPixels[i + 2] = color.GetB();
+        mPixels[i + 3] = color.GetA();
+    }
 }
 
 Texture::Texture(BinaryReader& reader) : Asset("", AssetScope::Manual)
@@ -53,28 +53,28 @@ Texture::Texture(BinaryReader& reader) : Asset("", AssetScope::Manual)
 
 Texture::~Texture()
 {
-	if(mTextureHandle != nullptr)
-	{
+    if(mTextureHandle != nullptr)
+    {
         void* texHandle = mTextureHandle;
         ThreadUtil::RunOnMainThread([texHandle]() {
             GAPI::Get()->DestroyTexture(texHandle);
         });
-	}
-	if(mPalette != nullptr)
-	{
-		delete[] mPalette;
-		mPalette = nullptr;
-	}
-	if(mPaletteIndexes != nullptr)
-	{
-		delete[] mPaletteIndexes;
-		mPaletteIndexes = nullptr;
-	}
-	if(mPixels != nullptr)
-	{
-		delete[] mPixels;
-		mPixels = nullptr;
-	}
+    }
+    if(mPalette != nullptr)
+    {
+        delete[] mPalette;
+        mPalette = nullptr;
+    }
+    if(mPaletteIndexes != nullptr)
+    {
+        delete[] mPaletteIndexes;
+        mPaletteIndexes = nullptr;
+    }
+    if(mPixels != nullptr)
+    {
+        delete[] mPixels;
+        mPixels = nullptr;
+    }
 }
 
 void Texture::Load(uint8_t* data, uint32_t dataLength)
@@ -141,20 +141,20 @@ void Texture::SetPixelColor32(int x, int y, const Color32& color)
 
 Color32 Texture::GetPixelColor32(int x, int y) const
 {
-	// No pixels means...just return black.
-	if(mPixels == nullptr) { return Color32::Black; }
+    // No pixels means...just return black.
+    if(mPixels == nullptr) { return Color32::Black; }
 
-	// Calculate index into pixels array.
-	uint32_t index = static_cast<uint32_t>((y * mWidth + x) * 4);
+    // Calculate index into pixels array.
+    uint32_t index = static_cast<uint32_t>((y * mWidth + x) * 4);
 
-	// If index isn't valid...also return black.
-	if(index >= (mWidth * mHeight * 4)) { return Color32::Black; }
+    // If index isn't valid...also return black.
+    if(index >= (mWidth * mHeight * 4)) { return Color32::Black; }
 
-	uint8_t r = mPixels[index];
+    uint8_t r = mPixels[index];
     uint8_t g = mPixels[index + 1];
     uint8_t b = mPixels[index + 2];
     uint8_t a = mPixels[index + 3];
-	return Color32(r, g, b, a);
+    return Color32(r, g, b, a);
 }
 
 void Texture::SetPaletteIndex(int x, int y, uint8_t val)
@@ -174,109 +174,109 @@ void Texture::SetPaletteIndex(int x, int y, uint8_t val)
 
 uint8_t Texture::GetPaletteIndex(int x, int y) const
 {
-	// No palette indexes means we can't get a value!
-	if(mPaletteIndexes == nullptr) { return 0; }
+    // No palette indexes means we can't get a value!
+    if(mPaletteIndexes == nullptr) { return 0; }
 
-	// Calculate index into pixels array.
-	uint32_t index = static_cast<uint32_t>(y * mWidth + x);
+    // Calculate index into pixels array.
+    uint32_t index = static_cast<uint32_t>(y * mWidth + x);
 
-	// If index isn't valid...also return zero.
-	if(index >= (mWidth * mHeight)) { return 0; }
+    // If index isn't valid...also return zero.
+    if(index >= (mWidth * mHeight)) { return 0; }
 
-	// Got it!
-	return mPaletteIndexes[index];
+    // Got it!
+    return mPaletteIndexes[index];
 }
 
 /*
 //CK: Tried this for face texture mixing. This works, BUT it doesn't properly blend alpha. But maybe useful for something, some day?
 void Texture::Blit(Texture* source, int destX, int destY)
 {
-	GLuint fboId = GL_NONE;
-	glGenFramebuffers(1, &fboId);
-	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+    GLuint fboId = GL_NONE;
+    glGenFramebuffers(1, &fboId);
+    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, source->mTextureId, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, source->mTextureId, 0);
 
-	glBindTexture(GL_TEXTURE_2D, mTextureId);
-	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, destX, destY, 0, 0, source->GetWidth(), source->GetHeight());
+    glBindTexture(GL_TEXTURE_2D, mTextureId);
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, destX, destY, 0, 0, source->GetWidth(), source->GetHeight());
 
-	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
-	glDeleteFramebuffers(1, &fboId);
+    glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+    glDeleteFramebuffers(1, &fboId);
 }
 */
 
 /*static*/ void Texture::BlendPixels(const Texture& source, Texture& dest, int destX, int destY)
 {
-	BlendPixels(source, 0, 0, source.mWidth, source.mHeight, dest, destX, destY);
+    BlendPixels(source, 0, 0, source.mWidth, source.mHeight, dest, destX, destY);
 }
 
 /*static*/ void Texture::BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
-					                 Texture& dest, int destX, int destY)
+                                     Texture& dest, int destX, int destY)
 {
-	// We can't copy out-of-bounds pixels from the source.
-	if(sourceX < 0 || sourceX >= static_cast<int>(source.mWidth)) { return; }
-	if(sourceY < 0 || sourceY >= static_cast<int>(source.mHeight)) { return; }
+    // We can't copy out-of-bounds pixels from the source.
+    if(sourceX < 0 || sourceX >= static_cast<int>(source.mWidth)) { return; }
+    if(sourceY < 0 || sourceY >= static_cast<int>(source.mHeight)) { return; }
 
-	// We can't copy to out-of-bounds pixels in the destination.
-	if(destX < 0 || destX >= static_cast<int>(dest.mWidth)) { return; }
-	if(destY < 0 || destY >= static_cast<int>(dest.mHeight)) { return; }
+    // We can't copy to out-of-bounds pixels in the destination.
+    if(destX < 0 || destX >= static_cast<int>(dest.mWidth)) { return; }
+    if(destY < 0 || destY >= static_cast<int>(dest.mHeight)) { return; }
 
-	// Brute force copy, pixel by pixel!
-	for(int y = sourceY; y < sourceY + sourceHeight && y < static_cast<int>(source.mHeight); ++y)
-	{
-		for(int x = sourceX; x < sourceX + sourceWidth && x < static_cast<int>(source.mWidth); ++x)
-		{
-			// Calculate source pixel index.
-			int sourcePixelIndex = (y * source.mWidth + x) * 4;
+    // Brute force copy, pixel by pixel!
+    for(int y = sourceY; y < sourceY + sourceHeight && y < static_cast<int>(source.mHeight); ++y)
+    {
+        for(int x = sourceX; x < sourceX + sourceWidth && x < static_cast<int>(source.mWidth); ++x)
+        {
+            // Calculate source pixel index.
+            int sourcePixelIndex = (y * source.mWidth + x) * 4;
 
-			// Calculate dest x/y for this pixel.
-			int copyToY = destY + (y - sourceY);
-			int copyToX = destX + (x - sourceX);
-			if(copyToY < 0 || copyToY >= dest.mHeight) { continue; }
-			if(copyToX < 0 || copyToY >= dest.mWidth) { continue; }
+            // Calculate dest x/y for this pixel.
+            int copyToY = destY + (y - sourceY);
+            int copyToX = destX + (x - sourceX);
+            if(copyToY < 0 || copyToY >= dest.mHeight) { continue; }
+            if(copyToX < 0 || copyToY >= dest.mWidth) { continue; }
 
-			// Calculate dest pixel index based on x/y.
-			int destPixelIndex = (copyToY * dest.mWidth + copyToX) * 4;
+            // Calculate dest pixel index based on x/y.
+            int destPixelIndex = (copyToY * dest.mWidth + copyToX) * 4;
 
-			// Interpolate between source/dest pixel colors based on source alpha value.
-			// If source alpha is zero, use 100% dest color - this value will be 0.
-			// If source alpha is 255, use 100% source color - this value will be 1.
-			// If source alpha is between, use X% dest/source color - this value is 0-1.
-			float alphaPercent = (float)source.mPixels[sourcePixelIndex + 3] / 255.0f;
+            // Interpolate between source/dest pixel colors based on source alpha value.
+            // If source alpha is zero, use 100% dest color - this value will be 0.
+            // If source alpha is 255, use 100% source color - this value will be 1.
+            // If source alpha is between, use X% dest/source color - this value is 0-1.
+            float alphaPercent = (float)source.mPixels[sourcePixelIndex + 3] / 255.0f;
 
-			// Copy!
-			dest.mPixels[destPixelIndex] = Math::Lerp(dest.mPixels[destPixelIndex], source.mPixels[sourcePixelIndex], alphaPercent);
-			dest.mPixels[destPixelIndex + 1] = Math::Lerp(dest.mPixels[destPixelIndex + 1], source.mPixels[sourcePixelIndex + 1], alphaPercent);
-			dest.mPixels[destPixelIndex + 2] = Math::Lerp(dest.mPixels[destPixelIndex + 2], source.mPixels[sourcePixelIndex + 2], alphaPercent);
-			// Don't make any changes to dest's alpha channel.
-		}
-	}
+            // Copy!
+            dest.mPixels[destPixelIndex] = Math::Lerp(dest.mPixels[destPixelIndex], source.mPixels[sourcePixelIndex], alphaPercent);
+            dest.mPixels[destPixelIndex + 1] = Math::Lerp(dest.mPixels[destPixelIndex + 1], source.mPixels[sourcePixelIndex + 1], alphaPercent);
+            dest.mPixels[destPixelIndex + 2] = Math::Lerp(dest.mPixels[destPixelIndex + 2], source.mPixels[sourcePixelIndex + 2], alphaPercent);
+            // Don't make any changes to dest's alpha channel.
+        }
+    }
 
-	// Don't upload dest to GPU here, since we might be doing a bunch of copy operations in a row.
-	// We'll leave it up to the caller to do that manually (for now).
+    // Don't upload dest to GPU here, since we might be doing a bunch of copy operations in a row.
+    // We'll leave it up to the caller to do that manually (for now).
     dest.mDirtyFlags |= DirtyFlags::Pixels;
 }
 
 void Texture::SetTransparentColor(const Color32& color)
 {
-	if(mPixels == nullptr) { return; }
+    if(mPixels == nullptr) { return; }
 
-	// Find instances of the desired transparent color and
-	// make sure the alpha value is zero.
-	int pixelByteCount = mWidth * mHeight * 4;
-	for(int i = 0; i < pixelByteCount; i += 4)
-	{
-		if(mPixels[i] == color.GetR() &&
-		   mPixels[i + 1] == color.GetG() &&
-		   mPixels[i + 2] == color.GetB())
-		{
-			mPixels[i + 3] = 0;
-		}
-		else
-		{
-			mPixels[i + 3] = 255;
-		}
-	}
+    // Find instances of the desired transparent color and
+    // make sure the alpha value is zero.
+    int pixelByteCount = mWidth * mHeight * 4;
+    for(int i = 0; i < pixelByteCount; i += 4)
+    {
+        if(mPixels[i] == color.GetR() &&
+           mPixels[i + 1] == color.GetG() &&
+           mPixels[i + 2] == color.GetB())
+        {
+            mPixels[i + 3] = 0;
+        }
+        else
+        {
+            mPixels[i + 3] = 255;
+        }
+    }
 
     // Mark dirty so it uploads to GPU on next use.
     mDirtyFlags |= DirtyFlags::Pixels;
@@ -299,25 +299,25 @@ void Texture::ClearTransparentColor()
 
 void Texture::ApplyAlphaChannel(const Texture& alphaTexture, bool useRGB)
 {
-	// For now, let's assume alpha texture has same width/height as target texture.
-	if(alphaTexture.mWidth != mWidth || alphaTexture.mHeight != mHeight)
-	{
-		std::cout << "Can't apply alpha texture! Width and height do not match." << std::endl;
-		return;
-	}
+    // For now, let's assume alpha texture has same width/height as target texture.
+    if(alphaTexture.mWidth != mWidth || alphaTexture.mHeight != mHeight)
+    {
+        std::cout << "Can't apply alpha texture! Width and height do not match." << std::endl;
+        return;
+    }
 
-	// If the alpha texture has a palette, we want to treat the R/G/B values as the alpha value.
-	// Palettized textures as alpha channels usually have palette colors like (255, 255, 255, 0) or (128, 128, 128, 0).
-	// At least, that's the case in GK3!
-	bool useRgbForAlpha = alphaTexture.mPalette != nullptr || useRGB;
+    // If the alpha texture has a palette, we want to treat the R/G/B values as the alpha value.
+    // Palettized textures as alpha channels usually have palette colors like (255, 255, 255, 0) or (128, 128, 128, 0).
+    // At least, that's the case in GK3!
+    bool useRgbForAlpha = alphaTexture.mPalette != nullptr || useRGB;
 
-	// For each pixel, copy over the alpha value.
-	int pixelCount = mWidth * mHeight;
-	for(int i = 0; i < pixelCount; ++i)
-	{
-		// If RGB is alpha value, just grab R val. Otherwise, +3 to get A val.
-		mPixels[(i * 4) + 3] = useRgbForAlpha ? alphaTexture.mPixels[(i * 4)] : alphaTexture.mPixels[(i * 4) + 3];
-	}
+    // For each pixel, copy over the alpha value.
+    int pixelCount = mWidth * mHeight;
+    for(int i = 0; i < pixelCount; ++i)
+    {
+        // If RGB is alpha value, just grab R val. Otherwise, +3 to get A val.
+        mPixels[(i * 4) + 3] = useRgbForAlpha ? alphaTexture.mPixels[(i * 4)] : alphaTexture.mPixels[(i * 4) + 3];
+    }
 
     // If an alpha channel is applied, we'll assume this texture is now translucent.
     mRenderType = RenderType::Translucent;
@@ -638,10 +638,10 @@ void Texture::WriteToFile(const std::string& filePath)
 
 /*static*/ int Texture::CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width)
 {
-	// Calculate number of bytes that should be present in each row.
-	// Each row has 4-byte alignment, so this rounds us up to nearest 4 bytes.
-	// For a 32-bit (4bpp) image...this doesn't really matter. But for other bpp sizes, it would.
-	return Math::FloorToInt((bitsPerPixel * width + 31.0f) / 32.0f) * 4;
+    // Calculate number of bytes that should be present in each row.
+    // Each row has 4-byte alignment, so this rounds us up to nearest 4 bytes.
+    // For a 32-bit (4bpp) image...this doesn't really matter. But for other bpp sizes, it would.
+    return Math::FloorToInt((bitsPerPixel * width + 31.0f) / 32.0f) * 4;
 }
 
 void Texture::ParseFromData(BinaryReader &reader)
@@ -674,209 +674,209 @@ void Texture::ParseFromData(BinaryReader &reader)
 void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 {
     // 2 bytes: compressed file identifier (assumed this has already been read in from constructor).
-	// 2 bytes: The compressed format has a second value here.
-	unsigned short fileIdentifier2 = reader.ReadUShort();
-	if(fileIdentifier2 != 0x4D6E) // Mn
-	{
-		std::cout << "BMP file does not have correct identifier!" << std::endl;
-		return;
-	}
+    // 2 bytes: The compressed format has a second value here.
+    unsigned short fileIdentifier2 = reader.ReadUShort();
+    if(fileIdentifier2 != 0x4D6E) // Mn
+    {
+        std::cout << "BMP file does not have correct identifier!" << std::endl;
+        return;
+    }
 
-	// Read width and height values.
-	mHeight = reader.ReadUShort();
-	mWidth = reader.ReadUShort();
+    // Read width and height values.
+    mHeight = reader.ReadUShort();
+    mWidth = reader.ReadUShort();
 
-	// Allocate pixels array.
-	mPixels = new unsigned char[mWidth * mHeight * 4];
+    // Allocate pixels array.
+    mPixels = new unsigned char[mWidth * mHeight * 4];
 
     // Read in pixel data.
     // This pixel data is stored top-left to bottom-right, so we don't flip (our pixel array starts at top-left corner).
-	for(uint32_t y = 0; y < mHeight; ++y)
-	{
-		for(uint32_t x = 0; x < mWidth; ++x)
-		{
-			int current = (y  * mWidth + x) * 4;
-			uint16_t pixel = reader.ReadUShort();
+    for(uint32_t y = 0; y < mHeight; ++y)
+    {
+        for(uint32_t x = 0; x < mWidth; ++x)
+        {
+            int current = (y  * mWidth + x) * 4;
+            uint16_t pixel = reader.ReadUShort();
 
-			float red = static_cast<float>((pixel & 0xF800) >> 11);
-			float green = static_cast<float>((pixel & 0x07E0) >> 5);
-			float blue = static_cast<float>((pixel & 0x001F));
+            float red = static_cast<float>((pixel & 0xF800) >> 11);
+            float green = static_cast<float>((pixel & 0x07E0) >> 5);
+            float blue = static_cast<float>((pixel & 0x001F));
 
-			mPixels[current] = (unsigned char)(red * 255 / 31);
-			mPixels[current + 1] = (unsigned char)(green * 255 / 63);
-			mPixels[current + 2] = (unsigned char)(blue * 255 / 31);
+            mPixels[current] = (unsigned char)(red * 255 / 31);
+            mPixels[current + 1] = (unsigned char)(green * 255 / 63);
+            mPixels[current + 2] = (unsigned char)(blue * 255 / 31);
 
-			// Causes all instances of magenta (R = 255, B = 255) to appear transparent.
-			if(mPixels[current] > 200 && mPixels[current + 1] < 100 && mPixels[current + 2] > 200)
-			{
-				mPixels[current + 3] = 0;
-			}
-			else
-			{
-				mPixels[current + 3] = 255;
-			}
-		}
+            // Causes all instances of magenta (R = 255, B = 255) to appear transparent.
+            if(mPixels[current] > 200 && mPixels[current + 1] < 100 && mPixels[current + 2] > 200)
+            {
+                mPixels[current + 3] = 0;
+            }
+            else
+            {
+                mPixels[current + 3] = 255;
+            }
+        }
 
-		// Might need to skip some padding here.
-		if((mWidth & 0x00000001) != 0)
-		{
-			reader.ReadUShort();
-		}
-	}
+        // Might need to skip some padding here.
+        if((mWidth & 0x00000001) != 0)
+        {
+            reader.ReadUShort();
+        }
+    }
 
-	// This seeeeems to work consistently - if the top-left pixel is fully transparent, flag as alpha test.
-	if(mHeight > 0 && mWidth > 0 && mPixels[3] == 0)
-	{
-		mRenderType = RenderType::AlphaTest;
-	}
+    // This seeeeems to work consistently - if the top-left pixel is fully transparent, flag as alpha test.
+    if(mHeight > 0 && mWidth > 0 && mPixels[3] == 0)
+    {
+        mRenderType = RenderType::AlphaTest;
+    }
 }
 
 void Texture::ParseFromBmpFormat(BinaryReader& reader)
 {
-	// BMP HEADER
+    // BMP HEADER
     // 2 bytes: BMP file identifier (assumed this has already been read in from constructor).
-	// 4 bytes: size of file in bytes
-	// 4 bytes: 2 shorts that are reserved/unused
-	// 4 bytes: offset to image data
-	reader.Skip(12);
+    // 4 bytes: size of file in bytes
+    // 4 bytes: 2 shorts that are reserved/unused
+    // 4 bytes: offset to image data
+    reader.Skip(12);
 
-	// DIB HEADER
-	// 4 bytes: size of DIB header (always 40)
-	unsigned int dibHeaderSize = reader.ReadUInt();
-	if(dibHeaderSize != 40)
-	{
-		std::cout << "Texture: unsupported dib header size of " << dibHeaderSize << std::endl;
-		return;
-	}
+    // DIB HEADER
+    // 4 bytes: size of DIB header (always 40)
+    unsigned int dibHeaderSize = reader.ReadUInt();
+    if(dibHeaderSize != 40)
+    {
+        std::cout << "Texture: unsupported dib header size of " << dibHeaderSize << std::endl;
+        return;
+    }
 
-	// 8 bytes: width and height
-	mWidth = reader.ReadUInt();
-	mHeight = reader.ReadUInt();
+    // 8 bytes: width and height
+    mWidth = reader.ReadUInt();
+    mHeight = reader.ReadUInt();
 
-	// 2 bytes: number of color planes
-	unsigned short colorPlaneCount = reader.ReadUShort();
-	if(colorPlaneCount != 1)
-	{
-		std::cout << "Texture: unsupported color plane count of " << colorPlaneCount << std::endl;
-		return;
-	}
+    // 2 bytes: number of color planes
+    unsigned short colorPlaneCount = reader.ReadUShort();
+    if(colorPlaneCount != 1)
+    {
+        std::cout << "Texture: unsupported color plane count of " << colorPlaneCount << std::endl;
+        return;
+    }
 
-	// 2 bytes: number of bits per pixel
-	unsigned short bitsPerPixel = reader.ReadUShort();
+    // 2 bytes: number of bits per pixel
+    unsigned short bitsPerPixel = reader.ReadUShort();
 
-	// 4 bytes: compression method
-	// 0 = BI_RGB (not compressed)
-	// 1 = BI_RLE8 (RLE 8-bit/pixel)
-	// 2 = BI_RLE4 (RLE 4-bit/pixel)
-	// 3 = BI_BITFIELDS (???)
-	// 4 = BI_JPEG (a JPEG image)
-	// 5 = BI_PNG (a PNG image)
-	// 6-13 = BI_ALPHABITFIELDS, BI_CMYK, BI_CMYKRLE8, BI_CMYKRLE4
-	unsigned int compressionMethod = reader.ReadUInt();
-	if(compressionMethod != 0)
-	{
-		std::cout << "Texture: unsupported compression method " << compressionMethod << std::endl;
-		return;
-	}
+    // 4 bytes: compression method
+    // 0 = BI_RGB (not compressed)
+    // 1 = BI_RLE8 (RLE 8-bit/pixel)
+    // 2 = BI_RLE4 (RLE 4-bit/pixel)
+    // 3 = BI_BITFIELDS (???)
+    // 4 = BI_JPEG (a JPEG image)
+    // 5 = BI_PNG (a PNG image)
+    // 6-13 = BI_ALPHABITFIELDS, BI_CMYK, BI_CMYKRLE8, BI_CMYKRLE4
+    unsigned int compressionMethod = reader.ReadUInt();
+    if(compressionMethod != 0)
+    {
+        std::cout << "Texture: unsupported compression method " << compressionMethod << std::endl;
+        return;
+    }
 
-	// 4 bytes: uncompressed size; but if compression method is zero, this is usually also zero (unset).
-	// 8 bytes: horizontal/vertical resolution (pixels per meter) - unused.
-	reader.Skip(12);
+    // 4 bytes: uncompressed size; but if compression method is zero, this is usually also zero (unset).
+    // 8 bytes: horizontal/vertical resolution (pixels per meter) - unused.
+    reader.Skip(12);
 
-	// 4 bytes: num colors in palette. If zero, default to 2^(bpp)
-	unsigned int numColorsInColorPalette = reader.ReadUInt();
-	if(numColorsInColorPalette == 0)
-	{
-		numColorsInColorPalette = Math::PowBase2(bitsPerPixel);
-	}
+    // 4 bytes: num colors in palette. If zero, default to 2^(bpp)
+    unsigned int numColorsInColorPalette = reader.ReadUInt();
+    if(numColorsInColorPalette == 0)
+    {
+        numColorsInColorPalette = Math::PowBase2(bitsPerPixel);
+    }
 
-	// 4 bytes: num important colors - unused.
-	reader.Skip(4);
+    // 4 bytes: num important colors - unused.
+    reader.Skip(4);
 
-	// COLOR TABLE - only present for 8-bpp or lower images
-	if(bitsPerPixel <= 8)
-	{
-		// The number of bytes is numColors in palette, times 4 bytes each.
-		// The order of the colors is blue, green, red, alpha.
+    // COLOR TABLE - only present for 8-bpp or lower images
+    if(bitsPerPixel <= 8)
+    {
+        // The number of bytes is numColors in palette, times 4 bytes each.
+        // The order of the colors is blue, green, red, alpha.
         mPaletteSize = numColorsInColorPalette * 4;
-		mPalette = new uint8_t[mPaletteSize];
-		reader.Read(mPalette, mPaletteSize);
-	}
+        mPalette = new uint8_t[mPaletteSize];
+        reader.Read(mPalette, mPaletteSize);
+    }
 
-	// PIXELS
-	// Allocate pixels array.
-	mPixels = new uint8_t[mWidth * mHeight * 4];
+    // PIXELS
+    // Allocate pixels array.
+    mPixels = new uint8_t[mWidth * mHeight * 4];
 
-	// For 8-bpp or lower images with a palette, allocate palette indexes.
-	if(bitsPerPixel <= 8)
-	{
-		mPaletteIndexes = new uint8_t[mWidth * mHeight];
-	}
+    // For 8-bpp or lower images with a palette, allocate palette indexes.
+    if(bitsPerPixel <= 8)
+    {
+        mPaletteIndexes = new uint8_t[mWidth * mHeight];
+    }
 
-	// Read in pixel data.
+    // Read in pixel data.
     // BMP pixel data is stored bottom-left to top-right, so we do flip (our pixel array starts at top-left corner).
-	int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
-	for(int y = mHeight - 1; y >= 0; --y)
-	{
-		int bytesRead = 0;
-		for(uint32_t x = 0; x < mWidth; ++x)
-		{
-			// Calculate index into pixels array.
+    int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
+    for(int y = mHeight - 1; y >= 0; --y)
+    {
+        int bytesRead = 0;
+        for(uint32_t x = 0; x < mWidth; ++x)
+        {
+            // Calculate index into pixels array.
             int index = (y * mWidth + x) * 4;
 
-			// How we interpret pixel data will depend on the bpp.
-			if(bitsPerPixel == 8)
-			{
-				// Read in the palette index and save it.
-				uint8_t paletteIndex = reader.ReadByte();
-				mPaletteIndexes[(y * mWidth + x)] = paletteIndex;
-				bytesRead++;
+            // How we interpret pixel data will depend on the bpp.
+            if(bitsPerPixel == 8)
+            {
+                // Read in the palette index and save it.
+                uint8_t paletteIndex = reader.ReadByte();
+                mPaletteIndexes[(y * mWidth + x)] = paletteIndex;
+                bytesRead++;
 
-				//TODO: For palettized textures, should we hold off on creating pixels array until someone requests it?
-				if(mPalette != nullptr)
-				{
-					// Since each palette color has 4 bytes, multiply by 4 to get byte offset.
-					int paletteByteIndex = paletteIndex * 4;
+                //TODO: For palettized textures, should we hold off on creating pixels array until someone requests it?
+                if(mPalette != nullptr)
+                {
+                    // Since each palette color has 4 bytes, multiply by 4 to get byte offset.
+                    int paletteByteIndex = paletteIndex * 4;
 
-					// Palette color order is BGRA. But our internal pixels are RGBA.
-					mPixels[index] = mPalette[paletteByteIndex + 2];
-					mPixels[index + 1] = mPalette[paletteByteIndex + 1];
-					mPixels[index + 2] = mPalette[paletteByteIndex];
+                    // Palette color order is BGRA. But our internal pixels are RGBA.
+                    mPixels[index] = mPalette[paletteByteIndex + 2];
+                    mPixels[index + 1] = mPalette[paletteByteIndex + 1];
+                    mPixels[index + 2] = mPalette[paletteByteIndex];
 
-					// As long as the BMP format is BI_RGB, we can assume the image does not have any alpha data.
-					// In these cases, the alpha value is usually zero.
-					// But we actually want to interpret that as 255 (fully opaque).
-					mPixels[index + 3] = 255; //palette[paletteByteIndex + 3];
-				}
-			}
-			else if(bitsPerPixel == 24 || bitsPerPixel == 32)
-			{
+                    // As long as the BMP format is BI_RGB, we can assume the image does not have any alpha data.
+                    // In these cases, the alpha value is usually zero.
+                    // But we actually want to interpret that as 255 (fully opaque).
+                    mPixels[index + 3] = 255; //palette[paletteByteIndex + 3];
+                }
+            }
+            else if(bitsPerPixel == 24 || bitsPerPixel == 32)
+            {
                 // Assuming BI_RGB format, alpha is not stored.
                 // So regardless of bits per pixel of 24 or 32, the data layout and size is the same.
 
-				// Pixel data in the BMP file is BGR.
+                // Pixel data in the BMP file is BGR.
                 // Internal pixel data is RGBA, so reorganize on read in.
-				mPixels[index + 2] = reader.ReadByte(); // Blue
-				mPixels[index + 1] = reader.ReadByte(); // Green
-				mPixels[index] = reader.ReadByte(); 	 // Red
-				bytesRead += 3;
+                mPixels[index + 2] = reader.ReadByte(); // Blue
+                mPixels[index + 1] = reader.ReadByte(); // Green
+                mPixels[index] = reader.ReadByte(); 	 // Red
+                bytesRead += 3;
 
-				// BI_RGB format doesn't save any alpha, even if 32 bits per pixel.
-				// We'll use a placeholder of 255 (fully opaque).
-				mPixels[index + 3] = 255; // Alpha
-			}
-			else
-			{
-				std::cout << "Texture: Unaccounted for BPP of " << bitsPerPixel << std::endl;
-			}
-		}
+                // BI_RGB format doesn't save any alpha, even if 32 bits per pixel.
+                // We'll use a placeholder of 255 (fully opaque).
+                mPixels[index + 3] = 255; // Alpha
+            }
+            else
+            {
+                std::cout << "Texture: Unaccounted for BPP of " << bitsPerPixel << std::endl;
+            }
+        }
 
-		// Skip padding that may be present, to ensure 4-byte alignment.
-		if(bytesRead < rowSize)
-		{
-			reader.Skip(rowSize - bytesRead);
-		}
-	}
+        // Skip padding that may be present, to ensure 4-byte alignment.
+        if(bytesRead < rowSize)
+        {
+            reader.Skip(rowSize - bytesRead);
+        }
+    }
 }
 
 void Texture::ParseFromPngFormat(BinaryReader& reader)

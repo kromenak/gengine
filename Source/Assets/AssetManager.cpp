@@ -277,6 +277,20 @@ Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scop
         bool useTrilinearFiltering = gRenderer.UseTrilinearFiltering();
         texture->SetFilterMode(useTrilinearFiltering ? Texture::FilterMode::Trilinear : Texture::FilterMode::Bilinear);
     }
+
+    // For some reason, many transparent scene textures in GK3 (mostly foliage) have a single non-transparent pixel at (1, 0).
+    // This pixel is obviously supposed to be transparent when rendered.
+    if(texture != nullptr && texture->GetRenderType() == Texture::RenderType::AlphaTest)
+    {
+        if(texture->GetPixelColor32(0, 0).a == 0 &&
+           texture->GetPixelColor32(1, 0).a > 0 &&
+           texture->GetPixelColor32(2, 0).a == 0 &&
+           texture->GetPixelColor32(1, 1).a == 0)
+        {
+            texture->SetPixelColor32(1, 0, Color32::Clear);
+        }
+
+    }
     return texture;
 }
 
@@ -483,11 +497,11 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
             }
         }
 
-        // We didn't find the asset in any barn at this priority. 
+        // We didn't find the asset in any barn at this priority.
         // Decrement to the next lowest priority.
         priority = static_cast<BarnSearchPriority>(static_cast<int>(priority) - 1);
     }
-    
+
 	// Didn't find the Barn containing this asset.
 	return nullptr;
 }
