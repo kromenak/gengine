@@ -6,6 +6,7 @@
 #include "Collisions.h"
 #include "CursorManager.h"
 #include "Debug.h"
+#include "GK3UI.h"
 #include "GKActor.h"
 #include "GKObject.h"
 #include "InputManager.h"
@@ -243,10 +244,9 @@ void GameCamera::OnUpdate(float deltaTime)
         }
 
         // If 'P' is pressed, this toggles game pause. Works even if action is ongoing.
-        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_P))
+        if(mSceneActive && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_P))
         {
-            //TODO: implement pause!
-            std::cout << "Pause!" << std::endl;
+            gGK3UI.ShowPauseScreen();
 
             // For debugging...
             std::cout << "Pos: " << GetPosition() << ", Heading: " << Heading::FromQuaternion(GetRotation()) << std::endl;

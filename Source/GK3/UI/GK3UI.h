@@ -14,6 +14,7 @@ class DrivingScreen;
 class FingerprintScreen;
 class GPSOverlay;
 class Layer;
+class PauseScreen;
 class ProgressBar;
 class QuitPopup;
 class SaveLoadScreen;
@@ -42,6 +43,7 @@ public:
     void SetProgressBarProgress(float fraction);
     void HideProgressBar();
 
+    void ShowPauseScreen();
     void ShowQuitPopup();
 
     void ShowSceneTransitioner();
@@ -76,6 +78,7 @@ private:
 
     ProgressBar* mProgressBar = nullptr;
 
+    PauseScreen* mPauseScreen = nullptr;
     QuitPopup* mQuitPopup = nullptr;
 
     SceneTransitioner* mSceneTransitioner = nullptr;

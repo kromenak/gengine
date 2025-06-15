@@ -10,6 +10,7 @@
 #include "GPSOverlay.h"
 #include "InputManager.h"
 #include "ProgressBar.h"
+#include "PauseScreen.h"
 #include "QuitPopup.h"
 #include "SaveLoadScreen.h"
 #include "SceneTransitioner.h"
@@ -137,6 +138,16 @@ void GK3UI::HideProgressBar()
     {
         mProgressBar->Hide();
     }
+}
+
+void GK3UI::ShowPauseScreen()
+{
+    if(mPauseScreen == nullptr)
+    {
+        mPauseScreen = new PauseScreen();
+        mPauseScreen->SetIsDestroyOnLoad(false);
+    }
+    mPauseScreen->Show();
 }
 
 void GK3UI::ShowQuitPopup()
