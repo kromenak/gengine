@@ -13,7 +13,6 @@
 #include "ReportManager.h"
 #include "SceneManager.h"
 #include "SheepManager.h"
-#include "SheepScript.h"
 #include "StringUtil.h"
 #include "Timeblock.h"
 #include "VerbManager.h"
@@ -660,7 +659,9 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
     }
 
     // Check global case conditions.
-    if(StringUtil::EqualsIgnoreCase(caseLabel, "ALL"))
+    if(StringUtil::EqualsIgnoreCase(caseLabel, "ALL") ||
+       StringUtil::EqualsIgnoreCase(caseLabel, "GABE_ALL") ||
+       StringUtil::EqualsIgnoreCase(caseLabel, "GRACE_ALL"))
     {
         // For topics, "ALL" has some strange behavior. Despite appearances, it is not ALWAYS available! It is the last thing to be said about a topic.
         // For example, take JEAN:T_TWO_MEN in Lobby on Day 1, 10AM. If you don't do this special logic, the last dialogue can be played forever.
@@ -681,17 +682,15 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
         }
 
         // "ALL" is always met!
+        if(StringUtil::EqualsIgnoreCase(caseLabel, "GABE_ALL"))
+        {
+            return StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel");
+        }
+        else if(StringUtil::EqualsIgnoreCase(caseLabel, "GRACE_ALL"))
+        {
+            return StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace");
+        }
         return true;
-    }
-    else if(StringUtil::EqualsIgnoreCase(caseLabel, "GABE_ALL"))
-    {
-        // Condition is met if Ego is Gabriel.
-        return StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel");
-    }
-    else if(StringUtil::EqualsIgnoreCase(caseLabel, "GRACE_ALL"))
-    {
-        // Condition is met if Ego is Grace.
-        return StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace");
     }
     else if(StringUtil::EqualsIgnoreCase(caseLabel, "1ST_TIME"))
     {
