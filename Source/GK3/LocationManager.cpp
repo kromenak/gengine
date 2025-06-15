@@ -361,12 +361,19 @@ void LocationManager::ChangeLocationInternal(const std::string& location, std::f
     }
 
     // Check for timeblock completion.
-    gSheepManager.Execute(gAssetManager.LoadSheep("Timeblocks.shp"), "CheckTimeblockComplete$", [location, callback, sameLocation](){
+    gSheepManager.Execute(gAssetManager.LoadSheep("Timeblocks.shp"), "CheckTimeblockComplete$", [this, location, callback, sameLocation](){
 
         // See whether a timeblock change is occurring.
         // If so, we should early out - the timeblock change logic handles any location and time change.
         if(gGameProgress.IsChangingTimeblock())
         {
+            // Usually, GK3 doesn't allow location & last location to be the same place. Note how SetLocation only changes variables if the location is different.
+            // However, on timeblock change, that isn't necessarily the case - it seems like the location you were in
+            // at the end of last timeblock ALWAYS becomes mLastLocation, even if its the same location you start the NEXT timeblock in.
+            // This usually doesn't really matter, but it DOES matter in at least one case: Grace's initial position at the beginning of Day 3, 12PM.
+            mLastLocation = location;
+
+            // Early out and let timeblock code handle this.
             gGK3UI.HideSceneTransitioner();
             if(callback != nullptr) { callback(); }
             return;
