@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "BinocsOverlay.h"
 #include "CaptionsOverlay.h"
+#include "ConfirmPopup.h"
 #include "DeathScreen.h"
 #include "DrivingScreen.h"
 #include "FingerprintScreen.h"
@@ -161,6 +162,16 @@ void GK3UI::ShowQuitPopup()
         mQuitPopup->SetIsDestroyOnLoad(false);
     }
     mQuitPopup->Show();
+}
+
+void GK3UI::ShowConfirmPopup(const std::string& message, const std::function<void(bool)>& callback)
+{
+    if(mConfirmPopup == nullptr)
+    {
+        mConfirmPopup = new ConfirmPopup();
+        mConfirmPopup->SetIsDestroyOnLoad(false);
+    }
+    mConfirmPopup->Show(message, callback);
 }
 
 void GK3UI::ShowSceneTransitioner()

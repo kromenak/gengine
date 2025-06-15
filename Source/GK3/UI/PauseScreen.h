@@ -1,7 +1,7 @@
 //
 // Clark Kromenaker
 //
-// This popup asks you if you're sure you want to quit the game.
+// This screen just displays a "Paused" graphic, and pauses the underlying scene.
 //
 #pragma once
 #include "Actor.h"

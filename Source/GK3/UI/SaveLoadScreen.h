@@ -76,6 +76,7 @@ private:
     int ListEntryIndexToSaveIndex(int listEntryIndex);
 
     void SetSelectedSaveIndex(int saveIndex);
+    void ShowSaveOverwriteConfirm(int listEntryIndex);
     void ActivateTextInput(int listEntryIndex);
     void OnListEntryButtonPressed(int listEntryIndex);
 

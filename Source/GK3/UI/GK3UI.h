@@ -9,6 +9,7 @@
 
 class BinocsOverlay;
 class CaptionsOverlay;
+class ConfirmPopup;
 class DeathScreen;
 class DrivingScreen;
 class FingerprintScreen;
@@ -45,6 +46,7 @@ public:
 
     void ShowPauseScreen();
     void ShowQuitPopup();
+    void ShowConfirmPopup(const std::string& message, const std::function<void(bool)>& callback);
 
     void ShowSceneTransitioner();
     void HideSceneTransitioner();
@@ -80,6 +82,7 @@ private:
 
     PauseScreen* mPauseScreen = nullptr;
     QuitPopup* mQuitPopup = nullptr;
+    ConfirmPopup* mConfirmPopup = nullptr;
 
     SceneTransitioner* mSceneTransitioner = nullptr;
 

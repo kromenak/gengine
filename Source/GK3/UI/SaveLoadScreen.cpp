@@ -5,6 +5,7 @@
 #include "GameProgress.h"
 #include "GK3UI.h"
 #include "InputManager.h"
+#include "Localizer.h"
 #include "RectTransform.h"
 #include "SaveManager.h"
 #include "Texture.h"
@@ -436,6 +437,16 @@ void SaveLoadScreen::SetSelectedSaveIndex(int saveIndex)
     }
 }
 
+void SaveLoadScreen::ShowSaveOverwriteConfirm(int listEntryIndex)
+{
+    gGK3UI.ShowConfirmPopup(gLocalizer.GetText("OverwriteSave"), [this, listEntryIndex](bool wantsOverwrite){
+        if(wantsOverwrite)
+        {
+            ActivateTextInput(listEntryIndex);
+        }
+    });
+}
+
 void SaveLoadScreen::ActivateTextInput(int listEntryIndex)
 {
     // Show text input over the name label.
@@ -472,11 +483,19 @@ void SaveLoadScreen::OnListEntryButtonPressed(int listEntryIndex)
         return;
     }
 
-    // In save mode, if we select the "empty" slot when it was already selected...
-    // It means we want to enter a name for the empty slot.
+    // In save mode, if we select a slot that's already highlighted, we try to save to that slot.
     if(listEntryIndex == SaveIndexToListEntryIndex(mSaveIndex) && mSaveButton->IsEnabled())
     {
-        ActivateTextInput(listEntryIndex);
+        // If this is the empty slot, we can activate the text input right away.
+        // Otherwise, show a confirm popup first.
+        if(mSaveIndex == gSaveManager.GetSaves().size())
+        {
+            ActivateTextInput(listEntryIndex);
+        }
+        else
+        {
+            ShowSaveOverwriteConfirm(listEntryIndex);
+        }
     }
 
     // Highlight selected button index.
@@ -488,10 +507,9 @@ void SaveLoadScreen::OnSaveButtonPressed()
     gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
     if(mSaveIndex < gSaveManager.GetSaves().size())
     {
-        //TODO: show popup asking if we want to overwrite the save.
         if(!mTextInput->IsEnabled())
         {
-            ActivateTextInput(SaveIndexToListEntryIndex(mSaveIndex));
+            ShowSaveOverwriteConfirm(SaveIndexToListEntryIndex(mSaveIndex));
         }
         else
         {
