@@ -53,6 +53,7 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     UIButton* quitButton = CreateButton(titleImage->GetOwner(), "TITLE_QUIT", buttonX);
     quitButton->SetTooltipText("titlequit");
     quitButton->SetPressCallback([](UIButton* button){
+        // Unlike most other quit buttons in the game, this one quits directly - no quit popup confirmation.
         GEngine::Instance()->Quit();
     });
     buttonX -= quitButton->GetRectTransform()->GetSize().x + distBetweenButtons;

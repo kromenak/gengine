@@ -407,16 +407,15 @@ void OptionBar::CreateOptionsSection(std::unordered_map<std::string, IniKeyValue
     // Created "advanced options" button.
     UIButton* advOptButton = CreateButton(config, "optAdvanced", mOptionsSection);
     advOptButton->SetPressCallback([this](UIButton* button) {
-        this->mAdvancedOptionsSection->SetActive(!this->mAdvancedOptionsSection->IsActive());
-        this->KeepOnScreen();
+        mAdvancedOptionsSection->SetActive(!this->mAdvancedOptionsSection->IsActive());
+        KeepOnScreen();
     });
 
     // Create "quit game" button.
     UIButton* quitButton = CreateButton(config, "optQuit", mOptionsSection);
     quitButton->SetPressCallback([this](UIButton* button) {
-        this->Hide();
-        //TODO: Show "are you sure you want to quit?" dialog.
-        GEngine::Instance()->Quit();
+        Hide();
+        gGK3UI.ShowQuitPopup();
     });
 
     // Create advanced options section.

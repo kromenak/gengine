@@ -43,6 +43,7 @@ void FinishedScreen::OnUpdate(float deltaTime)
        gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Right) ||
        gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Middle))
     {
+        // This one actually is a direct quit call - no quit popup in this instance.
         GEngine::Instance()->Quit();
     }
 }

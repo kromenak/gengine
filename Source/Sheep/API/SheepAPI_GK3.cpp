@@ -15,8 +15,7 @@ RegFunc0(ForceQuitGame, void, IMMEDIATE, DEV_FUNC);
 
 shpvoid QuitApp()
 {
-    //TODO: Should quit nicely by asking "are you sure" and making sure you saved.
-    GEngine::Instance()->Quit();
+    gGK3UI.ShowQuitPopup();
     return 0;
 }
 RegFunc0(QuitApp, void, IMMEDIATE, DEV_FUNC);

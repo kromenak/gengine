@@ -498,9 +498,10 @@ void GEngine::ProcessInput()
                 break;
             }
 
+            // Called when user hits X in corner of window.
             case SDL_QUIT:
             {
-                Quit();
+                gGK3UI.ShowQuitPopup();
                 break;
             }
         }

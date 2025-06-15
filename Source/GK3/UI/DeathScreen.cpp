@@ -63,8 +63,7 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         quitButton->SetDownTexture(gAssetManager.LoadTexture("DS_QUIT_D.BMP"));
         quitButton->SetDisabledTexture(gAssetManager.LoadTexture("DS_QUIT_X.BMP"));
         quitButton->SetPressCallback([](UIButton* button){
-            //TODO: Should show "are you sure?" prompt.
-            GEngine::Instance()->Quit();
+            gGK3UI.ShowQuitPopup();
         });
         quitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         quitButton->GetRectTransform()->SetAnchoredPosition(379.0f, 24.0f);
