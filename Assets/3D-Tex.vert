@@ -14,7 +14,7 @@ void main()
 {
     // Pass through the UV attribute.
     fUV1 = vUV1;
-    
+
     // Transform position obj->world->view->proj.
     gl_Position = gWorldToProjMatrix * gObjectToWorldMatrix * vec4(vPos, 1.0f);
 }

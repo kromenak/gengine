@@ -1,59 +1,59 @@
 symbols
 {
-	int count$ = 0;
+    int count$ = 0;
 }
 
 code
 {
-	CheckTimeblockComplete$()
-	{
-		// DAY 1
-		if(IsCurrentTime("110A"))
-		{
-			wait Call("CheckTimeblockComplete110A$");
-		}
-		else if(IsCurrentTime("112P"))
-		{
-			wait Call("CheckTimeblockComplete112P$");
-		}
-		else if(IsCurrentTime("102P"))
-		{
-			wait Call("CheckTimeblockComplete102P$");
-		}
-		else if(IsCurrentTime("104P"))
-		{
-			wait Call("CheckTimeblockComplete104P$");
-		}
-		else if(IsCurrentTime("106P"))
-		{
-			wait Call("CheckTimeblockComplete106P$");
-		}
+    CheckTimeblockComplete$()
+    {
+        // DAY 1
+        if(IsCurrentTime("110A"))
+        {
+            wait Call("CheckTimeblockComplete110A$");
+        }
+        else if(IsCurrentTime("112P"))
+        {
+            wait Call("CheckTimeblockComplete112P$");
+        }
+        else if(IsCurrentTime("102P"))
+        {
+            wait Call("CheckTimeblockComplete102P$");
+        }
+        else if(IsCurrentTime("104P"))
+        {
+            wait Call("CheckTimeblockComplete104P$");
+        }
+        else if(IsCurrentTime("106P"))
+        {
+            wait Call("CheckTimeblockComplete106P$");
+        }
 
-		// DAY 2
-		else if(IsCurrentTime("207A"))
-		{
-			wait Call("CheckTimeblockComplete207A$");
-		}
-		else if(IsCurrentTime("210A"))
-		{
-			wait Call("CheckTimeblockComplete210A$");
-		}
-		else if(IsCurrentTime("212P"))
-		{
-			wait Call("CheckTimeblockComplete212P$");
-		}
-		else if(IsCurrentTime("202P"))
-		{
-			wait Call("CheckTimeblockComplete202P$");
-		}
-		else if(IsCurrentTime("205P"))
-		{
-			wait Call("CheckTimeblockComplete205P$");
-		}
-		else if(IsCurrentTime("202A"))
-		{
-			wait Call("CheckTimeblockComplete202A$");
-		}
+        // DAY 2
+        else if(IsCurrentTime("207A"))
+        {
+            wait Call("CheckTimeblockComplete207A$");
+        }
+        else if(IsCurrentTime("210A"))
+        {
+            wait Call("CheckTimeblockComplete210A$");
+        }
+        else if(IsCurrentTime("212P"))
+        {
+            wait Call("CheckTimeblockComplete212P$");
+        }
+        else if(IsCurrentTime("202P"))
+        {
+            wait Call("CheckTimeblockComplete202P$");
+        }
+        else if(IsCurrentTime("205P"))
+        {
+            wait Call("CheckTimeblockComplete205P$");
+        }
+        else if(IsCurrentTime("202A"))
+        {
+            wait Call("CheckTimeblockComplete202A$");
+        }
 
         // DAY 3
         else if(IsCurrentTime("307A"))
@@ -75,359 +75,359 @@ code
         else if(IsCurrentTime("306P"))
         {
             wait Call("CheckTimeblockComplete306P$");
-        }   
-	}
+        }
+    }
 
-	CheckTimeblockComplete110A$()
-	{
-		// Must be at RC1 to complete timeblock.
-		if(IsCurrentLocation("RC1") == 0)
-		{
-			return;
-		}
+    CheckTimeblockComplete110A$()
+    {
+        // Must be at RC1 to complete timeblock.
+        if(IsCurrentLocation("RC1") == 0)
+        {
+            return;
+        }
 
-		// Must have met Mosely. COFFEE_POT/POUR gets set during dining room cutscene.
-		if(GetNounVerbCount("COFFEE_POT", "POUR") == 0)
-		{
-			return;
-		}
+        // Must have met Mosely. COFFEE_POT/POUR gets set during dining room cutscene.
+        if(GetNounVerbCount("COFFEE_POT", "POUR") == 0)
+        {
+            return;
+        }
 
-		// Must have called Prince James from one of the three phones.
-		if(GetNounVerbCount("PHONE", "PRINCE_JAMES_CARD") == 0 &&
-		   GetNounVerbCount("OTR_PHONE_1", "PRINCE_JAMES_CARD") == 0 &&
-		   GetNounVerbCount("OTR_PHONE_2", "PRINCE_JAMES_CARD") == 0)
-		{
-			return;
-		}
+        // Must have called Prince James from one of the three phones.
+        if(GetNounVerbCount("PHONE", "PRINCE_JAMES_CARD") == 0 &&
+           GetNounVerbCount("OTR_PHONE_1", "PRINCE_JAMES_CARD") == 0 &&
+           GetNounVerbCount("OTR_PHONE_2", "PRINCE_JAMES_CARD") == 0)
+        {
+            return;
+        }
 
-		// Must have read the register.
-		if(GetNounVerbCount("REGISTER", "READ") == 0)
-		{
-			return;
-		}
+        // Must have read the register.
+        if(GetNounVerbCount("REGISTER", "READ") == 0)
+        {
+            return;
+        }
 
-		// Must have at least met Emilio.
-		if(GetTopicCount("EMILIO", "T_INTRODUCE") == 0)
-		{
-			return;
-		}
+        // Must have at least met Emilio.
+        if(GetTopicCount("EMILIO", "T_INTRODUCE") == 0)
+        {
+            return;
+        }
 
-		// Must ask Buthane about check in times.
-		if(GetTopicCount("BUTHANE", "T_CHECK_IN") < 2)
-		{
-			return;
-		}
+        // Must ask Buthane about check in times.
+        if(GetTopicCount("BUTHANE", "T_CHECK_IN") < 2)
+        {
+            return;
+        }
 
-		// Must see the "San Greal" display at the bookstore.
-		if(GetNounVerbCount("SAN_GREAL_WORDS", "LOOK") == 0)
-		{
-			return;
-		}
+        // Must see the "San Greal" display at the bookstore.
+        if(GetNounVerbCount("SAN_GREAL_WORDS", "LOOK") == 0)
+        {
+            return;
+        }
 
-		// Must talk to Girard about Holy Grail.
-		if(GetTopicCount("GIRARD", "T_HOLY_GRAIL") == 0)
-		{
-			return;
-		}
+        // Must talk to Girard about Holy Grail.
+        if(GetTopicCount("GIRARD", "T_HOLY_GRAIL") == 0)
+        {
+            return;
+        }
 
-		// Must at least introduce to Howard/Estelle.
-		if(GetTopicCount("LADY_H_ESTELLE", "T_INTRODUCE") == 0)
-		{
-			return;
-		}
+        // Must at least introduce to Howard/Estelle.
+        if(GetTopicCount("LADY_H_ESTELLE", "T_INTRODUCE") == 0)
+        {
+            return;
+        }
 
-		// Ok, go to next timeblock!
-		SetTime("112P");
-	}
+        // Ok, go to next timeblock!
+        SetTime("112P");
+    }
 
-	CheckTimeblockComplete112P$()
-	{
-		// Must be at RC1 to complete timeblock.
-		if(IsCurrentLocation("RC1") == 0)
-		{
-			return;
-		}
+    CheckTimeblockComplete112P$()
+    {
+        // Must be at RC1 to complete timeblock.
+        if(IsCurrentLocation("RC1") == 0)
+        {
+            return;
+        }
 
-		// Must have met Buchelli and talked about Check-In Time.
-		if(GetTopicCount("BUCHELLI", "T_CHECK_IN") < 1)
-		{
-			return;
-		}
+        // Must have met Buchelli and talked about Check-In Time.
+        if(GetTopicCount("BUCHELLI", "T_CHECK_IN") < 1)
+        {
+            return;
+        }
 
-		// Must have met Abbe and talked about Templars.
-		if(GetTopicCount("ABBE", "T_TEMPLARS") < 1)
-		{
-			return;
-		}
+        // Must have met Abbe and talked about Templars.
+        if(GetTopicCount("ABBE", "T_TEMPLARS") < 1)
+        {
+            return;
+        }
 
-		// Must have witnessed Lady Howard & Emilio switching rooms...
-		// OR viewed the updated Hotel Registry.
-		if(!GetFlag("SeenLHRoomSwitch") && GetNounVerbCount("REGISTER", "READ") < 2)
-		{
-			return;
-		}
+        // Must have witnessed Lady Howard & Emilio switching rooms...
+        // OR viewed the updated Hotel Registry.
+        if(!GetFlag("SeenLHRoomSwitch") && GetNounVerbCount("REGISTER", "READ") < 2)
+        {
+            return;
+        }
 
-		// Must have talked to Mosely about Case, Grace, and Schattenjagers.
-		if(GetTopicCount("MOSELY", "T_CASE") < 1 ||
-		   GetTopicCount("MOSELY", "T_GRACE") < 1 ||
-		   GetTopicCount("MOSELY", "T_SCHATTENJAGER") < 1)
-		{
-			return;
-		}
+        // Must have talked to Mosely about Case, Grace, and Schattenjagers.
+        if(GetTopicCount("MOSELY", "T_CASE") < 1 ||
+           GetTopicCount("MOSELY", "T_GRACE") < 1 ||
+           GetTopicCount("MOSELY", "T_SCHATTENJAGER") < 1)
+        {
+            return;
+        }
 
-		// Ok, go to next timeblock!
-		SetTime("102P");
-	}
+        // Ok, go to next timeblock!
+        SetTime("102P");
+    }
 
-	CountTrainStationAndLarryActions$()
-	{
-		// Reset counter to 0.
-		count$ = 0;
+    CountTrainStationAndLarryActions$()
+    {
+        // Reset counter to 0.
+        count$ = 0;
 
-		// Increment if we did train station actions.
-		if(GetNounVerbCount("ARRIVALS_IN_CU", "THINK") > 0 && GetNounVerbCount("TAXI_DRIVER", "WALLET") == 2)
-		{
-			count$ = count$ + 1;
-		}
+        // Increment if we did train station actions.
+        if(GetNounVerbCount("ARRIVALS_IN_CU", "THINK") > 0 && GetNounVerbCount("TAXI_DRIVER", "WALLET") == 2)
+        {
+            count$ = count$ + 1;
+        }
 
-		// Increment if we talked to Larry about Templars.
-		if(GetTopicCount("LARRY", "T_TEMPLARS") >= 2)
-		{
-			count$ = count$ + 1;
-		}
-	}
+        // Increment if we talked to Larry about Templars.
+        if(GetTopicCount("LARRY", "T_TEMPLARS") >= 2)
+        {
+            count$ = count$ + 1;
+        }
+    }
 
-	CheckTimeblockComplete102P$()
-	{
-		// Must be on the Map screen.
-		if(IsCurrentLocation("MAP") == 0)
-		{
-			return;
-		}
+    CheckTimeblockComplete102P$()
+    {
+        // Must be on the Map screen.
+        if(IsCurrentLocation("MAP") == 0)
+        {
+            return;
+        }
 
-		// Must have rented moped. We'll assume that, if you've got the keys, you're good.
-		if(DoesEgoHaveInvItem("MOPED_KEYS") == 0)
-		{
-			return;
-		}
+        // Must have rented moped. We'll assume that, if you've got the keys, you're good.
+        if(DoesEgoHaveInvItem("MOPED_KEYS") == 0)
+        {
+            return;
+        }
 
-		// Must have followed Buthane.
-		if(GetNounVerbCount("BUTHANE", "FOLLOW") == 0)
-		{
-			return;
-		}
+        // Must have followed Buthane.
+        if(GetNounVerbCount("BUTHANE", "FOLLOW") == 0)
+        {
+            return;
+        }
 
-		// Must have followed Wilkes.
-		if(GetNounVerbCount("WILKES", "FOLLOW") == 0)
-		{
-			return;
-		}
+        // Must have followed Wilkes.
+        if(GetNounVerbCount("WILKES", "FOLLOW") == 0)
+        {
+            return;
+        }
 
-		// Must have either:
-		// A) "Think" at the Train Station arrival board & bribed taxi driver
-		// B) Talked to Larry about Templars
-		Call("CountTrainStationAndLarryActions$");
-		if(count$ == 0)
-		{
-			return;
-		}
+        // Must have either:
+        // A) "Think" at the Train Station arrival board & bribed taxi driver
+        // B) Talked to Larry about Templars
+        Call("CountTrainStationAndLarryActions$");
+        if(count$ == 0)
+        {
+            return;
+        }
 
-		// OK, go to next timeblock!
-		SetTime("104P");
-	}
+        // OK, go to next timeblock!
+        SetTime("104P");
+    }
 
-	CheckTimeblockComplete104P$()
-	{
-		// Must be at MOP.
-		if(IsCurrentLocation("MOP") == 0)
-		{
-			return;
-		}
+    CheckTimeblockComplete104P$()
+    {
+        // Must be at MOP.
+        if(IsCurrentLocation("MOP") == 0)
+        {
+            return;
+        }
 
-		// Must have done BOTH:
-		// A) "Think" at the Train Station arrival board & bribed taxi driver
-		// B) Talked to Larry about Templars
-		wait Call("CountTrainStationAndLarryActions$");
-		if(count$ < 2)
-		{
-			return;
-		}
+        // Must have done BOTH:
+        // A) "Think" at the Train Station arrival board & bribed taxi driver
+        // B) Talked to Larry about Templars
+        wait Call("CountTrainStationAndLarryActions$");
+        if(count$ < 2)
+        {
+            return;
+        }
 
-		// Must have introduced yourself to Wilkes.
-		// This technically can be done earlier (112P or 102P) but MUST be done now.
-		if(GetTopicCount("WILKES", "T_INTRODUCE") == 0)
-		{
-			return;
-		}
+        // Must have introduced yourself to Wilkes.
+        // This technically can be done earlier (112P or 102P) but MUST be done now.
+        if(GetTopicCount("WILKES", "T_INTRODUCE") == 0)
+        {
+            return;
+        }
 
-		// Must have used the binocs to spy on Mosely/Buthane from Chateau de Blanchefort.
-		if(GetNounVerbCount("VIEW_OF_LHOMME_MORE", "BINOCULARS") == 0)
-		{
-			return;
-		}
+        // Must have used the binocs to spy on Mosely/Buthane from Chateau de Blanchefort.
+        if(GetNounVerbCount("VIEW_OF_LHOMME_MORE", "BINOCULARS") == 0)
+        {
+            return;
+        }
 
-		// OK, go to next timeblock!
-		SetTime("106P");
-	}
+        // OK, go to next timeblock!
+        SetTime("106P");
+    }
 
-	CheckTimeblockComplete106P$()
-	{
-		// Must be at R25.
-		if(IsCurrentLocation("R25") == 0)
-		{
-			return;
-		}
+    CheckTimeblockComplete106P$()
+    {
+        // Must be at R25.
+        if(IsCurrentLocation("R25") == 0)
+        {
+            return;
+        }
 
-		// Must have asked Grace & Mosely about Abbe Arnaud.
-		// There are other requirements to get to this point, but you can only do this if you've done everything else.
-		if(GetTopicCount("GRACE_N_MOSE", "T_ABBE") == 0)
-		{
-			return;
-		}
+        // Must have asked Grace & Mosely about Abbe Arnaud.
+        // There are other requirements to get to this point, but you can only do this if you've done everything else.
+        if(GetTopicCount("GRACE_N_MOSE", "T_ABBE") == 0)
+        {
+            return;
+        }
 
-		// OK, go to next timeblock!
-		SetTime("207A");
-	}
+        // OK, go to next timeblock!
+        SetTime("207A");
+    }
 
-	CheckTimeblockComplete207A$()
-	{
-		// NOTE: the way this timeblock ends is Chateau de Blanchfort's Sheep will change the location to R25 after all conditions have been met.
+    CheckTimeblockComplete207A$()
+    {
+        // NOTE: the way this timeblock ends is Chateau de Blanchfort's Sheep will change the location to R25 after all conditions have been met.
 
-		// Must be at R25.
-		if(IsCurrentLocation("R25") == 0)
-		{
-			return;
-		}
+        // Must be at R25.
+        if(IsCurrentLocation("R25") == 0)
+        {
+            return;
+        }
 
-		// Must have come here from Chateau de Blanchefort.
-		if(WasLastLocation("CD1") == 0)
-		{
-			return;
-		}
+        // Must have come here from Chateau de Blanchefort.
+        if(WasLastLocation("CD1") == 0)
+        {
+            return;
+        }
 
-		// The original game won't let you clear the timeblock simply by using SetLocation from CD1 back to R25.
-		// These topic conditions are also checked:
+        // The original game won't let you clear the timeblock simply by using SetLocation from CD1 back to R25.
+        // These topic conditions are also checked:
 
-		// Must have talked to these three about Le Serpent Rouge.
-		if(GetTopicCount("EMILIO", "T_LE_SERPENT_ROUGE") < 1 || GetTopicCount("MOSELY", "T_LE_SERPENT_ROUGE") < 1 || GetTopicCount("BUTHANE", "T_LE_SERPENT_ROUGE") < 1)
-		{
-			return;
-		}
+        // Must have talked to these three about Le Serpent Rouge.
+        if(GetTopicCount("EMILIO", "T_LE_SERPENT_ROUGE") < 1 || GetTopicCount("MOSELY", "T_LE_SERPENT_ROUGE") < 1 || GetTopicCount("BUTHANE", "T_LE_SERPENT_ROUGE") < 1)
+        {
+            return;
+        }
 
-		// Must have talked to Mosely about Gabe, Grace, Treasure.
-		if(GetTopicCount("MOSELY", "T_GABRIEL") < 1 || GetTopicCount("MOSELY", "T_MOSELY") < 1 || GetTopicCount("MOSELY", "T_TREASURE") < 1)
-		{
-			return;
-		}
+        // Must have talked to Mosely about Gabe, Grace, Treasure.
+        if(GetTopicCount("MOSELY", "T_GABRIEL") < 1 || GetTopicCount("MOSELY", "T_MOSELY") < 1 || GetTopicCount("MOSELY", "T_TREASURE") < 1)
+        {
+            return;
+        }
 
-		// OK, go to next timeblock!
-		SetTime("210A");
-	}
+        // OK, go to next timeblock!
+        SetTime("210A");
+    }
 
-	CheckTimeblockComplete210A$()
-	{
-		// Must be at LBY.
-		if(IsCurrentLocation("LBY") == 0)
-		{
-			return;
-		}
+    CheckTimeblockComplete210A$()
+    {
+        // Must be at LBY.
+        if(IsCurrentLocation("LBY") == 0)
+        {
+            return;
+        }
 
-		// There are several things that must be done for this timeblock to end. However, these are all checked by a condition in the Lobby NVC.
-		// This triggers a cutscene where Jean & Roxanne offer to make lunch for Gabe. The timeblock then ends.
-		// That cutscene appears to use this Noun/Verb count as an indicator that the timeblock should end.
-		if(GetNounVerbCount("MAID", "FOLLOW") == 0)
-		{
-			return;
-		}
+        // There are several things that must be done for this timeblock to end. However, these are all checked by a condition in the Lobby NVC.
+        // This triggers a cutscene where Jean & Roxanne offer to make lunch for Gabe. The timeblock then ends.
+        // That cutscene appears to use this Noun/Verb count as an indicator that the timeblock should end.
+        if(GetNounVerbCount("MAID", "FOLLOW") == 0)
+        {
+            return;
+        }
 
-		// OK, go to next timeblock!
-		// In this case, we also need to switch to a new location (Chateau de Serras).
-		SetLocationTime("CSE", "212P");
-	}
+        // OK, go to next timeblock!
+        // In this case, we also need to switch to a new location (Chateau de Serras).
+        SetLocationTime("CSE", "212P");
+    }
 
-	CheckTimeblockComplete212P$()
-	{
-		// Must be at R25.
-		// This location is set at the end of the final cutscene.
-		if(IsCurrentLocation("R25") == 0)
-		{
-			return;
-		}
+    CheckTimeblockComplete212P$()
+    {
+        // Must be at R25.
+        // This location is set at the end of the final cutscene.
+        if(IsCurrentLocation("R25") == 0)
+        {
+            return;
+        }
 
-		// Must have talked to the old lady in the cellar.
-		if(GetNounVerbCount("OLD_LADY", "TALK") == 0)
-		{
-			return;
-		}
+        // Must have talked to the old lady in the cellar.
+        if(GetNounVerbCount("OLD_LADY", "TALK") == 0)
+        {
+            return;
+        }
 
-		// OK, go to next timeblock!
-		SetTime("202P");
-	}
+        // OK, go to next timeblock!
+        SetTime("202P");
+    }
 
-	CheckTimeblockComplete202P$()
-	{
-		// Must be at R25.
-		if(IsCurrentLocation("R25") == 0)
-		{
-			return;
-		}
+    CheckTimeblockComplete202P$()
+    {
+        // Must be at R25.
+        if(IsCurrentLocation("R25") == 0)
+        {
+            return;
+        }
 
-		// The end-of-timeblock cutscene sets this flag to 7, which seems to indicate that we should move to the next timeblock.
-		// This only happens if the following items have been done:
-		// 1) Ask Jean for a Wake-Up call (which can only happen if you've confronted Larry & solved the alarm clock puzzle).
-		// 2) Follow Estelle to her site (which can only happen after discussing the case with Grace/Mosely).
-		// 3) Exhaust dialogue with Montreaux (which can only happen after solving ID puzzle).
-		if(GetGameVariableInt("FiveMinTimer202p") != 7)
-		{
-			return;
-		}
+        // The end-of-timeblock cutscene sets this flag to 7, which seems to indicate that we should move to the next timeblock.
+        // This only happens if the following items have been done:
+        // 1) Ask Jean for a Wake-Up call (which can only happen if you've confronted Larry & solved the alarm clock puzzle).
+        // 2) Follow Estelle to her site (which can only happen after discussing the case with Grace/Mosely).
+        // 3) Exhaust dialogue with Montreaux (which can only happen after solving ID puzzle).
+        if(GetGameVariableInt("FiveMinTimer202p") != 7)
+        {
+            return;
+        }
 
-		// OK, go to next timeblock!
-		SetTime("205P");
-	}
+        // OK, go to next timeblock!
+        SetTime("205P");
+    }
 
-	CheckTimeblockComplete205P$()
-	{
-		// This timeblock change occurs when you finish Gemini/Cancer sections of LSR at the computer.
-		// The game sets a few flags, and changes the location to HAL, which we can catch here.
+    CheckTimeblockComplete205P$()
+    {
+        // This timeblock change occurs when you finish Gemini/Cancer sections of LSR at the computer.
+        // The game sets a few flags, and changes the location to HAL, which we can catch here.
 
-		// Must be in HAL.
-		if(IsCurrentLocation("HAL") == 0)
-		{
-			return;
-		}
+        // Must be in HAL.
+        if(IsCurrentLocation("HAL") == 0)
+        {
+            return;
+        }
 
-		// Must have completed Gemini & Cancer.
-		if(!GetFlag("Gemini") || !GetFlag("Cancer"))
-		{
-			return;
-		}
+        // Must have completed Gemini & Cancer.
+        if(!GetFlag("Gemini") || !GetFlag("Cancer"))
+        {
+            return;
+        }
 
-		// Ok, seems like we can move on.
-		// (Even though it's "Day 3 2AM" it internally is called 202A).
-		SetTime("202A")
-	}
+        // Ok, seems like we can move on.
+        // (Even though it's "Day 3 2AM" it internally is called 202A).
+        SetTime("202A")
+    }
 
-	CheckTimeblockComplete202A$()
-	{
-		// The goal in this timeblock is to get Larry's manuscript and return to R25.
+    CheckTimeblockComplete202A$()
+    {
+        // The goal in this timeblock is to get Larry's manuscript and return to R25.
 
-		// Must be in R25.
-		if(IsCurrentLocation("R25") == 0)
-		{
-			return;
-		}
+        // Must be in R25.
+        if(IsCurrentLocation("R25") == 0)
+        {
+            return;
+        }
 
-		// Must have bloodline manuscript.
-		if(!DoesEgoHaveInvItem("BLOODLINE_MANUSCRIPT"))
-		{
-			return;
-		}
+        // Must have bloodline manuscript.
+        if(!DoesEgoHaveInvItem("BLOODLINE_MANUSCRIPT"))
+        {
+            return;
+        }
 
-		// OK, go to Day 3, 7AM!
-		SetTime("307A");
-	}
-    
+        // OK, go to Day 3, 7AM!
+        SetTime("307A");
+    }
+
     CheckTimeblockComplete307A$()
     {
         // The goal in this timeblock is to make progress on Le Serpent Rouge.
@@ -435,10 +435,10 @@ code
 
         // Other scripts will set a flag "End307a" and move to hallway when we should end the timeblock.
         // Must be in HAL.
-		if(IsCurrentLocation("HAL") == 0)
-		{
-			return;
-		}
+        if(IsCurrentLocation("HAL") == 0)
+        {
+            return;
+        }
 
         // Must have flag set.
         if(!GetFlag("End307a"))
@@ -458,10 +458,10 @@ code
         // Game code sets the location to R25 with various topic counts set when the timeblock should end.
 
         // Must be in R25.
-		if(IsCurrentLocation("R25") == 0)
-		{
-			return;
-		}
+        if(IsCurrentLocation("R25") == 0)
+        {
+            return;
+        }
 
         // Must have talked to Grace about several topics.
         if(GetTopicCount("GRACE", "T_FREEMASONS") == 0 ||
@@ -485,9 +485,9 @@ code
 
         // Must be in dining room.
         if(IsCurrentLocation("DIN") == 0)
-		{
-			return;
-		}
+        {
+            return;
+        }
 
         // Not 100% sure about this, but the end of timeblock cutscene seems to set this to indicate that we should move on.
         if(GetNounVerbCount("VIEW_OF_ORANGE_ROCK", "BINOCULARS") != 2)
@@ -505,10 +505,10 @@ code
         // Game scripts handle playing a closing cutscene and movie. We just need to detect the cutscene occurring and warping to R25.
 
         // Must be in R25.
-		if(IsCurrentLocation("R25") == 0)
-		{
-			return;
-		}
+        if(IsCurrentLocation("R25") == 0)
+        {
+            return;
+        }
 
         // Must have seen closing cutscene. The only way I see to check this is a noun/verb count.
         if(GetNounVerbCount("CEILING", "INSPECT") == 0)
@@ -525,10 +525,10 @@ code
         // Grace ties up some loose ends. There's a long video at the end of this timeblock, which dumps you back at R25.
 
         // Must be in R25.
-		if(IsCurrentLocation("R25") == 0)
-		{
-			return;
-		}
+        if(IsCurrentLocation("R25") == 0)
+        {
+            return;
+        }
 
         // Must have visited R27, to talk with Emilio and see giant cutscene.
         if(GetEgoLocationCount("R27") == 0)

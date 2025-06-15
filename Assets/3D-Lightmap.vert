@@ -16,10 +16,10 @@ void main()
 {
     // Pass through the UV attribute.
     fUV1 = vUV1;
-    
+
     // Calculate light map UV by applying offset/scale to texture UV.
     fUV2 = (vUV1 + uLightmapScaleOffset.zw) * uLightmapScaleOffset.xy;
-    
+
     // Transform vertex obj->world->view->proj.
     gl_Position = gWorldToProjMatrix * gObjectToWorldMatrix * vec4(vPos, 1.0f);
 }

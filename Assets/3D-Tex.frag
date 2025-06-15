@@ -12,7 +12,7 @@ uniform sampler2D uDiffuse;
 
 void main()
 {
-	vec4 texel = texture(uDiffuse, fUV1) * uColor;
-	if(texel.a < gAlphaTest) { discard; }
-	oColor = texel;
+    vec4 texel = texture(uDiffuse, fUV1) * uColor;
+    if(texel.a < gAlphaTest) { discard; }
+    oColor = texel;
 }

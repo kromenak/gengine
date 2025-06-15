@@ -18,8 +18,8 @@ uniform vec4 uAmbientColor = vec4(0.06f, 0.08f, 0.06f, 1.0f);
 void main()
 {
     // Sample surface color. Discard if invisible (for alpha test-style transparency).
-	vec4 texel = texture(uDiffuse, fUV1) * uColor;
-	if(texel.a < gAlphaTest) { discard; }
+    vec4 texel = texture(uDiffuse, fUV1) * uColor;
+    if(texel.a < gAlphaTest) { discard; }
 
     // Normal must be renormalized - interpolation from vertex shader may have changed length.
     vec3 normalDir = normalize(fNormal);

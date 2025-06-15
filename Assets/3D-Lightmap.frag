@@ -24,7 +24,7 @@ void main()
 {
     // Grab color texel. Discard if below alpha test value.
     vec4 texel = texture(uDiffuse, fUV1);
-	if(texel.a < gAlphaTest) { discard; }
+    if(texel.a < gAlphaTest) { discard; }
 
     // Show/hide diffuse texture. May want to show just lightmap texture for debugging.
     texel = (uDiffuseVisible * texel) + ((1.0f - uDiffuseVisible) * vec4(1.0f, 1.0f, 1.0f, 1.0f));

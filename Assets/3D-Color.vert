@@ -14,8 +14,8 @@ uniform vec4 uColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 void main()
 {
     // Pass through color attribute.
-	fColor = vColor * uColor;
-    
+    fColor = vColor * uColor;
+
     // Transform position obj->world->view->proj
     gl_Position = gWorldToProjMatrix * gObjectToWorldMatrix * vec4(vPos, 1.0f);
 }
