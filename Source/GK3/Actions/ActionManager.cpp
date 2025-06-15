@@ -433,6 +433,17 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // Also GABRIEL and MOSELY both matching GABE_N_MOSE...
+    if(StringUtil::EqualsIgnoreCase(noun, "GABRIEL") || StringUtil::EqualsIgnoreCase(noun, "MOSELY"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("GABE_N_MOSE", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
     // Also WILKES and BUCHELLI both matching WILKES_N_BUCHELLI...
     if(StringUtil::EqualsIgnoreCase(noun, "WILKES") || StringUtil::EqualsIgnoreCase(noun, "BUCHELLI"))
     {
