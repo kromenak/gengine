@@ -37,9 +37,9 @@ public:
     void ShowSaveScreen();
     void ShowLoadScreen();
 
-    void ShowGenericProgressBar();
-    void ShowSaveProgressBar();
-    void ShowLoadProgressBar();
+    ProgressBar* ShowGenericProgressBar();
+    ProgressBar* ShowSaveProgressBar();
+    ProgressBar* ShowLoadProgressBar();
     void SetProgressBarProgress(float fraction);
     void HideProgressBar();
 

@@ -1,7 +1,9 @@
 #include "ProgressBar.h"
 
 #include "AssetManager.h"
+#include "Random.h"
 #include "RectTransform.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -10,8 +12,6 @@
 ProgressBar::ProgressBar() : Actor("Progress Bar", TransformType::RectTransform),
     mLayer("ProgressBar")
 {
-    mLayer.OverrideAudioState(true);
-
     // Order should be pretty high, since this displays over almost everything.
     const int kCanvasOrder = 50;
     UI::AddCanvas(this, kCanvasOrder);
@@ -25,28 +25,24 @@ ProgressBar::ProgressBar() : Actor("Progress Bar", TransformType::RectTransform)
     mBackground = UI::CreateWidgetActor<UIImage>("Background", this);
     mBackground->SetTexture(gAssetManager.LoadTexture("PROGRESS_GENERIC.BMP"), true);
 
-    // Create label for progress bar. Typically shows something like "Saving..." or "Restoring..."
-    //UILabel* mLabel = UI::CreateWidgetActor<UILabel>(background->GetOwner());
-    //mLabel->SetFont(gAssetManager.LoadFont("F_TEMPUS_A10.FON"));
-    //mLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
-    //mLabel->SetVerticalAlignment(VerticalAlignment::Center);
-    //mLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
-    //mLabel->GetRectTransform()->SetSizeDelta(0.0f, 200.0f);
-
     // Create canvas to contain the progress bar image.
     // Using a canvas here allows us to mask the progress bar image.
     mProgressBarCanvas = UI::CreateCanvas("BarImageCanvas", mBackground->GetOwner(), kCanvasOrder + 1);
     mProgressBarCanvas->SetMasked(true);
     mProgressBarCanvas->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
     mProgressBarCanvas->GetRectTransform()->SetAnchoredPosition(40.0f, 52.0f);
-    mProgressBarCanvas->GetRectTransform()->SetSizeDelta(513.0f, 50.0f);
+    mProgressBarCanvas->GetRectTransform()->SetSizeDelta(kProgressBarWidth, kProgressBarHeight);
 
+    // Create bar image inside of canvas.
+    // The pivot is important to get the correct progress bar effect when modifying the parent canvas's size.
     mProgressBarImage = UI::CreateWidgetActor<UIImage>("BarImage", mProgressBarCanvas->GetOwner());
+    mProgressBarImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
     mProgressBarImage->SetTexture(gAssetManager.LoadTexture("PROGRESS_SLIDER.BMP"), true);
 }
 
 void ProgressBar::Show(Type type)
 {
+    // Change background based on the type of progress bar being used.
     switch(type)
     {
     case Type::Generic:
@@ -59,8 +55,17 @@ void ProgressBar::Show(Type type)
         mBackground->SetTexture(gAssetManager.LoadTexture("PROGRESS_LOAD_SCREEN.BMP"), true);
         break;
     }
+
+    // Each time the progress bar shows, the part of the bar image that's shown changes randomly.
+    float randomY = Random::Range(0.0f, mProgressBarImage->GetTexture()->GetHeight() - kProgressBarHeight);
+    mProgressBarImage->GetRectTransform()->SetAnchoredPosition(0.0f, -randomY);
+
+    // Show the bar.
     SetActive(true);
     gLayerManager.PushLayer(&mLayer);
+
+    // Make sure fake progress is disabled unless asked for.
+    mFakeProgressDuration = 0.0f;
 }
 
 void ProgressBar::Hide()
@@ -71,5 +76,33 @@ void ProgressBar::Hide()
 
 void ProgressBar::SetProgress(float fraction)
 {
+    // The canvas is configured in such a way that we can just set the size (as a % of it's total width) and get the expected progress bar effect.
+    mProgressBarCanvas->GetRectTransform()->SetSizeDeltaX(fraction * kProgressBarWidth);
+}
 
+void ProgressBar::ShowFakeProgress(float duration)
+{
+    mFakeProgressDuration = duration;
+    mFakeProgressTimer = 0.0f;
+}
+
+void ProgressBar::OnUpdate(float deltaTime)
+{
+    // If a fake duration was specified....
+    if(mFakeProgressDuration > 0.0f)
+    {
+        // And we haven't reached the duration yet...
+        if(mFakeProgressTimer < mFakeProgressDuration)
+        {
+            // Increment timer and update progress bar.
+            mFakeProgressTimer += deltaTime;
+            SetProgress(mFakeProgressTimer / mFakeProgressDuration);
+
+            // If we do reach the duration, hide the progress bar.
+            if(mFakeProgressTimer >= mFakeProgressDuration)
+            {
+                Hide();
+            }
+        }
+    }
 }

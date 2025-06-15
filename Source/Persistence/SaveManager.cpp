@@ -8,6 +8,7 @@
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Paths.h"
+#include "ProgressBar.h"
 #include "Renderer.h"
 #include "SceneManager.h"
 #include "Sidney.h"
@@ -90,11 +91,17 @@ void SaveManager::HandlePendingSavesAndLoads()
 {
     if(!mPendingSaveDescription.empty())
     {
+        ProgressBar* progressBar = gGK3UI.ShowSaveProgressBar();
+        progressBar->ShowFakeProgress(0.25f);
+
         SaveInternal(mPendingSaveDescription);
         mPendingSaveDescription.clear();
     }
     if(!mPendingLoadPath.empty())
     {
+        ProgressBar* progressBar = gGK3UI.ShowLoadProgressBar();
+        progressBar->ShowFakeProgress(0.25f);
+
         LoadInternal(mPendingLoadPath);
         mPendingLoadPath.clear();
     }
@@ -246,7 +253,6 @@ void SaveManager::LoadInternal(const std::string& loadPath)
     // Ok, looks like we will actually load this save!
     // Let's unload the current scene to start with a clean slate.
     gSceneManager.UnloadScene([this, loadPath](){
-
         // Create the persistinator.
         PersistState ps(loadPath.c_str(), PersistFormat::Binary, PersistMode::Load);
 

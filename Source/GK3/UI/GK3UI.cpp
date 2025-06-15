@@ -94,7 +94,7 @@ void GK3UI::ShowLoadScreen()
     mSaveLoadScreen->ShowLoad();
 }
 
-void GK3UI::ShowGenericProgressBar()
+ProgressBar* GK3UI::ShowGenericProgressBar()
 {
     if(mProgressBar == nullptr)
     {
@@ -102,9 +102,10 @@ void GK3UI::ShowGenericProgressBar()
         mProgressBar->SetIsDestroyOnLoad(false);
     }
     mProgressBar->Show(ProgressBar::Type::Generic);
+    return mProgressBar;
 }
 
-void GK3UI::ShowSaveProgressBar()
+ProgressBar* GK3UI::ShowSaveProgressBar()
 {
     if(mProgressBar == nullptr)
     {
@@ -112,9 +113,10 @@ void GK3UI::ShowSaveProgressBar()
         mProgressBar->SetIsDestroyOnLoad(false);
     }
     mProgressBar->Show(ProgressBar::Type::Save);
+    return mProgressBar;
 }
 
-void GK3UI::ShowLoadProgressBar()
+ProgressBar* GK3UI::ShowLoadProgressBar()
 {
     if(mProgressBar == nullptr)
     {
@@ -122,6 +124,7 @@ void GK3UI::ShowLoadProgressBar()
         mProgressBar->SetIsDestroyOnLoad(false);
     }
     mProgressBar->Show(ProgressBar::Type::Load);
+    return mProgressBar;
 }
 
 void GK3UI::SetProgressBarProgress(float fraction)
