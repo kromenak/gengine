@@ -103,11 +103,12 @@ void DrivingScreen::Show(FollowMode followMode)
         // POU (Poussin's Tomb) is available after the tour on Day 2, 7am.
         mLocationButtons["POU"]->SetEnabled(currentTimeblock >= Timeblock(2, 7, Timeblock::AM) || currentTimeblock == Timeblock(2, 2));
 
-        // BEC (Bottom of Hexagram) is only available after discovering it via Le Serpent Rouge.
+        // BEC (Bottom of Hexagram) is only at the beginning of Day 3, 12PM (even though you discover the coordinates in Day 3, 7AM).
         // MCB (Top of Hexagram) is the same.
-        // TRE (Treasure) as well.
-        mLocationButtons["BEC"]->SetEnabled(gGameProgress.GetFlag("PlacedTempleDivisions"));
-        mLocationButtons["MCB"]->SetEnabled(gGameProgress.GetFlag("PlacedTempleDivisions"));
+        mLocationButtons["BEC"]->SetEnabled(currentTimeblock >= Timeblock(3, 12));
+        mLocationButtons["MCB"]->SetEnabled(currentTimeblock >= Timeblock(3, 12));
+
+        // TRE (Treasure) is only available after you've marked it on the map in Sidney.
         mLocationButtons["TRE"]->SetEnabled(gGameProgress.GetFlag("MarkedTheSite"));
 
         // BMB (Red Rock) is only available after spying on Buchelli from Blanchefort.
