@@ -39,6 +39,9 @@ struct AnimParams
     // If true, this anim will not do any parenting, even if it would otherwise be autodetected and applied.
     bool noParenting = false;
 
+    // If set, this actor is set as the parent for vertex animations (except when the parent IS the object, or for walker DOR models).
+    Actor* parent = nullptr;
+
     // A callback to fire on animation finish.
     std::function<void()> finishCallback = nullptr;
 };

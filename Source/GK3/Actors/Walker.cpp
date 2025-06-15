@@ -11,6 +11,7 @@
 #include "Heading.h"
 #include "Interpolate.h"
 #include "LineSegment.h"
+#include "MeshRenderer.h"
 #include "Ray.h"
 #include "Renderer.h"
 #include "SceneManager.h"
@@ -362,6 +363,7 @@ void Walker::OnUpdate(float deltaTime)
                     AnimParams animParams;
                     animParams.animation = mWalkLoopAnim;
                     animParams.allowMove = true;
+                    animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
                     animParams.fromAutoScript = mFromAutoscript;
                     animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
                     gSceneManager.GetScene()->GetAnimator()->Start(animParams);
@@ -615,6 +617,7 @@ void Walker::NextAction()
         AnimParams animParams;
         animParams.animation = mWalkStartAnim;
         animParams.allowMove = true;
+        animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
         animParams.fromAutoScript = mFromAutoscript;
         animParams.finishCallback = [this](){
             if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStart)
@@ -633,6 +636,7 @@ void Walker::NextAction()
         AnimParams animParams;
         animParams.animation = mWalkStartTurnLeftAnim;
         animParams.allowMove = true;
+        animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
         animParams.fromAutoScript = mFromAutoscript;
         animParams.finishCallback = [this](){
             if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStartTurnLeft)
@@ -651,6 +655,7 @@ void Walker::NextAction()
         AnimParams animParams;
         animParams.animation = mWalkStartTurnRightAnim;
         animParams.allowMove = true;
+        animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
         animParams.fromAutoScript = mFromAutoscript;
         animParams.finishCallback = [this](){
             if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStartTurnRight)
@@ -669,6 +674,7 @@ void Walker::NextAction()
         AnimParams animParams;
         animParams.animation = mWalkLoopAnim;
         animParams.allowMove = true;
+        animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
         animParams.fromAutoScript = mFromAutoscript;
         animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
 
@@ -699,6 +705,7 @@ void Walker::NextAction()
             AnimParams animParams;
             animParams.animation = mCharConfig->walkStopAnim;
             animParams.allowMove = true;
+            animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
             gSceneManager.GetScene()->GetAnimator()->Start(animParams);

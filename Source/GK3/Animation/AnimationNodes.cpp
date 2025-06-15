@@ -60,16 +60,26 @@ void VertexAnimNode::Play(AnimationState* animState)
             // (So, they must do it in some similar way to this, unless I'm missing something?)
             if(!absolute && !animState->params.noParenting)
             {
-                // e.g. Grab the "ROX" from "ROX_SPRAYANDWIPE2.ANM".
-                const std::string& animName = animState->params.animation->GetName();
-                std::string prefix = animName.substr(0, 3);
-
-                // If a parent exists, and it isn't ourselves, use it!
-                GKObject* parent = gSceneManager.GetScene()->GetSceneObjectByModelName(prefix);
-                if(parent != nullptr && parent != obj)
+                if(animState->params.parent != nullptr)
                 {
-                    params.parent = parent->GetMeshRenderer()->GetOwner();
-                    //printf("Found parent %s for %s\n", parent->GetName().c_str(), obj->GetName().c_str());
+                    if(animState->params.parent != obj && !StringUtil::StartsWithIgnoreCase(obj->GetName(), "dor"))
+                    {
+                        params.parent = animState->params.parent;
+                    }
+                }
+                else
+                {
+                    // e.g. Grab the "ROX" from "ROX_SPRAYANDWIPE2.ANM".
+                    const std::string& animName = animState->params.animation->GetName();
+                    std::string prefix = animName.substr(0, 3);
+
+                    // If a parent exists, and it isn't ourselves, use it!
+                    GKObject* parent = gSceneManager.GetScene()->GetSceneObjectByModelName(prefix);
+                    if(parent != nullptr && parent != obj)
+                    {
+                        params.parent = parent->GetMeshRenderer()->GetOwner();
+                        //printf("Found parent %s for %s\n", parent->GetName().c_str(), obj->GetName().c_str());
+                    }
                 }
             }
 
