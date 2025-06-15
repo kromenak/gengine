@@ -11,6 +11,7 @@
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UIScrollbar.h"
 #include "UITextInput.h"
 #include "UIUtil.h"
 
@@ -23,10 +24,12 @@ namespace
     const float kMiddleColumnWidth = 147.0f;
     const float kRightColumnWidth = 60.0f;
     const float kColumnSeparatorWidth = 5.0f;
-    const float kRowHeight = 16.0f;
+    const float kRowHeight = 17.0f;
+
+    const int kMaxSavesOnSingleScreen = 21;
 }
 
-SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
+SaveLoadScreen::SaveLoadScreen() : Actor("SaveLoadScreen", TransformType::RectTransform),
     mSaveLayer("SaveLayer"),
     mLoadLayer("LoadLayer")
 {
@@ -94,7 +97,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
     }
 
     // Create actor that contains all the list items.
-    mListActor = new Actor(TransformType::RectTransform);
+    mListActor = new Actor("SaveList", TransformType::RectTransform);
     mListActor->GetTransform()->SetParent(background->GetRectTransform());
     RectTransform* rt = mListActor->GetComponent<RectTransform>();
     rt->SetAnchor(AnchorPreset::TopLeft);
@@ -103,7 +106,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
 
     // Create a highlight for putting behind a list item.
     {
-        Actor* highlightActor = new Actor(TransformType::RectTransform);
+        Actor* highlightActor = new Actor("Highlight", TransformType::RectTransform);
         highlightActor->GetTransform()->SetParent(rt);
         mHighlight = highlightActor->GetComponent<RectTransform>();
         mHighlight->SetAnchor(AnchorPreset::TopLeft);
@@ -125,16 +128,26 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
         rightHighlight->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         rightHighlight->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kMiddleColumnWidth + (2 * kColumnSeparatorWidth), 0.0f);
         rightHighlight->GetRectTransform()->SetSizeDelta(kRightColumnWidth, kRowHeight);
-
-        mHighlight->SetEnabled(false);
     }
 
     // Create input field for entering save names.
     {
         mTextInput = UI::CreateWidgetActor<UITextInput>("SaveNameTextInput", mListActor);
         mTextInput->SetFont(gAssetManager.LoadFont("F_SSERIF_T8.FON"));
+        mTextInput->SetVerticalAlignment(VerticalAlignment::Top);
+        mTextInput->AllowInputToChangeFocus(false); // this text input is always focused if code focuses it
         mTextInput->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        mTextInput->GetRectTransform()->SetAnchoredPosition(2.0f, 0.0f);
         mTextInput->GetRectTransform()->SetSizeDelta(kLeftColumnWidth, kRowHeight);
+
+        UIImage* caretImage = UI::CreateWidgetActor<UIImage>("Caret", mTextInput);
+        caretImage->SetTexture(&Texture::White);
+        caretImage->SetColor(Color32(198, 170, 41));
+        caretImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        caretImage->GetRectTransform()->SetPivot(1.0f, 0.15f);
+        caretImage->GetRectTransform()->SetSizeDelta(2.0f, kRowHeight);
+        mTextInput->SetCaret(caretImage);
+        mTextInput->SetCaretBlinkInterval(0.5f);
     }
 
     // Create image for showing save thumbnail.
@@ -145,28 +158,43 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
         mThumbnailImage->GetRectTransform()->SetAnchoredPosition(-14.0f, -120.0f);
         mThumbnailImage->GetRectTransform()->SetSizeDelta(160.0f, 120.0f);
     }
+
+    // Add scrollbar for when there are too many saves to fit on screen.
+    UIScrollbarParams scrollbarParams;
+    scrollbarParams.decreaseValueButtonUp = gAssetManager.LoadTexture("SAVELOAD_SCROLLUP_STD.BMP");
+    scrollbarParams.decreaseValueButtonDown = gAssetManager.LoadTexture("SAVELOAD_SCROLLUP_DWN.BMP");
+    scrollbarParams.increaseValueButtonUp = gAssetManager.LoadTexture("SAVELOAD_SCROLLDN_STD.BMP");
+    scrollbarParams.increaseValueButtonDown = gAssetManager.LoadTexture("SAVELOAD_SCROLLDN_DWN.BMP");
+    scrollbarParams.scrollbarBacking = gAssetManager.LoadTexture("SAVELOAD_SCROLLBACK.BMP");
+    scrollbarParams.handleParams.leftColor = scrollbarParams.handleParams.topColor = scrollbarParams.handleParams.topLeftColor = Color32(181, 125, 0);
+    scrollbarParams.handleParams.rightColor = scrollbarParams.handleParams.bottomColor = scrollbarParams.handleParams.topRightColor =
+        scrollbarParams.handleParams.bottomRightColor = scrollbarParams.handleParams.bottomLeftColor = Color32(90, 28, 33);
+    scrollbarParams.handleParams.centerColor = Color32(123, 77, 8);
+    scrollbarParams.handleParams.borderWidth = 2;
+
+    mScrollbar = UI::CreateWidgetActor<UIScrollbar>("Scrollbar", background, scrollbarParams);
+    mScrollbar->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+    mScrollbar->GetRectTransform()->SetAnchoredPosition(430.0f, 28.0f);
+    mScrollbar->GetRectTransform()->SetSizeDeltaY(385.0f);
+    mScrollbar->SetDecreaseValueCallback([this](){
+        OnScrollbarUpArrowPressed();
+    });
+    mScrollbar->SetIncreaseValueCallback([this](){
+        OnScrollbarDownArrowPressed();
+    });
+    mScrollbar->SetValueChangeCallback([this](float value){
+        OnScrollbarValueChanged(value);
+    });
 }
 
 void SaveLoadScreen::ShowSave()
 {
-    SetActive(true);
-    mSaveButton->SetEnabled(true);
-    mLoadButton->SetEnabled(false);
-    gLayerManager.PushLayer(&mSaveLayer);
-
-    PopulateSaveList();
-    mTextInput->SetEnabled(false);
+    Show(true);
 }
 
 void SaveLoadScreen::ShowLoad()
 {
-    SetActive(true);
-    mSaveButton->SetEnabled(false);
-    mLoadButton->SetEnabled(true);
-    gLayerManager.PushLayer(&mLoadLayer);
-
-    PopulateSaveList();
-    mTextInput->SetEnabled(false);
+    Show(false);
 }
 
 void SaveLoadScreen::Hide()
@@ -212,7 +240,24 @@ void SaveLoadScreen::OnUpdate(float deltaTime)
     }
 }
 
-void SaveLoadScreen::PopulateSaveList()
+void SaveLoadScreen::Show(bool isSaveScreen)
+{
+    // Show the screen.
+    SetActive(true);
+    gLayerManager.PushLayer(&mSaveLayer);
+
+    // Show save or load button depending.
+    mSaveButton->SetEnabled(isSaveScreen);
+    mLoadButton->SetEnabled(!isSaveScreen);
+
+    // Populate the list of saves.
+    PopulateSaveList(true);
+
+    // Make sure text input is disabled to start.
+    mTextInput->SetEnabled(false);
+}
+
+void SaveLoadScreen::PopulateSaveList(bool justShown)
 {
     // Hide all existing list entries.
     for(SaveListEntry& entry : mListEntries)
@@ -227,18 +272,35 @@ void SaveLoadScreen::PopulateSaveList()
     int entryCount = saves.size();
     if(mSaveButton->IsEnabled())
     {
-        entryCount++;
+        ++entryCount;
     }
     mSaveEntryCount = entryCount;
 
+    // Show the range of saves starting at the scroll ofset and ending either at max saves on screen or entry count (whichever is smaller).
+    int startRowIndex = mSaveScrollRowOffset;
+    int endRowIndex = Math::Min(mSaveScrollRowOffset + kMaxSavesOnSingleScreen, entryCount) - 1;
+
+    // If the screen has just been shown, it defaults to showing the *bottom* of the list.
+    if(justShown)
+    {
+        startRowIndex = 0;
+        endRowIndex = entryCount - 1;
+        if(entryCount > kMaxSavesOnSingleScreen)
+        {
+            startRowIndex = entryCount - kMaxSavesOnSingleScreen;
+        }
+        mSaveScrollRowOffset = startRowIndex;
+    }
+
     // Create a list entry for each save (and maybe also empty slot).
-    for(int i = 0; i < entryCount; ++i)
+    int listEntryCounter = 0;
+    for(int i = startRowIndex; i <= endRowIndex; ++i)
     {
         SaveListEntry* entry = nullptr;
-        if(i < mListEntries.size())
+        if(listEntryCounter < mListEntries.size())
         {
             // Reuse an existing entry.
-            entry = &mListEntries[i];
+            entry = &mListEntries[listEntryCounter];
         }
         else
         {
@@ -250,8 +312,8 @@ void SaveLoadScreen::PopulateSaveList()
             UIButton* button = UI::CreateWidgetActor<UIButton>("SaveEntry" + std::to_string(i), mListActor);
             button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             button->GetRectTransform()->SetSizeDelta(kSaveListWidth, 14.0f);
-            button->SetPressCallback([this, i](UIButton* button){
-                OnEntryButtonPressed(i);
+            button->SetPressCallback([this, listEntryCounter](UIButton* button){
+                OnListEntryButtonPressed(listEntryCounter);
             });
             mListEntries.back().button = button;
 
@@ -300,19 +362,67 @@ void SaveLoadScreen::PopulateSaveList()
         }
 
         // Position appropriately in list.
-        entry->button->GetRectTransform()->SetAnchoredPosition(0.0f, i * -kRowHeight);
+        entry->button->GetRectTransform()->SetAnchoredPosition(0.0f, listEntryCounter * -kRowHeight);
 
-        // Highlight should default to last item in the list. Just setting it each time works too.
-        SetSelectedSaveIndex(i);
+        // We used one list entry, so increment to next one.
+        ++listEntryCounter;
     }
+
+    // When first shown, highlight the last save in the list.
+    if(justShown)
+    {
+        SetSelectedSaveIndex(endRowIndex);
+    }
+    else
+    {
+        SetSelectedSaveIndex(mSaveIndex);
+    }
+
+    // Update scrollbar to reflect the list size/state.
+    int rowsNotOnScreen = entryCount - kMaxSavesOnSingleScreen;
+    mMaxSaveScrollRowOffset = rowsNotOnScreen;
+    if(rowsNotOnScreen > 0)
+    {
+        // Size handle relative to number of entries not on screen. More entries = smaller handle.
+        float normalizedScrollbarHandleSize = 1.0f / rowsNotOnScreen;
+        mScrollbar->SetHandleNormalizedSize(normalizedScrollbarHandleSize);
+
+        // Make sure scrollbar is in the correct spot.
+        mScrollbar->SetValueSilently(static_cast<float>(mSaveScrollRowOffset) / rowsNotOnScreen);
+    }
+    mScrollbar->SetCanInteract(rowsNotOnScreen > 0);
 }
 
-void SaveLoadScreen::SetSelectedSaveIndex(int index)
+int SaveLoadScreen::SaveIndexToListEntryIndex(int saveIndex)
 {
-    mSaveIndex = index;
+    int listEntryIndex = saveIndex - mSaveScrollRowOffset;
+    if(listEntryIndex >= 0 && listEntryIndex < mListEntries.size() && mListEntries[listEntryIndex].button->GetOwner()->IsActive())
+    {
+        return listEntryIndex;
+    }
+    return -1;
+}
 
-    // Update highlight position.
-    mHighlight->SetAnchoredPosition(0.0f, index * -kRowHeight);
+int SaveLoadScreen::ListEntryIndexToSaveIndex(int listEntryIndex)
+{
+    return listEntryIndex + mSaveScrollRowOffset;
+}
+
+void SaveLoadScreen::SetSelectedSaveIndex(int saveIndex)
+{
+    mSaveIndex = saveIndex;
+
+    int listEntryIndex = SaveIndexToListEntryIndex(mSaveIndex);
+    if(listEntryIndex >= 0)
+    {
+        // Update highlight position.
+        mHighlight->GetOwner()->SetActive(true);
+        mHighlight->SetAnchoredPosition(0.0f, listEntryIndex * -kRowHeight);
+    }
+    else
+    {
+        mHighlight->GetOwner()->SetActive(false);
+    }
 
     // Update the thumbnail.
     const std::vector<SaveSummary>& saves = gSaveManager.GetSaves();
@@ -326,31 +436,35 @@ void SaveLoadScreen::SetSelectedSaveIndex(int index)
     }
 }
 
-void SaveLoadScreen::ActivateTextInput(int index)
+void SaveLoadScreen::ActivateTextInput(int listEntryIndex)
 {
     // Show text input over the name label.
-    mTextInput->GetRectTransform()->SetAnchoredPosition(0.0f, index * -kRowHeight);
+    mTextInput->GetRectTransform()->SetAnchoredPosition(2.0f, (listEntryIndex * -kRowHeight) - 2.0f);
     mTextInput->SetEnabled(true);
 
     // If this is the "empty" slot at the end of the list, clear the text to enter a full name.
     // Otherwise, the text stays so the player can keep it if they want.
-    if(index >= gSaveManager.GetSaves().size())
+    int saveIndex = ListEntryIndexToSaveIndex(listEntryIndex);
+    if(saveIndex >= gSaveManager.GetSaves().size())
     {
         mTextInput->Clear();
-        mListEntries[index].nameLabel->SetText("");
+        mListEntries[listEntryIndex].nameLabel->SetText("");
     }
     else
     {
         // Show the previously entered text in text input.
-        mTextInput->SetText(mListEntries[index].nameLabel->GetText());
-        mListEntries[index].nameLabel->SetText("");
+        mTextInput->SetText(mListEntries[listEntryIndex].nameLabel->GetText());
+        mListEntries[listEntryIndex].nameLabel->SetText("");
     }
 
     // Player must enter text or exit out at this point.
     mTextInput->Focus();
+
+    // The scrollbar is also no longer interactive at this point.
+    mScrollbar->SetCanInteract(false);
 }
 
-void SaveLoadScreen::OnEntryButtonPressed(int index)
+void SaveLoadScreen::OnListEntryButtonPressed(int listEntryIndex)
 {
     // When text input is enabled, pressing entry buttons has no effect anymore.
     if(mTextInput->IsEnabled())
@@ -360,13 +474,13 @@ void SaveLoadScreen::OnEntryButtonPressed(int index)
 
     // In save mode, if we select the "empty" slot when it was already selected...
     // It means we want to enter a name for the empty slot.
-    if(index == mSaveIndex && mSaveButton->IsEnabled())
+    if(listEntryIndex == SaveIndexToListEntryIndex(mSaveIndex) && mSaveButton->IsEnabled())
     {
-        ActivateTextInput(index);
+        ActivateTextInput(listEntryIndex);
     }
 
     // Highlight selected button index.
-    SetSelectedSaveIndex(index);
+    SetSelectedSaveIndex(ListEntryIndexToSaveIndex(listEntryIndex));
 }
 
 void SaveLoadScreen::OnSaveButtonPressed()
@@ -377,7 +491,7 @@ void SaveLoadScreen::OnSaveButtonPressed()
         //TODO: show popup asking if we want to overwrite the save.
         if(!mTextInput->IsEnabled())
         {
-            ActivateTextInput(mSaveIndex);
+            ActivateTextInput(SaveIndexToListEntryIndex(mSaveIndex));
         }
         else
         {
@@ -390,7 +504,7 @@ void SaveLoadScreen::OnSaveButtonPressed()
     {
         if(!mTextInput->IsEnabled())
         {
-            ActivateTextInput(mSaveIndex);
+            ActivateTextInput(SaveIndexToListEntryIndex(mSaveIndex));
         }
         else
         {
@@ -415,4 +529,49 @@ void SaveLoadScreen::OnExitButtonPressed()
 {
     gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
     Hide();
+}
+
+void SaveLoadScreen::OnScrollbarUpArrowPressed()
+{
+    if(mSaveScrollRowOffset > 0)
+    {
+        --mSaveScrollRowOffset;
+    }
+    PopulateSaveList(false);
+}
+
+void SaveLoadScreen::OnScrollbarDownArrowPressed()
+{
+    if(mSaveScrollRowOffset < mMaxSaveScrollRowOffset)
+    {
+        ++mSaveScrollRowOffset;
+    }
+    PopulateSaveList(false);
+}
+
+void SaveLoadScreen::OnScrollbarValueChanged(float value)
+{
+    // Similar to inventory screen, this scroll bar isn't continuous - it only affects the scroll list when you hit the next threshold.
+    // So first thing, figure out which threshold this value corresponds with.
+    int oldRowOffset = mSaveScrollRowOffset;
+    for(int i = 0; i <= mMaxSaveScrollRowOffset; ++i)
+    {
+        float normalizedValue = static_cast<float>(i) / mMaxSaveScrollRowOffset;
+        if(value >= normalizedValue)
+        {
+            // The scrollbar value is more than the value for this threshold, so we'll use this offset.
+            mSaveScrollRowOffset = i;
+        }
+        else
+        {
+            // The scrollbar is less than this threshold, so we don't need to iterate anymore.
+            break;
+        }
+    }
+
+    // If the offset changed due to changing the scrollbar value, refresh the layout.
+    if(mSaveScrollRowOffset != oldRowOffset)
+    {
+        PopulateSaveList(false);
+    }
 }

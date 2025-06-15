@@ -7,6 +7,7 @@ class RectTransform;
 class UIButton;
 class UIImage;
 class UILabel;
+class UIScrollbar;
 class UITextInput;
 
 class SaveLoadScreen : public Actor
@@ -61,13 +62,28 @@ private:
     // The number of entries in the save list.
     int mSaveEntryCount = 0;
 
-    void PopulateSaveList();
+    // When the list of saves gets too long, we need a scrollbar!
+    // The index keeps track of which save is at the top of the screen.
+    UIScrollbar* mScrollbar = nullptr;
+    int mSaveScrollRowOffset = 0;
+    int mMaxSaveScrollRowOffset = 0;
 
-    void SetSelectedSaveIndex(int index);
-    void ActivateTextInput(int index);
-    void OnEntryButtonPressed(int index);
+    void Show(bool isSaveScreen);
+
+    void PopulateSaveList(bool justShown);
+
+    int SaveIndexToListEntryIndex(int saveIndex);
+    int ListEntryIndexToSaveIndex(int listEntryIndex);
+
+    void SetSelectedSaveIndex(int saveIndex);
+    void ActivateTextInput(int listEntryIndex);
+    void OnListEntryButtonPressed(int listEntryIndex);
 
     void OnSaveButtonPressed();
     void OnLoadButtonPressed();
     void OnExitButtonPressed();
+
+    void OnScrollbarUpArrowPressed();
+    void OnScrollbarDownArrowPressed();
+    void OnScrollbarValueChanged(float value);
 };

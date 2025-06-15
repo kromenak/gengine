@@ -55,24 +55,24 @@ UIScrollbar::UIScrollbar(Actor* owner, const UIScrollbarParams& params) : UIWidg
 
     // Create decrease value button.
     {
-        UIButton* decreaseValueButton = UI::CreateWidgetActor<UIButton>("DecScrollButton", this);
-        decreaseValueButton->SetUpTexture(decreaseButtonTexture);
-        decreaseValueButton->SetDownTexture(params.decreaseValueButtonDown);
-        decreaseValueButton->SetPressCallback([this](UIButton* button){
+        mDecreaseValueButton = UI::CreateWidgetActor<UIButton>("DecScrollButton", this);
+        mDecreaseValueButton->SetUpTexture(decreaseButtonTexture);
+        mDecreaseValueButton->SetDownTexture(params.decreaseValueButtonDown);
+        mDecreaseValueButton->SetPressCallback([this](UIButton* button){
             OnDecreaseValueButtonPressed();
         });
-        decreaseValueButton->GetRectTransform()->SetAnchor(AnchorPreset::Top);
+        mDecreaseValueButton->GetRectTransform()->SetAnchor(AnchorPreset::Top);
     }
 
     // Create increase value button.
     {
-        UIButton* increaseValueButton = UI::CreateWidgetActor<UIButton>("IncScrollButton", this);
-        increaseValueButton->SetUpTexture(increaseButtonTexture);
-        increaseValueButton->SetDownTexture(params.increaseValueButtonDown);
-        increaseValueButton->SetPressCallback([this](UIButton* button){
+        mIncreaseValueButton = UI::CreateWidgetActor<UIButton>("IncScrollButton", this);
+        mIncreaseValueButton->SetUpTexture(increaseButtonTexture);
+        mIncreaseValueButton->SetDownTexture(params.increaseValueButtonDown);
+        mIncreaseValueButton->SetPressCallback([this](UIButton* button){
             OnIncreaseValueButtonPressed();
         });
-        increaseValueButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+        mIncreaseValueButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
     }
 
     // Create slider, which you grab to scroll the scroll area.
@@ -129,6 +129,17 @@ void UIScrollbar::SetHandleNormalizedSize(float size)
 bool UIScrollbar::IsHandleBeingDragged() const
 {
     return mHandle->IsDragging();
+}
+
+void UIScrollbar::SetCanInteract(bool canInteract)
+{
+    // Only show the handle if you can interact.
+    mHandle->GetOwner()->SetActive(canInteract);
+
+    // Only allow sliding or pressing buttons if can interact.
+    mSlider->SetEnabled(canInteract);
+    mDecreaseValueButton->SetCanInteract(canInteract);
+    mIncreaseValueButton->SetCanInteract(canInteract);
 }
 
 void UIScrollbar::OnDecreaseValueButtonPressed()

@@ -16,6 +16,7 @@
 #include "UINineSlice.h"
 
 class Texture;
+class UIButton;
 class UIDrag;
 class UISlider;
 
@@ -54,6 +55,8 @@ public:
     void SetIncreaseValueCallback(const std::function<void()>& callback) { mIncreaseValueCallback = callback; }
     void SetValueChangeCallback(const std::function<void(float)>& callback) { mValueChangeCallback = callback; }
 
+    void SetCanInteract(bool canInteract);
+
 private:
     // The slider used for the scrollbar drag behavior.
     UISlider* mSlider = nullptr;
@@ -63,6 +66,10 @@ private:
 
     // The area that the handle is dragged within. Needed for size calculations.
     RectTransform* mHandleBacking = nullptr;
+
+    // Buttons for decreasing/increasing scroll.
+    UIButton* mDecreaseValueButton = nullptr;
+    UIButton* mIncreaseValueButton = nullptr;
 
     // Callbacks that are fired when the buttons to decrease/increase scroll value are pressed.
     std::function<void()> mDecreaseValueCallback = nullptr;
