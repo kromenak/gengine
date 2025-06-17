@@ -9,6 +9,7 @@
 #include "FingerprintScreen.h"
 #include "FinishedScreen.h"
 #include "GPSOverlay.h"
+#include "HelpScreen.h"
 #include "InputManager.h"
 #include "ProgressBar.h"
 #include "PauseScreen.h"
@@ -152,6 +153,16 @@ void GK3UI::ShowPauseScreen()
         mPauseScreen->SetIsDestroyOnLoad(false);
     }
     mPauseScreen->Show();
+}
+
+void GK3UI::ShowHelpScreen()
+{
+    if(mHelpScreen == nullptr)
+    {
+        mHelpScreen = new HelpScreen();
+        mHelpScreen->SetIsDestroyOnLoad(false);
+    }
+    mHelpScreen->Show();
 }
 
 void GK3UI::ShowQuitPopup()

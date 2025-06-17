@@ -342,8 +342,9 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
 
     // Add help button.
     mHelpButton = CreateButton(config, "help", mOptionBarRoot->GetOwner());
-    mHelpButton->SetPressCallback([](UIButton* button) {
-        std::cout << "Help!" << std::endl;
+    mHelpButton->SetPressCallback([this](UIButton* button) {
+        Hide();
+        gGK3UI.ShowHelpScreen();
     });
 
     // Add options button.

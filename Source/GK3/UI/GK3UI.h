@@ -14,6 +14,7 @@ class DeathScreen;
 class DrivingScreen;
 class FingerprintScreen;
 class GPSOverlay;
+class HelpScreen;
 class Layer;
 class PauseScreen;
 class ProgressBar;
@@ -45,6 +46,7 @@ public:
     void HideProgressBar();
 
     void ShowPauseScreen();
+    void ShowHelpScreen();
     void ShowQuitPopup();
     void ShowConfirmPopup(const std::string& message, const std::function<void(bool)>& callback);
 
@@ -81,6 +83,7 @@ private:
     ProgressBar* mProgressBar = nullptr;
 
     PauseScreen* mPauseScreen = nullptr;
+    HelpScreen* mHelpScreen = nullptr;
     QuitPopup* mQuitPopup = nullptr;
     ConfirmPopup* mConfirmPopup = nullptr;
 

@@ -1,8 +1,6 @@
 #include "ConfirmPopup.h"
 
 #include "AssetManager.h"
-#include "AudioManager.h"
-#include "GEngine.h"
 #include "IniParser.h"
 #include "TextAsset.h"
 #include "UIButton.h"
