@@ -72,7 +72,12 @@ DrivingScreen::~DrivingScreen()
 void DrivingScreen::Show(FollowMode followMode)
 {
     // Wherever we are right now, that's where we are driving from.
-    mDrivingFromLocation = gLocationManager.GetLocation();
+    // One exception is if location is already MAP (which occurs if timeblock screen shows over the map like in Day 1, 2PM).
+    std::string location = gLocationManager.GetLocation();
+    if(!StringUtil::EqualsIgnoreCase(location, "MAP"))
+    {
+        mDrivingFromLocation = gLocationManager.GetLocation();
+    }
 
     // The map shows as a special location called "Map".
     // Unload the current scene and set the location as such.
