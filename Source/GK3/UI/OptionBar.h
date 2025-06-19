@@ -39,14 +39,23 @@ private:
     UILabel* mScoreLabel = nullptr;
     UIButton* mActiveInventoryItemButton = nullptr;
 
+    // The primary buttons on the option bar - these appear in a row near the top and provide access to subsections.
     UIButton* mInventoryButton = nullptr;
     UIButton* mHintButton = nullptr;
-    UIButton* mRadioButton = nullptr;
     UIButton* mCamerasButton = nullptr;
     UIButton* mCinematicsOffButton = nullptr;
     UIButton* mCinematicsOnButton = nullptr;
     UIButton* mHelpButton = nullptr;
     UIButton* mOptionsButton = nullptr;
+
+    // In one rare occasion, this button replaces the "hint" button so that you can radio Grace instead.
+    UIButton* mRadioButton = nullptr;
+
+    // In some occasions, these buttons replace the inventory button.
+    // When in the inventory screen, the "exit inventory screen" button is used instead.
+    // When in certain examine/gadget interfaces, the "exit current screen" button is used instead.
+    UIButton* mExitInventoryButton = nullptr;
+    UIButton* mExitScreenButton = nullptr;
 
     // Camera section.
     Actor* mCamerasSection = nullptr;
@@ -96,7 +105,6 @@ private:
     void CreateGameOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
 
     void OnRadioButtonPressed();
-    void RefreshRadioButtonState();
 
     void OnCinematicsButtonPressed(UIButton* button);
     void RefreshCinematicsButtonState();

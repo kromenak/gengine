@@ -13,7 +13,7 @@
 HelpScreen::HelpScreen() : Actor("HelpScreen", TransformType::RectTransform),
     mLayer("HelpLayer")
 {
-    // When the pause screen shows, all underlying audio stops entirely.
+    // When the help screen shows, all underlying audio stops entirely.
     mLayer.OverrideAudioState(true);
 
     // Add a fullscreen canvas that tints whatever's under it.

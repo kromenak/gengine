@@ -72,6 +72,9 @@ public:
     bool IsAnyKeyPressedOutsideTextInputAndConsole();
     bool CanExitScreen(const Layer& layer);
 
+    bool IsOnExitableScreen() const;
+    void ExitCurrentScreen();
+
 private:
     TitleScreen* mTitleScreen = nullptr;
 

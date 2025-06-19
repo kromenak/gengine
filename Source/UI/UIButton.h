@@ -27,7 +27,7 @@ public:
     void SetHoverTexture(Texture* texture, const Color32& color = Color32::White);
     void SetDisabledTexture(Texture* texture, const Color32& color = Color32::White);
 
-    void SetPressCallback(std::function<void(UIButton*)> callback) { mPressCallback = callback; }
+    void SetPressCallback(const std::function<void(UIButton*)>& callback) { mPressCallback = callback; }
 
     void SetHoverSound(Audio* sound) { mHoverSound = sound; }
     bool IsHovered() const { return mPointerOver; }

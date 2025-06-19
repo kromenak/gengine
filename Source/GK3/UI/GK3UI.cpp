@@ -344,3 +344,26 @@ bool GK3UI::CanExitScreen(const Layer& layer)
         !gActionManager.IsActionPlaying() &&            // must not be playing an action
         !gActionManager.IsSkippingCurrentAction();      // must not be skipping an action
 }
+
+bool GK3UI::IsOnExitableScreen() const
+{
+    return gInventoryManager.IsInventoryInspectShowing() ||
+        mFingerprintScreen != nullptr && mFingerprintScreen->IsActive() ||
+        mDrivingScreen != nullptr && mDrivingScreen->IsActive();
+}
+
+void GK3UI::ExitCurrentScreen()
+{
+    if(gInventoryManager.IsInventoryInspectShowing())
+    {
+        gInventoryManager.InventoryUninspect();
+    }
+    else if(mFingerprintScreen != nullptr && mFingerprintScreen->IsActive())
+    {
+        mFingerprintScreen->Hide();
+    }
+    else if(mDrivingScreen != nullptr && mDrivingScreen->IsActive())
+    {
+        mDrivingScreen->Cancel();
+    }
+}

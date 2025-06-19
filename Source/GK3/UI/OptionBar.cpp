@@ -162,9 +162,17 @@ void OptionBar::Show()
                                             gGameProgress.GetScore(),
                                             gGameProgress.GetMaxScore()));
 
-    // Make sure any immediately visible buttons reflect the correct state.
-    RefreshRadioButtonState();
+    // The state of the cinematics button depends on whether cinematics are enabled or disabled.
     RefreshCinematicsButtonState();
+
+    // The radio button only appears in Day 3, 9PM timeblock and hides the "hint button.
+    mRadioButton->SetEnabled(gGameProgress.GetTimeblock() == Timeblock(3, 21));
+
+    // The exit inventory button only shows when the inventory is open.
+    mExitInventoryButton->SetEnabled(gInventoryManager.IsInventoryShowing());
+
+    // The "exit this screen" button only shows when select UIs are visible.
+    mExitScreenButton->SetEnabled(gGK3UI.IsOnExitableScreen());
 
     // Position option bar over mouse.
     // "Minus half size" because option bar's pivot is lower-left corner, but want mouse at center.
@@ -311,6 +319,22 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     mInventoryButton->SetPressCallback([this](UIButton* button) {
         Hide();
         gInventoryManager.ShowInventory();
+    });
+
+    // Add close inventory button.
+    // This button only appears when the inventory is visible, and allows you to exit the inventory via the option bar.
+    mExitInventoryButton = CreateButton(config, "open", mOptionBarRoot->GetOwner());
+    mExitInventoryButton->SetPressCallback([this](UIButton* button){
+        Hide();
+        gInventoryManager.HideInventory();
+    });
+
+    // Add exit screen button.
+    // This button only appears when exitable screens are up, and allows you to exit that screen.
+    mExitScreenButton = CreateButton(config, "invExit", mOptionBarRoot->GetOwner());
+    mExitScreenButton->SetPressCallback([this](UIButton* button){
+        Hide();
+        gGK3UI.ExitCurrentScreen();
     });
 
     // Add hint button.
@@ -688,11 +712,6 @@ void OptionBar::OnRadioButtonPressed()
 {
     Hide();
     gActionManager.ExecuteSheepAction(StringUtil::Format("wait CallSheep(\"%s\", \"RadioButton$\")", gLocationManager.GetLocation().c_str()));
-}
-
-void OptionBar::RefreshRadioButtonState()
-{
-    mRadioButton->SetEnabled(gGameProgress.GetTimeblock() == Timeblock(3, 21));
 }
 
 void OptionBar::OnCinematicsButtonPressed(UIButton* button)
