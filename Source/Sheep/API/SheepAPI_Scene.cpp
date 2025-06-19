@@ -33,6 +33,22 @@ shpvoid SetScene(const std::string& sceneName)
 }
 RegFunc1(SetScene, void, string, IMMEDIATE, REL_FUNC);
 
+shpvoid SetSceneNoPreloadTextures(const std::string& sceneName)
+{
+    // In the original game, there may have been a distinction here, but we can just do SetScene here.
+    SetScene(sceneName);
+    return shpvoid();
+}
+RegFunc1(SetSceneNoPreloadTextures, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid UploadSceneLightmaps(const std::string& sceneName)
+{
+    // As far as I know, we don't actually need to do anything in this function.
+    // The way lightmaps are implemented ensures they are always uploaded by default.
+    return shpvoid();
+}
+RegFunc1(UploadSceneLightmaps, void, string, IMMEDIATE, REL_FUNC);
+
 shpvoid SetEgo(const std::string& actorName)
 {
     gSceneManager.GetScene()->SetEgo(actorName);

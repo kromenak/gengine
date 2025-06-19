@@ -86,6 +86,7 @@ shpvoid DumpNouns(); // DEV
 // LIGHTMAPS
 shpvoid SetScene(const std::string& sceneName);
 shpvoid SetSceneNoPreloadTextures(const std::string& sceneName);
+shpvoid UploadSceneLightmaps(const std::string& sceneName);
 
 // INSETS
 // (NOTE: it doesn't appear that the final game uses the "Inset" system at all, but they are defined in the SIF, so that'd be scene stuff).
