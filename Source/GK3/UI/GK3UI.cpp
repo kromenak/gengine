@@ -275,6 +275,19 @@ bool GK3UI::FollowingOnDrivingScreen()
     return false;
 }
 
+bool GK3UI::IsOnDrivingScreen()
+{
+    return mDrivingScreen != nullptr && mDrivingScreen->IsActive();
+}
+
+void GK3UI::FlashDrivingScreenLocation(const std::string& locationCode)
+{
+    if(mDrivingScreen != nullptr)
+    {
+        mDrivingScreen->FlashLocation(locationCode);
+    }
+}
+
 Sidney* GK3UI::GetSidney()
 {
     if(mSidney == nullptr)

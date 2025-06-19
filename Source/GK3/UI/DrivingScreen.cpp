@@ -33,22 +33,22 @@ DrivingScreen::DrivingScreen() : Actor("DrivingScreen", TransformType::RectTrans
     mMapImage->GetRectTransform()->SetPixelPerfect(false);
 
     // Add location buttons.
-    AddLocation("VGR", "ARM", Vector2(458.0f, -225.0f));
-    AddLocation("BEC", "BEC", Vector2(94.0f, -400.0f));
-    AddLocation("PL3", "BMB", Vector2(499.0f, -137.0f));
-    AddLocation("PL2", "CSD", Vector2(396.0f, -187.0f));
-    AddLocation("PL6", "CSE", Vector2(520.0f, -4.0f));
-    AddLocation("PL4", "LER", Vector2(387.0f, -258.0f));
-    AddLocation("LHE", "LHE", Vector2(454.0f, -65.0f));
-    AddLocation("PL1", "LHM", Vector2(442.0f, -155.0f));
-    AddLocation("MCB", "MCB", Vector2(555.0f, -72.0f));
-    AddLocation("PLO", "PLO", Vector2(447.0f, -91.0f));
-    AddLocation("POU", "POU", Vector2(578.0f, -22.0f));
-    AddLocation("RL1", "RL1", Vector2(487.0f, -174.0f));
-    AddLocation("MOP", "RLC", Vector2(193.0f, -119.0f));
-    AddLocation("TR1", "TR1", Vector2(57.0f, -131.0f));
-    AddLocation("TRE", "TRE", Vector2(506.0f, -89.0f));
-    AddLocation("PL5", "WOD", Vector2(44.0f, -218.0f));
+    AddLocation("VGR", "ARM", Vector2(458.0f, -225.0f)); // Devil's Armchair
+    AddLocation("BEC", "BEC", Vector2(94.0f, -400.0f));  // Southwest Arm of Hexagram
+    AddLocation("PL3", "BMB", Vector2(499.0f, -137.0f)); // Orange Rock
+    AddLocation("PL2", "CSD", Vector2(396.0f, -187.0f)); // Coumme Sourde
+    AddLocation("PL6", "CSE", Vector2(520.0f, -4.0f));   // Chateau de Serres
+    AddLocation("PL4", "LER", Vector2(387.0f, -258.0f)); // L'Ermitage
+    AddLocation("LHE", "LHE", Vector2(454.0f, -65.0f));  // Larry's House
+    AddLocation("PL1", "LHM", Vector2(442.0f, -155.0f)); // L'Homme Mort
+    AddLocation("MCB", "MCB", Vector2(555.0f, -72.0f));  // Northeast Arm of Hexagram
+    AddLocation("PLO", "PLO", Vector2(447.0f, -91.0f));  // Chateau de Blanchfort
+    AddLocation("POU", "POU", Vector2(578.0f, -22.0f));  // Poussin's Tomb
+    AddLocation("RL1", "RL1", Vector2(487.0f, -174.0f)); // Ren Le Bains
+    AddLocation("MOP", "RLC", Vector2(193.0f, -119.0f)); // Rennes Le Chateau
+    AddLocation("TR1", "TR1", Vector2(57.0f, -131.0f));  // Train Station
+    AddLocation("TRE", "TRE", Vector2(506.0f, -89.0f));  // "The Site"
+    AddLocation("PL5", "WOD", Vector2(44.0f, -218.0f));  // Estelle's & Lady Howard's Site
 
     // Load paths for blip movements.
     LoadPaths();
@@ -100,41 +100,41 @@ void DrivingScreen::Show(FollowMode followMode)
 
         // ARM (Devil's Armchair) is only available on or after Day 2, 2pm.
         const Timeblock& currentTimeblock = gGameProgress.GetTimeblock();
-        mLocationButtons["ARM"]->SetEnabled(currentTimeblock >= Timeblock(2, 2, Timeblock::PM) || currentTimeblock == Timeblock(2, 2));
+        mLocationButtons["ARM"].button->SetEnabled(currentTimeblock >= Timeblock(2, 2, Timeblock::PM) || currentTimeblock == Timeblock(2, 2));
 
         // CSE (Chateau de Serras) only available after going on the tour on Day 2, Noon.
-        mLocationButtons["CSE"]->SetEnabled(currentTimeblock >= Timeblock(2, 12, Timeblock::PM) || currentTimeblock == Timeblock(2, 2));
+        mLocationButtons["CSE"].button->SetEnabled(currentTimeblock >= Timeblock(2, 12, Timeblock::PM) || currentTimeblock == Timeblock(2, 2));
 
         // POU (Poussin's Tomb) is available after the tour on Day 2, 7am.
-        mLocationButtons["POU"]->SetEnabled(currentTimeblock >= Timeblock(2, 7, Timeblock::AM) || currentTimeblock == Timeblock(2, 2));
+        mLocationButtons["POU"].button->SetEnabled(currentTimeblock >= Timeblock(2, 7, Timeblock::AM) || currentTimeblock == Timeblock(2, 2));
 
         // BEC (Bottom of Hexagram) is only at the beginning of Day 3, 12PM (even though you discover the coordinates in Day 3, 7AM).
         // MCB (Top of Hexagram) is the same.
-        mLocationButtons["BEC"]->SetEnabled(currentTimeblock >= Timeblock(3, 12));
-        mLocationButtons["MCB"]->SetEnabled(currentTimeblock >= Timeblock(3, 12));
+        mLocationButtons["BEC"].button->SetEnabled(currentTimeblock >= Timeblock(3, 12));
+        mLocationButtons["MCB"].button->SetEnabled(currentTimeblock >= Timeblock(3, 12));
 
         // TRE (Treasure) is only available after you've marked it on the map in Sidney.
-        mLocationButtons["TRE"]->SetEnabled(gGameProgress.GetFlag("MarkedTheSite"));
+        mLocationButtons["TRE"].button->SetEnabled(gGameProgress.GetFlag("MarkedTheSite"));
 
         // BMB (Red Rock) is only available after spying on Buchelli from Blanchefort.
-        mLocationButtons["BMB"]->SetEnabled(gGameProgress.GetNounVerbCount("VIEW_OF_ORANGE_ROCK", "BINOCULARS") > 0);
+        mLocationButtons["BMB"].button->SetEnabled(gGameProgress.GetNounVerbCount("VIEW_OF_ORANGE_ROCK", "BINOCULARS") > 0 || currentTimeblock >= Timeblock(3, 3, Timeblock::PM));
 
         // CSD (Coume Sourde) only available after following Madeline (or on/after Day 1, 4PM).
         // LHM (Lhomme Mort) is in the same boat.
         bool showCSD_LHM = gGameProgress.GetNounVerbCount("BUTHANE", "FOLLOW") > 0 && followMode != FollowMode::Buthane;
         showCSD_LHM = showCSD_LHM || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
-        mLocationButtons["CSD"]->SetEnabled(showCSD_LHM);
-        mLocationButtons["LHM"]->SetEnabled(showCSD_LHM);
+        mLocationButtons["CSD"].button->SetEnabled(showCSD_LHM);
+        mLocationButtons["LHM"].button->SetEnabled(showCSD_LHM);
 
         // LER (L'Ermitage) only available after following Wilkes (or on/after Day 1, 4PM).
         bool showLER = gGameProgress.GetNounVerbCount("WILKES", "FOLLOW") > 0 && followMode != FollowMode::Wilkes;
         showLER = showLER || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
-        mLocationButtons["LER"]->SetEnabled(showLER);
+        mLocationButtons["LER"].button->SetEnabled(showLER);
 
         // WOD (Woods) only available after following Estelle on Day 2.
         bool showWOD = gGameProgress.GetNounVerbCount("ESTELLE", "FOLLOW") > 0 && followMode != FollowMode::Estelle;
         showWOD = showWOD || currentTimeblock >= Timeblock(2, 5, Timeblock::PM);
-        mLocationButtons["WOD"]->SetEnabled(showWOD);
+        mLocationButtons["WOD"].button->SetEnabled(showWOD);
 
         // Make sure the map fits snugly in the window area, with aspect ratio preserved.
         // We do this every time the UI shows in case resolution has changed.
@@ -210,6 +210,82 @@ void DrivingScreen::Hide()
 
     // Clear follow mode.
     mFollowMode = FollowMode::None;
+
+    // Clear flash state.
+    for(LocationButton* lb : mFlashingButtons)
+    {
+        lb->button->SetUpTexture(lb->upTexture);
+    }
+    mFlashingButtons.clear();
+    mFlashActive = false;
+    mFlashCounter = 0;
+    mFlashTimer = 0.0f;
+}
+
+void DrivingScreen::Cancel()
+{
+    // Unlike simply hiding, this goes back to the last location you were at - cancel driving anywhere.
+    ExitToLocation(gLocationManager.GetLastLocation());
+}
+
+void DrivingScreen::FlashLocation(const std::string& locationCode)
+{
+    auto it = mLocationButtons.find(locationCode);
+    if(it != mLocationButtons.end())
+    {
+        bool addedFirstItem = mFlashingButtons.empty();
+        mFlashingButtons.push_back(&it->second);
+
+        if(addedFirstItem)
+        {
+            mFlashTimer = kFlashInterval;
+            mFlashCounter = 10;
+            mFlashActive = true;
+        }
+
+        if(mFlashActive)
+        {
+            it->second.button->SetUpTexture(mFlashActive ? it->second.hoverTexture : it->second.upTexture);
+        }
+    }
+}
+
+void DrivingScreen::OnUpdate(float deltaTime)
+{
+    // If the flash timer has time on it, decrement based on delta time.
+    if(mFlashTimer > 0.0f)
+    {
+        mFlashTimer -= deltaTime;
+        if(mFlashTimer <= 0.0f)
+        {
+            // When the timer expires, flip the flash and decrement counter for how many times to do a flash.
+            mFlashActive = !mFlashActive;
+            --mFlashCounter;
+
+            // If out of flashes, turn of the flash system.
+            // Otherwise, refresh the flash timer.
+            if(mFlashCounter <= 0)
+            {
+                mFlashActive = false;
+            }
+            else
+            {
+                mFlashTimer = kFlashInterval;
+            }
+
+            // Update each flashing button's state based on whether flash is active or not.
+            for(LocationButton* lb : mFlashingButtons)
+            {
+                lb->button->SetUpTexture(mFlashActive ? lb->hoverTexture : lb->upTexture);
+            }
+
+            // Once done flashing, clear the set of flashing buttons.
+            if(mFlashCounter <= 0)
+            {
+                mFlashingButtons.clear();
+            }
+        }
+    }
 }
 
 void DrivingScreen::SetLocationButtonsInteractive(bool interactive)
@@ -217,7 +293,7 @@ void DrivingScreen::SetLocationButtonsInteractive(bool interactive)
     // This doesn't hide the buttons; it just makes them interactive or not.
     for(auto& button : mLocationButtons)
     {
-        button.second->SetCanInteract(interactive);
+        button.second.button->SetCanInteract(interactive);
     }
 }
 
@@ -241,9 +317,10 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
 
     // Set textures.
     Texture* upTexture = gAssetManager.LoadTexture("DM_" + buttonId + "_UL.BMP");
+    Texture* hoverTexture = gAssetManager.LoadTexture("DM_" + buttonId + ".BMP");
     button->SetUpTexture(upTexture);
-    button->SetDownTexture(gAssetManager.LoadTexture("DM_" + buttonId + ".BMP"));
-    button->SetHoverTexture(gAssetManager.LoadTexture("DM_" + buttonId + ".BMP"));
+    button->SetDownTexture(hoverTexture);
+    button->SetHoverTexture(hoverTexture);
 
     // The map scales up or down depending on window resolution.
     // In order for the buttons to appear at the correct positions and scales, we need to do some fancy anchoring...
@@ -283,7 +360,11 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     });
 
     // Cache button for later.
-    mLocationButtons[buttonId] = button;
+    LocationButton lb;
+    lb.button = button;
+    lb.upTexture = upTexture;
+    lb.hoverTexture = hoverTexture;
+    mLocationButtons[buttonId] = lb;
 }
 
 void DrivingScreen::LoadPaths()
@@ -453,7 +534,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
         {
             // Buthane drives in circles, starting at PL3.
             // But she no longer appears on the map after LHM is enabled.
-            if(!mLocationButtons["LHM"]->IsEnabled())
+            if(!mLocationButtons["LHM"].button->IsEnabled())
             {
                 mBlips[kNpc1Index]->SetActive(true);
                 mBlips[kNpc1Index]->SetColor(kButhaneColor);
@@ -473,7 +554,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
 
             // Wilkes drives in circles, starting at LHE.
             // But he no longer appears on the map after LER is enabled.
-            if(!mLocationButtons["LER"]->IsEnabled())
+            if(!mLocationButtons["LER"].button->IsEnabled())
             {
                 mBlips[kNpc2Index]->SetActive(true);
                 mBlips[kNpc2Index]->SetColor(kWilkesColor);
@@ -588,8 +669,8 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             // Also play a little piece of dialogue.
             mBlips[kNpc1Index]->SetPathCompleteCallback([this](){
                 OnFollowDone();
-                mLocationButtons["CSD"]->SetEnabled(true);
-                mLocationButtons["LHM"]->SetEnabled(true);
+                mLocationButtons["CSD"].button->SetEnabled(true);
+                mLocationButtons["LHM"].button->SetEnabled(true);
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"2196L3WL71\", 1)");
                 gLocationManager.SetActorLocation("BUTHANE", "CSD");
             });
@@ -609,7 +690,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             // Also play a little piece of dialogue.
             mBlips[kNpc1Index]->SetPathCompleteCallback([this](){
                 OnFollowDone();
-                mLocationButtons["LER"]->SetEnabled(true);
+                mLocationButtons["LER"].button->SetEnabled(true);
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"2196L3WLM1\", 1)");
                 gLocationManager.SetActorLocation("WILKES", "LER");
             });
@@ -729,7 +810,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             // Play dialogue and show new location once we reach PL5.
             mBlips[kNpc1Index]->SetPathCompleteCallback([this](){
                 OnFollowDone();
-                mLocationButtons["WOD"]->SetEnabled(true);
+                mLocationButtons["WOD"].button->SetEnabled(true);
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"21K6L3WJI1\", 1)");
                 gLocationManager.SetActorLocation("ESTELLE", "WOD");
             });

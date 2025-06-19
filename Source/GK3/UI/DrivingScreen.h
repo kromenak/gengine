@@ -7,10 +7,10 @@
 #include "Actor.h"
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "Color32.h"
+#include "StringUtil.h"
 #include "Vector2.h"
 
 class DrivingScreenBlip;
@@ -70,8 +70,14 @@ public:
 
     void Show(FollowMode followMode = FollowMode::None);
     void Hide();
+    void Cancel();
 
     bool FollowingSomeone() const { return mFollowMode != FollowMode::None; }
+
+    void FlashLocation(const std::string& locationCode);
+
+protected:
+    void OnUpdate(float deltaTime) override;
 
 private:
     // The map is a child of the screen, and then all the location buttons are children of the map.
@@ -82,7 +88,13 @@ private:
     Texture* mMapTexture = nullptr;
 
     // Maps each location to its button.
-    std::unordered_map<std::string, UIButton*> mLocationButtons;
+    struct LocationButton
+    {
+        Texture* upTexture = nullptr;
+        Texture* hoverTexture = nullptr;
+        UIButton* button = nullptr;
+    };
+    std::string_map_ci<LocationButton> mLocationButtons;
 
     // Texture used to represent a "blip" on the map.
     // Can't seem to find this in the game's assets, but we can make our own pretty easily.
@@ -99,6 +111,14 @@ private:
 
     // The location code for the place we are driving from.
     std::string mDrivingFromLocation;
+
+    // State tracking for "flashing" locations (for the hint system).
+    // Basically, keep a list of flashing locations, use timer/counter/bool to track whether flash is on/off.
+    std::vector<LocationButton*> mFlashingButtons;
+    float mFlashTimer = 0.0f;
+    int mFlashCounter = 0;
+    bool mFlashActive = false;
+    static constexpr float kFlashInterval = 0.2f;
 
     // Colors for blips.
     const Color32 kEgoColor = Color32::Green;

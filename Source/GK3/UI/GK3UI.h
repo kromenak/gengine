@@ -59,6 +59,8 @@ public:
 
     void ShowDrivingScreen(int followState = 0);
     bool FollowingOnDrivingScreen();
+    bool IsOnDrivingScreen();
+    void FlashDrivingScreenLocation(const std::string& locationCode);
 
     Sidney* GetSidney();
     void ShowSidney();

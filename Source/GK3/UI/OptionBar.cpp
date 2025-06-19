@@ -8,6 +8,7 @@
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "GK3UI.h"
+#include "HintManager.h"
 #include "IniParser.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
@@ -209,16 +210,31 @@ void OptionBar::Hide()
 
 void OptionBar::OnUpdate(float deltaTime)
 {
-    // Set buttons interactive only if an action is not playing.
     bool actionActive = gActionManager.IsActionPlaying();
-    mActiveInventoryItemButton->SetCanInteract(!actionActive);
-    mInventoryButton->SetCanInteract(!actionActive);
-    mHintButton->SetCanInteract(!actionActive); //TODO: also base this on whether a hint is currently available...
+    bool onDrivingScreen = gGK3UI.IsOnDrivingScreen();
+
+    // Inventory buttons can't be interacted with during actions and on driving screen.
+    mActiveInventoryItemButton->SetCanInteract(!actionActive && !onDrivingScreen);
+    mInventoryButton->SetCanInteract(!actionActive && !onDrivingScreen);
+
+    // Hint button is only available when a hint is available (and no action is happening).
+    mHintButton->SetCanInteract(!actionActive && gHintManager.IsHintAvailable());
+
+    // Radio button is only interactive when no action is occurring.
     mRadioButton->SetCanInteract(!actionActive);
-    mCamerasButton->SetCanInteract(!actionActive);
-    mHelpButton->SetCanInteract(!actionActive);
-    mOptionsButton->SetCanInteract(!actionActive);
-    // Note: Cinematics and Close button are always interactive.
+
+    // Camera/help buttons are only available when not doing actions and not on driving screen.
+    mCamerasButton->SetCanInteract(!actionActive && !onDrivingScreen);
+    mHelpButton->SetCanInteract(!actionActive && !onDrivingScreen);
+
+    // Options can't be accessed during actions or on driving screen.
+    mOptionsButton->SetCanInteract(!actionActive && !onDrivingScreen);
+
+    // Cinematic buttons are almost always interactive - the only time I've seen it not so was on the driving screen.
+    mCinematicsOffButton->SetCanInteract(!gGK3UI.IsOnDrivingScreen());
+    mCinematicsOnButton->SetCanInteract(!gGK3UI.IsOnDrivingScreen());
+
+    // Note: Close button is always interactive.
 
     // Most keyboard input counts as a cancel action, unless some text input is active (like debug window).
     // Any key press EXCEPT ~ counts as a cancel action.
@@ -339,8 +355,9 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
 
     // Add hint button.
     mHintButton = CreateButton(config, "hint", mOptionBarRoot->GetOwner());
-    mHintButton->SetPressCallback([](UIButton* button) {
-        std::cout << "Hint!" << std::endl;
+    mHintButton->SetPressCallback([this](UIButton* button) {
+        Hide();
+        gHintManager.ShowHint();
     });
 
     // Add radio button.
