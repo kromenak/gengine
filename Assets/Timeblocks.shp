@@ -185,7 +185,7 @@ code
         count$ = 0;
 
         // Increment if we did train station actions.
-        if(GetNounVerbCount("ARRIVALS_IN_CU", "THINK") > 0 && GetNounVerbCount("TAXI_DRIVER", "WALLET") == 2)
+        if((GetNounVerbCount("ARRIVALS_IN_CU", "THINK") > 0 || GetTopicCount("MARCIE","T_TRAIN_FROM_NAPLES") > 0) && GetNounVerbCount("TAXI_DRIVER", "WALLET") == 2)
         {
             count$ = count$ + 1;
         }
