@@ -212,13 +212,13 @@ code
         }
 
         // Must have followed Buthane.
-        if(GetNounVerbCount("BUTHANE", "FOLLOW") == 0)
+        if(!IsActorAtLocation("BUTHANE", "CSD"))
         {
             return;
         }
 
         // Must have followed Wilkes.
-        if(GetNounVerbCount("WILKES", "FOLLOW") == 0)
+        if(!IsActorAtLocation("WILKES", "LER"))
         {
             return;
         }

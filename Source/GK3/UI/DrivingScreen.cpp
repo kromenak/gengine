@@ -586,6 +586,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
                 mLocationButtons["CSD"]->SetEnabled(true);
                 mLocationButtons["LHM"]->SetEnabled(true);
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"2196L3WL71\", 1)");
+                gLocationManager.SetActorLocation("BUTHANE", "CSD");
             });
         }
         else if(followMode == FollowMode::Wilkes)
@@ -605,6 +606,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
                 OnFollowDone();
                 mLocationButtons["LER"]->SetEnabled(true);
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"2196L3WLM1\", 1)");
+                gLocationManager.SetActorLocation("WILKES", "LER");
             });
         }
         else if(followMode == FollowMode::LadyHoward)
@@ -724,6 +726,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
                 OnFollowDone();
                 mLocationButtons["WOD"]->SetEnabled(true);
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"21K6L3WJI1\", 1)");
+                gLocationManager.SetActorLocation("ESTELLE", "WOD");
             });
         }
 
