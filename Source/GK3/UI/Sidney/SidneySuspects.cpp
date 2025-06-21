@@ -65,7 +65,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
     mMenuBar.AddDropdownChoice(SidneyUtil::GetSuspectsLocalizer().GetText("Menu3Item2"), [this](){
         OnUnlinkToSuspectPressed();
     });
-    //TODO: separator
+    mMenuBar.AddDropdownChoiceSeparator();
     mMenuBar.AddDropdownChoice(SidneyUtil::GetSuspectsLocalizer().GetText("Menu3Item4"), [this](){
         OnMatchAnalysisPressed();
     });
@@ -802,6 +802,9 @@ void SidneySuspects::OnMatchAnalysisPressed()
     mMACloseButton->GetButton()->SetCanInteract(false);
     mMatchAnalysisWindow->SetActive(true);
 
+    // The game is in hands-off mode until the match analysis completes.
+    gActionManager.StartManualAction();
+
     // Ok, we're going to put on a big show of analyzing the fingerprint and comparing it to all the suspects!
     gAudioManager.PlaySFX(gAssetManager.LoadAudio("WORKING3.WAV", AssetScope::Scene), [this, videoName, compareTexture, matchSuspectIndex](){
 
@@ -815,7 +818,6 @@ void SidneySuspects::OnMatchAnalysisPressed()
             // Now we move on to compare mode...
             mMAActionLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchCompare"));
             OnMatchAnalysisCheckSuspect(0, matchSuspectIndex);
-            mMACloseButton->GetButton()->SetCanInteract(true);
         });
     });
 }
@@ -828,6 +830,9 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
         mMAActionLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchNone"));
         mMASuspectLabel->SetText("");
         mMACloseButton->GetButton()->SetCanInteract(true);
+
+        // Completes the match analysis action.
+        gActionManager.FinishManualAction();
 
         // If this is the unknown LSR fingerprint, Grace plays some dialogue about having to try again later.
         if(mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint)
@@ -869,6 +874,9 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
 
             // Open the suspect's page.
             ShowSuspect(currentIndex);
+
+            // Completes the match analysis action.
+            gActionManager.FinishManualAction();
 
             // Do some action that depends on the file matched.
             if(mOpenedFileId == SidneyFileIds::kManuscriptPrint1)
