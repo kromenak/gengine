@@ -82,7 +82,8 @@ private:
         PreAnalyze,
         Map,
         Image,
-        Text
+        Text,
+        Audio
     };
     State mState = State::Empty;
 

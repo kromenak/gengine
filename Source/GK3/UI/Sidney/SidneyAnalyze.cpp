@@ -43,6 +43,8 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
 
             // Show the file selector.
             mSidneyFiles->Show([this](SidneyFile* selectedFile){
+
+                // Save ID of file that's now being analyzed.
                 mAnalyzeFileId = selectedFile->id;
 
                 // If the file has never been analyzed before, we show the pre-analyze UI.
@@ -260,10 +262,8 @@ void SidneyAnalyze::SetState(State state)
         break;
 
     case State::PreAnalyze:
-    {
         ShowPreAnalyzeUI();
         break;
-    }
 
     case State::Map:
         AnalyzeMap_EnterState();
@@ -275,6 +275,15 @@ void SidneyAnalyze::SetState(State state)
 
     case State::Text:
         AnalyzeText_EnterState();
+        break;
+
+    case State::Audio:
+        ShowPreAnalyzeUI();
+        mMenuBar.SetDropdownEnabled(kTextDropdownIdx, true);
+        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_ExtractAnomaliesIdx, false);
+        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_TranslateIdx, true);
+        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_AnagramParserIdx, false);
+        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_AnalyzeTextIdx, false);
         break;
     }
 
@@ -302,6 +311,10 @@ void SidneyAnalyze::SetStateFromFile()
     else if(file->type == SidneyFileType::Text)
     {
         SetState(State::Text);
+    }
+    else if(file->type == SidneyFileType::Audio)
+    {
+        SetState(State::Audio);
     }
     else
     {
@@ -336,6 +349,10 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
 
     case State::Text:
         AnalyzeText_OnAnalyzeButtonPressed();
+        break;
+
+    case State::Audio:
+        ShowAnalyzeMessage("AnalyzeTape", Vector2(), HorizontalAlignment::Center);
         break;
     }
 
