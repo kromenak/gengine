@@ -23,10 +23,8 @@ class Billboard : public Component
 public:
     Billboard(Actor* owner);
 
-    void ForceUpdate();
-
 protected:
-    void OnUpdate(float deltaTime) override;
+    void OnLateUpdate(float deltaTime) override;
 
 private:
     // The billboard needs to freqently query the mesh renderer, so cache it here.

@@ -13,14 +13,10 @@ Billboard::Billboard(Actor* owner) : Component(owner)
 {
     mMeshRenderer = GetOwner()->GetComponent<MeshRenderer>();
     mInitialPos = GetRotatePosition();
+    OnLateUpdate(0.0f);
 }
 
-void Billboard::ForceUpdate()
-{
-    Billboard::OnUpdate(0.0f);
-}
-
-void Billboard::OnUpdate(float deltaTime)
+void Billboard::OnLateUpdate(float deltaTime)
 {
     // Get the camera's forward vector, using UnitZ as the default worst case.
     Vector3 camForwardDir = Vector3::UnitZ;

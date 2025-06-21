@@ -7,6 +7,7 @@
 #include "ActionManager.h"
 #include "Animator.h"
 #include "AssetManager.h"
+#include "Billboard.h"
 #include "BSPActor.h"
 #include "Camera.h"
 #include "Collisions.h"
@@ -20,6 +21,7 @@
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "MeshRenderer.h"
+#include "Model.h"
 #include "Profiler.h"
 #include "Renderer.h"
 #include "ReportManager.h"
@@ -345,6 +347,18 @@ void Scene::Init()
 
     // Check for and run "scene enter" actions.
     gActionManager.ExecuteAction("SCENE", "ENTER");
+
+    // This is a bit of a HACK, but we must update billboards after all has init'd, and scene enter functions have executed their first frames.
+    // This is in case the camera position moves, and the billboard is facing the wrong way for one frame.
+    for(auto& prop : mProps)
+    {
+        Model* model = prop->GetMeshRenderer()->GetModel();
+        if(model != nullptr && model->IsBillboard())
+        {
+            Billboard* billboard = prop->GetComponent<Billboard>();
+            billboard->LateUpdate(0.0f);
+        }
+    }
 
     // Make sure light colors are applied to all actors correctly before our first render.
     // Doing this here avoids a 1-frame render with bad lighting. Do this after SCENE/ENTER action executes, since that may change actor positions.
