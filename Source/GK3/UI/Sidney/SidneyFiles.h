@@ -12,6 +12,7 @@
 #include "AssetManager.h"
 #include "InventoryManager.h"
 #include "SidneyUtil.h"
+#include "Texture.h"
 
 class PersistState;
 class Sidney;
@@ -98,7 +99,7 @@ struct SidneyFile
     {
         // We just reuse the inventory list texture for this.
         Texture* texture = gInventoryManager.GetInventoryItemListTexture(invItemName);
-        if(texture == nullptr)
+        if(texture == nullptr || StringUtil::StartsWithIgnoreCase(texture->GetName(), "Undefined"))
         {
             // Some files don't have an inventory item - just fall back on a generic file icon.
             texture = gAssetManager.LoadTexture("SIDFILE_9.BMP");
