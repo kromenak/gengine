@@ -8,7 +8,6 @@
 #include "SidneyUtil.h"
 #include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UINineSlice.h"
 #include "UITextInput.h"
@@ -22,7 +21,8 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
         GetTransform()->SetParent(parent->GetTransform());
 
         // Add a UICanvas, so we can force this to display above other things.
-        UI::AddCanvas(this, 4);
+        // The weird color here is because the popup should block interaction with things below it, but there's no visible dimming that occurs.
+        UI::AddCanvas(this, 4, Color32(0, 0, 0, 1));
     }
 
     // Add the window itself.
