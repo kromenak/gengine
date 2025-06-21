@@ -187,7 +187,7 @@ void InventoryInspectScreen::OnClicked(const std::string& noun)
     // A "PICKUP" action should appear after the "LOOK" action (or at the front if no "LOOK" action exists).
     // This allows the player to make this the active inventory item, even from the closeup view.
     ActionBar* actionBar = gActionManager.GetActionBar();
-    if(!actionBar->HasVerb("PICKUP"))
+    if(!actionBar->HasVerb("PICKUP") && gInventoryManager.HasInventoryItem(mInspectItemName))
     {
         actionBar->AddVerbAtIndex("PICKUP", actionBar->GetVerbIndex("LOOK") + 1, [this](){
             gInventoryManager.SetActiveInventoryItem(mInspectItemName);
