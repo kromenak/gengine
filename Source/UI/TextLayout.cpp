@@ -167,9 +167,42 @@ void TextLayout::AddLine(const std::string& line)
         yPos = mRect.GetMax().y - (lineHeight * mLineCount);
         break;
     case VerticalAlignment::Center:
-        // Center: Get vertical center-point of the rect. But subtract half line height because we need bottom-y.
-        yPos = mRect.GetMin().y + (mRect.GetSize().y / 2) - (lineHeight / 2);
-        //TODO: this currently only works for single line labels! Need to factor in mLineCount too.
+        // Center: a bit tricky; each new line pushes all other lines up/down to maintain centered-ness.
+
+        // First, get vertical center-point of the rect. But subtract half line height because we need bottom-y.
+        // This is the bottom-y we'd use if there was just a single line.
+        float singleLineYPos = mRect.GetMin().y + (mRect.GetSize().y / 2) - (lineHeight / 2);
+
+        // Calculate the bottom-y of the topmost line.
+        // The idea is that each line after the first one results in a half-line height increase for the top line.
+        float topLineYPos = singleLineYPos + ((lineHeight / 2) * (mLineCount - 1));
+
+        // We need to iterate through all the previously added glyphs and update their height for this new line.
+        // Start from the new top line y-pos and work our way down...
+        float currentLinePos = topLineYPos;
+        if(!mCharInfos.empty())
+        {
+            float prevLineYPos = mCharInfos.front().pos.y;
+            for(auto& charInfo : mCharInfos)
+            {
+                // If the y-pos of this char differs from the previous, we detected that we're on a new line.
+                // Move the line pos down for the new line.
+                if(!Math::AreEqual(prevLineYPos, charInfo.pos.y))
+                {
+                    currentLinePos -= lineHeight;
+                    prevLineYPos = charInfo.pos.y;
+                }
+
+                // Update y-pos of this char to the newly calculated value.
+                charInfo.pos.y = currentLinePos;
+            }
+
+            // Decrease once more for the final line (the one we are about to add).
+            currentLinePos -= lineHeight;
+        }
+
+        // The y-pos of this new line is whatever's left in this variable.
+        yPos = currentLinePos;
         break;
     }
 
