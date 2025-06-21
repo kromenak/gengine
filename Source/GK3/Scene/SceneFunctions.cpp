@@ -179,10 +179,10 @@ namespace
         {
             if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace"))
             {
-                //TODO: Can't execute a dialogue action here, since another action may be ongoing.
-                //TODO: The original game seems to maybe have this problem too...but they do a fake "wait" period instead.
-                //gActionManager.ExecuteDialogueAction("18P1F0M021");
-                gDialogueManager.StartDialogue("18P1F0M021", 1, false, nullptr);
+                // The "interact with angel" action is still ongoing here, so we need to wait for it to complete before playing dialogue.
+                gActionManager.WaitForActionsToComplete([](){
+                    gActionManager.ExecuteDialogueAction("18P1F0M021");
+                });
             }
             saidInitialDialogue = true;
         }
@@ -194,22 +194,28 @@ namespace
             // This lets sheep code know that we did it.
             gGameProgress.SetNounVerbCount("Four_Angels", "Trace", 1);
 
+            // Finish dialogue differs based on who's doing this.
+            std::string dialogueLicensePlate;
             if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
             {
-                //TODO: Same problem as mentioned above.
-                //gActionManager.ExecuteDialogueAction("18L9M0MZ81");
-                gDialogueManager.StartDialogue("18L9M0MZ81", 1, false, [](){
-                    CHU_Erase();
-                });
+                dialogueLicensePlate = "18L9M0MZ81";
             }
             else
             {
-                //TODO: Same problem as mentioned above.
-                //gActionManager.ExecuteDialogueAction("18P9M0MCE1");
-                gDialogueManager.StartDialogue("18P9M0MCE1", 1, false, [](){
-                    CHU_Erase();
-                });
+                dialogueLicensePlate = "18P9M0MCE1";
             }
+
+            // As above, "interact with angel" action is ongoing, so must wait until it completes before playing dialogue.
+            gActionManager.WaitForActionsToComplete([dialogueLicensePlate](){
+                gActionManager.ExecuteDialogueAction(dialogueLicensePlate, 1, [](const Action* action){
+
+                    // The original game also keeps the action active a bit longer, I guess so you can see the tilted square before it disappears.
+                    // So, let's do that too.
+                    gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2)", [](const Action* action){
+                        CHU_Erase();
+                    });
+                });
+            });
         }
     }
 
