@@ -1051,11 +1051,18 @@ void SidneySearch::OnSearchButtonPressed()
     }
     else
     {
+        // In the original game, they keep the text input focused when the popup appears.
+        // But also still stop input from going to the text input.
+        // In our case, for simplicity, I think I'm OK temporarily unfocusing...
+        mTextInput->Unfocus();
+
         // Show a popup that says "what you're searching for can't be found."
         mPopup->ResetToDefaults();
         mPopup->SetTextAlignment(HorizontalAlignment::Center);
         mPopup->SetText(SidneyUtil::GetSearchLocalizer().GetText("NotFound"));
-        mPopup->ShowOneButton();
+        mPopup->ShowOneButton([this](){
+            mTextInput->Focus();
+        });
     }
 }
 
