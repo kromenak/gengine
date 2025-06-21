@@ -131,7 +131,7 @@ void SidneyFakeInputPopup::OnUpdate(float deltaTime)
 
                 // Play random "key press" SFX from set of sounds.
                 int index = Random::Range(1, 5);
-                Audio* audio = gAssetManager.LoadAudio("COMPKEYSIN" + std::to_string(index));
+                Audio* audio = gAssetManager.LoadAudio("COMPKEYSIN" + std::to_string(index), AssetScope::Scene);
                 gAudioManager.PlaySFX(audio);
             }
             else
@@ -148,6 +148,9 @@ void SidneyFakeInputPopup::OnUpdate(float deltaTime)
                 });
                 mOKButton->GetButton()->SetCanInteract(true);
                 mOKButton->Press();
+
+                // The game also plays like an "enter key press" sound at this point.
+                gAudioManager.PlaySFX(gAssetManager.LoadAudio("COMPKEYSPACE.WAV", AssetScope::Scene));
             }
         }
     }
