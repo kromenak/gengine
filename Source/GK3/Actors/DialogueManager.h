@@ -17,7 +17,7 @@ class GAS;
 class DialogueManager
 {
 public:
-    void StartDialogue(const std::string& licensePlate, int numLines, bool playFidgets, std::function<void()> finishCallback);
+    void StartDialogue(const std::string& licensePlate, int numLines, bool playFidgets, const std::function<void()>& finishCallback);
     void ContinueDialogue(int numLines, bool playFidgets, const std::function<void()>& finishCallback);
     void TriggerDialogueCue();
 

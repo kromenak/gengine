@@ -42,7 +42,7 @@ public:
         Listen
     };
     void StartFidget(FidgetType type);
-    void StopFidget(std::function<void()> callback = nullptr);
+    void StopFidget(const std::function<void()>& callback = nullptr);
 
     void SetIdleFidget(GAS* fidget);
     void SetTalkFidget(GAS* fidget);

@@ -13,7 +13,7 @@
 
 DialogueManager gDialogueManager;
 
-void DialogueManager::StartDialogue(const std::string& licensePlate, int numLines, bool playFidgets, std::function<void()> finishCallback)
+void DialogueManager::StartDialogue(const std::string& licensePlate, int numLines, bool playFidgets, const std::function<void()>& finishCallback)
 {
     // We need a valid license plate.
     if(licensePlate.empty()) { return; }
@@ -42,6 +42,7 @@ void DialogueManager::StartDialogue(const std::string& licensePlate, int numLine
     // Save whether this dialogue plays fidgets.
     mDialogueUsesFidgets = playFidgets;
 
+    // Add dialogue finish callback.
     mDialogueFinishCallbacks.push_back(finishCallback);
 
     // Play first line of dialogue.

@@ -220,7 +220,7 @@ void GKActor::StartFidget(FidgetType type)
     }
 }
 
-void GKActor::StopFidget(std::function<void()> callback)
+void GKActor::StopFidget(const std::function<void()>& callback)
 {
     mGasPlayer->Stop(callback);
     mActiveFidget = FidgetType::None;
