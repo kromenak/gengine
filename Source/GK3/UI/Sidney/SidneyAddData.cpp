@@ -20,27 +20,22 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
     // Add "Add Data" dialog box.
     {
-        mAddDataBox = new Actor("Add Data", TransformType::RectTransform);
-        mAddDataBox->GetTransform()->SetParent(sidney->GetTransform());
+        UINineSlice* outerBox = UI::CreateWidgetActor<UINineSlice>("Add Data", sidney, SidneyUtil::GetGrayBoxParams(Color32(0, 0, 0, 160)));
+        outerBox->GetRectTransform()->SetSizeDelta(248.0f, 44.0f);
+        mAddDataBox = outerBox->GetOwner();
 
-        UINineSlice* outerBoxImage = mAddDataBox->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32(0, 0, 0, 160)));
-        outerBoxImage->GetRectTransform()->SetSizeDelta(248.0f, 44.0f);
-
-        Actor* innerBoxActor = new Actor(TransformType::RectTransform);
-        innerBoxActor->GetTransform()->SetParent(mAddDataBox->GetTransform());
-
-        UINineSlice* innerBoxImage = innerBoxActor->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32(0, 0, 0, 180)));
-        innerBoxImage->GetRectTransform()->SetSizeDelta(220.0f, 17.0f);
+        UINineSlice* innerBox = UI::CreateWidgetActor<UINineSlice>("LabelBox", mAddDataBox, SidneyUtil::GetGrayBoxParams(Color32(0, 0, 0, 180)));
+        innerBox->GetRectTransform()->SetSizeDelta(220.0f, 17.0f);
 
         mGreenFont = gAssetManager.LoadFont("SID_TEXT_14_GRN.FON");
         mYellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
 
-        mAddDataLabel = UI::CreateWidgetActor<UILabel>("AddDataLabel", innerBoxImage);
+        mAddDataLabel = UI::CreateWidgetActor<UILabel>("AddDataLabel", innerBox);
         mAddDataLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mAddDataLabel->SetFont(mGreenFont);
         mAddDataLabel->SetMasked(true);
-        mAddDataLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-        mAddDataLabel->GetRectTransform()->SetSizeDelta(0.0f, -1.0f);
+        mAddDataLabel->GetRectTransform()->SetAnchor(AnchorPreset::Top);
+        mAddDataLabel->GetRectTransform()->SetSizeDelta(200.0f, 16.0f);
 
         // Hide by default.
         mAddDataBox->SetActive(false);
