@@ -394,7 +394,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
                             // Final video.
                             AnalyzeImage_PlayVideo("TenierGeoD.avi", mAnalyzeVideoImages[1], "GEOMTENNIERSFINAL.BMP", [this](){
                                 gActionManager.FinishManualAction();
-                                ShowAnalyzeMessage("GeometryTenier5", Vector2(190.0f, -160.0f), HorizontalAlignment::Center);
+                                ShowAnalyzeMessage("GeometryTenier5", Vector2(190.0f, -164.0f), HorizontalAlignment::Center);
 
                                 // Grace says "I already know about the tilted square!"
                                 // You don't even get any points for all this work!
