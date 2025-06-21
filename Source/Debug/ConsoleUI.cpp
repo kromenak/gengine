@@ -108,9 +108,9 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
             textInputRT->SetPivot(0.0f, 0.0f);
 
             mTextInput = textInputActor->AddComponent<UITextInput>();
-
             mTextInput->SetFont(font);
             mTextInput->SetText("");
+            mTextInput->AllowInputToChangeFocus(false);
 
             // Create text input field caret.
             Actor* caretActor = new Actor("Caret", TransformType::RectTransform);
