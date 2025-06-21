@@ -44,7 +44,11 @@ void GasPlayer::Play(GAS* gas)
     mTimer = 0.0f;
     mPaused = false;
     mReceivedNextNodeRequestWhilePaused = false;
+
+    // Reset animation playback state.
     mCurrentAnimation = nullptr;
+    mCurrentAnimationStillPlaying = false;
+    mCurrentAnimationDoneCallback = nullptr;
 
     // Reset all vars.
     for(int i = 0; i < kMaxVariables; i++)
@@ -102,13 +106,14 @@ void GasPlayer::Stop(const std::function<void()>& callback)
 
 void GasPlayer::Interrupt(bool forTalk, const std::function<void()>& callback)
 {
+    // Start a manual action. This makes the game non-interactive for a bit as the interruption occurs.
     gActionManager.StartManualAction();
 
     // We're interrupting playback, so pause.
     // This also ensures no additional GAS nodes execute during cleanups/walks.
     Pause();
 
-    // First, play any cleanups. This moves the Actor back to a default pose if in some weird pose.
+    // Play any cleanups. This moves the Actor back to a default pose if in some weird pose.
     PerformCleanups(forTalk, [this, forTalk, callback](){
 
         // If there's a clear flag, clear it.
@@ -121,8 +126,11 @@ void GasPlayer::Interrupt(bool forTalk, const std::function<void()>& callback)
             // Finally, change idle gas, if any is specified.
             SetNewIdle(forTalk, callback);
 
+            // It's likely that any walk code or new idle code already resumed the player.
+            // But in case there was no walk or new idle, resume playback manually.
             Resume();
 
+            // All done - clear the manual action.
             gActionManager.FinishManualAction();
         });
     });
@@ -151,12 +159,32 @@ void GasPlayer::StartAnimation(Animation* anim, const std::function<void()>& fin
     // Save playing animation so we know whether we need to do cleanups when stopping the autoscript.
     mCurrentAnimation = anim;
 
+    // This anim is starting to play.
+    mCurrentAnimationStillPlaying = true;
+
     // Play the thing.
     AnimParams animParams;
     animParams.animation = anim;
     animParams.fromAutoScript = true;
-    animParams.finishCallback = finishCallback;
-    gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+    gSceneManager.GetScene()->GetAnimator()->Start(animParams, [this, finishCallback](){
+
+        // Anim is no longer playing.
+        mCurrentAnimationStillPlaying = false;
+
+        // If anyone was waiting for this anim to complete, let them know it's done.
+        if(mCurrentAnimationDoneCallback != nullptr)
+        {
+            auto callback = mCurrentAnimationDoneCallback;
+            mCurrentAnimationDoneCallback = nullptr;
+            callback();
+        }
+
+        // Let caller know the animation is done too.
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+    });
 }
 
 void GasPlayer::AddDistanceCondition(WhenNearGasNode* node)
@@ -254,6 +282,20 @@ void GasPlayer::CheckDistanceConditions()
     }
 }
 
+void GasPlayer::WaitForCurrentAnimationToFinish(const std::function<void()>& callback)
+{
+    // If an anim is playing, save callback to be called when the anim is done.
+    // If no anim is playing, we can do the callback right away.
+    if(mCurrentAnimationStillPlaying)
+    {
+        mCurrentAnimationDoneCallback = callback;
+    }
+    else
+    {
+        callback();
+    }
+}
+
 void GasPlayer::PerformCleanups(bool forTalk, const std::function<void()>& callback)
 {
     // Get the correct cleanups set.
@@ -283,10 +325,16 @@ void GasPlayer::PerformCleanups(bool forTalk, const std::function<void()>& callb
     // This is a bit hacky, but since we're playing a cleanup anim, increment execution counter so no callbacks from previous anims cause additional nodes to execute.
     ++mExecutionCounter;
 
-    // Ok, let's do the cleanup!
-    // When the cleanup finishes, this function re-calls itself, until all cleanups are done.
-    StartAnimation(it->second, [this, forTalk, callback](){
-        PerformCleanups(forTalk, callback);
+    // Before playing the cleanup for the current animation, let the current animation actually finish.
+    // This avoids some jumpy cuts between anims, and is required in one case for a cutscene to look correct (Buchelli/Wilkes in Dining Room, Day 1 6PM).
+    Animation* cleanupAnim = it->second;
+    WaitForCurrentAnimationToFinish([this, forTalk, callback, cleanupAnim](){
+
+        // Ok, let's do the cleanup!
+        // When the cleanup finishes, this function re-calls itself, until all cleanups are done.
+        StartAnimation(cleanupAnim, [this, forTalk, callback](){
+            PerformCleanups(forTalk, callback);
+        });
     });
 }
 

@@ -89,6 +89,11 @@ private:
     // Needs to be saved here so we know whether we need to do a cleanup or not.
     Animation* mCurrentAnimation = nullptr;
 
+    // Some actions (like performing cleanups) look better if you wait for the current animation to finish before doing them.
+    // These vars keep track of whether an anim is still playing, and if so, an optional callback to execute when the anim is done.
+    bool mCurrentAnimationStillPlaying = false;
+    std::function<void()> mCurrentAnimationDoneCallback = nullptr;
+
     // Nodes that do distance condition checks to determine whether to go to some label/index in the current autoscript.
     // The "bool" is to hold if the condition is currently true - the condition only triggers when going from false to true.
     std::vector<std::pair<WhenNearGasNode*, bool>> mDistanceConditionNodes;
@@ -124,6 +129,7 @@ private:
 
     void CheckDistanceConditions();
 
+    void WaitForCurrentAnimationToFinish(const std::function<void()>& callback);
     void PerformCleanups(bool forTalk, const std::function<void()>& callback);
     void WalkToInterruptPos(bool forTalk, const std::function<void()>& callback);
     void PlayInterruptAnimation(bool forTalk, const std::function<void()>& callback);

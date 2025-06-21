@@ -164,70 +164,91 @@ void DialogueManager::SetConversation(const std::string& conversation, const std
     mSavedTalkFidgets.clear();
     mSavedListenFidgets.clear();
 
-    // Apply settings for this conversation.
-    // Some actors may use different talk/listen GAS for particular conversations.
-    // And some actors may need to play enter anims when starting a conversation.
+    // Before we can fully "enter" the conversation, we need to take care of changing participant fidgets and playing enter animations.
+    // This can get a bit complex, depending on how complex participant fidgets and enter anims are.
+
+    // To start, we aren't waiting on any animations to complete before entering this conversation.
     mConversationAnimWaitCount = 0;
+
+    // Get conversation settings, which dictate which animations to play and any new fidgets to play.
     std::vector<const SceneConversation*> conversationSettings = gSceneManager.GetScene()->GetSceneData()->GetConversationSettings(conversation);
-    for(auto& settings : conversationSettings)
+
+    // Figure out how many fidget interrupts we need to perform.
+    // We need to count them all out *BEFORE* actually doing the interrupts, in case any interrupts execute the callback immediately.
+    std::vector<GKActor*> conversationActors;
+    for(const SceneConversation* settings : conversationSettings)
     {
-        // If needed, set new GAS for actor.
-        if(settings->talkGas != nullptr || settings->listenGas != nullptr)
-        {
-            GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(settings->actorName);
-            if(actor != nullptr)
-            {
-                // The interrupt counts as a conversation anim that we must wait on.
-                ++mConversationAnimWaitCount;
-                actor->InterruptFidget(true, [this, settings, actor](){
-                    if(settings->talkGas != nullptr)
-                    {
-                        mSavedTalkFidgets.emplace_back(actor, actor->GetTalkFidget());
-                        actor->SetTalkFidget(settings->talkGas);
-                    }
-                    if(settings->listenGas != nullptr)
-                    {
-                        mSavedListenFidgets.emplace_back(actor, actor->GetListenFidget());
-                        actor->SetListenFidget(settings->listenGas);
-
-                        // Start with the listen fidget.
-                        actor->StartFidget(GKActor::FidgetType::Listen);
-                    }
-
-                    // Start in listen fidget, unless it's null in which case fall back on talk fidget.
-                    // If both are null, actor just keeps doing the idle fidget I guess.
-                    if(settings->listenGas != nullptr)
-                    {
-                        actor->StartFidget(GKActor::FidgetType::Listen);
-                    }
-                    else if(settings->talkGas != nullptr)
-                    {
-                        actor->StartFidget(GKActor::FidgetType::Talk);
-                    }
-                    else
-                    {
-                        actor->StartFidget(GKActor::FidgetType::Idle);
-                    }
-
-                    // Finished one conversation anim - see if we're done entering the conversation.
-                    --mConversationAnimWaitCount;
-                    CheckConversationAnimFinishCallback();
-                });
-            }
-        }
-
-        // Play enter anim.
-        if(settings->enterAnim != nullptr)
+        // An actor will play an interrupt anim if non-null and has either a talk or listen fidget for this conversation.
+        GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(settings->actorName);
+        if(actor != nullptr && (settings->talkGas != nullptr || settings->listenGas != nullptr))
         {
             ++mConversationAnimWaitCount;
-            gSceneManager.GetScene()->GetAnimator()->Start(settings->enterAnim, [this](){
+        }
+        conversationActors.push_back(actor);
+    }
+
+    // We now know how many interrupts need to be performed. Iterate again and actually DO the interrupts.
+    for(int i = 0; i < conversationSettings.size(); ++i)
+    {
+        const SceneConversation* settings = conversationSettings[i];
+        GKActor* actor = conversationActors[i];
+        if(actor != nullptr && (settings->talkGas != nullptr || settings->listenGas != nullptr))
+        {
+            // Perform the interrupt.
+            // Depending on current state, this could resolve immediately, or it could take several seconds to play cleanup anims, walk to interrupt spot, etc.
+            actor->InterruptFidget(true, [this, settings, actor](){
+
+                // If this conversation has overrides for talk/listen fidgets, start using them.
+                // We also save which talk/listen fidgets are being overwritten so we can revert them after the conversation is over.
+                if(settings->talkGas != nullptr)
+                {
+                    mSavedTalkFidgets.emplace_back(actor, actor->GetTalkFidget());
+                    actor->SetTalkFidget(settings->talkGas);
+                }
+                if(settings->listenGas != nullptr)
+                {
+                    mSavedListenFidgets.emplace_back(actor, actor->GetListenFidget());
+                    actor->SetListenFidget(settings->listenGas);
+                }
+
+                // Start in listen fidget, unless it's null in which case fall back on talk fidget.
+                // If both are null, actor just keeps doing the idle fidget I guess.
+                if(settings->listenGas != nullptr)
+                {
+                    actor->StartFidget(GKActor::FidgetType::Listen);
+                }
+                else if(settings->talkGas != nullptr)
+                {
+                    actor->StartFidget(GKActor::FidgetType::Talk);
+                }
+                else
+                {
+                    actor->StartFidget(GKActor::FidgetType::Idle);
+                }
+
+                // Decrement because we finished one "interrupt" anims.
                 --mConversationAnimWaitCount;
-                CheckConversationAnimFinishCallback();
+
+                // But if we ALSO have an enter anim, we now need to play that!
+                if(settings->enterAnim != nullptr)
+                {
+                    // Enter anims are pretty straightforward - just add a wait, play it, and decrement a wait when done.
+                    ++mConversationAnimWaitCount;
+                    gSceneManager.GetScene()->GetAnimator()->Start(settings->enterAnim, [this](){
+                        --mConversationAnimWaitCount;
+                        CheckConversationAnimFinishCallback();
+                    });
+                }
+                else
+                {
+                    // See if we're done entering the conversation.
+                    CheckConversationAnimFinishCallback();
+                }
             });
         }
     }
 
-    // No waits? Do callback right away.
+    // If there were no conversation settings, or no fidget changes or enter anims, we may be able to finish entering the conversation right away.
     CheckConversationAnimFinishCallback();
 }
 
