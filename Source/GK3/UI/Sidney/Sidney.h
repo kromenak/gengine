@@ -43,6 +43,11 @@ private:
     UILabel* mAddDataLabel = nullptr;
     bool mAddingData = false;
 
+    // When playing at higher resolutions, Sidney has some decorative textures around it, to make it feel like you're in R25.
+    // One of those textures (a photo of the Dalai Lama) overlaps the screen.
+    // This is cool, but we also don't want to show that texture at lower resolutions, as it would look strange in that case.
+    UIImage* mLamaImage = nullptr;
+
     // Various subscreens.
     SidneySearch mSearch;
     SidneyEmail mEmail;

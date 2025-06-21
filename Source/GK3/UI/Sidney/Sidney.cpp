@@ -11,6 +11,7 @@
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UIUtil.h"
+#include "Window.h"
 
 namespace
 {
@@ -163,6 +164,33 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
 
     mFiles.Init(this);
 
+    // Add room background images around the desktop.
+    {
+        UIImage* topImage = UI::CreateWidgetActor<UIImage>("BGTop", desktopBackgroundImage);
+        topImage->GetRectTransform()->SetAnchor(AnchorPreset::Top);
+        topImage->GetRectTransform()->SetPivot(0.5f, 0.0f);
+        topImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD1024_TOP_A.BMP"), true);
+
+        UIImage* bottomImage = UI::CreateWidgetActor<UIImage>("BGBottom", desktopBackgroundImage);
+        bottomImage->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+        bottomImage->GetRectTransform()->SetPivot(0.5f, 1.0f);
+        bottomImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD1024_BOTTOM_A.BMP"), true);
+
+        UIImage* leftImage = UI::CreateWidgetActor<UIImage>("BGLeft", desktopBackgroundImage);
+        leftImage->GetRectTransform()->SetAnchor(AnchorPreset::Left);
+        leftImage->GetRectTransform()->SetPivot(1.0f, 0.5f);
+        leftImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD1024_LEFT_A.BMP"), true);
+
+        UIImage* rightImage = UI::CreateWidgetActor<UIImage>("BGRight", desktopBackgroundImage);
+        rightImage->GetRectTransform()->SetAnchor(AnchorPreset::Right);
+        rightImage->GetRectTransform()->SetPivot(0.0f, 0.5f);
+        rightImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD1024_RIGHT_A.BMP"), true);
+
+        mLamaImage = UI::CreateWidgetActor<UIImage>("BGOverlay", desktopBackgroundImage);
+        mLamaImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        mLamaImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD800_LAMA_A.BMP"), true);
+    }
+
     // Not active by default.
     SetActive(false);
 }
@@ -214,6 +242,10 @@ void Sidney::OnPersist(PersistState& ps)
 void Sidney::OnUpdate(float deltaTime)
 {
     if(!IsActive()) { return; }
+
+    // This is a bit wasteful, but update the lama image based on screen resolution.
+    // It's rare to change resolution in Sidney, but if you do, we want to make sure this reacts.
+    mLamaImage->SetEnabled(Window::GetHeight() > 480);
 
     // We want to keep the "New Email" label updating at all times.
     mEmail.UpdateNewEmail(deltaTime);
