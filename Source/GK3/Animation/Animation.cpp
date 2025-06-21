@@ -113,8 +113,13 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                     mVertexAnimNodes.push_back(node);
                 }
 
-                //TODO: Some animations have a keyword here (ABSOLUTE). Which I guess indicates that this is an absolute animation.
-                //TODO: I'm guessing this might be shorthand for "0, 0, 0, 0, 0, 0, 0, 0" which is frequently used for absolute anims.
+                // A very select few animations use the ABSOLUTE keyword here, which I guess indicates that this is an absolute animation.
+                // I think this is shorthand for "0, 0, 0, 0, 0, 0, 0, 0" which is frequently used for absolute anims.
+                if(line.entries.size() > 2 && StringUtil::EqualsIgnoreCase(line.entries[2].value, "ABSOLUTE"))
+                {
+                    node->absolute = true;
+                    continue;
+                }
 
                 // See if there are enough args for the (x1, y1, z1) and (angle1) values.
                 if(line.entries.size() < 6) { continue; }

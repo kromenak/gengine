@@ -162,7 +162,20 @@ void GKActor::Init(const SceneData& sceneData)
     // Sample an init anim (if any) that poses the GKActor as needed for scene start.
     if(mActorDef->initAnim != nullptr)
     {
-        gSceneManager.GetScene()->GetAnimator()->Sample(mActorDef->initAnim, 0, mActorDef->model->GetNameNoExtension());
+        // This is a TURBO HACK right here! In 306P, Mosely/Buchelli/Buthane are sitting in the dining room. But Buthane is missing!?
+        // The problem is her initAnim in the SIF is not an absolute anim (it's missing the absolute x/y/z/etc data). So she isn't positioned correctly.
+        // There are three possible solutions to this:
+        // 1) Somehow, the original game gets this correct. Is my detection of absolute vs relative anims incorrect? Are init anims always absolute? Or did the original game use a similar hack?
+        // 2) Catch the initAnim use and replace it with one that works (what I'm doing here).
+        // 3) Add a "fixed" version of the asset to the Assets folder.
+        Animation* initAnim = mActorDef->initAnim;
+        if(StringUtil::EqualsIgnoreCase(GetName(), "MAD") && StringUtil::StartsWithIgnoreCase(initAnim->GetName(), "MADSITGNRIC"))
+        {
+            initAnim = gAssetManager.LoadAnimation("MadDinFig01", AssetScope::Scene);
+        }
+
+        // Sample the init anim.
+        gSceneManager.GetScene()->GetAnimator()->Sample(initAnim, 0, mActorDef->model->GetNameNoExtension());
     }
     else
     {
