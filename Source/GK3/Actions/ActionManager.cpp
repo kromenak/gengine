@@ -1019,7 +1019,15 @@ void ActionManager::OnActionExecuteFinished()
     }
     else if(!mLastAction->talkTo.empty())
     {
-        ShowTopicBar(mLastAction->talkTo, nullptr, true);
+        const Action* talkAction = GetAction(mLastAction->talkTo, "TALK");
+        if(talkAction != nullptr && HasTopicsLeft(mLastAction->talkTo))
+        {
+            ExecuteAction(talkAction);
+        }
+        else
+        {
+            ShowTopicBar(mLastAction->talkTo, nullptr, true);
+        }
     }
     else if(gVerbManager.IsTopic(mLastAction->verb))
     {
