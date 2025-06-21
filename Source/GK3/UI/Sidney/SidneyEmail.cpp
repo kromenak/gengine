@@ -10,6 +10,7 @@
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
 #include "TextAsset.h"
+#include "Timers.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -190,7 +191,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
             UICanvas* bodyCanvas = UI::CreateCanvas("Body", emailWindow, 1);
             bodyCanvas->SetMasked(true);
             bodyCanvas->GetRectTransform()->SetAnchor(AnchorPreset::Top);
-            bodyCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, -100.0f);
+            bodyCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, -101.0f);
             bodyCanvas->GetRectTransform()->SetSizeDelta(527.0f, 227.0f);
 
             // Create body scroll rect.
@@ -525,9 +526,9 @@ void SidneyEmail::ViewEmail(const std::string& emailId, int emailIndex)
     mEmailListWindow->SetActive(false);
 
     // Get the email.
-    Email& email = mAllEmails[emailId];
 
     // Populate the metadata labels.
+    Email& email = mAllEmails[emailId];
     mFromLabel->SetText(email.from);
     mToLabel->SetText(email.to);
     mCCLabel->SetText(email.cc);
@@ -538,58 +539,7 @@ void SidneyEmail::ViewEmail(const std::string& emailId, int emailIndex)
     mBodyScrollRect->SetNormalizedScrollValue(0.0f);
 
     // Populate body.
-    {
-        // First, hide any pre-existing labels.
-        for(auto& bodyLabel : mBodyLabels)
-        {
-            bodyLabel->SetEnabled(false);
-        }
-
-        // Now activate each needed label, populating with correct text.
-        int bodyLabelIndex = 0;
-        Vector2 bodyItemPos(8.0f, -8.0f);
-        Font* yellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
-        for(auto& bodyText : email.body)
-        {
-            // Either reuse an existing label or create a new one.
-            UILabel* label = nullptr;
-            if(bodyLabelIndex < mBodyLabels.size())
-            {
-                label = mBodyLabels[bodyLabelIndex];
-            }
-            else
-            {
-                label = UI::CreateWidgetActor<UILabel>("EmailBodyLabel", mBodyScrollRect);
-                label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-                label->GetRectTransform()->SetSizeDelta(510.0f, yellowFont->GetGlyphHeight());
-                label->SetFont(yellowFont);
-                label->SetVerticalAlignment(VerticalAlignment::Top);
-                label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
-                mBodyLabels.push_back(label);
-            }
-            label->SetEnabled(true);
-            label->GetRectTransform()->SetAnchoredPosition(bodyItemPos);
-
-            // Set the text.
-            label->SetText(bodyText);
-
-            // Calculate text height.
-            float textHeight = yellowFont->GetGlyphHeight();
-            if(!bodyText.empty())
-            {
-                textHeight = label->GetTextHeight();
-            }
-
-            // Resize label height to fit the text snugly.
-            label->GetRectTransform()->SetSizeDeltaY(textHeight);
-
-            // Move next line down below this text.
-            bodyItemPos.y -= textHeight;
-
-            // Increment item index.
-            ++bodyLabelIndex;
-        }
-    }
+    BuildEmailBody(emailId);
 
     // Mark this email as read.
     mReadEmails.insert(emailId);
@@ -600,11 +550,209 @@ void SidneyEmail::ViewEmail(const std::string& emailId, int emailIndex)
         gGameProgress.ChangeScore(email.scoreEvent);
     }
 
+    // Upon opening the hermetic symbols email, Grace also plays a little bit of dialogue.
+    // This appears to be hard-coded, so can't get this from a data file.
+    if(StringUtil::EqualsIgnoreCase(emailId, "EMail5") && !gGameProgress.GetFlag(email.flag))
+    {
+        Timers::AddTimerSeconds(2.0f, [](){
+            gActionManager.ExecuteDialogueAction("02DG4583L2", 2);
+        });
+    }
+
     // Apply flag if any.
     if(!email.flag.empty())
     {
         gGameProgress.SetFlag(email.flag);
     }
+}
+
+void SidneyEmail::BuildEmailBody(const std::string& emailId)
+{
+    // First, hide any pre-existing labels/boxes/images.
+    for(auto& bodyLabel : mBodyLabels)
+    {
+        bodyLabel->SetEnabled(false);
+    }
+    mUsedBodyLabelCount = 0;
+    for(auto& bodyBox : mBodyBoxes)
+    {
+        bodyBox->GetOwner()->SetActive(false);
+    }
+    for(auto& bodyImage : mBodyImages)
+    {
+        bodyImage->SetEnabled(false);
+    }
+
+    // Unfortunately, a couple emails have extremely custom/bespoke layouts.
+    // There are hints in the data files that they were originally not going to do this (and store the custom layouts as files), but they pivoted for the final game.
+    // What this means is that we need to hardcode some custom layouts for emails 4 & 5.
+    Email& email = mAllEmails[emailId];
+    if(StringUtil::EqualsIgnoreCase(emailId, "EMail4"))
+    {
+        // This is the "Temple of Solomon Layout" email. We need to position a layout using labels and boxes.
+        // Create header label.
+        UILabel* headerLabel = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("SolomonFile1"));
+        headerLabel->FitRectTransformToText();
+        headerLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+        headerLabel->GetRectTransform()->SetPivot(0.5f, 1.0f); // Top-Center
+        headerLabel->GetRectTransform()->SetAnchoredPosition(160.0f, -30.0f);
+
+        // Create boxes for the three parts of the temple layout.
+        if(mBodyBoxes.empty())
+        {
+            for(int i = 0; i < 3; ++i)
+            {
+                UINineSlice* box = UI::CreateWidgetActor<UINineSlice>("BodyBox", mBodyScrollRect, SidneyUtil::GetGrayBoxParams(Color32::Clear));
+                box->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+                box->GetRectTransform()->SetPivot(0.5f, 1.0f); // Top-Center
+                mBodyBoxes.push_back(box);
+            }
+        }
+        for(int i = 0; i < 3; ++i)
+        {
+            mBodyBoxes[i]->GetOwner()->SetActive(true);
+        }
+        mBodyBoxes[0]->GetRectTransform()->SetAnchoredPosition(160.0f, -56.0f);
+        mBodyBoxes[1]->GetRectTransform()->SetAnchoredPosition(160.0f, -145.0f);
+        mBodyBoxes[2]->GetRectTransform()->SetAnchoredPosition(160.0f, -324.0f);
+
+        mBodyBoxes[0]->GetRectTransform()->SetSizeDelta(100.0f, 90.0f);
+        mBodyBoxes[1]->GetRectTransform()->SetSizeDelta(100.0f, 180.0f);
+        mBodyBoxes[2]->GetRectTransform()->SetSizeDelta(100.0f, 90.0f);
+
+        // Within each box, place a label with some info.
+        for(int i = 0; i < 3; ++i)
+        {
+            UILabel* boxLabel = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("SolomonFile" + std::to_string((i * 3) + 2)) + "\n" +
+                                             SidneyUtil::GetEmailLocalizer().GetText("SolomonFile" + std::to_string((i * 3) + 3)) + "\n" +
+                                             SidneyUtil::GetEmailLocalizer().GetText("SolomonFile" + std::to_string((i * 3) + 4)) + "\n");
+            boxLabel->GetRectTransform()->SetParent(mBodyBoxes[i]->GetRectTransform());
+            boxLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+            boxLabel->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+            boxLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+            boxLabel->SetVerticalAlignment(VerticalAlignment::Center);
+        }
+
+        // Create some extra space at the bottom of the email using an empty label.
+        UILabel* spacerLabel = GetBodyLabel("");
+        spacerLabel->GetRectTransform()->SetSizeDeltaY(200.0f);
+        spacerLabel->GetRectTransform()->SetAnchoredPosition(8.0f, -414.0f);
+    }
+    else if(StringUtil::EqualsIgnoreCase(emailId, "EMail5"))
+    {
+        // This is the hermetic symbols email, which has a few labels and images in a not particularly systematic way.
+        UILabel* label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile1"));
+        label->GetRectTransform()->SetAnchoredPosition(18.0f, -18.0f);
+
+        label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile2"));
+        label->GetRectTransform()->SetAnchoredPosition(30.0f, -48.0f);
+
+        label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile3"));
+        label->GetRectTransform()->SetAnchoredPosition(150.0f, -100.0f);
+
+        label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile4"));
+        label->GetRectTransform()->SetAnchoredPosition(150.0f, -187.0f);
+
+        label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile5"));
+        label->GetRectTransform()->SetAnchoredPosition(150.0f, -275.0f);
+
+        label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile6"));
+        label->GetRectTransform()->SetAnchoredPosition(150.0f, -360.0f);
+
+        label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile7"));
+        label->GetRectTransform()->SetAnchoredPosition(170.0f, -380.0f);
+
+        label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile8"));
+        label->GetRectTransform()->SetAnchoredPosition(170.0f, -400.0f);
+
+        label = GetBodyLabel(SidneyUtil::GetEmailLocalizer().GetText("HermFile9"));
+        label->GetRectTransform()->SetAnchoredPosition(170.0f, -420.0f);
+
+        if(mBodyImages.empty())
+        {
+            for(int i = 0; i < 4; ++i)
+            {
+                UIImage* image = UI::CreateWidgetActor<UIImage>("BodyImage", mBodyScrollRect);
+                image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+                mBodyImages.push_back(image);
+            }
+        }
+        for(int i = 0; i < 4; ++i)
+        {
+            mBodyImages[i]->SetEnabled(true);
+            mBodyImages[i]->SetTexture(gAssetManager.LoadTexture("SID_SYMB_" + std::to_string(i + 1) + ".BMP"));
+        }
+
+        mBodyImages[0]->GetRectTransform()->SetAnchoredPosition(42.0f, -62.0f);
+        mBodyImages[1]->GetRectTransform()->SetAnchoredPosition(42.0f, -152.0f);
+        mBodyImages[2]->GetRectTransform()->SetAnchoredPosition(42.0f, -240.0f);
+        mBodyImages[3]->GetRectTransform()->SetAnchoredPosition(42.0f, -320.0f);
+
+        // Create some extra space at the bottom of the email using an empty label.
+        UILabel* spacerLabel = GetBodyLabel("");
+        spacerLabel->GetRectTransform()->SetSizeDeltaY(200.0f);
+        spacerLabel->GetRectTransform()->SetAnchoredPosition(8.0f, -410.0f);
+    }
+    else // just a normal email
+    {
+        // Most emails are a simple vertical layout of labels, so a bit easier to generate.
+        Vector2 bodyItemPos(8.0f, -8.0f);
+        for(auto& bodyText : email.body)
+        {
+            // Create body label with desired text.
+            UILabel* label = GetBodyLabel(bodyText);
+
+            // Position it and move position down for next label.
+            label->GetRectTransform()->SetAnchoredPosition(bodyItemPos);
+            bodyItemPos.y -= label->GetRectTransform()->GetSizeDelta().y;
+        }
+    }
+}
+
+UILabel* SidneyEmail::GetBodyLabel(const std::string& text)
+{
+    // Most emails are a simple vertical layout of labels, so a bit easier to generate.
+    Font* yellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
+
+    // Either reuse an existing label or create a new one.
+    UILabel* label = nullptr;
+    if(mUsedBodyLabelCount < mBodyLabels.size())
+    {
+        label = mBodyLabels[mUsedBodyLabelCount];
+    }
+    else
+    {
+        label = UI::CreateWidgetActor<UILabel>("EmailBodyLabel", mBodyScrollRect);
+        mBodyLabels.push_back(label);
+    }
+
+    // Reset label to default settings.
+    label->GetRectTransform()->SetParent(mBodyScrollRect->GetRectTransform());
+    label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+    label->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+    label->GetRectTransform()->SetSizeDelta(510.0f, yellowFont->GetGlyphHeight());
+    label->SetFont(yellowFont);
+    label->SetVerticalAlignment(VerticalAlignment::Top);
+    label->SetHorizonalAlignment(HorizontalAlignment::Left);
+    label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
+    label->SetEnabled(true);
+
+    // Increment item index.
+    ++mUsedBodyLabelCount;
+
+    // Set the text.
+    label->SetText(text);
+
+    // Calculate text height.
+    float textHeight = yellowFont->GetGlyphHeight();
+    if(!text.empty())
+    {
+        textHeight = label->GetTextHeight();
+    }
+
+    // Resize label height to fit the text snugly.
+    label->GetRectTransform()->SetSizeDeltaY(textHeight);
+    return label;
 }
 
 void SidneyEmail::OnNextEmailButtonPressed()

@@ -14,6 +14,7 @@ class Actor;
 class PersistState;
 class SidneyButton;
 class UILabel;
+class UINineSlice;
 class UIScrollRect;
 
 class SidneyEmail
@@ -52,9 +53,18 @@ private:
     UILabel* mDateLabel = nullptr;
     UILabel* mSubjectLabel = nullptr;
 
-    // Single email body labels and scroll rect.
+    // The email body is contained inside this scroll rect.
     UIScrollRect* mBodyScrollRect = nullptr;
+
+    // The body of most emails is made up of labels.
     std::vector<UILabel*> mBodyLabels;
+    int mUsedBodyLabelCount = 0;
+
+    // One email body uses some boxes...
+    std::vector<UINineSlice*> mBodyBoxes;
+
+    // And another email contains some images.
+    std::vector<UIImage*> mBodyImages;
 
     // Buttons for actions on an email.
     SidneyButton* mNextButton = nullptr;
@@ -104,6 +114,8 @@ private:
 
     void ShowEmailList();
     void ViewEmail(const std::string& emailId, int emailIndex);
+    void BuildEmailBody(const std::string& emailId);
+    UILabel* GetBodyLabel(const std::string& text);
 
     void OnNextEmailButtonPressed();
     void OnPrevEmailButtonPressed();
