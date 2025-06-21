@@ -140,6 +140,7 @@ bool Renderer::Initialize()
         gAssetManager.LoadShader(shader);
     }
     gAssetManager.LoadShader("3D-Tex", "UI-Text-ColorReplace");
+    gAssetManager.LoadShader("3D-Tex", "UI-Point-Circle");
 
     // Create simple shapes (useful for debugging/visualization).
     // Line

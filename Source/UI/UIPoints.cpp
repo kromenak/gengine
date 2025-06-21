@@ -1,5 +1,6 @@
 #include "UIPoints.h"
 
+#include "AssetManager.h"
 #include "Mesh.h"
 
 TYPEINFO_INIT(UIPoints, UIWidget, 24)
@@ -9,6 +10,7 @@ TYPEINFO_INIT(UIPoints, UIWidget, 24)
 
 UIPoints::UIPoints(Actor* owner) : UIWidget(owner)
 {
+    mMaterial.SetShader(gAssetManager.LoadShader("3D-Tex", "UI-Point-Circle"));
     mMaterial.SetDiffuseTexture(&Texture::White);
 }
 

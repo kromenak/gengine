@@ -388,7 +388,7 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
 {
     // Determine the name of this shader asset.
     std::string shaderName = vertName;
-    if(StringUtil::EqualsIgnoreCase(vertName, fragName))
+    if(!StringUtil::EqualsIgnoreCase(vertName, fragName))
     {
         shaderName.push_back('_');
         shaderName += fragName;
