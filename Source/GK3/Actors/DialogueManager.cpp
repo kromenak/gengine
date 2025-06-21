@@ -48,7 +48,7 @@ void DialogueManager::StartDialogue(const std::string& licensePlate, int numLine
     PlayNextDialogueLine();
 }
 
-void DialogueManager::ContinueDialogue(int numLines, bool playFidgets, std::function<void()> finishCallback)
+void DialogueManager::ContinueDialogue(int numLines, bool playFidgets, const std::function<void()>& finishCallback)
 {
     // This assumes that we've already previously specified a plate/sequence and we just want to continue the sequence.
     mRemainingDialogueLines = numLines;
@@ -144,7 +144,7 @@ void DialogueManager::SetSpeaker(const std::string& noun)
     }
 }
 
-void DialogueManager::SetConversation(const std::string& conversation, std::function<void()> finishCallback)
+void DialogueManager::SetConversation(const std::string& conversation, const std::function<void()>& finishCallback)
 {
     // Now in a conversation!
     mConversation = conversation;
@@ -194,10 +194,19 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
                         actor->StartFidget(GKActor::FidgetType::Listen);
                     }
 
-                    // Use the talk fidget by default if there were no listen fidget defined for some reason.
-                    if(settings->talkGas != nullptr && settings->listenGas == nullptr)
+                    // Start in listen fidget, unless it's null in which case fall back on talk fidget.
+                    // If both are null, actor just keeps doing the idle fidget I guess.
+                    if(settings->listenGas != nullptr)
+                    {
+                        actor->StartFidget(GKActor::FidgetType::Listen);
+                    }
+                    else if(settings->talkGas != nullptr)
                     {
                         actor->StartFidget(GKActor::FidgetType::Talk);
+                    }
+                    else
+                    {
+                        actor->StartFidget(GKActor::FidgetType::Idle);
                     }
 
                     // Finished one conversation anim - see if we're done entering the conversation.
@@ -222,7 +231,7 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
     CheckConversationAnimFinishCallback();
 }
 
-void DialogueManager::EndConversation(std::function<void()> finishCallback)
+void DialogueManager::EndConversation(const std::function<void()>& finishCallback)
 {
     // No conversation? No problem.
     if(mConversation.empty())
@@ -243,18 +252,6 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
     {
         gSceneManager.GetScene()->SetCameraPositionForConversation(mConversation, false);
     }
-
-    // Revert any fidgets that were set when entering the conversation.
-    for(auto& pair : mSavedTalkFidgets)
-    {
-        pair.first->SetTalkFidget(pair.second);
-    }
-    for(auto& pair : mSavedListenFidgets)
-    {
-        pair.first->SetListenFidget(pair.second);
-    }
-    mSavedTalkFidgets.clear();
-    mSavedListenFidgets.clear();
 
     // Play any exit anims for actors in this conversation.
     mConversationAnimWaitCount = 0;
@@ -280,6 +277,18 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
             actor->StartFidget(GKActor::FidgetType::Idle);
         }
     }
+
+    // Revert any fidgets that were set when entering the conversation.
+    for(auto& pair : mSavedTalkFidgets)
+    {
+        pair.first->SetTalkFidget(pair.second);
+    }
+    for(auto& pair : mSavedListenFidgets)
+    {
+        pair.first->SetListenFidget(pair.second);
+    }
+    mSavedTalkFidgets.clear();
+    mSavedListenFidgets.clear();
 
     // No waits? Do callback right away.
     CheckConversationAnimFinishCallback();

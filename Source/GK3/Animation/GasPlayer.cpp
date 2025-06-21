@@ -159,6 +159,16 @@ void GasPlayer::StartAnimation(Animation* anim, const std::function<void()>& fin
     gSceneManager.GetScene()->GetAnimator()->Start(animParams);
 }
 
+void GasPlayer::AddDistanceCondition(WhenNearGasNode* node)
+{
+    // Add distance condition.
+    mDistanceConditionNodes.push_back(std::make_pair(node, false));
+
+    // There's a chance that a distance condition is met *immediately* when it's added.
+    // In that case, we should immediately detect it, and trigger a skip to the appropriate node index.
+    CheckDistanceConditions();
+}
+
 void GasPlayer::OnUpdate(float deltaTime)
 {
     if(mGas == nullptr || mPaused) { return; }
@@ -173,20 +183,8 @@ void GasPlayer::OnUpdate(float deltaTime)
         }
     }
 
-    // Check distance conditions. If one goes from false to true, the execution index is changed.
-    for(auto& condition : mDistanceConditionNodes)
-    {
-        bool conditionMet = condition.first->CheckCondition(this);
-        if(!condition.second && conditionMet)
-        {
-            condition.second = true;
-            SetNodeIndex(condition.first->index);
-        }
-        else if(condition.second && !conditionMet)
-        {
-            condition.second = false;
-        }
-    }
+    // See if any distance condition has been met.
+    CheckDistanceConditions();
 }
 
 void GasPlayer::ProcessNextNode()
@@ -234,6 +232,24 @@ void GasPlayer::ProcessNextNode()
         if(mTimer != 0.0f)
         {
             break;
+        }
+    }
+}
+
+void GasPlayer::CheckDistanceConditions()
+{
+    // Check distance conditions. If one goes from false to true, the execution index is changed.
+    for(auto& condition : mDistanceConditionNodes)
+    {
+        bool conditionMet = condition.first->CheckCondition(this);
+        if(!condition.second && conditionMet)
+        {
+            condition.second = true;
+            SetNodeIndex(condition.first->index);
+        }
+        else if(condition.second && !conditionMet)
+        {
+            condition.second = false;
         }
     }
 }

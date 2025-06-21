@@ -51,7 +51,7 @@ public:
     void SetNewIdleOnTalkAction(GAS* newIdle) { mTalkInterruptConfig.newIdle = newIdle; }
     void SetTalkInterruptClearFlag(const std::string& clearFlag) { mTalkInterruptConfig.clearFlag = clearFlag; }
 
-    void AddDistanceCondition(WhenNearGasNode* node) { mDistanceConditionNodes.push_back(std::make_pair(node, false)); }
+    void AddDistanceCondition(WhenNearGasNode* node);
 
     int GetExecutionCounter() const { return mExecutionCounter; }
 
@@ -121,6 +121,8 @@ private:
     InterruptConfig mTalkInterruptConfig;
 
     void ProcessNextNode();
+
+    void CheckDistanceConditions();
 
     void PerformCleanups(bool forTalk, const std::function<void()>& callback);
     void WalkToInterruptPos(bool forTalk, const std::function<void()>& callback);

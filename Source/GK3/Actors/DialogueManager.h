@@ -18,14 +18,14 @@ class DialogueManager
 {
 public:
     void StartDialogue(const std::string& licensePlate, int numLines, bool playFidgets, std::function<void()> finishCallback);
-    void ContinueDialogue(int numLines, bool playFidgets, std::function<void()> finishCallback);
+    void ContinueDialogue(int numLines, bool playFidgets, const std::function<void()>& finishCallback);
     void TriggerDialogueCue();
 
     void SetSpeaker(const std::string& noun);
     const std::string& GetSpeaker() const { return mSpeaker; }
 
-    void SetConversation(const std::string& conversation, std::function<void()> finishCallback);
-    void EndConversation(const std::function<void()> finishCallback);
+    void SetConversation(const std::string& conversation, const std::function<void()>& finishCallback);
+    void EndConversation(const std::function<void()>& finishCallback);
     bool InConversation() const { return !mConversation.empty(); }
 
 private:
