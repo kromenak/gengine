@@ -284,7 +284,7 @@ void ActionManager::QueueAction(const std::string& noun, const std::string& verb
     mActionQueue.push_back(entry);
 }
 
-void ActionManager::WaitForActionsToComplete(const std::function<void()> callback)
+void ActionManager::WaitForActionsToComplete(const std::function<void()>& callback)
 {
     if(mCurrentAction == nullptr && !IsSkippingCurrentAction())
     {
@@ -459,6 +459,19 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
     {
         verbToActionSpecific.clear();
         AddActionsToMap("TWO_MEN", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
+    // Also MOSELY, BUTHANE, and BUCHELLI match BUTHANE_MOSE_BUCHELLI...
+    if(StringUtil::EqualsIgnoreCase(noun, "MOSELY") ||
+       StringUtil::EqualsIgnoreCase(noun, "BUTHANE") ||
+       StringUtil::EqualsIgnoreCase(noun, "BUCHELLI"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("BUTHANE_MOSE_BUCHELLI", verbType, verbToActionSpecific);
         for(auto& entry : verbToActionSpecific)
         {
             verbToAction[entry.first] = entry.second;

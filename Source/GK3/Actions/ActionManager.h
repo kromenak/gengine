@@ -57,7 +57,7 @@ public:
     void ExecuteDialogueAction(const std::string& licensePlate, int lineCount = 1, std::function<void(const Action*)> finishCallback = nullptr);
 
     void QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
-    void WaitForActionsToComplete(const std::function<void()> callback);
+    void WaitForActionsToComplete(const std::function<void()>& callback);
 
     void StartManualAction() { ++mManualActionCounter; }
     void FinishManualAction() { mManualActionCounter = Math::Max(--mManualActionCounter, 0); }
