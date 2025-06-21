@@ -107,8 +107,8 @@ FilePreviewWindow SidneyUtil::CreateFilePreviewWindow(Actor* parent)
 
     // Add item image.
     UIImage* image = UI::CreateWidgetActor<UIImage>("Image", border);
-    //image->SetTexture(gAssetManager.LoadTexture("MAP9.BMP"), true);
     image->GetRectTransform()->SetAnchoredPosition(0.0f, -8.0f);
+    image->GetRectTransform()->SetSizeDelta(94.0f, 94.0f);
 
     FilePreviewWindow window;
     window.root = border->GetOwner();
