@@ -14,6 +14,7 @@
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UINineSlice.h"
+#include "UIScrollRect.h"
 #include "UIUtil.h"
 
 void SidneyFiles::Init(Sidney* parent)
@@ -289,10 +290,11 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
 {
     mForShapes = forShapes;
 
-    // Add dialog background.
+    // Add background.
     {
         // Create a root actor for the dialog.
         UICanvas* canvas = UI::CreateCanvas("SidneyFiles", parent, 2);
+        canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mWindowRoot = canvas->GetOwner();
         mWindowRoot->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
 
@@ -331,6 +333,20 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
         mTitleLabel = titleLabel;
     }
 
+    // Over the course of the game, you may gather more files than can fit in the file window.
+    // To accommodate this, we need a scroll area.
+    // Create a canvas with masking for the scroll area.
+    UICanvas* canvas = UI::CreateCanvas("ScrollCanvas", mWindowRoot, 3);
+    canvas->SetMasked(true);
+    canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+    canvas->GetRectTransform()->SetAnchoredPosition(0.0f, -21.0f);
+    canvas->GetRectTransform()->SetSizeDelta(153.0f, 328.0f);
+
+    // Create scroll area that fills up the canvas.
+    mScrollRect = new UIScrollRect(canvas->GetOwner());
+    mScrollRect->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+    mScrollRect->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+
     // Hide by default.
     mWindowRoot->SetActive(false);
 }
@@ -338,7 +354,6 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
 void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback)
 {
     // Reset to default position.
-    mWindowRoot->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::TopLeft);
     mWindowRoot->GetComponent<RectTransform>()->SetAnchoredPosition(40.0f, -66.0f);
 
     // Show the window.
@@ -352,8 +367,11 @@ void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std
     }
     mButtonIndex = 0;
 
+    // Make sure scroll rect is positioned at top.
+    mScrollRect->SetNormalizedScrollValue(0.0f);
+
     // Iterate and place each label.
-    Vector2 topLeft(10.0f, -28.0f);
+    Vector2 topLeft(10.0f, -8.0f);
     for(auto& dir : data)
     {
         // Only show shapes if this is the shapes list.
@@ -468,7 +486,7 @@ SidneyFiles::FileListButton& SidneyFiles::FileListWindow::GetFileListButton()
     if(mButtonIndex >= mButtons.size())
     {
         Actor* labelActor = new Actor(TransformType::RectTransform);
-        labelActor->GetTransform()->SetParent(mWindowRoot->GetTransform());
+        labelActor->GetTransform()->SetParent(mScrollRect->GetRectTransform());
 
         UILabel* label = labelActor->AddComponent<UILabel>();
         label->GetRectTransform()->SetPivot(0.0f, 1.0f); // Top-Left

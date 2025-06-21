@@ -17,6 +17,7 @@ class PersistState;
 class Sidney;
 class UIButton;
 class UILabel;
+class UIScrollRect;
 
 namespace SidneyFileIds
 {
@@ -205,6 +206,9 @@ private:
 
         // The title label.
         UILabel* mTitleLabel = nullptr;
+
+        // A scroll rect containing the file list (in case it overflows the available space).
+        UIScrollRect* mScrollRect = nullptr;
 
         // Each button is a selection in the window.
         std::vector<FileListButton> mButtons;
