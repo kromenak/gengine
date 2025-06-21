@@ -49,17 +49,9 @@ public:
 
     void Push(const T& t)
     {
-        assert(mSize < TCapacity);
-
-        // Put the item at the tail.
-        reinterpret_cast<T*>(mData)[mTail] = t;
-
-        // Move the tail forward, with wraparound.
-        ++mTail;
-        mTail %= TCapacity;
-
-        // Increase size.
-        ++mSize;
+        // Internally, push just uses the same code as enqueue, but relies on a copy constructor.
+        // Placement new is necessary, especially if the type is something complex like std::string.
+        Emplace(t);
     }
 
     template<typename... Args>
