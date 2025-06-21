@@ -72,14 +72,17 @@ void SidneyFiles::Init(Sidney* parent)
     mAllFiles.emplace_back(26, SidneyFileType::Image, "fileSUMNote",          "I_AM_WORDS",               "e_sidney_add_sum_note");
 
     // Audio (27-28)
-    mAllFiles.emplace_back(27, SidneyFileType::Audio, "fileAbbeTape",     "", "e_sidney_add_tape_abbe");
-    mAllFiles.emplace_back(28, SidneyFileType::Audio, "fileBuchelliTape", "", "e_sidney_add_tape_buchelli");
+    mAllFiles.emplace_back(27, SidneyFileType::Audio, "fileAbbeTape",     "ABBE_TAPE", "e_sidney_add_tape_abbe");
+    mAllFiles.emplace_back(28, SidneyFileType::Audio, "fileBuchelliTape", "BUCHELLI_TAPE", "e_sidney_add_tape_buchelli");
 
     // Text (29-30)
     mAllFiles.emplace_back(29, SidneyFileType::Text, "fileArcadiaText", "");
-    mAllFiles.emplace_back(30, SidneyFileType::Text, "fileTempleOfSolomonText", "");     //TODO: Is this a text type?
 
-    mAllFiles.emplace_back(31, SidneyFileType::Image, "fileHermeticSymbols", "");         //TODO: Seems doubled up and unused?
+    // Originally, it seems that the emails Grace receives about the Temple of Solomon layout and Hermetic Symbols were supposed to add files to your collection.
+    // However, at some point, they decided to instead just embed the layout and symbols in the email layouts themselves.
+    // So, these files are vestigal and unused in the final game.
+    mAllFiles.emplace_back(30, SidneyFileType::Text, "fileTempleOfSolomonText", "");
+    mAllFiles.emplace_back(31, SidneyFileType::Image, "fileHermeticSymbols", "");
 
     // Licenses (32-36)
     mAllFiles.emplace_back(32, SidneyFileType::License, "fileBuchelliLicense",   "BUCHELLIS_LICENSE", "e_sidney_add_license_buchelli");
