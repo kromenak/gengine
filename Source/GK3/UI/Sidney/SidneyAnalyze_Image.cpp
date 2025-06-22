@@ -410,6 +410,11 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
             });
         });
     }
+
+    // The "view geometry" button becomes disabled if the viewed geometry is already visible on-screen.
+    // We always use video image 0 for this, so we can disable the choice if the video image is enabled.
+    // This gets reset if you open a different file.
+    mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ViewGeometryIdx, !mAnalyzeVideoImages[0]->IsEnabled());
 }
 
 void SidneyAnalyze::AnalyzeImage_OnRotateShapeButtonPressed()
