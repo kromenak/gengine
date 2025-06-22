@@ -72,6 +72,7 @@ target_include_directories(gk3 PRIVATE
     Source/GK3/Mechanisms
     Source/GK3/Scene
     Source/GK3/UI
+    Source/GK3/UI/DrivingScreen
     Source/GK3/UI/Sidney
     Source/GK3/UI/Sidney/Analyze
     Source/GK3/UI/Sidney/Components
