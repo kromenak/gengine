@@ -4,10 +4,10 @@
 // UI for the analyze subscreen of Sidney.
 //
 #pragma once
-#include "AudioManager.h"
+#include "MapState.h"
 #include "SidneyMenuBar.h"
+#include "TextLayout.h" // HorizontalAlignment
 #include "Vector2.h"
-#include "UILabel.h"
 
 class Actor;
 class PersistState;
@@ -20,13 +20,8 @@ struct SidneyFile;
 class SidneyPopup;
 class SidneyTranslate;
 class UIButton;
-class UICircles;
-class UIGrids;
-class UIHexagrams;
 class UIImage;
-class UILines;
-class UIPoints;
-class UIRectangles;
+class UILabel;
 class UIScrollRect;
 
 class SidneyAnalyze
@@ -152,101 +147,6 @@ private:
     float mMapStatusLabelTimer = 0.0f;
 
     // The map screen is quite complex, so this helper class helps manage its state.
-    struct MapState
-    {
-        struct View
-        {
-            // A button to detect when the player is interacting with this view.
-            UIButton* button = nullptr;
-
-            // The image of the map in the view.
-            // Placed map elements are also children of this Actor!
-            UIImage* mapImage = nullptr;
-
-            // Points that have been placed on the map.
-            // Locked points are a different color and not modifiable by players.
-            UIPoints* points = nullptr;
-            UIPoints* lockedPoints = nullptr;
-
-            // Lines that have been placed on the map.
-            // These are only placed by the system - players don't place these directly.
-            UILines* lines = nullptr;
-
-            // Circles that have been placed on the map.
-            // Locked circles are no longer modifiable by players.
-            UICircles* circles = nullptr;
-            UICircles* lockedCircles = nullptr;
-
-            // Rectangles that have been placed on the map.
-            // Locked rectangles are no longer modifiable by players.
-            UIRectangles* rectangles = nullptr;
-            UIRectangles* lockedRectangles = nullptr;
-
-            // Grids that have been placed on the map.
-            // Locked grids are no longer modifiable by players.
-            UIGrids* grids = nullptr;
-            UIGrids* lockedGrids = nullptr;
-
-            // Hexagrams that have been placed
-            UIHexagrams* hexagrams = nullptr;
-            UIHexagrams* lockedHexagrams = nullptr;
-
-            UIImage* siteText[2] = { 0 };
-            UIImage* serpentImage = nullptr;
-
-            Vector2 GetLocalMousePos();
-            Vector2 GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints = false);
-
-            void OnPersist(PersistState& ps);
-        };
-        View zoomedOut;
-        View zoomedIn;
-
-        // Index of selected shapes (in the UICircles/UIRectangles components).
-        int selectedCircleIndex = -1;
-        int selectedRectangleIndex = -1;
-        int selectedHexagramIndex = -1;
-
-        // Are we currently entering points?
-        bool enteringPoints = false;
-
-        // Tracks what action the current click is doing.
-        enum class ClickAction
-        {
-            None,
-            FocusMap,
-            SelectShape,
-            MoveShape,
-            ResizeShape,
-            RotateShape
-        };
-        ClickAction zoomedOutClickAction = ClickAction::None;
-
-        // For move/resize/rotate shapes, it's helpful to store some extra state data between frames.
-        Vector2 zoomedOutClickActionPos;
-        Vector2 zoomedOutClickShapeCenter;
-
-        // Points
-        Vector2 ToZoomedInPoint(const Vector2& pos);
-        Vector2 ToZoomedOutPoint(const Vector2& pos);
-        std::string GetPointLatLongText(const Vector2& zoomedInPos);
-
-        // Shapes
-        void AddShape(const std::string& shapeName);
-        void EraseSelectedShape();
-        bool IsAnyShapeSelected();
-        void ClearShapeSelection();
-
-        // Grids
-        void DrawGrid(uint8_t size, bool fillShape);
-        void LockGrid();
-        void ClearGrid();
-
-        // Images
-        void RefreshImages();
-
-        void OnPersist(PersistState& ps);
-    };
     MapState mMap;
 
     void AnalyzeMap_Init();
@@ -266,4 +166,17 @@ private:
 
     void AnalyzeMap_SetStatusText(const std::string& text, float duration = 5.0f);
     void AnalyzeMap_SetPointStatusText(const std::string& baseMessage, const Vector2& zoomedInMapPos);
+
+    void AnalyzeMap_CheckAquariusCompletion();
+    void AnalyzeMap_CheckPiscesCompletion();
+    void AnalyzeMap_CheckAriesCompletion();
+    void AnalyzeMap_CheckTaurusMeridianLine();
+    void AnalyzeMap_CheckTaurusCompletion();
+    void AnalyzeMap_CheckGeminiAndCancerCompletion(float gridSize);
+    bool AnalyzeMap_CheckLeoCompletion();
+    void AnalyzeMap_CheckVirgoCompletion();
+    void AnalyzeMap_CheckLibraCompletion();
+    bool AnalyzeMap_CheckScorpioPlaceTempleWalls();
+    void AnalyzeMap_CheckScorpioCompletion(const Vector2& point);
+    bool AnalyzeMap_CheckSagitariusCompletion();
 };

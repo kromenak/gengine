@@ -9,6 +9,7 @@
 #include "SidneyTranslate.h"
 #include "SidneyUtil.h"
 #include "UIImage.h"
+#include "UILabel.h"
 #include "UINineSlice.h"
 #include "UIUtil.h"
 
