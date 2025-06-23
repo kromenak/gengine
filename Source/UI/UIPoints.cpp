@@ -47,6 +47,12 @@ void UIPoints::AddPoint(const Vector2& point)
     mNeedMeshRegen = true;
 }
 
+void UIPoints::SetPoint(size_t index, const Vector2& point)
+{
+    mPoints[index] = point;
+    mNeedMeshRegen = true;
+}
+
 void UIPoints::RemovePoint(const Vector2& point)
 {
     for(int i = 0; i < mPoints.size(); ++i)

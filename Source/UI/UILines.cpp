@@ -45,6 +45,12 @@ void UILines::AddLine(const Vector2& startPoint, const Vector2& endPoint)
     mNeedMeshRegen = true;
 }
 
+void UILines::SetLine(size_t index, const Vector2& startPoint, const Vector2& endPoint)
+{
+    mLines[index].start = startPoint;
+    mLines[index].end = endPoint;
+}
+
 void UILines::ClearLines()
 {
     mLines.clear();

@@ -224,6 +224,12 @@ void SidneyAnalyze::OnPersist(PersistState& ps)
 
     // HACK: Ensure LSR state var is up-to-date, for save games that were made before we started tracking this.
     SidneyUtil::UpdateLSRState();
+
+    // Older save games may have an incorrect map layout - run some code to detect and fix this.
+    if(ps.GetFormatVersionNumber() < 3)
+    {
+        AnalyzeMap_FixOldSaveGames();
+    }
 }
 
 void SidneyAnalyze::SetState(State state)

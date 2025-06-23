@@ -26,6 +26,7 @@ public:
     void SetColor(const Color32& color);
 
     void AddPoint(const Vector2& point);
+    void SetPoint(size_t index, const Vector2& point);
     void RemovePoint(const Vector2& point);
     void RemovePoint(size_t index);
     void ClearPoints();

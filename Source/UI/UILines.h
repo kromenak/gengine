@@ -27,6 +27,7 @@ public:
     void SetColor(const Color32& color);
 
     void AddLine(const Vector2& startPoint, const Vector2& endPoint);
+    void SetLine(size_t index, const Vector2& startPoint, const Vector2& endPoint);
     void ClearLines();
 
     const LineSegment& GetLine(size_t index) const { return mLines[index]; }

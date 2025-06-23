@@ -73,14 +73,14 @@ void MapView::Init(Actor* parent, bool zoomedIn)
             siteText[0]->SetTexture(gAssetManager.LoadTexture("MAPLG_THE.BMP"), true);
             siteText[0]->SetColor(Color32(255, 255, 255, 128));
             siteText[0]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-            siteText[0]->GetRectTransform()->SetAnchoredPosition(823.0f, 1039.0f);
+            siteText[0]->GetRectTransform()->SetAnchoredPosition(804.0f, 1045.0f);
             siteText[0]->SetEnabled(false);
 
             siteText[1] = UI::CreateWidgetActor<UIImage>("SiteText2", mapImage);
             siteText[1]->SetTexture(gAssetManager.LoadTexture("MAPLG_SITE.BMP"), true);
             siteText[1]->SetColor(Color32(255, 255, 255, 128));
             siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-            siteText[1]->GetRectTransform()->SetAnchoredPosition(792.0f, 983.0f);
+            siteText[1]->GetRectTransform()->SetAnchoredPosition(777.0f, 989.0f);
             siteText[1]->SetEnabled(false);
         }
 
@@ -111,13 +111,13 @@ void MapView::Init(Actor* parent, bool zoomedIn)
             siteText[0] = UI::CreateWidgetActor<UIImage>("SiteText1", mapImage);
             siteText[0]->SetTexture(gAssetManager.LoadTexture("MAPSM_THE.BMP"), true);
             siteText[0]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-            siteText[0]->GetRectTransform()->SetAnchoredPosition(204.0f, 254.0f);
+            siteText[0]->GetRectTransform()->SetAnchoredPosition(198.0f, 257.0f);
             siteText[0]->SetEnabled(false);
 
             siteText[1] = UI::CreateWidgetActor<UIImage>("SiteText2", mapImage);
             siteText[1]->SetTexture(gAssetManager.LoadTexture("MAPSM_SITE.BMP"), true);
             siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-            siteText[1]->GetRectTransform()->SetAnchoredPosition(196.0f, 242.0f);
+            siteText[1]->GetRectTransform()->SetAnchoredPosition(191.0f, 242.0f);
             siteText[1]->SetEnabled(false);
         }
 

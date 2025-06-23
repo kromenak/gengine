@@ -31,13 +31,41 @@ namespace
     const float kHoverPointDist = 4.0f;
     const float kHoverPointDistSq = kHoverPointDist * kHoverPointDist;
 
-    // Specific points required for various parts of the LSR map puzle.
-    const Vector2 kPiscesCoustaussaPoint(405.0f, 1094.0f);
-    const Vector2 kPiscesBezuPoint(301.0f, 385.0f);
-    const Vector2 kPiscesBugarachPoint(991.0f, 327.0f);
+    // Points required for Pisces (in zoomed in map coordinates).
+    const Vector2 kPiscesCoustaussaPoint(404.0f, 1095.0f);
+    const Vector2 kPiscesBezuPoint(301.0f, 386.0f);
+    const Vector2 kPiscesBugarachPoint(990.0f, 326.0f);
 
-    const Vector2 kTaurusSerresPoint(815.0f, 1167.0f);
-    const Vector2 kTaurusMeridianPoint(898.0f, 1128.0f);
+    // The center point and radius of the circle placed on the map (in zoomed out map coordinates).
+    // This is also the center point and radius used for the square around the circle, and the hexagram placed in the circle.
+    const Vector2 kCircleCenter(169.0f, 174.0f);
+    const float kCircleRadius = 121.0f;
+
+    // For placing the square around the circle, it's size and correct rotation in radians.
+    const float kSquareAroundCircleSize = (kCircleRadius * 2) + 1;
+    const float kSquareAroundCircleRotationRadians = 1.185174f;
+
+    // Meridian line points for taurus (in zoomed in map coordinates).
+    const Vector2 kTaurusSerresPoint(808.0f, 1168.0f);
+    const Vector2 kTaurusMeridianPoint(896.0f, 1130.0f);
+
+    // For placing the hexagram, the expected rotation in degrees.
+    const float kHexagramRotationDegrees = 33.0f;
+
+    // The four corners of the temple (in zoomed in map coordinates).
+    const Vector2 kTempleCorner1(381.0f, 292.0f);
+    const Vector2 kTempleCorner2(605.0f, 201.0f);
+    const Vector2 kTempleCorner3(970.0f, 1102.0f);
+    const Vector2 kTempleCorner4(745.0f, 1193.0f);
+
+    // The four division points of the temple (in zoomed in map coordinates).
+    const Vector2 kTempleDivisionPoint1(654.0f, 967.0f);
+    const Vector2 kTempleDivisionPoint2(879.0f, 877.0f);
+    const Vector2 kTempleDivisionPoint3(471.0f, 518.0f);
+    const Vector2 kTempleDivisionPoint4(695.0f, 426.0f);
+
+    // "The Site" point on the map (in zoomed in map coordinates);
+    const Vector2 kTheSitePoint(812.0f, 1033.0f);
 }
 
 void SidneyAnalyze::AnalyzeMap_Init()
@@ -287,7 +315,7 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
     }
     else if(libraDone && !scorpioDone) // working on Scorpio
     {
-        didValidAnalyzeAction = AnalyzeMap_CheckScorpioPlaceTempleWalls();
+        didValidAnalyzeAction = AnalyzeMap_CheckScorpioPlaceTempleDivisions();
     }
 
     // Sagitarius functions a bit differently from other LSR steps, in that you can try to do it at any time, and the game does give a response if it's the wrong time for it.
@@ -502,9 +530,9 @@ void SidneyAnalyze::AnalyzeMap_SetPointStatusText(const std::string& baseMessage
 void SidneyAnalyze::AnalyzeMap_CheckAquariusCompletion()
 {
     // Player must place two points near enough to these points and press "Analyze" to pass Aquarius.
-    const Vector2 kRLCPoint(266.0f, 952.0f);
-    const Vector2 kCDBPoint(653.0f, 1060.0f);
-    const Vector2 kSunLineEndPoint(1336.0f, 1249.0f);
+    const Vector2 kRLCPoint(267.0f, 953.0f);
+    const Vector2 kCDBPoint(652.0f, 1061.0f);
+    const Vector2 kSunLineEndPoint(1336.0f, 1247.0f);
 
     // See if two placed points meet the criteria to finish Aquarius.
     Vector2 rlcPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kRLCPoint);
@@ -550,8 +578,6 @@ void SidneyAnalyze::AnalyzeMap_CheckPiscesCompletion()
     Vector2 bugarachPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesBugarachPoint);
     if(coustaussaPoint != Vector2::Zero && bezuPoint != Vector2::Zero && bugarachPoint != Vector2::Zero)
     {
-        const Vector2 kCircleCenter(168.875f, 174.5f);
-        const float kCircleRadius = 121.0f;
         for(size_t i = 0; i < mMap.zoomedOut.circles->GetCirclesCount(); ++i)
         {
             const Circle& circle = mMap.zoomedOut.circles->GetCircle(i);
@@ -612,14 +638,12 @@ void SidneyAnalyze::AnalyzeMap_CheckPiscesCompletion()
 void SidneyAnalyze::AnalyzeMap_CheckAriesCompletion()
 {
     // To complete Aries, the player must place a Rectangle with a certain position and size.
-    const Vector2 kRectangleCenter(168.875f, 174.5f);
-    const float kRectangleSize = 242.0f;
     for(size_t i = 0; i < mMap.zoomedOut.rectangles->GetCount(); ++i)
     {
         const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(i);
 
-        float centerDiffSq = (rectangle.center - kRectangleCenter).GetLengthSq();
-        float sizeDiff = Math::Abs(rectangle.size.x - kRectangleSize);
+        float centerDiffSq = (rectangle.center - kCircleCenter).GetLengthSq();
+        float sizeDiff = Math::Abs(rectangle.size.x - kSquareAroundCircleSize);
         if(centerDiffSq < 20 * 20 && sizeDiff < 4)
         {
             // Clear mouse click action, forcing player to stop manipulating the rectangle.
@@ -629,8 +653,8 @@ void SidneyAnalyze::AnalyzeMap_CheckAriesCompletion()
             // Set the rectangle to the correct position/size.
             // Note that the rectangle IS NOT locked yet, since the player can still rotate it.
             UIRectangle correctRectangle;
-            correctRectangle.center = kRectangleCenter;
-            correctRectangle.size = Vector2::One * kRectangleSize;
+            correctRectangle.center = kCircleCenter;
+            correctRectangle.size = Vector2::One * kSquareAroundCircleSize;
             correctRectangle.angle = rectangle.angle;
 
             mMap.zoomedOut.rectangles->ClearRectangles();
@@ -719,11 +743,10 @@ void SidneyAnalyze::AnalyzeMap_CheckTaurusCompletion()
         //printf("Rectangle angle is %f\n", angle);
 
         // There are four possible orientations that are considered correct.
-        const float kRectangleRotation = 1.129951f;
-        if(Math::Approximately(angle, kRectangleRotation, 0.1f) ||
-           Math::Approximately(angle, kRectangleRotation + Math::kPiOver2, 0.1f) ||
-           Math::Approximately(angle, kRectangleRotation + Math::kPi, 0.1f) ||
-           Math::Approximately(angle, kRectangleRotation + Math::kPi + Math::kPiOver2, 0.1f))
+        if(Math::Approximately(angle, kSquareAroundCircleRotationRadians, 0.1f) ||
+           Math::Approximately(angle, kSquareAroundCircleRotationRadians + Math::kPiOver2, 0.1f) ||
+           Math::Approximately(angle, kSquareAroundCircleRotationRadians + Math::kPi, 0.1f) ||
+           Math::Approximately(angle, kSquareAroundCircleRotationRadians + Math::kPi + Math::kPiOver2, 0.1f))
         {
             // Clear click action, forcing the player to stop rotating the rectangle.
             mMap.zoomedOutClickAction = MapState::ClickAction::None;
@@ -735,10 +758,10 @@ void SidneyAnalyze::AnalyzeMap_CheckTaurusCompletion()
             mMap.zoomedOut.rectangles->ClearRectangles();
             mMap.zoomedIn.rectangles->ClearRectangles();
 
-            mMap.zoomedOut.lockedRectangles->AddRectangle(rectangle.center, rectangle.size, kRectangleRotation);
+            mMap.zoomedOut.lockedRectangles->AddRectangle(rectangle.center, rectangle.size, kSquareAroundCircleRotationRadians);
             mMap.zoomedIn.lockedRectangles->AddRectangle(mMap.ToZoomedInPoint(rectangle.center),
                                                          mMap.ToZoomedInPoint(rectangle.size),
-                                                         kRectangleRotation);
+                                                         kSquareAroundCircleRotationRadians);
 
             // Grace is excited that we figured it out. And time moves forward a bit!
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7E2ZQB1\", 1)", [](const Action* action){
@@ -791,8 +814,8 @@ void SidneyAnalyze::AnalyzeMap_CheckGeminiAndCancerCompletion(float gridSize)
 bool SidneyAnalyze::AnalyzeMap_CheckLeoCompletion()
 {
     // Player must place two points near enough to these points and press "Analyze" to pass Leo.
-    const Vector2 kLermitagePoint(676.0f, 698.0f);
-    const Vector2 kPoussinTombPoint(938.0f, 1207.0f);
+    const Vector2 kLermitagePoint(676.0f, 696.0f);
+    const Vector2 kPoussinTombPoint(936.0f, 1208.0f);
 
     // See if two placed points meet the criteria to finish Leo.
     Vector2 lermitagePoint = mMap.zoomedIn.GetPlacedPointNearPoint(kLermitagePoint);
@@ -841,16 +864,11 @@ bool SidneyAnalyze::AnalyzeMap_CheckLeoCompletion()
 void SidneyAnalyze::AnalyzeMap_CheckVirgoCompletion()
 {
     // Player must place four points in the correct spots to pass Virgo.
-    const Vector2 kCorner1(360.0f, 312.0f);
-    const Vector2 kCorner2(578.0f, 210.0f);
-    const Vector2 kCorner3(992.0f, 1084.0f);
-    const Vector2 kCorner4(773.0f, 1188.0f);
-
     // See if placed points meet the criteria to finish Virgo.
-    Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner1);
-    Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner2);
-    Vector2 point3 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner3);
-    Vector2 point4 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner4);
+    Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleCorner1);
+    Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleCorner2);
+    Vector2 point3 = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleCorner3);
+    Vector2 point4 = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleCorner4);
     if(point1 != Vector2::Zero && point2 != Vector2::Zero && point3 != Vector2::Zero && point4 != Vector2::Zero)
     {
         // Says "points define 4-to-1 rectangle."
@@ -868,7 +886,7 @@ void SidneyAnalyze::AnalyzeMap_CheckVirgoCompletion()
 
         // It's possible for the player to place these points multiple times.
         // But only the first placement elicits exclamations from Grace.
-        bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner1, true) != Vector2::Zero;
+        bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleCorner1, true) != Vector2::Zero;
         if(!alreadyPlacedPoints)
         {
             // Grace says "That matches Wilkes seismic charts!"
@@ -879,27 +897,27 @@ void SidneyAnalyze::AnalyzeMap_CheckVirgoCompletion()
             });
 
             // Add locked points.
-            mMap.zoomedIn.lockedPoints->AddPoint(kCorner1);
-            mMap.zoomedIn.lockedPoints->AddPoint(kCorner2);
-            mMap.zoomedIn.lockedPoints->AddPoint(kCorner3);
-            mMap.zoomedIn.lockedPoints->AddPoint(kCorner4);
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner1));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner2));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner3));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner4));
+            mMap.zoomedIn.lockedPoints->AddPoint(kTempleCorner1);
+            mMap.zoomedIn.lockedPoints->AddPoint(kTempleCorner2);
+            mMap.zoomedIn.lockedPoints->AddPoint(kTempleCorner3);
+            mMap.zoomedIn.lockedPoints->AddPoint(kTempleCorner4);
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleCorner1));
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleCorner2));
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleCorner3));
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleCorner4));
 
             // Place line segments between the points.
-            mMap.zoomedIn.lines->AddLine(kCorner1, kCorner2);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner1), mMap.ToZoomedOutPoint(kCorner2));
+            mMap.zoomedIn.lines->AddLine(kTempleCorner1, kTempleCorner2);
+            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleCorner1), mMap.ToZoomedOutPoint(kTempleCorner2));
 
-            mMap.zoomedIn.lines->AddLine(kCorner2, kCorner3);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner2), mMap.ToZoomedOutPoint(kCorner3));
+            mMap.zoomedIn.lines->AddLine(kTempleCorner2, kTempleCorner3);
+            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleCorner2), mMap.ToZoomedOutPoint(kTempleCorner3));
 
-            mMap.zoomedIn.lines->AddLine(kCorner3, kCorner4);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner3), mMap.ToZoomedOutPoint(kCorner4));
+            mMap.zoomedIn.lines->AddLine(kTempleCorner3, kTempleCorner4);
+            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleCorner3), mMap.ToZoomedOutPoint(kTempleCorner4));
 
-            mMap.zoomedIn.lines->AddLine(kCorner4, kCorner1);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner4), mMap.ToZoomedOutPoint(kCorner1));
+            mMap.zoomedIn.lines->AddLine(kTempleCorner4, kTempleCorner1);
+            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleCorner4), mMap.ToZoomedOutPoint(kTempleCorner1));
 
             // Virgo is done!
             gGameProgress.ChangeScore("e_sidney_map_virgo");
@@ -913,16 +931,13 @@ void SidneyAnalyze::AnalyzeMap_CheckVirgoCompletion()
 void SidneyAnalyze::AnalyzeMap_CheckLibraCompletion()
 {
     // To complete Libra, the player must place a hexagram at a certain position, scale, and angle.
-    const Vector2 kHexagramCenter(168.875f, 174.5f);
-    const float kHexagramRadius = 121.0f;
-
     for(size_t i = 0; i < mMap.zoomedOut.hexagrams->GetCount(); ++i)
     {
         const UIHexagram& hexagram = mMap.zoomedOut.hexagrams->GetHexagram(i);
 
         // Center/radius checks are the same as for the circle earlier...
-        float centerDiffSq = (hexagram.center - kHexagramCenter).GetLengthSq();
-        float radiusDiff = Math::Abs(hexagram.radius - kHexagramRadius);
+        float centerDiffSq = (hexagram.center - kCircleCenter).GetLengthSq();
+        float radiusDiff = Math::Abs(hexagram.radius - kCircleRadius);
         if(centerDiffSq < 20 * 20 && radiusDiff < 4)
         {
             // The hexagram needs to be in a specific rotation. But there are several valid rotations to get the correct visual effect.
@@ -934,12 +949,12 @@ void SidneyAnalyze::AnalyzeMap_CheckLibraCompletion()
 
             // Check all valid rotations. If any match, you got it!
             const float kCloseEnoughDegrees = 2.0f;
-            if(Math::Approximately(degrees, 30.0f, kCloseEnoughDegrees) ||
-               Math::Approximately(degrees, 90.0f, kCloseEnoughDegrees) ||
-               Math::Approximately(degrees, 150.0f, kCloseEnoughDegrees) ||
-               Math::Approximately(degrees, 210.0f, kCloseEnoughDegrees) ||
-               Math::Approximately(degrees, 270.0f, kCloseEnoughDegrees) ||
-               Math::Approximately(degrees, 330.0f, kCloseEnoughDegrees))
+            if(Math::Approximately(degrees, kHexagramRotationDegrees, kCloseEnoughDegrees) ||
+               Math::Approximately(degrees, kHexagramRotationDegrees + 60.0f, kCloseEnoughDegrees) ||
+               Math::Approximately(degrees, kHexagramRotationDegrees + 120.0f, kCloseEnoughDegrees) ||
+               Math::Approximately(degrees, kHexagramRotationDegrees + 180.0f, kCloseEnoughDegrees) ||
+               Math::Approximately(degrees, kHexagramRotationDegrees + 240.0f, kCloseEnoughDegrees) ||
+               Math::Approximately(degrees, kHexagramRotationDegrees + 300.0f, kCloseEnoughDegrees))
             {
                 // Clear click action, forcing the player to stop rotating the hexagram.
                 mMap.zoomedOutClickAction = MapState::ClickAction::None;
@@ -951,8 +966,8 @@ void SidneyAnalyze::AnalyzeMap_CheckLibraCompletion()
                 mMap.zoomedOut.hexagrams->ClearHexagrams();
                 mMap.zoomedIn.hexagrams->ClearHexagrams();
 
-                mMap.zoomedOut.lockedHexagrams->AddHexagram(kHexagramCenter, kHexagramRadius, Math::ToRadians(30.0f));
-                mMap.zoomedIn.lockedHexagrams->AddHexagram(mMap.ToZoomedInPoint(kHexagramCenter), mMap.ToZoomedInDistance(kHexagramRadius), Math::ToRadians(30.0f));
+                mMap.zoomedOut.lockedHexagrams->AddHexagram(kCircleCenter, kCircleRadius, Math::ToRadians(kHexagramRotationDegrees));
+                mMap.zoomedIn.lockedHexagrams->AddHexagram(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius), Math::ToRadians(kHexagramRotationDegrees));
 
                 // Grace says you got it right!
                 gActionManager.ExecuteDialogueAction("02O1K2ZC73", 2, [](const Action* action){
@@ -967,27 +982,22 @@ void SidneyAnalyze::AnalyzeMap_CheckLibraCompletion()
                 gGameProgress.SetFlag("LockedHexagram");
                 SidneyUtil::UpdateLSRState();
             }
+            //printf("Center (%f, %f), Size (%f), Angle (%f)\n", hexagram.center.x, hexagram.center.y, hexagram.radius, degrees);
         }
-        //printf("Center (%f, %f), Size (%f), Angle (%f)\n", h"Lexagram.center.x, hexagram.center.y, hexagram.radius, angle);
     }
 }
 
-bool SidneyAnalyze::AnalyzeMap_CheckScorpioPlaceTempleWalls()
+bool SidneyAnalyze::AnalyzeMap_CheckScorpioPlaceTempleDivisions()
 {
     // This can only be successfully done if the player has seen the Temple of Solomon email.
     if(gGameProgress.GetFlag("OpenedTempleDiagram") && !gGameProgress.GetFlag("PlacedTempleDivisions"))
     {
         // Player must place four points in the correct spots to pass Scorpio.
-        const Vector2 kPoint1(670.0f, 969.0f);
-        const Vector2 kPoint2(889.0f, 866.0f);
-        const Vector2 kPoint3(463.0f, 531.0f);
-        const Vector2 kPoint4(680.0f, 429.0f);
-
         // See if placed points meet the criteria to finish Virgo.
-        Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kPoint1);
-        Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kPoint2);
-        Vector2 point3 = mMap.zoomedIn.GetPlacedPointNearPoint(kPoint3);
-        Vector2 point4 = mMap.zoomedIn.GetPlacedPointNearPoint(kPoint4);
+        Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleDivisionPoint1);
+        Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleDivisionPoint2);
+        Vector2 point3 = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleDivisionPoint3);
+        Vector2 point4 = mMap.zoomedIn.GetPlacedPointNearPoint(kTempleDivisionPoint4);
         if(point1 != Vector2::Zero && point2 != Vector2::Zero && point3 != Vector2::Zero && point4 != Vector2::Zero)
         {
             // Remove points placed by the player.
@@ -1001,21 +1011,21 @@ bool SidneyAnalyze::AnalyzeMap_CheckScorpioPlaceTempleWalls()
             mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point4));
 
             // Add locked points.
-            mMap.zoomedIn.lockedPoints->AddPoint(kPoint1);
-            mMap.zoomedIn.lockedPoints->AddPoint(kPoint2);
-            mMap.zoomedIn.lockedPoints->AddPoint(kPoint3);
-            mMap.zoomedIn.lockedPoints->AddPoint(kPoint4);
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoint1));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoint2));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoint3));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoint4));
+            mMap.zoomedIn.lockedPoints->AddPoint(kTempleDivisionPoint1);
+            mMap.zoomedIn.lockedPoints->AddPoint(kTempleDivisionPoint2);
+            mMap.zoomedIn.lockedPoints->AddPoint(kTempleDivisionPoint3);
+            mMap.zoomedIn.lockedPoints->AddPoint(kTempleDivisionPoint4);
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleDivisionPoint1));
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleDivisionPoint3));
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
 
             // Place line segments between the points to create the temple layout.
-            mMap.zoomedIn.lines->AddLine(kPoint1, kPoint2);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kPoint1), mMap.ToZoomedOutPoint(kPoint2));
+            mMap.zoomedIn.lines->AddLine(kTempleDivisionPoint1, kTempleDivisionPoint2);
+            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleDivisionPoint1), mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
 
-            mMap.zoomedIn.lines->AddLine(kPoint3, kPoint4);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kPoint3), mMap.ToZoomedOutPoint(kPoint4));
+            mMap.zoomedIn.lines->AddLine(kTempleDivisionPoint3, kTempleDivisionPoint4);
+            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleDivisionPoint3), mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
 
             // Grace says something like "that matches the temple diagram!"
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZR82\", 1)");
@@ -1031,15 +1041,14 @@ bool SidneyAnalyze::AnalyzeMap_CheckScorpioPlaceTempleWalls()
 
 void SidneyAnalyze::AnalyzeMap_CheckScorpioCompletion(const Vector2& point)
 {
-    const Vector2 kSitePoint(830.0f, 1027.0f);
-    Vector2 sitePoint = mMap.zoomedIn.GetPlacedPointNearPoint(kSitePoint);
+    Vector2 sitePoint = mMap.zoomedIn.GetPlacedPointNearPoint(kTheSitePoint);
     if(sitePoint != Vector2::Zero)
     {
         // Replace placed point with locked actual point.
         mMap.zoomedIn.points->RemovePoint(point);
         mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point));
-        mMap.zoomedIn.lockedPoints->AddPoint(kSitePoint);
-        mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kSitePoint));
+        mMap.zoomedIn.lockedPoints->AddPoint(kTheSitePoint);
+        mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTheSitePoint));
 
         // Change score and apply flags.
         gGameProgress.ChangeScore("e_sidney_map_scorpio");
@@ -1149,4 +1158,106 @@ bool SidneyAnalyze::AnalyzeMap_CheckSagitariusCompletion()
         }
     }
     return false;
+}
+
+void SidneyAnalyze::AnalyzeMap_FixOldSaveGames()
+{
+    // Older save files may have the circle in a slightly wrong spot.
+    if(mMap.zoomedOut.lockedCircles->GetCirclesCount() > 0)
+    {
+        mMap.zoomedOut.lockedCircles->ClearCircles();
+        mMap.zoomedIn.lockedCircles->ClearCircles();
+
+        mMap.zoomedOut.lockedCircles->AddCircle(kCircleCenter, kCircleRadius);
+        mMap.zoomedIn.lockedCircles->AddCircle(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius));
+    }
+
+    // Older save files may have the square around the circle at a wrong angle.
+    if(mMap.zoomedOut.lockedRectangles->GetCount() > 0)
+    {
+        mMap.zoomedOut.lockedRectangles->ClearRectangles();
+        mMap.zoomedIn.lockedRectangles->ClearRectangles();
+
+        mMap.zoomedOut.lockedRectangles->AddRectangle(kCircleCenter, Vector2::One * kSquareAroundCircleSize, kSquareAroundCircleRotationRadians);
+        mMap.zoomedIn.lockedRectangles->AddRectangle(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInPoint(Vector2::One * kSquareAroundCircleSize), kSquareAroundCircleRotationRadians);
+    }
+
+    // Since the grid fills the square, it also needs to be updated due to the square angle changing.
+    if(mMap.zoomedOut.lockedGrids->GetCount() > 0)
+    {
+        mMap.zoomedOut.lockedGrids->Clear();
+        mMap.zoomedIn.lockedGrids->Clear();
+
+        mMap.DrawGrid(8, true);
+        mMap.LockGrid();
+    }
+
+    // The hexagram is placed relative to the square, so it's angle must also change.
+    if(mMap.zoomedOut.lockedHexagrams->GetCount() > 0)
+    {
+        mMap.zoomedOut.lockedHexagrams->ClearHexagrams();
+        mMap.zoomedIn.lockedHexagrams->ClearHexagrams();
+
+        mMap.zoomedOut.lockedHexagrams->AddHexagram(kCircleCenter, kCircleRadius, Math::ToRadians(kHexagramRotationDegrees));
+        mMap.zoomedIn.lockedHexagrams->AddHexagram(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius), Math::ToRadians(kHexagramRotationDegrees));
+    }
+
+    // Because the square's angle changed, the temple corner points changed too.
+    if(mMap.zoomedOut.lockedPoints->GetPointsCount() >= 13)
+    {
+        mMap.zoomedIn.lockedPoints->SetPoint(9, kTempleCorner1);
+        mMap.zoomedIn.lockedPoints->SetPoint(10, kTempleCorner2);
+        mMap.zoomedIn.lockedPoints->SetPoint(11, kTempleCorner3);
+        mMap.zoomedIn.lockedPoints->SetPoint(12, kTempleCorner4);
+
+        mMap.zoomedOut.lockedPoints->SetPoint(9, mMap.ToZoomedOutPoint(kTempleCorner1));
+        mMap.zoomedOut.lockedPoints->SetPoint(10, mMap.ToZoomedOutPoint(kTempleCorner2));
+        mMap.zoomedOut.lockedPoints->SetPoint(11, mMap.ToZoomedOutPoint(kTempleCorner3));
+        mMap.zoomedOut.lockedPoints->SetPoint(12, mMap.ToZoomedOutPoint(kTempleCorner4));
+    }
+
+    // And the lines between the temple corner points changed as well.
+    if(mMap.zoomedOut.lines->GetLinesCount() >= 7)
+    {
+        mMap.zoomedIn.lines->SetLine(3, kTempleCorner1, kTempleCorner2);
+        mMap.zoomedIn.lines->SetLine(4, kTempleCorner2, kTempleCorner3);
+        mMap.zoomedIn.lines->SetLine(5, kTempleCorner3, kTempleCorner4);
+        mMap.zoomedIn.lines->SetLine(6, kTempleCorner4, kTempleCorner1);
+
+        mMap.zoomedOut.lines->SetLine(3, mMap.ToZoomedOutPoint(kTempleCorner1), mMap.ToZoomedOutPoint(kTempleCorner2));
+        mMap.zoomedOut.lines->SetLine(4, mMap.ToZoomedOutPoint(kTempleCorner2), mMap.ToZoomedOutPoint(kTempleCorner3));
+        mMap.zoomedOut.lines->SetLine(5, mMap.ToZoomedOutPoint(kTempleCorner3), mMap.ToZoomedOutPoint(kTempleCorner4));
+        mMap.zoomedOut.lines->SetLine(6, mMap.ToZoomedOutPoint(kTempleCorner4), mMap.ToZoomedOutPoint(kTempleCorner1));
+    }
+
+    // And the temple division points must change.
+    if(mMap.zoomedOut.lockedPoints->GetPointsCount() >= 17)
+    {
+        mMap.zoomedIn.lockedPoints->SetPoint(13, kTempleDivisionPoint1);
+        mMap.zoomedIn.lockedPoints->SetPoint(14, kTempleDivisionPoint2);
+        mMap.zoomedIn.lockedPoints->SetPoint(15, kTempleDivisionPoint3);
+        mMap.zoomedIn.lockedPoints->SetPoint(16, kTempleDivisionPoint4);
+
+        mMap.zoomedOut.lockedPoints->SetPoint(13, mMap.ToZoomedOutPoint(kTempleDivisionPoint1));
+        mMap.zoomedOut.lockedPoints->SetPoint(14, mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
+        mMap.zoomedOut.lockedPoints->SetPoint(15, mMap.ToZoomedOutPoint(kTempleDivisionPoint3));
+        mMap.zoomedOut.lockedPoints->SetPoint(16, mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
+    }
+
+    // And the lines between the division points must change.
+    if(mMap.zoomedOut.lines->GetLinesCount() >= 9)
+    {
+        mMap.zoomedIn.lines->SetLine(7, kTempleDivisionPoint1, kTempleDivisionPoint2);
+        mMap.zoomedIn.lines->SetLine(8, kTempleDivisionPoint3, kTempleDivisionPoint4);
+
+        mMap.zoomedOut.lines->SetLine(7, mMap.ToZoomedOutPoint(kTempleDivisionPoint1), mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
+        mMap.zoomedOut.lines->SetLine(8, mMap.ToZoomedOutPoint(kTempleDivisionPoint3), mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
+    }
+
+    // And finally, The Site point position is changed.
+    if(mMap.zoomedOut.lockedPoints->GetPointsCount() >= 18)
+    {
+        mMap.zoomedIn.lockedPoints->SetPoint(17, kTheSitePoint);
+        mMap.zoomedOut.lockedPoints->SetPoint(17, mMap.ToZoomedOutPoint(kTheSitePoint));
+    }
 }

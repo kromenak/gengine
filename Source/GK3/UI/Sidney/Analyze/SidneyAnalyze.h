@@ -167,16 +167,18 @@ private:
     void AnalyzeMap_SetStatusText(const std::string& text, float duration = 5.0f);
     void AnalyzeMap_SetPointStatusText(const std::string& baseMessage, const Vector2& zoomedInMapPos);
 
-    void AnalyzeMap_CheckAquariusCompletion();
-    void AnalyzeMap_CheckPiscesCompletion();
-    void AnalyzeMap_CheckAriesCompletion();
-    void AnalyzeMap_CheckTaurusMeridianLine();
-    void AnalyzeMap_CheckTaurusCompletion();
-    void AnalyzeMap_CheckGeminiAndCancerCompletion(float gridSize);
-    bool AnalyzeMap_CheckLeoCompletion();
-    void AnalyzeMap_CheckVirgoCompletion();
-    void AnalyzeMap_CheckLibraCompletion();
-    bool AnalyzeMap_CheckScorpioPlaceTempleWalls();
-    void AnalyzeMap_CheckScorpioCompletion(const Vector2& point);
-    bool AnalyzeMap_CheckSagitariusCompletion();
+    void AnalyzeMap_CheckAquariusCompletion();                          // Sunrise Line from Rennes le Chateau to Chateau de Blanchfort
+    void AnalyzeMap_CheckPiscesCompletion();                            // Place Circle
+    void AnalyzeMap_CheckAriesCompletion();                             // Place Square around Circle
+    void AnalyzeMap_CheckTaurusMeridianLine();                          // Line from Meridian to Chateau de Serres
+    void AnalyzeMap_CheckTaurusCompletion();                            // Rotate Square to align with Meridian Line
+    void AnalyzeMap_CheckGeminiAndCancerCompletion(float gridSize);     // Fill Square with 8x8 grid
+    bool AnalyzeMap_CheckLeoCompletion();                               // Line from L'Ermitage to Poussin's Tomb
+    void AnalyzeMap_CheckVirgoCompletion();                             // Place temple boundaries
+    void AnalyzeMap_CheckLibraCompletion();                             // Place Hexagram
+    bool AnalyzeMap_CheckScorpioPlaceTempleDivisions();                 // Place temple divisions
+    void AnalyzeMap_CheckScorpioCompletion(const Vector2& point);       // Placed "The Site"
+    bool AnalyzeMap_CheckSagitariusCompletion();                        // Placed serpent
+
+    void AnalyzeMap_FixOldSaveGames();
 };
