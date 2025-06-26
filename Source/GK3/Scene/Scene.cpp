@@ -1059,35 +1059,56 @@ void Scene::InspectObject(const std::string& noun, const SceneCamera* camera, co
     }
     else // No inspect camera for this noun
     {
-        // This does actually happen for dynamic objects (like any humanoid/walker).
-        // So, we need to support this. Find an inspect position on-the-fly!
-        bool foundActor = false;
-        for(GKActor* actor : mActors)
+        // All moving objects (particularly humanoids/walkers) don't have a set inspect camera. But you can still inspect!
+        // In these cases, the game finds a decent position/angle for the inspect camera on-the-fly.
+
+        // First, find the object.
+        GKObject* obj = GetSceneObjectByNoun(noun);
+        if(obj == nullptr)
         {
-            if(StringUtil::EqualsIgnoreCase(actor->GetNoun(), noun))
+            if(finishCallback != nullptr)
             {
-                // For starters, at head level, looking toward them sounds reasonable.
-                Vector3 facing = actor->GetForward();
-                Vector3 inspectPos = actor->GetHeadPosition() + facing * 50.0f;
-
-                float yaw = Heading::FromDirection(-facing).ToRadians();
-                Vector2 inspectAngle(yaw, 0.0f);
-
-                //TODO: If the actor is facing a wall or something, it's pretty likely the camera will go out-of-bounds.
-                //TODO: The original game seems to check this and move the camera around to a valid spot on the sides/back.
-
-                // Use the calculated inspect position and angle.
-                mCamera->Inspect(noun, inspectPos, inspectAngle, finishCallback);
-                foundActor = true;
-                break;
+                finishCallback();
             }
+            return;
         }
 
-        // Worst case, there's no inspect camera for this thing, so let's give up!
-        if(!foundActor && finishCallback != nullptr)
+        // We need to figure out the best inspect camera position and camera angle for this object.
+        Vector3 inspectPosition;
+        Vector2 inspectAngle;
+
+        // For GKActors, the game tries to look at the character's face.
+        const float kInspectPositionDistance = 50.0f;
+        if(obj->IsA<GKActor>())
         {
-            finishCallback();
+            GKActor* actor = static_cast<GKActor*>(obj);
+
+            // Get position X units in front of their head.
+            Vector3 facing = actor->GetForward();
+            inspectPosition = actor->GetHeadPosition() + facing * kInspectPositionDistance;
+
+            // Set angle such that we're looking at the head.
+            inspectAngle.x = Heading::FromDirection(-facing).ToRadians();
         }
+        else
+        {
+            // Calculate the camera distance
+            AABB aabb = obj->GetAABB();
+            Vector3 aabbSize = aabb.GetSize();
+            float largestSize = Math::Max(aabbSize.z, Math::Max(aabbSize.x, aabbSize.y));
+            float distance = Math::Abs(largestSize / Math::Sin(mCamera->GetCamera()->GetCameraFovRadians()));
+
+            // If the camera moved in a straight line from here to the object, find a point along that line to stop at.
+            Vector3 objToCameraDir = Vector3::Normalize(mCamera->GetPosition() - aabb.GetCenter());
+            inspectPosition = aabb.GetCenter() + objToCameraDir * distance;
+
+            // Set angle such that we're looking at the thing.
+            inspectAngle.x = Heading::FromDirection(-objToCameraDir).ToRadians();
+            inspectAngle.y = Math::Asin(objToCameraDir.y);
+        }
+
+        // Move the camera to that position/angle to inspect.
+        mCamera->Inspect(noun, inspectPosition, inspectAngle, finishCallback);
     }
 }
 
