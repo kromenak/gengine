@@ -43,8 +43,8 @@ public:
 
     void Glide(const Vector3& position, const Vector2& angle, std::function<void()> callback);
 
-    void Inspect(const std::string& noun, const Vector3& position, const Vector2& angle, std::function<void()> callback);
-    void Uninspect(std::function<void()> callback);
+    void Inspect(const std::string& noun, const Vector3& position, const Vector2& angle, const std::function<void()>& callback);
+    void Uninspect(const std::function<void()>& callback);
     const std::string& GetInspectNoun() const { return mInspectNoun; }
 
     GKObject* RaycastIntoScene(bool interactiveOnly);
@@ -114,6 +114,11 @@ private:
     // This value was derived from trial & error.
     const float kCameraColliderRadius = 16.0f;
 
+    // The camera's current yaw and pitch.
+    // This is tracked separately from the transform mainly to enable clamping of pitch.
+    float mYaw = 0.0f;
+    float mPitch = 0.0f;
+
     // When mouse is clicked, this is start position of the click.
     // Used to determine when to enable mouse-based camera movement.
     Vector2 mClickStartPos;
@@ -171,7 +176,7 @@ private:
 
     // Start position/rotation when inspecting (so we can later do an uninspect).
     Vector3 mInspectStartPos;
-    Quaternion mInspectStartRot;
+    Vector3 mInspectStartYawPitch;
 
     void SceneUpdate(float deltaTime);
     void SceneUpdateMovement(float deltaTime);

@@ -69,12 +69,17 @@ void GameCamera::SetAngle(const Vector2& angle)
 
 void GameCamera::SetAngle(float yaw, float pitch)
 {
+    // Save updated yaw and pitch.
+    mYaw = yaw;
+    mPitch = pitch;
+
+    // Update transform rotation right away as well.
     SetRotation(Quaternion(Vector3::UnitY, yaw) * Quaternion(Vector3::UnitX, pitch));
 }
 
 Vector2 GameCamera::GetAngle() const
 {
-    return Vector2(GetRotation().Isolate(Vector3::UnitY).GetAngle(), GetRotation().Isolate(Vector3::UnitX).GetAngle());
+    return Vector2(mYaw, mPitch);
 }
 
 void GameCamera::Glide(const Vector3& position, const Vector2& angle, std::function<void()> callback)
@@ -82,23 +87,31 @@ void GameCamera::Glide(const Vector3& position, const Vector2& angle, std::funct
     mGliding = true;
     mEndGlideCallback = callback;
 
+    // Save glide to position/rotation.
     mGlidePosition = position;
     mGlideRotation = Quaternion(Vector3::UnitY, angle.x) * Quaternion(Vector3::UnitX, angle.y);
 
+    // Save start glide pos/rot (for lerp start values).
     mGlideStartPos = GetTransform()->GetPosition();
     mGlideStartRot = GetTransform()->GetRotation();
 
+    // Glides are done using Slerp on a quaternion, for smooth and correct movement.
+    // But once the slerp is done, the yaw/pitch will be at the passed in angle.
+    mYaw = angle.x;
+    mPitch = angle.y;
+
+    // Set timer to zero - we're at start of lerp.
     mGlideTimer = 0.0f;
 
     // A glide request would cancel any inspect that was occurring.
     mInspectNoun.clear();
 }
 
-void GameCamera::Inspect(const std::string& noun, const Vector3& position, const Vector2& angle, std::function<void()> callback)
+void GameCamera::Inspect(const std::string& noun, const Vector3& position, const Vector2& angle, const std::function<void()>& callback)
 {
     // Save spot we were at when we started to inspect.
     mInspectStartPos = GetTransform()->GetPosition();
-    mInspectStartRot = GetTransform()->GetRotation();
+    mInspectStartYawPitch = Vector2(mYaw, mPitch);
 
     // Glide to the inspect position/angle.
     Glide(position, angle, callback);
@@ -107,13 +120,14 @@ void GameCamera::Inspect(const std::string& noun, const Vector3& position, const
     mInspectNoun = noun;
 }
 
-void GameCamera::Uninspect(std::function<void()> callback)
+void GameCamera::Uninspect(const std::function<void()>& callback)
 {
     if(!mInspectNoun.empty())
     {
-        Glide(mInspectStartPos, Vector2::Zero, callback);
-        mGlideRotation = mInspectStartRot; //HACK: Just overwrite with saved rotation here.
+        // Glide back to start position and start yaw/pitch.
+        Glide(mInspectStartPos, mInspectStartYawPitch, callback);
 
+        // No longer inspecting this noun.
         mInspectNoun.clear();
     }
 }
@@ -191,6 +205,13 @@ void GameCamera::OnUpdate(float deltaTime)
     if(mSceneActive)
     {
         SceneUpdate(deltaTime);
+
+        // If not gliding, keep the rotation updated with the yaw/pitch we're tracking internally.
+        // We don't do this while gliding b/c rotation is controlled by a Quaternion::Slerp at that time.
+        if(!mGliding)
+        {
+            SetRotation(Quaternion(Vector3::UnitY, mYaw) * Quaternion(Vector3::UnitX, mPitch));
+        }
     }
 
     // Show options on right-click. This works even if an action is playing.
@@ -555,11 +576,10 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
     float heightForReal = position.y - newFloorY;
     mHeight = heightForReal;
 
-    // Apply turn movement.
-    GetTransform()->Rotate(Vector3::UnitY, turnSpeed * deltaTime, Transform::Space::World);
-
-    // Apply pitch movement.
-    GetTransform()->Rotate(GetRight(), -pitchSpeed * deltaTime, Transform::Space::World);
+    // Update yaw and pitch, clamping pitch to up/down extremes.
+    // Clamping pitch not exactly at PiOver2 results in better camera movement behavior at this extremes.
+    mYaw += turnSpeed * deltaTime;
+    mPitch = Math::Clamp(mPitch - pitchSpeed * deltaTime, -Math::kPiOver2 + 0.01f, Math::kPiOver2 - 0.01f);
 
     // If we were inspecting something, but we move the camera, that "breaks" the inspect state.
     if(moveOffset.GetLengthSq() > 1)
