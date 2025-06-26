@@ -3,9 +3,9 @@
 #include "ActionManager.h"
 #include "Bridge.h"
 #include "Chessboard.h"
-#include "DialogueManager.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
+#include "GKActor.h"
 #include "GKObject.h"
 #include "LaserHead.h"
 #include "LocationManager.h"
@@ -282,6 +282,25 @@ namespace
 
 namespace
 {
+    void CD1_Init()
+    {
+        // HACK: For some reason, Emilio's position isn't correct (compared to the original game) when he's sitting at Chateau de Blanchfort during Day 1, 4PM.
+        // HACK: The really weird thing is...the game data tells him to sit at a specific position; in the original game, he IS NOT at that position. In G-Engine, he does go exactly to the specified position.
+        // HACK: So, I don't understand why Emilio is in the spot he's in in the original game, since the game data says he should be elsewhere.
+        // HACK: As a workaround, I'll just force his position to something that looks correct here.
+        if(gGameProgress.GetTimeblock() == Timeblock(1, 4, Timeblock::PM))
+        {
+            GKActor* actor = gSceneManager.GetScene()->GetActorByNoun("Emilio");
+            if(actor != nullptr)
+            {
+                actor->SetPosition(Vector3(1272.0f, 723.0f, -616.0f));
+            }
+        }
+    }
+}
+
+namespace
+{
     // TE1 has a giant chessboard puzzle. All the logic is encompassed in this Chessboard class.
     Chessboard* chessboard = nullptr;
 
@@ -318,6 +337,9 @@ void SceneFunctions::Execute(const std::string& functionName)
     static bool initialized = false;
     if(!initialized)
     {
+        // CD1
+        sSceneFunctions["cd1-init"] = CD1_Init;
+
         // CS2
         sSceneFunctions["cs2-init"] = CS2_Init;
         sSceneFunctions["cs2-togglelasers"] = CS2_ToggleLasers;
