@@ -293,7 +293,7 @@ void Scene::Init()
     if(defaultRoomCamera != nullptr)
     {
         mCamera->SetPosition(defaultRoomCamera->position);
-        mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.x));
+        mCamera->SetAngle(defaultRoomCamera->angle);
     }
 
     // Force a camera update to make sure the audio listener is positioned correctly in the scene.
