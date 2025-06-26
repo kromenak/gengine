@@ -99,7 +99,8 @@ private:
     const float kFastSpeedMultiplier = 2.0f;
 
     // Camera rotation speed in radians/second. Again, trial and error!
-    const float kRotationSpeed = Math::kPi / 2.0f;
+    // This is about half the speed of the original game (from my observations). But I think the original game turns way too fast though!
+    const float kRotationSpeed = Math::kPi;
 
     // How much you have to move the mouse (in pixels) to go as fast as keyboard keys. Derived from trial and error.
     // Smaller values make mouse movement more sensitive and speedier.
