@@ -367,11 +367,14 @@ void LocationManager::ChangeLocationInternal(const std::string& location, std::f
         // If so, we should early out - the timeblock change logic handles any location and time change.
         if(gGameProgress.IsChangingTimeblock())
         {
-            // Usually, GK3 doesn't allow location & last location to be the same place. Note how SetLocation only changes variables if the location is different.
-            // However, on timeblock change, that isn't necessarily the case - it seems like the location you were in
-            // at the end of last timeblock ALWAYS becomes mLastLocation, even if its the same location you start the NEXT timeblock in.
-            // This usually doesn't really matter, but it DOES matter in at least one case: Grace's initial position at the beginning of Day 3, 12PM.
-            mLastLocation = location;
+            // Usually, GK3 doesn't allow location & last location to be the same place.
+            // But at the beginning of Day 3 12PM, the initial position logic for Grace DEPENDS ON mLastLocation and mLocation being the same.
+            // There may be a more elegant generalized way to handle this (e.g. on new timeblock, if switching ego, set last location to actor's location in mActorLocations).
+            // But for now, this targeted HACK does the trick!
+            if(gGameProgress.GetTimeblock() == Timeblock(3, 10))
+            {
+                mLastLocation = location;
+            }
 
             // Early out and let timeblock code handle this.
             gGK3UI.HideSceneTransitioner();
