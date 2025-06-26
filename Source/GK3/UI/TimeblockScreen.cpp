@@ -133,6 +133,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, const std::f
 
 void TimeblockScreen::Hide()
 {
+    if(!IsActive()) { return; }
     SetActive(false);
 
     // If leaving this screen to the MAP location, make sure the driving screen is showing!

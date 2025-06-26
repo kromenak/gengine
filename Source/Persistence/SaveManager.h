@@ -44,6 +44,7 @@
 
 struct SaveSummary
 {
+    bool isQuickSave = false;
     std::string filePath;
     PersistHeader saveInfo;
 };
@@ -63,11 +64,15 @@ public:
     // Saves
     const std::vector<SaveSummary>& GetSaves();
 
-    void Save(const std::string& saveDescription, int saveIndex = -1);
+    void Save(const std::string& saveDescription, int saveIndex = -1, bool quickSave = false);
     void Load(const std::string& loadPathOrDescription);
+
+    void HandleQuickSaveQuickLoad();
     void HandlePendingSavesAndLoads();
 
 private:
+    const char* kQuickSaveFileName = "fastsave.gk3";
+
     // The player's game preferences.
     // Things like audio settings, graphics settings, etc go here.
     // Basically anything that is not a per-save-game value.
@@ -81,6 +86,9 @@ private:
 
     // Similarly, a pending load game path.
     std::string mPendingLoadPath;
+
+    // If true, the pending save will use the quick save slot.
+    bool mPendingUseQuickSave = false;
 
     // A list of saves found on disk, for displaying in save/load screens.
     std::vector<SaveSummary> mSaves;

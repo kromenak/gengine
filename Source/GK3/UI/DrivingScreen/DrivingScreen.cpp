@@ -198,6 +198,7 @@ void DrivingScreen::Show(FollowMode followMode)
 
 void DrivingScreen::Hide()
 {
+    if(!IsActive()) { return; }
     SetActive(false);
 
     // Stop map music, but play motorcycle arrival sound.

@@ -32,7 +32,7 @@ public:
     void ShowTitleScreen();
     void HideTitleScreen();
 
-    void ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::function<void()> callback);
+    void ShowTimeblockScreen(const Timeblock& timeblock, float timer, const std::function<void()>& callback);
     void ShowDeathScreen();
     void ShowFinishedScreen();
 
@@ -76,6 +76,7 @@ public:
 
     bool IsOnExitableScreen() const;
     void ExitCurrentScreen();
+    void HideAllScreens();
 
 private:
     TitleScreen* mTitleScreen = nullptr;

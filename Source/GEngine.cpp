@@ -240,7 +240,11 @@ void GEngine::Run()
         // Check whether we need a scene change.
         gSceneManager.UpdateLoading();
 
-        // Frame is done, do any save or loads now.
+        // Frame is done, do any save or loads actions now.
+        // First, see if a quick save or quick load are desired.
+        gSaveManager.HandleQuickSaveQuickLoad();
+
+        // Then, process any save/load that was registered this frame (including the very recent quick save/load).
         gSaveManager.HandlePendingSavesAndLoads();
 
         // If F11 is pressed, take a screenshot and save it to file.

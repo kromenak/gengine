@@ -46,7 +46,7 @@ void GK3UI::HideTitleScreen()
     }
 }
 
-void GK3UI::ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::function<void()> callback)
+void GK3UI::ShowTimeblockScreen(const Timeblock& timeblock, float timer, const std::function<void()>& callback)
 {
     if(mTimeblockScreen == nullptr)
     {
@@ -378,5 +378,79 @@ void GK3UI::ExitCurrentScreen()
     else if(mDrivingScreen != nullptr && mDrivingScreen->IsActive())
     {
         mDrivingScreen->Cancel();
+    }
+}
+
+void GK3UI::HideAllScreens()
+{
+    // For now, basically just hide all screens that may be up to return to "just the game scene" visible.
+    // First the screens with no layer (yet).
+    if(mTitleScreen != nullptr)
+    {
+        mTitleScreen->Hide();
+    }
+    if(mTimeblockScreen != nullptr)
+    {
+        mTimeblockScreen->Hide();
+    }
+    if(mDrivingScreen != nullptr)
+    {
+        mDrivingScreen->Hide();
+    }
+    if(mSidney != nullptr)
+    {
+        mSidney->Hide();
+    }
+    if(mBinocsOverlay != nullptr)
+    {
+        mBinocsOverlay->Hide();
+    }
+    if(mGPSOverlay != nullptr)
+    {
+        // Set inactive instead of hiding to avoid "power down" delay.
+        mGPSOverlay->SetActive(false);
+    }
+
+    //TODO: This logic is pretty silly, and it'd be way better if you could just pop layers off the stack (you know...like a game state system SHOULD work).
+    //TODO: I'd like to do that, but it'll require a refactor of the layer system...will get to that eventually.
+    while(gLayerManager.IsLayerInStack("SceneLayer") && !gLayerManager.IsTopLayer("SceneLayer"))
+    {
+        const std::string& topLayerName = gLayerManager.GetTopLayerName();
+        if(StringUtil::EqualsIgnoreCase(topLayerName, "DeathLayer"))
+        {
+            mDeathScreen->Hide();
+        }
+        else if(StringUtil::EqualsIgnoreCase(topLayerName, "PauseLayer"))
+        {
+            mPauseScreen->Hide();
+        }
+        else if(StringUtil::EqualsIgnoreCase(topLayerName, "HelpLayer"))
+        {
+            mHelpScreen->Hide();
+        }
+        else if(StringUtil::EqualsIgnoreCase(topLayerName, "ConfirmQuitLayer"))
+        {
+            mQuitPopup->Hide();
+        }
+        else if(StringUtil::EqualsIgnoreCase(topLayerName, "ModalMessageLayer"))
+        {
+            mConfirmPopup->Hide();
+        }
+        else if(StringUtil::EqualsIgnoreCase(topLayerName, "FingerprintLayer"))
+        {
+            mFingerprintScreen->Hide();
+        }
+        else if(StringUtil::EqualsIgnoreCase(topLayerName, "InventoryLayer"))
+        {
+            gInventoryManager.HideInventory();
+        }
+        else if(StringUtil::EqualsIgnoreCase(topLayerName, "CloseUpLayer"))
+        {
+            gInventoryManager.InventoryUninspect();
+        }
+        else if(StringUtil::EqualsIgnoreCase(topLayerName, "SaveLayer") || StringUtil::EqualsIgnoreCase(topLayerName, "LoadLayer"))
+        {
+            mSaveLoadScreen->Hide();
+        }
     }
 }

@@ -207,6 +207,7 @@ void Sidney::Show()
 void Sidney::Hide()
 {
     // Hide Sidney UI.
+    if(!IsActive()) { return; }
     SetActive(false);
 
     // Whenever you exit Sidney, no matter where you are in the game, you warp to R25.

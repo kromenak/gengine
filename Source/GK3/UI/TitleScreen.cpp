@@ -113,6 +113,7 @@ void TitleScreen::Show()
 
 void TitleScreen::Hide()
 {
+    if(!IsActive()) { return; }
     SetActive(false);
 
     // Fade out theme music.

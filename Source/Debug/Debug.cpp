@@ -49,10 +49,12 @@ void Debug::Update(float deltaTime)
     {
         sRenderRectTransformRects = !sRenderRectTransformRects;
     }
+    /*
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F5))
     {
         Debug::ToggleFlag("ShowBoundingBoxes");
     }
+    */
 }
 
 void Debug::Render()

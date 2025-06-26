@@ -268,7 +268,7 @@ void SaveLoadScreen::Show(bool isSaveScreen)
 {
     // Show the screen.
     SetActive(true);
-    gLayerManager.PushLayer(&mSaveLayer);
+    gLayerManager.PushLayer(isSaveScreen ? &mSaveLayer : &mLoadLayer);
 
     // Show save or load button depending.
     mSaveButton->SetEnabled(isSaveScreen);

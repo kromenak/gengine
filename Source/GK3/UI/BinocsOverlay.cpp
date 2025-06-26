@@ -281,6 +281,7 @@ void BinocsOverlay::Show()
 
 void BinocsOverlay::Hide()
 {
+    if(!IsActive()) { return; }
     SetActive(false);
 
     // Move the game camera back down to the ground, undoing the upward move when we shows the binocs interface.

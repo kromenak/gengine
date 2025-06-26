@@ -5,6 +5,7 @@
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "GK3UI.h"
+#include "InputManager.h"
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Paths.h"
@@ -65,10 +66,11 @@ const std::vector<SaveSummary>& SaveManager::GetSaves()
     return mSaves;
 }
 
-void SaveManager::Save(const std::string& saveDescription, int saveIndex)
+void SaveManager::Save(const std::string& saveDescription, int saveIndex, bool quickSave)
 {
     mPendingSaveDescription = saveDescription;
     mPendingSaveIndex = saveIndex;
+    mPendingUseQuickSave = quickSave;
 }
 
 void SaveManager::Load(const std::string& loadPathOrDescription)
@@ -87,6 +89,50 @@ void SaveManager::Load(const std::string& loadPathOrDescription)
     mPendingLoadPath = loadPathOrDescription;
 }
 
+void SaveManager::HandleQuickSaveQuickLoad()
+{
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F5))
+    {
+        // To keep things sane, the game blocks quick saving in some circumstances.
+        // The original game is a bit more lenient than this, but this is a good start for reasonable behavior - can only quick save when in the 3D scene.
+        if(gLayerManager.IsTopLayer("SceneLayer"))
+        {
+            // See if we've already got a quick save to overwrite, or if this will be a new save.
+            int quickSaveIndex = -1;
+            for(int i = 0; i < mSaves.size(); ++i)
+            {
+                if(mSaves[i].isQuickSave)
+                {
+                    quickSaveIndex = i;
+                    break;
+                }
+            }
+
+            // Save to quick save slot.
+            Save("(Quick Save)", quickSaveIndex, true);
+        }
+    }
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F6))
+    {
+        // Find quick save index.
+        int quickSaveIndex = -1;
+        for(int i = 0; i < mSaves.size(); ++i)
+        {
+            if(mSaves[i].isQuickSave)
+            {
+                quickSaveIndex = i;
+                break;
+            }
+        }
+
+        // If we have a quick save, then load it!
+        if(quickSaveIndex >= 0)
+        {
+            Load(mSaves[quickSaveIndex].filePath);
+        }
+    }
+}
+
 void SaveManager::HandlePendingSavesAndLoads()
 {
     if(!mPendingSaveDescription.empty())
@@ -99,11 +145,21 @@ void SaveManager::HandlePendingSavesAndLoads()
     }
     if(!mPendingLoadPath.empty())
     {
-        ProgressBar* progressBar = gGK3UI.ShowLoadProgressBar();
-        progressBar->ShowFakeProgress(0.25f);
+        // If given a bum path, ignore it.
+        if(File::Exists(mPendingLoadPath))
+        {
+            // A loaded save state doesn't store what screens should/shouldn't be visible.
+            // To simplify things, before loading a save state, hide all screens that appear above the game scene.
+            gGK3UI.HideAllScreens();
 
-        LoadInternal(mPendingLoadPath);
-        mPendingLoadPath.clear();
+            // Show loading progress bar.
+            ProgressBar* progressBar = gGK3UI.ShowLoadProgressBar();
+            progressBar->ShowFakeProgress(0.25f);
+
+            // Actually do the load!
+            LoadInternal(mPendingLoadPath);
+            mPendingLoadPath.clear();
+        }
     }
 }
 
@@ -148,6 +204,12 @@ void SaveManager::RescanSaveDirectory()
                 ++mNextSaveNumber;
             }
         }
+
+        // Remember if this is the quick save file.
+        if(StringUtil::EqualsIgnoreCase(saveFileName, kQuickSaveFileName))
+        {
+            mSaves.back().isQuickSave = true;
+        }
     }
 }
 
@@ -171,8 +233,15 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
         return;
     }
 
-    // Figure out the path to save to.
+    // Figure out save file name.
+    // This is usually sequential, but a specific filename is used for quicksaves.
     std::string fileName = StringUtil::Format("save%04i.gk3", saveNumber);
+    if(mPendingUseQuickSave)
+    {
+        fileName = kQuickSaveFileName;
+    }
+
+    // Generate full save file path.
     std::string savePath = Path::Combine({ saveFolderPath, fileName });
 
     // Create the persistinator.
@@ -233,6 +302,7 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
         mSaves.emplace_back();
         mSaves.back().filePath = savePath;
         mSaves.back().saveInfo = std::move(persistHeader);
+        mSaves.back().isQuickSave = mPendingUseQuickSave;
 
         // Increment save number if this wasn't an overwrite of an existing slot.
         ++mNextSaveNumber;
@@ -241,11 +311,6 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
 
 void SaveManager::LoadInternal(const std::string& loadPath)
 {
-    // If given a bum path, ignore it.
-    if(!File::Exists(loadPath))
-    {
-        return;
-    }
 
     //TODO: It might be valuable to create the PersistState *before* unloading the current scene (for verification its a valid save).
     //TODO: To do that, due to scope, we'd have to dynamically allocate though!
