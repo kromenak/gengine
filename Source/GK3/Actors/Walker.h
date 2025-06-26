@@ -43,7 +43,7 @@ public:
 
     void SkipToEnd(bool alsoSkipWalkEndAnim = false);
 
-    bool AtPosition(const Vector3& position);
+    bool AtPosition(const Vector3& position, float maxDistance = kAtNodeDist);
     bool IsWalking() const { return mWalkActions.size() > 0; }
     bool IsWalkingExceptTurn() const { return IsWalking() && mWalkActions.back() != WalkOp::TurnToFace; }
     Vector3 GetDestination() const { return mPath.size() > 0 ? mPath.front() : Vector3::Zero; }
@@ -107,6 +107,10 @@ private:
     // The path to follow when in the FollowPath state.
     // Note that this path is BACKWARDS - the goal is front() and next node to go to is back().
     std::vector<Vector3> mPath;
+
+    // The final position to be at when the walk ends.
+    // This usually matches mPath.front(), but kept separate so we can use it after the path has been followed.
+    Vector3 mFinalPosition;
 
     // The facing direction to use in the TurnToFace state.
     Vector3 mTurnToFaceDir = Vector3::UnitX;

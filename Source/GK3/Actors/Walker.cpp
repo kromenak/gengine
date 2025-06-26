@@ -222,7 +222,7 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
     else // even though we skipped, still want to play "end walk" anim.
     {
         // Move actor back by "at position" amount, so end walk anim puts us in right spot.
-        mGKOwner->SetPosition(mGKOwner->GetPosition() - (mGKOwner->GetForward() * kAtNodeDist));
+        mGKOwner->SetPosition(mGKOwner->GetPosition());// -(mGKOwner->GetForward() * kAtNodeDist));
 
         // Remove all walk ops except for the "follow path end" op.
         bool poppedAction = false;
@@ -238,9 +238,11 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
     }
 }
 
-bool Walker::AtPosition(const Vector3& position)
+bool Walker::AtPosition(const Vector3& position, float maxDistance)
 {
-    return (GetOwner()->GetPosition() - position).GetLengthSq() <= kAtNodeDistSq;
+    Vector3 myPosition = mGKOwner->GetPosition();
+    float distSq = (myPosition - position).GetLengthSq();
+    return distSq <= maxDistance * maxDistance;
 }
 
 void Walker::OnUpdate(float deltaTime)
@@ -377,6 +379,7 @@ void Walker::OnUpdate(float deltaTime)
         }
         else if(currentWalkOp == WalkOp::FollowPathEnd)
         {
+            // The walker is allowed to start any "turn to face" while playing the stop walking anim.
             if(mWalkActions.front() == WalkOp::TurnToFace)
             {
                 TurnToFace(deltaTime, mTurnToFaceDir, kTurnSpeed);
@@ -448,14 +451,19 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
         mWalkActions.push_back(WalkOp::TurnToFace);
     }
 
+    // Make sure the passed in position is *actually* the position we will walk to.
+    // Sometimes the position given is under the floor or floating in the air - ground it.
+    Vector3 walkPosition = position;
+    walkPosition.y = gSceneManager.GetScene()->GetFloorY(position);
+
     // Do we need to walk?
-    if(!AtPosition(position))
+    if(!AtPosition(walkPosition))
     {
         mPath.clear();
 
         // Attempt to find a path between current position and walk position.
         Vector3 startPos = GetOwner()->GetPosition();
-        Vector3 endPos = position;
+        Vector3 endPos = walkPosition;
         if(mWalkerBoundary != nullptr)
         {
             mWalkerBoundary->FindPath(startPos, endPos, mPath);
@@ -495,6 +503,10 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
 
         // Again, since the skip path nodes code may have removed some nodes.
         UpdateNextNodesYPos();
+
+        // Cache final position for later use.
+        mFinalPosition = mPath.front();
+        mFinalPosition.y = gSceneManager.GetScene()->GetFloorY(mFinalPosition);
 
         /*
         Debug::DrawLine(GetOwner()->GetPosition(), GetOwner()->GetPosition() + Vector3::UnitY * 100.0f, Color32::Blue, 10.0f);
@@ -702,6 +714,10 @@ void Walker::NextAction()
         }
         else
         {
+            // While testing the original game, I noticed that "walk end" anims don't seem to actually ever be used!
+            // For example, if you insert a "scene texture swap" anim node into the walk end anim, it never happens. But it will if you put it in walk start/continue anims.
+            // So, perhaps they intended to use "walk end" anims, but then decided not to for some reason?
+            /*
             AnimParams animParams;
             animParams.animation = mCharConfig->walkStopAnim;
             animParams.allowMove = true;
@@ -709,6 +725,18 @@ void Walker::NextAction()
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
             gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+            */
+
+            // If I had to guess, the reason would be: it's too hard to 100% ensure the walker ends up at the correct final position!
+            // To absolutely ensure that, let's set the owner to the final position just to be sure.
+            mGKOwner->SetPosition(mFinalPosition);
+
+            // Sampling the walk start anim ensures that the walker is in a default pose, looking straight ahead, before any "turn to face" logic occurs.
+            // Without this, the "turn to face" logic might happen when the walker was in the middle of a long stride, and the turn behavior would look all wrong.
+            gSceneManager.GetScene()->GetAnimator()->Sample(mWalkStartAnim, 0);
+
+            // No anim to play, so just move right on to the next walk action.
+            PopAndNextAction();
         }
     }
     else if(currentWalkOp == WalkOp::TurnToFace)
@@ -947,7 +975,8 @@ bool Walker::AdvancePath()
         int atNode = -1;
         for(int i = 0; i < mPath.size(); i++)
         {
-            if(AtPosition(mPath[i]))
+            float maxDist = i == 0 ? 2.0f : kAtNodeDist;
+            if(AtPosition(mPath[i], maxDist))
             {
                 atNode = i;
                 break;
