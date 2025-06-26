@@ -340,7 +340,7 @@ void GKActor::SnapToFloor()
     if(mFloorHeight != kNoFloorValue)
     {
         Vector3 pos = GetPosition();
-        pos.y = mFloorHeight;
+        pos.y = mFloorHeight + mCharConfig->shoeThickness;
         SetPosition(pos);
     }
 }
