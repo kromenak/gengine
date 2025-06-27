@@ -64,6 +64,12 @@ private:
     // Typically this isn't allowed, but it's overridden for the settings menu.
     bool mAllowInteractDuringActions = false;
 
+    // If true, the application is focused (not backgrounded).
+    bool mApplicationFocused = true;
+
+    // If true, the application continues to update, even when it doesn't have focus.
+    bool mAlwaysActive = false;
+
     void ShowOpeningMovies();
     void ShowTitleScreen();
 

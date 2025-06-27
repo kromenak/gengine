@@ -154,6 +154,18 @@ bool GEngine::Initialize()
     ConsoleUI* consoleUI = new ConsoleUI(false);
     consoleUI->SetIsDestroyOnLoad(false);
 
+    // Init debug system.
+    Debug::Init();
+
+    // Decide whether the app will always stay active in the background.
+    // For debug builds, this is almost always useful - do it.
+    // For release builds, we usually don't want this, unless a debug flag was set in INI file.
+    #if defined(DEBUG)
+    mAlwaysActive = true;
+    #else
+    mAlwaysActive = Debug::GetFlag("GEngine AlwaysActive");
+    #endif
+
     // INIT DONE! Move on to starting the game flow.
     // Non-debug: do the full game presentation - company logos, intro movie, title screen.
     //#define FORCE_TITLE_SCREEN
@@ -233,28 +245,38 @@ void GEngine::Run()
         PROFILER_BEGIN_FRAME();
 
         // Our main loop: inputs, updates, outputs.
+        // First, poll inputs and pump OS events.
+        // This should be done even if app is not focused - we need to detect "app focus" event for one.
         ProcessInput();
-        Update();
-        GenerateOutputs();
 
-        // Check whether we need a scene change.
-        gSceneManager.UpdateLoading();
-
-        // Frame is done, do any save or loads actions now.
-        // First, see if a quick save or quick load are desired.
-        gSaveManager.HandleQuickSaveQuickLoad();
-
-        // Then, process any save/load that was registered this frame (including the very recent quick save/load).
-        gSaveManager.HandlePendingSavesAndLoads();
-
-        // If F11 is pressed, take a screenshot and save it to file.
-        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F11))
+        // The remainder only happen if app is focused OR if we want app to stay focused in background.
+        if(mApplicationFocused || mAlwaysActive)
         {
-            gRenderer.TakeScreenshotToFile();
-        }
+            // Update application state (including game state).
+            Update();
 
-        // OK, this frame is done!
-        ++mFrameNumber;
+            // Render outputs to reflect updated game state.
+            GenerateOutputs();
+
+            // Check whether we need a scene change.
+            gSceneManager.UpdateLoading();
+
+            // Frame is done, do any save or loads actions now.
+            // First, see if a quick save or quick load are desired.
+            gSaveManager.HandleQuickSaveQuickLoad();
+
+            // Then, process any save/load that was registered this frame (including the very recent quick save/load).
+            gSaveManager.HandlePendingSavesAndLoads();
+
+            // If F11 is pressed, take a screenshot and save it to file.
+            if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F11))
+            {
+                gRenderer.TakeScreenshotToFile();
+            }
+
+            // OK, this frame is done!
+            ++mFrameNumber;
+        }
         PROFILER_END_FRAME();
     }
 }
@@ -498,6 +520,28 @@ void GEngine::ProcessInput()
                 {
                     // Let renderer know so it can process and take any action.
                     Window::OnPositionChanged();
+                }
+                else if(event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+                {
+                    // Keep track of wether the application is focused.
+                    mApplicationFocused = true;
+
+                    // Resume audio playback.
+                    if(!mAlwaysActive)
+                    {
+                        gAudioManager.Resume();
+                    }
+                }
+                else if(event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+                {
+                    // App is no longer focused.
+                    mApplicationFocused = false;
+
+                    // Unless we want to stay active when not focused, pause audio playback.
+                    if(!mAlwaysActive)
+                    {
+                        gAudioManager.Pause();
+                    }
                 }
                 break;
             }

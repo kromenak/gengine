@@ -3,6 +3,7 @@
 #include "AABB.h"
 #include "AssetManager.h"
 #include "Camera.h"
+#include "Config.h"
 #include "InputManager.h"
 #include "Material.h"
 #include "Matrix4.h"
@@ -27,6 +28,16 @@ FlagSet Debug::sDebugFlags;
 bool Debug::sRenderActorTransformAxes = false;
 bool Debug::sRenderSubmeshLocalAxes = false;
 bool Debug::sRenderRectTransformRects = false;
+
+void Debug::Init()
+{
+    // Load any debug flags that can be set from the INI file.
+    Config* config = gAssetManager.LoadConfig("GK3.ini");
+    if(config->GetBool("Debug", "GEngine AlwaysActive", false))
+    {
+        SetFlag("GEngine AlwaysActive");
+    }
+}
 
 void Debug::Update(float deltaTime)
 {

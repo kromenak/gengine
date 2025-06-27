@@ -138,6 +138,9 @@ public:
     bool Initialize();
     void Shutdown();
 
+    void Pause();
+    void Resume();
+
     void Update(float deltaTime);
     void UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up);
 

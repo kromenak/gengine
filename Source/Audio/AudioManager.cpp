@@ -332,6 +332,30 @@ void AudioManager::Shutdown()
     mSystem = nullptr;
 }
 
+void AudioManager::Pause()
+{
+    // Suspending the mixer ensures background threads sleep and don't use any CPU.
+    mSystem->mixerSuspend();
+
+    // Pause all playing sounds.
+    for(PlayingSoundHandle& playingSound : mPlayingSounds)
+    {
+        playingSound.Pause();
+    }
+}
+
+void AudioManager::Resume()
+{
+    // Resume the mixer.
+    mSystem->mixerResume();
+
+    // Resume all playing sounds.
+    for(PlayingSoundHandle& playingSound : mPlayingSounds)
+    {
+        playingSound.Resume();
+    }
+}
+
 void AudioManager::Update(float deltaTime)
 {
     // Update FMOD system every frame.
