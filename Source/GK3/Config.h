@@ -26,17 +26,17 @@ public:
     bool HasKey(const std::string& key);
     bool HasKey(const std::string& section, const std::string& key);
 
-    std::string GetString(const std::string& key, const std::string& defaultValue = "");
-    std::string GetString(const std::string& section, const std::string& key, const std::string& defaultValue = "");
+    std::string GetString(const std::string& key, const std::string& defaultValue);
+    std::string GetString(const std::string& section, const std::string& key, const std::string& defaultValue);
 
-    int GetInt(const std::string& key, int defaultValue = 0);
-    int GetInt(const std::string& section, const std::string& key, int defaultValue = 0);
+    int GetInt(const std::string& key, int defaultValue);
+    int GetInt(const std::string& section, const std::string& key, int defaultValue);
 
-    float GetFloat(const std::string& key, float defaultValue = 0.0f);
-    float GetFloat(const std::string& section, const std::string& key, float defaultValue = 0.0f);
+    float GetFloat(const std::string& key, float defaultValue);
+    float GetFloat(const std::string& section, const std::string& key, float defaultValue);
 
-    bool GetBool(const std::string& key, bool defaultValue = false);
-    bool GetBool(const std::string& section, const std::string& key, bool defaultValue = false);
+    bool GetBool(const std::string& key, bool defaultValue);
+    bool GetBool(const std::string& section, const std::string& key, bool defaultValue);
 
     void Set(const std::string& section, const std::string& key, const std::string& value);
     void Set(const std::string& section, const std::string& key, int value);

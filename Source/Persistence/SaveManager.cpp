@@ -53,7 +53,7 @@ void SaveManager::SavePrefs()
 
 int SaveManager::GetRunCount() const
 {
-    return mPrefs->GetInt("App", "Run Count");
+    return mPrefs->GetInt("App", "Run Count", 0);
 }
 
 const std::vector<SaveSummary>& SaveManager::GetSaves()

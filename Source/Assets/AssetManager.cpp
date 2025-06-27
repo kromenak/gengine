@@ -81,7 +81,7 @@ void AssetManager::Init()
     {
         // Load "high priority" custom paths, if any.
         // These paths will be searched first to find any requested resources.
-        std::string customPaths = config->GetString("Custom Paths");
+        std::string customPaths = config->GetString("Custom Paths", "");
         if(!customPaths.empty())
         {
             // Multiple paths are separated by semicolons.
