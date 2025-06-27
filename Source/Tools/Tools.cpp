@@ -61,15 +61,16 @@ void Tools::Update()
 
 void Tools::Render()
 {
-    if(!toolsActive) { return; }
-
     // Render construction mode.
     //TODO: This is *kind of* not the right spot for this, since tools render *after* debug drawing stuff.
-    //TODO: So any Debug::Draw* calls will be on frame late. But maybe that's no big deal?
-    Scene* scene = gSceneManager.GetScene();
-    if(scene != nullptr)
+    //TODO: So any Debug::Draw* calls will be one frame late. But maybe that's no big deal?
+    if(toolsActive)
     {
-        scene->GetConstruction().Render();
+        Scene* scene = gSceneManager.GetScene();
+        if(scene != nullptr)
+        {
+            scene->GetConstruction().Render();
+        }
     }
 
     // Start a new frame.
@@ -78,12 +79,15 @@ void Tools::Render()
     ImGui::NewFrame();
 
     // Render any tools.
-    mainMenu.Render();
-    hierarchy.Render(mainMenu.hierarchyToolActive);
-    assets.Render(mainMenu.assetsToolActive);
+    if(toolsActive)
+    {
+        mainMenu.Render();
+        hierarchy.Render(mainMenu.hierarchyToolActive);
+        assets.Render(mainMenu.assetsToolActive);
 
-    // Optionally show demo window.
-    //ImGui::ShowDemoWindow();
+        // Optionally show demo window.
+        //ImGui::ShowDemoWindow();
+    }
 
     // Render with OpenGL.
     ImGui::Render();
