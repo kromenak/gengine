@@ -91,6 +91,11 @@ void SaveManager::Load(const std::string& loadPathOrDescription)
 
 void SaveManager::HandleQuickSaveQuickLoad()
 {
+    // As in the original game, not allowed to quick save or quick load during cutscenes.
+    if(gActionManager.IsActionPlaying()) { return; }
+
+    // F5 does a quick save, F6 does a quick load.
+    // It shouldn't be possible to do both on one frame - quick save wins out if there's a tie.
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F5))
     {
         // To keep things sane, the game blocks quick saving in some circumstances.
