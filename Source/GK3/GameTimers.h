@@ -7,16 +7,12 @@
 #pragma once
 #include <string>
 
-// Timers that tick down and execute a specific noun/verb combo action when done.
-struct GameTimer
-{
-    float secondsRemaining = 0.0f;
-    std::string noun;
-    std::string verb;
-};
+class PersistState;
 
 namespace GameTimers
 {
     void Update(float deltaTime);
     void Set(const std::string& noun, const std::string& verb, float seconds);
+
+    void OnPersist(PersistState& ps);
 }

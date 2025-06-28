@@ -3,9 +3,25 @@
 #include <vector>
 
 #include "ActionManager.h"
+#include "PersistState.h"
 
 namespace
 {
+    // Timers that tick down and execute a specific noun/verb combo action when done.
+    struct GameTimer
+    {
+        float secondsRemaining = 0.0f;
+        std::string noun;
+        std::string verb;
+
+        void OnPersist(PersistState& ps)
+        {
+            ps.Xfer(PERSIST_VAR(secondsRemaining));
+            ps.Xfer(PERSIST_VAR(noun));
+            ps.Xfer(PERSIST_VAR(verb));
+        }
+    };
+
     // Timers that are active.
     std::vector<GameTimer> mGameTimers;
 }
@@ -32,4 +48,9 @@ void GameTimers::Set(const std::string& noun, const std::string& verb, float sec
     mGameTimers.back().secondsRemaining = seconds;
     mGameTimers.back().noun = noun;
     mGameTimers.back().verb = verb;
+}
+
+void GameTimers::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mGameTimers));
 }

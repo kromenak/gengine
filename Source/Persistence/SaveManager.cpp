@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "FileSystem.h"
 #include "GameProgress.h"
+#include "GameTimers.h"
 #include "GEngine.h"
 #include "GK3UI.h"
 #include "InputManager.h"
@@ -379,6 +380,12 @@ void SaveManager::OnPersist(PersistState& ps)
     gInventoryManager.OnPersist(ps);
     gGameProgress.OnPersist(ps);
     gActionManager.OnPersist(ps);
+
+    // Game timers were added in save version 3 and higher.
+    if(ps.GetFormatVersionNumber() >= 3)
+    {
+        GameTimers::OnPersist(ps);
+    }
 
     // The Sidney UI is somewhat unique in that it actually stores some important state data in there.
     // Maybe its a sign that a "SidneyManager" would make sense? Shrug.
