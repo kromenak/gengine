@@ -530,6 +530,17 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // There's exactly one spot in the entire game (Wine Tasting Room in Day 2, 12PM) where the noun BUTHANE is expected to correlate to MADELINE. Geez.
+    if(StringUtil::StartsWithIgnoreCase(noun, "BUTHANE"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("MADELINE", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
     // The "Chat" action is only valid if the "Talk" option is not present. Remove "Chat" if "Talk" is present.
     // Not sure where else to check that - this seems like an OK spot.
     auto talkIt = verbToAction.find("TALK");
