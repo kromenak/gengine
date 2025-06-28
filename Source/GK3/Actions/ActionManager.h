@@ -83,13 +83,14 @@ public:
 
 private:
     // These "global" action sets are loaded for every scene during the appropriate timeblocks.
-    const std::string kGlobalActionSets[11] {
+    const std::string kGlobalActionSets[12] {
         "GLB_ALL.NVC",
         "GLB_23ALL.NVC",
         "GLB102P.NVC",
         "GLB202A.NVC",
         "GLB210A.NVC",
         "GLB212P.NVC",
+        "GLB202P.NVC",
         "GLB205P.NVC",
         "GLB307A.NVC",
         "GLB310A.NVC",
