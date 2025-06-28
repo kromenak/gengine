@@ -211,6 +211,11 @@ void CharacterManager::Init()
                         {
                             faceConfig.mouthSize = entry.GetValueAsVector2();
                         }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Face Name"))
+                        {
+                            // In some cases, the face texture name doesn't follow convention and is obtained from a specific key in the ini section.
+                            faceConfig.faceTexture = gAssetManager.LoadSceneTexture(entry.value);
+                        }
                     }
                 }
             }
