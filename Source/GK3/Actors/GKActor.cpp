@@ -651,18 +651,36 @@ Vector3 GKActor::GetModelFacingDirection() const
     }
     else // SCENARIO C: No facing helper, this is a very simple Actor (e.g. Chicken).
     {
-        // Get the hip axis, convert y-axis to a facing direction.
-        // Remember, models are facing down negative z-axis, so need to negate the axis we get back here.
-        Matrix4 hipMeshToWorldMatrix = mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix();
-        if(StringUtil::EqualsIgnoreCase(GetName(), "EM2"))
+        // Unfortunately, not all actors are created equal - if there's a global way to determine facing direction, I haven't found it yet.
+        // As needed for individual actors, add logic here!
+        if(StringUtil::EqualsIgnoreCase(GetName(), "CAT"))
         {
-            facingDir = hipMeshToWorldMatrix.GetYAxis();
+            Vector3 meshHipPos = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
+            Vector3 worldHipPos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshHipPos);
+
+            Vector3 pt2 = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(0);
+            Vector3 pt2World = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(pt2);
+            facingDir = worldHipPos - pt2World;
         }
         else
         {
-            facingDir = -hipMeshToWorldMatrix.GetYAxis();
+            // Get the hip axis, convert y-axis to a facing direction.
+            // Remember, models are facing down negative z-axis, so need to negate the axis we get back here.
+            Matrix4 hipMeshToWorldMatrix = mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix();
+            if(StringUtil::EqualsIgnoreCase(GetName(), "EM2"))
+            {
+                facingDir = hipMeshToWorldMatrix.GetYAxis();
+            }
+            else
+            {
+                facingDir = -hipMeshToWorldMatrix.GetYAxis();
+            }
         }
     }
+
+    // Get rid of any height in the facing direction.
+    facingDir.y = 0.0f;
+    facingDir.Normalize();
 
     //Debug::DrawLine(GetPosition(), GetPosition() + facingDir * 10.0f, Color32::Blue);
     return facingDir;
