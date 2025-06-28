@@ -30,6 +30,8 @@ public:
 
     void Update(float deltaTime);
 
+    bool AllNodesHitRepeatLimit() const;
+
 private:
     void ProcessNextNode();
 

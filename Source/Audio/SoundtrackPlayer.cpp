@@ -66,6 +66,19 @@ void PlayingSoundtrack::Update(float deltaTime)
     }
 }
 
+bool PlayingSoundtrack::AllNodesHitRepeatLimit() const
+{
+    auto& nodes = mSoundtrack->GetNodes();
+    for(int i = 0; i < nodes.size(); ++i)
+    {
+        if(nodes[i]->repeat == 0 || nodes[i]->repeat - mExecutionCounts[i] > 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void PlayingSoundtrack::ProcessNextNode()
 {
     // If no nodes, can't do anything!
@@ -74,6 +87,13 @@ void PlayingSoundtrack::ProcessNextNode()
     {
         mTimer = 0.0f;
         return;
+    }
+
+    // The previous node must have finished executing at this point, so increment its execution count before going on to the next node.
+    int prevNodeIndex = mCurrentNodeIndex;
+    if(prevNodeIndex >= 0 && prevNodeIndex < nodes.size())
+    {
+        mExecutionCounts[prevNodeIndex]++;
     }
 
     // Update the node index and loop if necessary.
@@ -92,7 +112,6 @@ void PlayingSoundtrack::ProcessNextNode()
     }
 
     // Ok, execute the thing.
-    mExecutionCounts[mCurrentNodeIndex]++;
     int waitMilliseconds = node->Execute(mSoundtrack, mSoundtrackNodeResults);
     mTimer = static_cast<float>(waitMilliseconds) / 1000.0f;
 }
@@ -188,8 +207,21 @@ void SoundtrackPlayer::OnUpdate(float deltaTime)
 {
     if(gActionManager.IsSkippingCurrentAction()) { return; }
 
+    // Update each playing soundtrack in turn.
     for(PlayingSoundtrack& playing : mPlaying)
     {
         playing.Update(deltaTime);
+    }
+
+    // Most of the time, soundtracks play indefinitely, looping and playing nodes over and over.
+    // However, a few soundtracks define repeat limits for all nodes, so they hit a point where they will never play again.
+    // If that happens, stop and remove from playing soundtracks.
+    for(int i = mPlaying.size() - 1; i >= 0; --i)
+    {
+        if(mPlaying[i].AllNodesHitRepeatLimit())
+        {
+            mPlaying[i].Stop();
+            mPlaying.erase(mPlaying.begin() + i);
+        }
     }
 }
