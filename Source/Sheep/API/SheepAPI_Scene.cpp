@@ -18,7 +18,7 @@ using namespace std;
 
 shpvoid CallSceneFunction(const std::string& parameter)
 {
-    SceneFunctions::Execute(parameter);
+    SceneFunctions::Execute(parameter, AddWait());
     return 0;
 }
 RegFunc1(CallSceneFunction, void, string, WAITABLE, REL_FUNC);

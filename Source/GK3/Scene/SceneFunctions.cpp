@@ -13,14 +13,14 @@
 #include "SceneManager.h"
 #include "SoundtrackPlayer.h"
 
-std::string_map_ci<std::function<void()>> SceneFunctions::sSceneFunctions;
+std::string_map_ci<std::function<void(const std::function<void()>&)>> SceneFunctions::sSceneFunctions;
 
 namespace
 {
     // CS2
     LaserHead* cs2LaserHeads[5] = { 0 };
 
-    void CS2_Init()
+    void CS2_Init(const std::function<void()>& callback)
     {
         // Find each head in the scene and add the LaserHead component to each.
         for(int i = 0; i < 5; ++i)
@@ -32,9 +32,10 @@ namespace
                 cs2LaserHeads[i] = head->AddComponent<LaserHead>(i);
             }
         }
+        if(callback != nullptr) { callback(); }
     }
 
-    void CS2_ToggleLasers()
+    void CS2_ToggleLasers(const std::function<void()>& callback)
     {
         // Toggle the lasers on/off.
         for(int i = 0; i < 5; ++i)
@@ -47,18 +48,59 @@ namespace
 
         // Somewhat randomly, this function is also responsible for stopping the current soundtrack.
         gSceneManager.GetScene()->GetSoundtrackPlayer()->Stop("NocturneSlow");
+        if(callback != nullptr) { callback(); }
     }
 
-    void CS2_Head1TurnLeft() { cs2LaserHeads[0]->TurnLeft(); }
-    void CS2_Head1TurnRight() { cs2LaserHeads[0]->TurnRight(); }
-    void CS2_Head2TurnLeft() { cs2LaserHeads[1]->TurnLeft(); }
-    void CS2_Head2TurnRight() { cs2LaserHeads[1]->TurnRight(); }
-    void CS2_Head3TurnLeft() { cs2LaserHeads[2]->TurnLeft(); }
-    void CS2_Head3TurnRight() { cs2LaserHeads[2]->TurnRight(); }
-    void CS2_Head4TurnLeft() { cs2LaserHeads[3]->TurnLeft(); }
-    void CS2_Head4TurnRight() { cs2LaserHeads[3]->TurnRight(); }
-    void CS2_Head5TurnLeft() { cs2LaserHeads[4]->TurnLeft(); }
-    void CS2_Head5TurnRight() { cs2LaserHeads[4]->TurnRight(); }
+    void CS2_Head1TurnLeft(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[0]->TurnLeft(callback);
+    }
+
+    void CS2_Head1TurnRight(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[0]->TurnRight(callback);
+    }
+
+    void CS2_Head2TurnLeft(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[1]->TurnLeft(callback);
+    }
+
+    void CS2_Head2TurnRight(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[1]->TurnRight(callback);
+    }
+
+    void CS2_Head3TurnLeft(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[2]->TurnLeft(callback);
+    }
+
+    void CS2_Head3TurnRight(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[2]->TurnRight(callback);
+    }
+
+    void CS2_Head4TurnLeft(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[3]->TurnLeft(callback);
+    }
+
+    void CS2_Head4TurnRight(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[3]->TurnRight(callback);
+    }
+
+    void CS2_Head5TurnLeft(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[4]->TurnLeft(callback);
+    }
+
+    void CS2_Head5TurnRight(const std::function<void()>& callback)
+    {
+        cs2LaserHeads[4]->TurnRight(callback);
+    }
+
 }
 
 namespace
@@ -69,7 +111,7 @@ namespace
     int lastDotIndex = -1;
     bool saidInitialDialogue = false;
 
-    void CHU_Erase()
+    void CHU_Erase(const std::function<void()>& callback)
     {
         lastDotIndex = -1;
         for(GKObject* dot : angelDots)
@@ -87,6 +129,7 @@ namespace
             }
         }
         gGameProgress.SetNounVerbCount("Four_Angels", "ERASE", 0);
+        if(callback != nullptr) { callback(); }
     }
 
     void ActivateEdge(int dotIndex)
@@ -212,14 +255,14 @@ namespace
                     // The original game also keeps the action active a bit longer, I guess so you can see the tilted square before it disappears.
                     // So, let's do that too.
                     gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2)", [](const Action* action){
-                        CHU_Erase();
+                        CHU_Erase(nullptr);
                     });
                 });
             });
         }
     }
 
-    void CHU_Init()
+    void CHU_Init(const std::function<void()>& callback)
     {
         // Find and save dots.
         for(int i = 0; i < 4; ++i)
@@ -242,26 +285,31 @@ namespace
         }
 
         saidInitialDialogue = false;
+        if(callback != nullptr) { callback(); }
     }
 
-    void CHU_Angel1()
+    void CHU_Angel1(const std::function<void()>& callback)
     {
         AddDot(0);
+        if(callback != nullptr) { callback(); }
     }
 
-    void CHU_Angel2()
+    void CHU_Angel2(const std::function<void()>& callback)
     {
         AddDot(1);
+        if(callback != nullptr) { callback(); }
     }
 
-    void CHU_Angel3()
+    void CHU_Angel3(const std::function<void()>& callback)
     {
         AddDot(2);
+        if(callback != nullptr) { callback(); }
     }
 
-    void CHU_Angel4()
+    void CHU_Angel4(const std::function<void()>& callback)
     {
         AddDot(3);
+        if(callback != nullptr) { callback(); }
     }
 }
 
@@ -269,20 +317,22 @@ namespace
 {
     // Strangely, the GPS interface is not shown via a dedicated Sheep API call.
     // Instead, it hooks into the SceneFunctions system in a few scenes.
-    void GPS_On()
+    void GPS_On(const std::function<void()>& callback)
     {
         gGK3UI.ShowGPSOverlay();
+        if(callback != nullptr) { callback(); }
     }
 
-    void GPS_Off()
+    void GPS_Off(const std::function<void()>& callback)
     {
         gGK3UI.HideGPSOverlay();
+        if(callback != nullptr) { callback(); }
     }
 }
 
 namespace
 {
-    void CD1_Init()
+    void CD1_Init(const std::function<void()>& callback)
     {
         // HACK: For some reason, Emilio's position isn't correct (compared to the original game) when he's sitting at Chateau de Blanchfort during Day 1, 4PM.
         // HACK: The really weird thing is...the game data tells him to sit at a specific position; in the original game, he IS NOT at that position. In G-Engine, he does go exactly to the specified position.
@@ -296,6 +346,7 @@ namespace
                 actor->SetPosition(Vector3(1272.0f, 723.0f, -616.0f));
             }
         }
+        if(callback != nullptr) { callback(); }
     }
 }
 
@@ -304,34 +355,80 @@ namespace
     // TE1 has a giant chessboard puzzle. All the logic is encompassed in this Chessboard class.
     Chessboard* chessboard = nullptr;
 
-    void TE1_Init() { chessboard = new Chessboard(); }
-    void TE1_ClearTiles() { chessboard->Reset(false); }
-    void TE1_Reset() { chessboard->Reset(true); }
-    void TE1_Takeoff() { chessboard->Takeoff(); }
-    void TE1_Landed() { chessboard->Landed(); }
-    void TE1_HideCurrentTile() { chessboard->HideCurrentTile(); }
-    void TE1_Fell() { /*TODO: Does this actually do anything? Maybe reset state?*/ }
-    void TE1_CenterMe() { chessboard->CenterEgo(); }
-    void TE1_BadLand() { chessboard->BadLand(); }
+    void TE1_Init(const std::function<void()>& callback)
+    {
+        chessboard = new Chessboard();
+        if(callback != nullptr) { callback(); }
+    }
+
+    void TE1_ClearTiles(const std::function<void()>& callback)
+    {
+        chessboard->Reset(false);
+        if(callback != nullptr) { callback(); }
+    }
+
+    void TE1_Reset(const std::function<void()>& callback)
+    {
+        chessboard->Reset(true);
+        if(callback != nullptr) { callback(); }
+    }
+
+    void TE1_Takeoff(const std::function<void()>& callback)
+    {
+        chessboard->Takeoff();
+        if(callback != nullptr) { callback(); }
+    }
+
+    void TE1_Landed(const std::function<void()>& callback)
+    {
+        chessboard->Landed();
+        if(callback != nullptr) { callback(); }
+    }
+
+    void TE1_HideCurrentTile(const std::function<void()>& callback)
+    {
+        chessboard->HideCurrentTile();
+        if(callback != nullptr) { callback(); }
+    }
+
+    void TE1_Fell(const std::function<void()>& callback)
+    {
+        /*TODO: Does this actually do anything? Maybe reset state?*/
+        if(callback != nullptr) { callback(); }
+    }
+
+    void TE1_CenterMe(const std::function<void()>& callback)
+    {
+        chessboard->CenterEgo();
+        if(callback != nullptr) { callback(); }
+    }
+
+    void TE1_BadLand(const std::function<void()>& callback)
+    {
+        chessboard->BadLand();
+        if(callback != nullptr) { callback(); }
+    }
 }
 
 namespace
 {
-    void TE3_Init()
+    void TE3_Init(const std::function<void()>& callback)
     {
         new Pendulum();
+        if(callback != nullptr) { callback(); }
     }
 }
 
 namespace
 {
-    void TE5_Init()
+    void TE5_Init(const std::function<void()>& callback)
     {
         new Bridge();
+        if(callback != nullptr) { callback(); }
     }
 }
 
-void SceneFunctions::Execute(const std::string& functionName)
+void SceneFunctions::Execute(const std::string& functionName, const std::function<void()>& callback)
 {
     // If haven't initialized the function map, do it now.
     static bool initialized = false;
@@ -402,6 +499,13 @@ void SceneFunctions::Execute(const std::string& functionName)
     if(it != sSceneFunctions.end())
     {
         // If it exists, call the function!
-        it->second();
+        it->second(callback);
+    }
+    else
+    {
+        if(callback != nullptr)
+        {
+            callback();
+        }
     }
 }

@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "Animator.h"
+#include "AssetManager.h"
 #include "Debug.h"
 #include "GameProgress.h"
 #include "GKObject.h"
@@ -88,26 +90,14 @@ bool LaserHead::IsLaserEnabled() const
     return mLaser->IsActive();
 }
 
-void LaserHead::TurnLeft()
+void LaserHead::TurnLeft(const std::function<void()>& callback)
 {
-    if(mTurnIndex < 4)
-    {
-        ++mTurnIndex;
-        gGameProgress.SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
-
-        mTurnTimer = 0.0f;
-    }
+    Turn(1, callback);
 }
 
-void LaserHead::TurnRight()
+void LaserHead::TurnRight(const std::function<void()>& callback)
 {
-    if(mTurnIndex > 0)
-    {
-        --mTurnIndex;
-        gGameProgress.SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
-
-        mTurnTimer = 0.0f;
-    }
+    Turn(-1, callback);
 }
 
 void LaserHead::OnUpdate(float deltaTime)
@@ -148,4 +138,32 @@ void LaserHead::OnUpdate(float deltaTime)
         scale.z = scaleFactor;
         mLaser->SetScale(scale);
     }
+}
+
+void LaserHead::Turn(int dir, const std::function<void()>& callback)
+{
+    // If the new turn index is out of range, just early out and do the callback right away.
+    int newTurnIndex = mTurnIndex + dir;
+    if(newTurnIndex < 0 || newTurnIndex > 4)
+    {
+        if(callback != nullptr)
+        {
+            callback();
+        }
+        return;
+    }
+
+    // Update turn index.
+    mTurnIndex = newTurnIndex;
+    gGameProgress.SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
+
+    // Play turn animation.
+    // This is basically Grace moving her hands in slightly different ways based on the rotation of the head.
+    std::string animName = dir > 0 ? "GraCs2TrnHeadL" : "GraCs2TrnHeadR";
+    Animation* turnAnim = gAssetManager.LoadAnimation(animName + std::to_string(mTurnIndex), AssetScope::Scene);
+    gSceneManager.GetScene()->GetAnimator()->Start(turnAnim, callback);
+
+    // Setting this to a negative value adds a slight delay before the laser head actually starts rotating.
+    // This is important to try to match the laser head rotation to Grace's hand movement animation.
+    mTurnTimer = -0.8f;
 }

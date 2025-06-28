@@ -10,6 +10,8 @@
 #pragma once
 #include "Component.h"
 
+#include <functional>
+
 class GKObject;
 
 class LaserHead : public Component
@@ -21,8 +23,8 @@ public:
     void SetLaserEnabled(bool enabled);
     bool IsLaserEnabled() const;
 
-    void TurnLeft();
-    void TurnRight();
+    void TurnLeft(const std::function<void()>& callback);
+    void TurnRight(const std::function<void()>& callback);
 
 protected:
     void OnUpdate(float deltaTime) override;
@@ -41,4 +43,6 @@ private:
     // Tracks the turn of the head via a lerp. Longer durations means slower turn speed.
     const float kTurnDuration = 2.0f;
     float mTurnTimer = 0.0f;
+
+    void Turn(int dir, const std::function<void()>& callback);
 };

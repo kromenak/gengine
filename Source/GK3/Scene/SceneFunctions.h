@@ -19,8 +19,8 @@
 class SceneFunctions
 {
 public:
-    static void Execute(const std::string& functionName);
+    static void Execute(const std::string& functionName, const std::function<void()>& callback = nullptr);
 
 private:
-    static std::string_map_ci<std::function<void()>> sSceneFunctions;
+    static std::string_map_ci<std::function<void(const std::function<void()>&)>> sSceneFunctions;
 };
