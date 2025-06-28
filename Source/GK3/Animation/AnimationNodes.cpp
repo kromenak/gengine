@@ -370,7 +370,10 @@ void StopSoundtrackAnimNode::Play(AnimationState* animState)
     }
     else
     {
-        soundtrackPlayer->Stop(soundtrackName);
+        // Since this is an animation command to stop a specific soundtrack, let's set the "force" flag to true.
+        // Assuming that if you make a specific command like that, you really mean it!
+        // This fixes a few instances where anim tells soundtrack to stop, but soundtrack is set to "play to end".
+        soundtrackPlayer->Stop(soundtrackName, true);
     }
 }
 

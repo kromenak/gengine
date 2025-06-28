@@ -174,7 +174,7 @@ void SoundtrackPlayer::Stop(Soundtrack* soundtrack, bool force)
     }
 }
 
-void SoundtrackPlayer::Stop(const std::string& soundtrackName)
+void SoundtrackPlayer::Stop(const std::string& soundtrackName, bool force)
 {
     // Find and remove.
     for(auto it = mPlaying.begin(); it != mPlaying.end(); ++it)
@@ -184,7 +184,7 @@ void SoundtrackPlayer::Stop(const std::string& soundtrackName)
         {
             // Stop the soundtrack.
             // How the audio stops depends on the "Stop Method" of the current soundtrack node.
-            it->Stop();
+            it->Stop(force);
 
             // Erase from list.
             mPlaying.erase(it);
