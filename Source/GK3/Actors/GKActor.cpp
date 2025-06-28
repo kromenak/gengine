@@ -503,12 +503,18 @@ void GKActor::OnActive()
 {
     // My model becomes active when I become active.
     mModelActor->SetActive(true);
+
+    // Same with my shadow.
+    mShadowActor->SetActive(true);
 }
 
 void GKActor::OnInactive()
 {
     // My model becomes inactive when I become inactive.
     mModelActor->SetActive(false);
+
+    // Same with my shadow.
+    mShadowActor->SetActive(false);
 }
 
 void GKActor::OnLateUpdate(float deltaTime)
