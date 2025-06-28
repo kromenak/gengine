@@ -230,10 +230,6 @@ void ModelVisibilityAnimNode::Play(AnimationState* animState)
             {
                 // Toggle specific submesh visibility.
                 meshRenderer->SetVisibility(meshIndex, submeshIndex, visible);
-
-                // If we're toggling specific submeshes on/off, let's assume we want the object as a whole enabled...
-                meshRenderer->SetEnabled(true);
-                obj->SetActive(true);
             }
             else
             {
