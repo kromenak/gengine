@@ -357,6 +357,13 @@ void BinocsOverlay::OnUpdate(float deltaTime)
         float camAngleDegX = Math::ToDegrees(mZoomedOutCameraAngle.x);
         float camAngleDegY = Math::ToDegrees(mZoomedOutCameraAngle.y);
 
+        // Ensure angle is within 0-360 range, since that's the range the zoom in rects are defined within.
+        camAngleDegX = Math::Mod(camAngleDegX, 360.0f);
+        while(camAngleDegX < 0.0f)
+        {
+            camAngleDegX += 360.0f;
+        }
+
         // Figure out if the current camera angle is within the min/max of any locations we can zoom to from this location.
         // If so, we'll save the zoom location code.
         mCamZoomToLocCode.clear();

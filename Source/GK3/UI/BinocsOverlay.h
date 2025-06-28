@@ -118,7 +118,7 @@ private:
 
         // Tour Magadala
         { "MA3", {
-            { "CD1", ZoomAngles(Vector2(355.0f, -5.0f), Vector2(360.0f, 0.0f)) } // Chateau de Blanchefort
+            { "CD1", ZoomAngles(Vector2(0.0f, -5.0f), Vector2(20.0f, 0.0f)) } // Chateau de Blanchefort
         }}
     };
 
