@@ -91,12 +91,21 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
     // Iterate over all desired actions and show a button for it.
     bool inventoryShowing = gInventoryManager.IsInventoryShowing();
     int buttonIndex = 0;
+    const Action* cancelAction = nullptr;
     for(size_t i = 0; i < actions.size(); ++i)
     {
         // Kind of a HACK, but it does the trick...if inventory is showing, hide all PICKUP verbs.
         // You can't PICKUP something you already have. And the PICKUP icon is used in inventory to represent "make active".
         if(inventoryShowing && StringUtil::EqualsIgnoreCase(actions[i]->verb, "PICKUP"))
         {
+            continue;
+        }
+
+        // In rare cases, the NVC specifies a custom CANCEL action.
+        // In that case, save it so we can add it to the bar last (cancel should always be the last action in the bar).
+        if(StringUtil::EqualsIgnoreCase(actions[i]->verb, "CANCEL"))
+        {
+            cancelAction = actions[i];
             continue;
         }
 
@@ -191,8 +200,15 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
         UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon, "CANCEL");
 
         // Pressing cancel button hides the bar, but it also requires an extra step. So its got its own callback.
-        cancelButton->SetPressCallback([this](UIButton* button){
-            OnCancelButtonPressed();
+        cancelButton->SetPressCallback([this, cancelAction](UIButton* button){
+            if(cancelAction != nullptr)
+            {
+                gActionManager.ExecuteAction(cancelAction);
+            }
+            else
+            {
+                OnCancelButtonPressed();
+            }
         });
         cancelButton->SetTooltipText("v_t_cancel");
     }
