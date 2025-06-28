@@ -113,13 +113,16 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                     mVertexAnimNodes.push_back(node);
                 }
 
-                // A very select few animations use the ABSOLUTE keyword here, which I guess indicates that this is an absolute animation.
-                // I think this is shorthand for "0, 0, 0, 0, 0, 0, 0, 0" which is frequently used for absolute anims.
+                /*
+                // A very select few animations use the ABSOLUTE keyword here, which I guessed was a shorthand for "0, 0, 0, 0, 0, 0, 0, 0" which is frequently used for absolute anims.
+                // BUT NO! This code screws up some animations where it's used (such as Grace in the hotel room during Day 1, 6PM).
+                // I have no idea what it does, but so far it seems like it isn't needed.
                 if(line.entries.size() > 2 && StringUtil::EqualsIgnoreCase(line.entries[2].value, "ABSOLUTE"))
                 {
                     node->absolute = true;
                     continue;
                 }
+                */
 
                 // See if there are enough args for the (x1, y1, z1) and (angle1) values.
                 if(line.entries.size() < 6) { continue; }
