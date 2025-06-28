@@ -28,7 +28,7 @@ public:
     void Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions,
               std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback,
               bool centerOnPointer = true);
-    void Hide();
+    void Hide(bool cancel);
 
     bool IsShowing() const;
 

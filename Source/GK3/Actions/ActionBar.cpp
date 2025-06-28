@@ -72,7 +72,7 @@ ActionBar::ActionBar() : Actor("ActionBar", TransformType::RectTransform)
     mButtonHolder->SetSizeDelta(cancelVerbIcon.GetWidth(), cancelVerbIcon.GetWidth());
 
     // Hide by default.
-    Hide();
+    Hide(false);
 }
 
 void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions,
@@ -80,7 +80,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
                      bool centerOnPointer)
 {
     // Hide if not already hidden (make sure buttons are freed).
-    Hide();
+    Hide(false);
 
     // Sort actions based on some criteria, so they appear in a deterministic order when the bar is shown.
     std::sort(actions.begin(), actions.end(), SortActions());
@@ -119,7 +119,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
         const Action* action = actions[i];
         actionButton->SetPressCallback([this, action, executeCallback](UIButton* button){
             // Hide action bar on button press.
-            this->Hide();
+            this->Hide(false);
 
             // If callback was provided for press, pass handling the press off to that.
             // If no callback was provided, simply play the action!
@@ -168,7 +168,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
             const Action* invAction = gActionManager.GetAction(noun, invItemVerb);
             invButton->SetPressCallback([this, invAction, executeCallback](UIButton* button){
                 // Hide action bar on button press.
-                this->Hide();
+                this->Hide(false);
 
                 // Execute the action, which will likely run some SheepScript.
                 if(executeCallback != nullptr)
@@ -214,7 +214,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
     mSceneBlockerButton->SetReceivesInput(true);
 }
 
-void ActionBar::Hide()
+void ActionBar::Hide(bool cancel)
 {
     // Disable all buttons and put them on the free stack.
     for(auto& button : mButtons)
@@ -229,6 +229,13 @@ void ActionBar::Hide()
 
     // Scene blocker no longer receives input.
     mSceneBlockerButton->SetReceivesInput(false);
+
+    // If this was hidden due to a cancel, call the cancel callback.
+    if(cancel && mCancelCallback != nullptr)
+    {
+        mCancelCallback();
+        mCancelCallback = nullptr;
+    }
 }
 
 bool ActionBar::IsShowing() const
@@ -275,7 +282,7 @@ void ActionBar::AddVerbAtIndex(const std::string& verb, int index, const std::fu
     // Add button with callback at index.
     UIButton* button = AddButton(index, icon, verb);
     button->SetPressCallback([this, callback](UIButton* button){
-        this->Hide();
+        this->Hide(false);
         callback();
     });
 
@@ -394,11 +401,5 @@ void ActionBar::CenterOnPointer()
 
 void ActionBar::OnCancelButtonPressed()
 {
-    Hide();
-
-    if(mCancelCallback != nullptr)
-    {
-        mCancelCallback();
-        mCancelCallback = nullptr;
-    }
+    Hide(true);
 }

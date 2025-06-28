@@ -197,7 +197,7 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 
     // Sometimes, an action can start that the user doesn't initiate (e.g. due to a timer expiring).
     // In those cases, the action bar should close if it was still up.
-    HideActionBar();
+    HideActionBar(true);
 
     // If no script is associated with the action, that might be an error...
     // But for now, we'll just treat it as action is immediately over.
@@ -598,9 +598,9 @@ bool ActionManager::IsActionBarShowing() const
     return mActionBar->IsShowing();
 }
 
-void ActionManager::HideActionBar() const
+void ActionManager::HideActionBar(bool cancel) const
 {
-    return mActionBar->Hide();
+    return mActionBar->Hide(cancel);
 }
 
 void ActionManager::OnPersist(PersistState& ps)

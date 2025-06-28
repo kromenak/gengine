@@ -77,7 +77,7 @@ public:
     void ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback = nullptr, bool centerOnPointer = true);
     bool IsActionBarShowing() const;
     ActionBar* GetActionBar() const { return mActionBar; }
-    void HideActionBar() const;
+    void HideActionBar(bool cancel) const;
 
     void OnPersist(PersistState& ps);
 

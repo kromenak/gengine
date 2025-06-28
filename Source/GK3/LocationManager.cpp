@@ -341,7 +341,7 @@ void LocationManager::ChangeLocationInternal(const std::string& location, std::f
     }
 
     // If the action bar is up, it should close on a scene change.
-    gActionManager.HideActionBar();
+    gActionManager.HideActionBar(false);
 
     // Set new location.
     // This is important to do BEFORE checking for timeblock completion, as that logic looks for locations sometimes.

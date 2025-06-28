@@ -221,7 +221,7 @@ void GameCamera::OnUpdate(float deltaTime)
         {
             if(gActionManager.IsActionBarShowing())
             {
-                gActionManager.HideActionBar();
+                gActionManager.HideActionBar(true);
             }
             else
             {
