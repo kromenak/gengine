@@ -728,8 +728,11 @@ void Walker::NextAction()
             */
 
             // If I had to guess, the reason would be: it's too hard to 100% ensure the walker ends up at the correct final position!
-            // To absolutely ensure that, let's set the owner to the final position just to be sure.
-            mGKOwner->SetPosition(mFinalPosition);
+            // To absolutely ensure that, let's set the owner to the final position just to be sure (except for when we don't care about exact end position, such as a walk-to-see situation).
+            if(mWalkToSeeTarget == nullptr)
+            {
+                mGKOwner->SetPosition(mFinalPosition);
+            }
 
             // Sampling the walk start anim ensures that the walker is in a default pose, looking straight ahead, before any "turn to face" logic occurs.
             // Without this, the "turn to face" logic might happen when the walker was in the middle of a long stride, and the turn behavior would look all wrong.
