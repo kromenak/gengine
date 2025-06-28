@@ -145,7 +145,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
 
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_LHOMIR_P1.BMP";
-        object.fingerprints.back().position = Vector2(160.0f, 134.0f);
+        object.fingerprints.back().position = Vector2(159.0f, 134.0f);
         object.fingerprints.back().uncoverPrintLicensePlate = "2O8A805PF1";
         object.fingerprints.back().invItemName = "HOWARDS_FINGERPRINT";
         object.fingerprints.back().flagName = "GotMirrorHowardPrint";
