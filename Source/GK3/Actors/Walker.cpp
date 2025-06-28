@@ -504,58 +504,62 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
         // Again, since the skip path nodes code may have removed some nodes.
         UpdateNextNodesYPos();
 
-        // Cache final position for later use.
-        mFinalPosition = mPath.front();
-        mFinalPosition.y = gSceneManager.GetScene()->GetFloorY(mFinalPosition);
-
-        /*
-        Debug::DrawLine(GetOwner()->GetPosition(), GetOwner()->GetPosition() + Vector3::UnitY * 100.0f, Color32::Blue, 10.0f);
-        Debug::DrawLine(mPath.back(), mPath.back() + Vector3::UnitY * 100.0f, Color32::Magenta, 10.0f);
-        for(int i = 1; i < mPath.size(); ++i)
+        // There's a small chance the path will be empty at this point - if so, we don't walk anywhere.
+        if(!mPath.empty())
         {
-            Debug::DrawLine(mPath[i - 1], mPath[i], Color32::Red, 10.0f);
-        }
-        */
+            // Cache final position for later use.
+            mFinalPosition = mPath.front();
+            mFinalPosition.y = gSceneManager.GetScene()->GetFloorY(mFinalPosition);
 
-        // We will walk, so there's always a "walk end" action.
-        mWalkActions.push_back(WalkOp::FollowPathEnd);
-
-        // We need an action to follow the path.
-        mWalkActions.push_back(WalkOp::FollowPath);
-
-        // We need a start walk, but NOT if the path was shortened.
-        // In that case, the walker warps to the nearest offscreen position, so the start walk can be skipped.
-        if(!shortened)
-        {
-            // Need to decide which start anim to play.
-            WalkOp startOp = WalkOp::FollowPathStart;
-
-            bool hasTurnToStartAnims = mWalkStartTurnLeftAnim != nullptr && mWalkStartTurnRightAnim != nullptr;
-            if(hasTurnToStartAnims)
+            /*
+            Debug::DrawLine(GetOwner()->GetPosition(), GetOwner()->GetPosition() + Vector3::UnitY * 100.0f, Color32::Blue, 10.0f);
+            Debug::DrawLine(mPath.back(), mPath.back() + Vector3::UnitY * 100.0f, Color32::Magenta, 10.0f);
+            for(int i = 1; i < mPath.size(); ++i)
             {
-                Vector3 currToGoal = (mPath.front() - GetOwner()->GetPosition());
-                if(currToGoal.GetLengthSq() > 30.0f * 30.0f)
+                Debug::DrawLine(mPath[i - 1], mPath[i], Color32::Red, 10.0f);
+            }
+            */
+
+            // We will walk, so there's always a "walk end" action.
+            mWalkActions.push_back(WalkOp::FollowPathEnd);
+
+            // We need an action to follow the path.
+            mWalkActions.push_back(WalkOp::FollowPath);
+
+            // We need a start walk, but NOT if the path was shortened.
+            // In that case, the walker warps to the nearest offscreen position, so the start walk can be skipped.
+            if(!shortened)
+            {
+                // Need to decide which start anim to play.
+                WalkOp startOp = WalkOp::FollowPathStart;
+
+                bool hasTurnToStartAnims = mWalkStartTurnLeftAnim != nullptr && mWalkStartTurnRightAnim != nullptr;
+                if(hasTurnToStartAnims)
                 {
-                    Vector3 toGoal = currToGoal.Normalize();
-                    if(Vector3::Dot(GetOwner()->GetForward(), toGoal) <= 0.0f)
+                    Vector3 currToGoal = (mPath.front() - GetOwner()->GetPosition());
+                    if(currToGoal.GetLengthSq() > 30.0f * 30.0f)
                     {
-                        // For initial direction to turn, let's use the goal node direction.
-                        // Just thinking about the real world...you usually turn towards your goal, right?
-                        Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toGoal);
-                        if(cross.y > 0)
+                        Vector3 toGoal = currToGoal.Normalize();
+                        if(Vector3::Dot(GetOwner()->GetForward(), toGoal) <= 0.0f)
                         {
-                            startOp = WalkOp::FollowPathStartTurnRight;
-                        }
-                        else
-                        {
-                            startOp = WalkOp::FollowPathStartTurnLeft;
+                            // For initial direction to turn, let's use the goal node direction.
+                            // Just thinking about the real world...you usually turn towards your goal, right?
+                            Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toGoal);
+                            if(cross.y > 0)
+                            {
+                                startOp = WalkOp::FollowPathStartTurnRight;
+                            }
+                            else
+                            {
+                                startOp = WalkOp::FollowPathStartTurnLeft;
+                            }
                         }
                     }
                 }
-            }
 
-            // Ok, we chose a start walk op.
-            mWalkActions.push_back(startOp);
+                // Ok, we chose a start walk op.
+                mWalkActions.push_back(startOp);
+            }
         }
     }
 
