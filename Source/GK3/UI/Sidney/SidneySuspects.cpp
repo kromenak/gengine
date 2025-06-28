@@ -221,12 +221,11 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
                     UINineSlice* itemBorder = UI::CreateWidgetActor<UINineSlice>("LinkedItem" + std::to_string(i), windowBorder, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
                     itemBorder->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
                     itemBorder->GetRectTransform()->SetAnchoredPosition(i * 70.0f, 0.0f);
-                    itemBorder->GetRectTransform()->SetSizeDelta(70.0f, 74.0f);
+                    itemBorder->GetRectTransform()->SetSizeDelta(70.0f, 75.0f);
 
                     // Header border.
                     UINineSlice* headerBorder = UI::CreateWidgetActor<UINineSlice>("HeaderBox", itemBorder, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
                     headerBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-                    headerBorder->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
                     headerBorder->GetRectTransform()->SetSizeDelta(70.0f, 18.0f);
 
                     // Header label.
@@ -515,7 +514,7 @@ void SidneySuspects::ShowSuspect(int index)
     if(fingerprintFileIt != info.linkedFileIds.end())
     {
         mFingerprintImage->SetEnabled(true);
-        mFingerprintImage->SetTexture(mFiles->GetFile(*fingerprintFileIt)->GetIcon());
+        mFingerprintImage->SetTexture(info.matchAnalysisFingerprintTexture);
     }
     else
     {
