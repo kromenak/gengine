@@ -293,7 +293,7 @@ void GKActor::WalkToAnimationStart(Animation* anim, const std::function<void()>&
     // GOAL: walk the actor to the initial position/rotation of this anim.
     // Retrieve vertex animation that matches this actor's model.
     // If no vertex anim exists, we can't walk to animation start! This is probably a developer error.
-    VertexAnimNode* vertexAnimNode = anim->GetVertexAnimationOnFrameForModel(0, mMeshRenderer->GetModelName());
+    VertexAnimNode* vertexAnimNode = anim->GetFirstVertexAnimationForModel(mMeshRenderer->GetModelName());
     if(vertexAnimNode == nullptr) { return; }
 
     // Sample position/pose on first frame of animation.
@@ -486,22 +486,6 @@ void GKActor::SampleAnimation(VertexAnimParams& animParams, int frame)
         SetModelPositionToActorPosition();
         SetModelRotationToActorRotation();
     }
-
-    // In GK3, a "move" anim is one that is allowed to move the actor. This is like "root motion" in modern engines.
-    // When "move" anim ends, the actor/mesh stay where they are. For "non-move" anims, actor/mesh revert to initial pos/rot.
-    // Interestingly, the actor still moves with the model during non-move anims...it just reverts at the end.
-    /*
-    mVertexAnimAllowMove = animParams.allowMove;
-    if(!mVertexAnimAllowMove)
-    {
-        // Save start pos/rot for the actor, so it can be reverted.
-        mStartVertexAnimPosition = GetPosition();
-        mStartVertexAnimRotation = GetRotation();
-    }
-    */
-
-    //SetModelPositionToActorPosition();
-    //SetModelRotationToActorRotation();
 }
 
 void GKActor::StopAnimation(VertexAnimation* anim)

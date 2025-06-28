@@ -37,6 +37,7 @@ public:
     // Finds a vertex animation, if any, that starts on the given frame for the given model.
     // Mainly used to support "anim" approach type - allows us to query what a model's position/facing will be when an animation starts.
     VertexAnimNode* GetVertexAnimationOnFrameForModel(int frameNumber, const std::string& modelName);
+    VertexAnimNode* GetFirstVertexAnimationForModel(const std::string& modelName);
 
     // Length and duration.
     int GetFrameCount() const { return mFrameCount; }

@@ -56,6 +56,24 @@ VertexAnimNode* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, co
     return nullptr;
 }
 
+VertexAnimNode* Animation::GetFirstVertexAnimationForModel(const std::string& modelName)
+{
+    int earliestFrameNumber = GetFrameCount();
+    VertexAnimNode* vertexAnimNode = nullptr;
+    for(auto& node : mVertexAnimNodes)
+    {
+        if(node->vertexAnimation != nullptr && StringUtil::EqualsIgnoreCase(node->vertexAnimation->GetModelName(), modelName))
+        {
+            if(vertexAnimNode == nullptr || node->frameNumber < earliestFrameNumber)
+            {
+                earliestFrameNumber = node->frameNumber;
+                vertexAnimNode = node;
+            }
+        }
+    }
+    return vertexAnimNode;
+}
+
 void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     IniParser parser(data, dataLength);
