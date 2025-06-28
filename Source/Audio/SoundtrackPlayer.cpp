@@ -160,7 +160,8 @@ void SoundtrackPlayer::Stop(const std::string& soundtrackName)
     // Find and remove.
     for(auto it = mPlaying.begin(); it != mPlaying.end(); ++it)
     {
-        if(StringUtil::EqualsIgnoreCase(it->mSoundtrack->GetNameNoExtension(), soundtrackName))
+        if(StringUtil::EqualsIgnoreCase(it->mSoundtrack->GetName(), soundtrackName) ||
+           StringUtil::EqualsIgnoreCase(it->mSoundtrack->GetNameNoExtension(), soundtrackName))
         {
             // Stop the soundtrack.
             // How the audio stops depends on the "Stop Method" of the current soundtrack node.
