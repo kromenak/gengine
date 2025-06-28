@@ -539,7 +539,8 @@ void GKActor::OnLateUpdate(float deltaTime)
     Vector3 leftShoeWorldPos;
     Vector3 rightShoeWorldPos;
     Vector3 floorPosition = GetModelFloorAndShoePositions(leftShoeWorldPos, rightShoeWorldPos);
-    mShadowActor->SetPosition(floorPosition + Vector3::UnitY);
+    floorPosition.y = mFloorHeight + 0.08f;
+    mShadowActor->SetPosition(floorPosition);
 
     // Update the scale of the shadow based on how much floor area the actor is taking up. This is mostly affected by walk animations.
     // We can estimate how big the shadow should be based on shoe positions. Farther apart shoes means more floor covered means bigger shadow.
