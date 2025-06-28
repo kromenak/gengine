@@ -43,6 +43,17 @@ void Timers::Update(float deltaTime)
 
 void Timers::AddTimerSeconds(float seconds, const std::function<void()>& finishCallback)
 {
+    // If seconds is zero or less, assume the callback should just be called immediately
+    // (Yes, the game does set a zero second timer on at least one occasion.)
+    if(seconds <= 0.0f)
+    {
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        return;
+    }
+
     // See if we can reuse a previously created timer.
     for(Timer& timer : timers)
     {
