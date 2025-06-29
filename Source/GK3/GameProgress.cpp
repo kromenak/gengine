@@ -9,6 +9,7 @@
 #include "LocationManager.h"
 #include "ReportManager.h"
 #include "SceneManager.h"
+#include "Sidney.h"
 #include "StatusOverlay.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
@@ -136,6 +137,12 @@ void GameProgress::StartTimeblock(const Timeblock& timeblock, const std::functio
 
         // Show beginning movie (if any) for the new timeblock.
         VideoHelper::PlayVideoWithCaptions(timeblock.ToString() + "begin", [this, callback](){
+
+            // HACK: If Sidney is still up, make sure it is hidden at this point.
+            // Just set active to false (don't call "Hide") because we don't want scene change behavior.
+            // This is mainly done here to improve presentation when a timeblock ends while Sidney is up.
+            // If we hide Sidney earlier, you often get an ugly single frame of the 3D scene before a video or UI displays.
+            gGK3UI.GetSidney()->SetActive(false);
 
             // Reload our current location in the new timeblock.
             gSceneManager.LoadScene(gLocationManager.GetLocation());

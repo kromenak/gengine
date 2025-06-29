@@ -4,7 +4,6 @@
 #include "ActionManager.h"
 #include "AssetManager.h"
 #include "AudioManager.h"
-#include "Color32.h"
 #include "GameProgress.h"
 #include "InputManager.h"
 #include "LocationManager.h"
@@ -14,11 +13,9 @@
 #include "SidneyFiles.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UICircles.h"
 #include "UIGrids.h"
 #include "UIHexagrams.h"
-#include "UIImage.h"
 #include "UILabel.h"
 #include "UILines.h"
 #include "UIPoints.h"
@@ -795,8 +792,10 @@ void SidneyAnalyze::AnalyzeMap_CheckGeminiAndCancerCompletion(float gridSize)
             gGameProgress.ChangeScore("e_sidney_map_gemini");
             SidneyUtil::UpdateLSRState();
 
-            // Hide Sidney, but not using the normal "Hide", which causes a location change we don't want in this case.
-            mSidney->SetActive(false);
+            // NOTE: we want to hide Sidney for the timeblock change.
+            // But doing it here causes an ugly single frame rendering the 3D scene before the timeblock video/ui appears.
+            // This is now done after playing the opening movie of the following timeblock.
+            //mSidney->SetActive(false);
 
             // Ok, this is the end of the 205P timeblock. All conditions are set to move on.
             // We should warp to the hallway now (where the next timeblock begins).
