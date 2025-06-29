@@ -206,6 +206,9 @@ void Sidney::Show()
 
 void Sidney::Hide()
 {
+    // It's possible to exit Sidney with the file window still up. If so, close it so it's not open when Sidney is next opened.
+    mFiles.HideAllFileWindows();
+
     // Hide Sidney UI.
     if(!IsActive()) { return; }
     SetActive(false);
