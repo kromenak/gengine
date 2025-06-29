@@ -287,6 +287,24 @@ void Skybox::CreateMeshAndCubemap()
             }
         }
 
+        // At least in OpenGL, all cubemap textures MUST be square and have the same resolution.
+        // If any texture is inconsistent, adjust it to be the correct size.
+        int largestSize = 0;
+        for(Texture*& texture : mTextures.array)
+        {
+            if(texture->GetWidth() > largestSize)
+            {
+                largestSize = texture->GetWidth();
+            }
+        }
+        for(Texture*& texture : mTextures.array)
+        {
+            if(texture->GetWidth() != largestSize)
+            {
+                texture->Resize(largestSize, largestSize);
+            }
+        }
+
         // Build cubemap params struct.
         GAPI::CubemapParams params;
         params.left.width = mTextures.named.left->GetWidth();
