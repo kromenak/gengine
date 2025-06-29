@@ -541,6 +541,20 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // And another instance (Dining Room in Day 2, 5PM) where the noun BRIDGE_PLAYERS corresponds to four character nouns.
+    if(StringUtil::StartsWithIgnoreCase(noun, "LADY_HOWARD") ||
+       StringUtil::EqualsIgnoreCase(noun, "ESTELLE") ||
+       StringUtil::EqualsIgnoreCase(noun, "EMILIO") ||
+       StringUtil::EqualsIgnoreCase(noun, "BUCHELLI"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("BRIDGE_PLAYERS", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
     // The "Chat" action is only valid if the "Talk" option is not present. Remove "Chat" if "Talk" is present.
     // Not sure where else to check that - this seems like an OK spot.
     auto talkIt = verbToAction.find("TALK");
