@@ -458,11 +458,8 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
         // Handle spacebar input, which resets camera pitch/height.
         if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_SPACE))
         {
-            // Reset pitch by discarding all rotation about the right axis, while keeping all else.
-            Quaternion current = GetTransform()->GetRotation();
-            GetTransform()->SetRotation(current.Discard(GetRight()));
-
-            // Resetting height is a bit more straightforward.
+            // Reset pitch and height.
+            mPitch = 0.0f;
             mHeight = kDefaultHeight;
         }
     }
