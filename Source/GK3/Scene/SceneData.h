@@ -34,11 +34,11 @@ class SceneData
 public:
     SceneData(const std::string& location, const std::string& timeblock);
     ~SceneData();
-    
+
     // SCENE RESOLUTION
     const SceneActor* DetermineWhoEgoWillBe() const;
     void ResolveSceneData();
-    
+
     // SCENE SETTINGS
     const Timeblock& GetTimeblock() const { return mTimeblock; }
     BSP* GetBSP() const { return mBSP; }
@@ -52,10 +52,10 @@ public:
     // ACTORS/MODELS
     const std::vector<const SceneActor*>& GetActors() const { return mActors; }
     const std::vector<const SceneModel*>& GetModels() const { return mModels; }
-    
+
     // POSITIONS
     const ScenePosition* GetScenePosition(const std::string& positionName) const;
-    
+
     // CAMERAS
     const SceneCamera* GetInspectCamera(const std::string& nounOrModel) const;
     const RoomSceneCamera* GetDefaultRoomCamera() const { return mDefaultRoomCamera; }
@@ -75,28 +75,28 @@ public:
 
     // CONVERSATIONS
     std::vector<const SceneConversation*> GetConversationSettings(const std::string& conversationName) const;
-    
+
 private:
     Timeblock mTimeblock;
-    
+
     // Every location *must* have a general SIF.
     // Specific SIFs, however, are optional.
     SceneInitFile* mGeneralSIF = nullptr;
     SceneInitFile* mSpecificSIF = nullptr;
-    
+
     // The general block to be used by the scene.
     GeneralBlock mGeneralSettings;
-        
+
     // The scene asset. One *must* be defined, but really just so we can get the BSP data.
     SceneAsset* mSceneAsset = nullptr;
-    
+
     // BSP model, retrieved from the Scene asset.
     BSP* mBSP = nullptr;
-    
+
     // BSP lightmap, determined from the scene asset.
     // The rule seems to be that the lightmap to use always has the same name as the scene asset.
     BSPLightmap* mBSPLightmap = nullptr;
-    
+
     // The skybox the scene should use.
     // This can be defined in serveral spots. The priority is:
     // 1) Skybox from Specific SIF's Scene Model.
@@ -105,22 +105,22 @@ private:
     // 4) Skybox from General SIF.
     Skybox* mSkybox = nullptr;
     bool mOwnsSkybox = false;
-    
+
     // Walker boundary for the scene, if any.
     WalkerBoundary* mWalkerBoundary = nullptr;
 
     // Models to use for camera boundaries.
     std::vector<Model*> mCameraBoundaryModels;
-    
+
     // Combined generic and specific actors to spawn.
     std::vector<const SceneActor*> mActors;
-    
+
     // Combined generic and specific models to spawn.
     std::vector<const SceneModel*> mModels;
-    
+
     // Combined generic and specific positions to use.
     std::vector<const ScenePosition*> mPositions;
-    
+
     // Combined generic and specific cameras to use.
     std::vector<const SceneCamera*> mInspectCameras;
     std::vector<const RoomSceneCamera*> mRoomCameras;
@@ -130,21 +130,21 @@ private:
 
     // Combined regions & triggers to use.
     std::vector<const SceneRegionOrTrigger*> mTriggers;
-    
+
     // Combined generic and specific soundtracks to use.
     std::vector<Soundtrack*> mSoundtracks;
 
     // Combined generic and specific conversation settings to use.
     std::vector<const SceneConversation*> mConversations;
-    
+
     // Combined generic and specific action sets.
     // Each set contains multiple actions.
     std::vector<NVC*> mActionSets;
-    
+
     void AddActorBlocks(const std::vector<ConditionalBlock<SceneActor>>& actorBlocks);
     void AddModelBlocks(const std::vector<ConditionalBlock<SceneModel>>& modelBlocks);
     void AddPositionBlocks(const std::vector<ConditionalBlock<ScenePosition>>& positionBlocks);
-    
+
     void AddInspectCameraBlocks(const std::vector<ConditionalBlock<SceneCamera>>& cameraBlocks);
     void AddRoomCameraBlocks(const std::vector<ConditionalBlock<RoomSceneCamera>>& cameraBlocks);
     void AddCinematicCameraBlocks(const std::vector<ConditionalBlock<SceneCamera>>& cameraBlocks);

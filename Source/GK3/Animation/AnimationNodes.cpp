@@ -46,19 +46,21 @@ void VertexAnimNode::Play(AnimationState* animState)
             // If we're already a fraction of time into the current frame, take that into account for smoother animations.
             params.startTime += animState->timer;
 
+            // Is this animation absolute? Usually, this entirely depends on whether absolute coordinates/rotations were provided for this vertex anim in the ANM file.
+            // However, in at least one case (EmlWalkwFolder), absolute anims are specified when relative ones should be used.
+            // Unsure if this is a good global rule, but one way to catch this is to not allow absolute anims if a parent is specified?
+            params.absolute = absolute && animState->params.parent == nullptr;
+
             // If this is an absolute anim, calculate the position/heading to set the model actor to when the anim plays.
-            params.absolute = absolute;
-            if(absolute)
+            if(params.absolute)
             {
                 params.absolutePosition = CalcAbsolutePosition();
                 params.absoluteHeading = Heading::FromDegrees(absoluteWorldToModelHeading - absoluteModelToActorHeading);
             }
 
-            // If not an absolute anim, see if the animation's name is prefixed by the name of a model in the scene.
-            // If so...we will treat that model as our parent (so, we move/rotate to match them).
-            // (This feels like a HACK, but the original game also does this parenting, but the assets themselves have no flags/indicators about it.)
-            // (So, they must do it in some similar way to this, unless I'm missing something?)
-            if(!absolute && !animState->params.noParenting)
+            // If a parent is specified (or if we can detect that this anim should be parented by it's name), specify a parent in the vertex anim params.
+            // This is often needed when an object is attached to another: Roxanne walking with spray bottle, Emilio/Buchelli walking with newspapers, Gabe walking with mic headset, etc.
+            if(!params.absolute && !animState->params.noParenting)
             {
                 if(animState->params.parent != nullptr)
                 {
@@ -85,7 +87,7 @@ void VertexAnimNode::Play(AnimationState* animState)
 
             // Move anims allow the actor associated with the model to stay in its final position when the animation ends, instead of reverting.
             // Absolute anims are always "move anims".
-            params.allowMove = animState->params.allowMove || absolute;
+            params.allowMove = animState->params.allowMove || params.absolute;
 
             // Keep track of whether this is an autoscript anim.
             // This is mainly b/c autoscript anims are lower priority than other anims.
