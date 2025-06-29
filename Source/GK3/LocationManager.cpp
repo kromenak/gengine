@@ -371,7 +371,7 @@ void LocationManager::ChangeLocationInternal(const std::string& location, std::f
             // But at the beginning of Day 3 12PM, the initial position logic for Grace DEPENDS ON mLastLocation and mLocation being the same.
             // There may be a more elegant generalized way to handle this (e.g. on new timeblock, if switching ego, set last location to actor's location in mActorLocations).
             // But for now, this targeted HACK does the trick!
-            if(gGameProgress.GetTimeblock() == Timeblock(3, 10))
+            if(gGameProgress.GetTimeblock() == Timeblock(2, 14) || gGameProgress.GetTimeblock() == Timeblock(3, 10))
             {
                 mLastLocation = location;
             }
