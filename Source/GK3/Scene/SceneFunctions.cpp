@@ -12,8 +12,25 @@
 #include "Pendulum.h"
 #include "SceneManager.h"
 #include "SoundtrackPlayer.h"
+#include "WalkerBoundary.h"
 
 std::string_map_ci<std::function<void(const std::function<void()>&)>> SceneFunctions::sSceneFunctions;
+
+namespace
+{
+    // CSE
+    void CSE_Init(const std::function<void()>& callback)
+    {
+        // In Day 2, 2PM, Gabriel visits Montreaux posing as a journalist. I encountered a bug where Montreaux walks through a door!
+        // On closer inspection, this is because the walker boundary has a 1-pixel spot that technically counts as a valid path, but it looks bad to take it.
+        // Though I do think it'd be nice if the pathfinding system took "walker size" into account - for now, I can fix this bug by simply disallowing walking on region 6 (cyan) on walker bounds.
+        if(gGameProgress.GetTimeblock() == Timeblock(2, 14))
+        {
+            gSceneManager.GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(6, 6, true);
+        }
+        if(callback != nullptr) { callback(); }
+    }
+}
 
 namespace
 {
@@ -436,6 +453,9 @@ void SceneFunctions::Execute(const std::string& functionName, const std::functio
     {
         // CD1
         sSceneFunctions["cd1-init"] = CD1_Init;
+
+        // CSE
+        sSceneFunctions["cse-init"] = CSE_Init;
 
         // CS2
         sSceneFunctions["cs2-init"] = CS2_Init;
