@@ -446,6 +446,9 @@ void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std
 
 void SidneyFiles::FileListWindow::Show(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback)
 {
+    // Reset to default position.
+    mWindowRoot->GetComponent<RectTransform>()->SetAnchoredPosition(40.0f, -66.0f);
+
     // Show the window.
     mWindowRoot->SetActive(true);
 
