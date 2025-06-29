@@ -793,4 +793,27 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
             std::cout << "Unexpected animation header: " << section.name << std::endl;
         }
     }
+
+    // On rare occasions, there are data entry errors - such as a node specifying a frame number that's out of bounds.
+    // To fix this, first find nodes with out of bounds frame number.
+    // We need to do this in two loops, since we can't modify a map while iterating it.
+    std::vector<AnimNode*> problemNodes;
+    for(auto& entry : mFrames)
+    {
+        for(auto& animNode : entry.second)
+        {
+            if(animNode->frameNumber >= mFrameCount)
+            {
+                problemNodes.push_back(animNode);
+            }
+        }
+    }
+
+    // For each out of bounds node, clamp the frame number within range and re-insert in the frames map.
+    // Note that we never remove the errant old frame number entry from mFrames - but should be fine, since out of bounds frames are never executed anyways.
+    for(AnimNode* node : problemNodes)
+    {
+        node->frameNumber = Math::Clamp(node->frameNumber, 0, mFrameCount - 1);
+        mFrames[node->frameNumber].push_back(node);
+    }
 }

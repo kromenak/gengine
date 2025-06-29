@@ -180,12 +180,6 @@ void Animator::OnUpdate(float deltaTime)
         if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount() - 1)
         {
             mActiveAnimations[i].done = true;
-
-            // HACK: In at least one case (E0VJ5M39291.YAK), GK3 specifies a final animation node that is errantly beyond the length of the animation.
-            // For example, the animation has length 39 (valid frame indexes are 0-38), but it specifies a node on frame 39.
-            // To deal with that, we will attempt to execute any "final frame nodes" here.
-            mActiveAnimations[i].currentFrame = mActiveAnimations[i].params.animation->GetFrameCount();
-            ExecuteFrame(i, mActiveAnimations[i].params.animation->GetFrameCount());
         }
     }
 }
