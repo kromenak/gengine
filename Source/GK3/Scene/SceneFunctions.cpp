@@ -1,6 +1,9 @@
 #include "SceneFunctions.h"
 
 #include "ActionManager.h"
+#include "Animation.h"
+#include "AnimationNodes.h"
+#include "AssetManager.h"
 #include "Bridge.h"
 #include "Chessboard.h"
 #include "GameProgress.h"
@@ -12,9 +15,38 @@
 #include "Pendulum.h"
 #include "SceneManager.h"
 #include "SoundtrackPlayer.h"
+#include "VertexAnimation.h"
 #include "WalkerBoundary.h"
 
 std::string_map_ci<std::function<void(const std::function<void()>&)>> SceneFunctions::sSceneFunctions;
+
+namespace
+{
+    void LBY_Init(const std::function<void()>& callback)
+    {
+        // This bit of code fixes Buchelli's wine glass floating mid-air if you go to the lobby near the end of Day 2, 5PM timeblock (after he goes to dining room to play Bridge).
+        // This functions correctly in the original game, BUT I just don't understand how!
+        // The init anims for bglass/bourbon (on lines 45-46 of LBY205P.SIF) do not actually animation the glass at all. So...how does the glass get to the correct spot?
+        // Until that mystery can be resolved, this bit of code alleviates the problem by sampling an anim that DOES involve the glass.
+        if(gGameProgress.GetTimeblock() == Timeblock(2, 17)) // 205P
+        {
+            // This variable ensures we only run the anim after Buchelli has gone to the Dining Room.
+            if(gGameProgress.GetGameVariable("LSRState") > 2)
+            {
+                // This anim involves Buchelli putting the wine glass down on the table.
+                // Get the vertex anims for the glass and contained liquid.
+                Animation* anim = gAssetManager.LoadAnimation("VITLBYSTANDWBRB.ANM", AssetScope::Scene);
+                VertexAnimNode* glassAnim = anim->GetFirstVertexAnimationForModel("bglass");
+                VertexAnimNode* wineAnim = anim->GetFirstVertexAnimationForModel("bourbon");
+
+                // Sample anims on their last frames, which is when Buchelli has placed the glass on the table.
+                glassAnim->Sample(glassAnim->vertexAnimation->GetFrameCount() - 1);
+                wineAnim->Sample(wineAnim->vertexAnimation->GetFrameCount() - 1);
+            }
+        }
+        if(callback != nullptr) { callback(); }
+    }
+}
 
 namespace
 {
@@ -451,6 +483,9 @@ void SceneFunctions::Execute(const std::string& functionName, const std::functio
     static bool initialized = false;
     if(!initialized)
     {
+        // LBY
+        sSceneFunctions["lby-init"] = LBY_Init;
+
         // CD1
         sSceneFunctions["cd1-init"] = CD1_Init;
 
