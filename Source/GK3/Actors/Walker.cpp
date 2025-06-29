@@ -2,6 +2,7 @@
 
 #include "ActionManager.h"
 #include "Actor.h"
+#include "Animation.h"
 #include "Animator.h"
 #include "Camera.h"
 #include "CharacterManager.h"
@@ -238,11 +239,49 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
     }
 }
 
+void Walker::StopWalk()
+{
+    // This function is used when the walk should stop IMMEDIATELY - only used in rare circumstances where anims interrupt the walk.
+    // Clear the path - we're not using it anymore.
+    mPath.clear();
+
+    // Clear walk actions - we're not walking anymore.
+    mWalkActions.clear();
+    mPrevWalkOp = WalkOp::None;
+
+    // No more finish callback needed
+    mFinishedPathCallback = nullptr;
+
+    // Stop any walk anims in progress.
+    StopAllWalkAnimations();
+}
+
 bool Walker::AtPosition(const Vector3& position, float maxDistance)
 {
     Vector3 myPosition = mGKOwner->GetPosition();
     float distSq = (myPosition - position).GetLengthSq();
     return distSq <= maxDistance * maxDistance;
+}
+
+bool Walker::IsWalkAnimation(VertexAnimation* vertexAnim) const
+{
+    if(mWalkStartAnim != nullptr && mWalkStartAnim->ContainsVertexAnimation(vertexAnim))
+    {
+        return true;
+    }
+    if(mWalkLoopAnim != nullptr && mWalkLoopAnim->ContainsVertexAnimation(vertexAnim))
+    {
+        return true;
+    }
+    if(mWalkStartTurnLeftAnim != nullptr && mWalkStartTurnLeftAnim->ContainsVertexAnimation(vertexAnim))
+    {
+        return true;
+    }
+    if(mWalkStartTurnRightAnim != nullptr && mWalkStartTurnRightAnim->ContainsVertexAnimation(vertexAnim))
+    {
+        return true;
+    }
+    return false;
 }
 
 void Walker::OnUpdate(float deltaTime)

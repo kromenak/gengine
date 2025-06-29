@@ -42,6 +42,18 @@ std::vector<AnimNode*>* Animation::GetFrame(int frameNumber)
     return nullptr;
 }
 
+bool Animation::ContainsVertexAnimation(VertexAnimation* vertexAnim) const
+{
+    for(VertexAnimNode* vertexAnimNode : mVertexAnimNodes)
+    {
+        if(vertexAnimNode->vertexAnimation == vertexAnim)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 VertexAnimNode* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, const std::string& modelName)
 {
     for(auto& node : mVertexAnimNodes)

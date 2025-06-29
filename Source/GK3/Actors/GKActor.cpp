@@ -466,6 +466,13 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
         mStartVertexAnimPosition = GetPosition();
         mStartVertexAnimRotation = GetRotation();
     }
+
+    // In the original game, starting a vertex animation on a character will cause any in-progress walk to be cancelled.
+    // Of course, the trick is to only do this if the vertex animation being played isn't one of the walk animations!
+    if(mWalker->IsWalking() && !mWalker->IsWalkAnimation(animParams.vertexAnimation))
+    {
+        mWalker->StopWalk();
+    }
 }
 
 void GKActor::SampleAnimation(VertexAnimParams& animParams, int frame)

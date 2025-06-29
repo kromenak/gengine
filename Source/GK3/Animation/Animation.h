@@ -34,6 +34,8 @@ public:
     //TODO: Again, might make sense to move code from Animator into this class.
     const std::vector<VertexAnimNode*>& GetVertexAnimNodes() const { return mVertexAnimNodes; }
 
+    bool ContainsVertexAnimation(VertexAnimation* vertexAnim) const;
+
     // Finds a vertex animation, if any, that starts on the given frame for the given model.
     // Mainly used to support "anim" approach type - allows us to query what a model's position/facing will be when an animation starts.
     VertexAnimNode* GetVertexAnimationOnFrameForModel(int frameNumber, const std::string& modelName);
