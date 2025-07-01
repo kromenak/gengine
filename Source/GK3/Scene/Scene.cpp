@@ -1237,14 +1237,15 @@ void Scene::ExecuteAction(const Action* action)
             if(obj != nullptr)
             {
                 // Find nearest walkable pos to this object.
-                Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(obj->GetPosition());
+                Vector3 objPos = obj->GetAABB().GetCenter();
+                Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(objPos);
 
                 // We also want "turn to" behavior if already at the walk pos.
                 Heading walkHeading = Heading::None;
-                if((mEgo->GetPosition() - obj->GetPosition()).GetLengthSq() < 50.0f * 50.0f)
+                if((mEgo->GetPosition() - objPos).GetLengthSq() < 50.0f * 50.0f)
                 {
                     walkPos = mEgo->GetPosition();
-                    walkHeading = Heading::FromDirection(obj->GetPosition() - mEgo->GetPosition());
+                    walkHeading = Heading::FromDirection(objPos - mEgo->GetPosition());
                 }
 
                 // Walk there, and then do the action.
