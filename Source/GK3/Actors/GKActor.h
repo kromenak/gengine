@@ -20,6 +20,7 @@ class GasPlayer;
 class Model;
 struct SceneActor;
 class SceneData;
+struct ScenePosition;
 class VertexAnimation;
 class VertexAnimator;
 struct VertexAnimParams;
@@ -31,6 +32,7 @@ public:
     GKActor(const SceneActor* actorDef);
 
     void Init(const SceneData& sceneData);
+    void InitPosition(const ScenePosition* scenePosition);
 
     // Fidgets
     enum class FidgetType

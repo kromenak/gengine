@@ -190,6 +190,23 @@ void GKActor::Init(const SceneData& sceneData)
     SyncActorToModelPositionAndRotation();
 }
 
+void GKActor::InitPosition(const ScenePosition* scenePosition)
+{
+    // Set position and heading from passed in scene position.
+    SetPosition(scenePosition->position);
+    SetHeading(scenePosition->heading);
+
+    // Make sure we are on the floor.
+    SnapToFloor();
+
+    // After some experimenting, another interesting thing "InitEgoPosition" does is stop any current animation and sample the walk anim.
+    // This puts the actor in a sane default state.
+    mVertexAnimator->Stop(nullptr); // stop all anims
+
+    // Sample walk anim start.
+    gSceneManager.GetScene()->GetAnimator()->Sample(mCharConfig->walkStartAnim, 0);
+}
+
 void GKActor::StartFidget(FidgetType type)
 {
     // Treat "Start None" as "Stop".

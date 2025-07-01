@@ -407,9 +407,7 @@ bool Scene::InitEgoPosition(const std::string& positionName)
     if(position == nullptr) { return false; }
 
     // Set position and heading.
-    mEgo->SetPosition(position->position);
-    mEgo->SetHeading(position->heading);
-    mEgo->SnapToFloor();
+    mEgo->InitPosition(position);
 
     // Should also set camera position/angle.
     // Output a warning if specified position has no camera though.
