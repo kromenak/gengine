@@ -44,6 +44,14 @@ void GameTimers::Update(float deltaTime)
 
 void GameTimers::Set(const std::string& noun, const std::string& verb, float seconds)
 {
+    // If seconds are zero or less (this does happen from time to time), just execute action immediately and return.
+    if(seconds <= 0.0f && !gActionManager.IsActionPlaying())
+    {
+        gActionManager.ExecuteAction(noun, verb);
+        return;
+    }
+
+    // Otherwise, add to tracked timers.
     mGameTimers.emplace_back();
     mGameTimers.back().secondsRemaining = seconds;
     mGameTimers.back().noun = noun;
