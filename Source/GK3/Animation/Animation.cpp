@@ -492,6 +492,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                         PlaySoundtrackAnimNode* node = new PlaySoundtrackAnimNode();
                         node->frameNumber = frameNumber;
                         node->soundtrackName = line.entries[2].key;
+                        node->nonLooping = true;
                         mFrames[frameNumber].push_back(node);
                     }
                 }

@@ -5,8 +5,9 @@
 #include "GKObject.h"
 #include "StringUtil.h"
 
-PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
-    mSoundtrack(soundtrack)
+PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack, bool nonLooping) :
+    mSoundtrack(soundtrack),
+    mNonLooping(nonLooping)
 {
 
 }
@@ -69,11 +70,28 @@ void PlayingSoundtrack::Update(float deltaTime)
 bool PlayingSoundtrack::AllNodesHitRepeatLimit() const
 {
     auto& nodes = mSoundtrack->GetNodes();
-    for(int i = 0; i < nodes.size(); ++i)
+    if(mNonLooping)
     {
-        if(nodes[i]->repeat == 0 || nodes[i]->repeat - mExecutionCounts[i] > 0)
+        // For non-looping soundtracks, we're done if all nodes have one or more executions.
+        // If any node has zero executions, we haven't finished yet.
+        for(int i = 0; i < nodes.size(); ++i)
         {
-            return false;
+            if(mExecutionCounts[i] == 0)
+            {
+                return false;
+            }
+        }
+    }
+    else
+    {
+        // For looping soundtracks, we're done if all nodes have hit their repeat limit.
+        // Note that plenty of soundtracks don't define repeat limits, so they'll never return false here.
+        for(int i = 0; i < nodes.size(); ++i)
+        {
+            if(nodes[i]->repeat == 0 || nodes[i]->repeat - mExecutionCounts[i] > 0)
+            {
+                return false;
+            }
         }
     }
     return true;
@@ -96,8 +114,17 @@ void PlayingSoundtrack::ProcessNextNode()
         mExecutionCounts[prevNodeIndex]++;
     }
 
-    // Update the node index and loop if necessary.
+    // Update to next node index.
     mCurrentNodeIndex++;
+
+    // If this is a non-looping soundtrack, and we've played all nodes, we can early out - we're done.
+    if(mNonLooping && mCurrentNodeIndex >= nodes.size())
+    {
+        mTimer = 0.0f;
+        return;
+    }
+
+    // Otherwise, we are looping, so wraparound.
     mCurrentNodeIndex %= nodes.size();
 
     // Grab the node from the list.
@@ -136,7 +163,7 @@ SoundtrackPlayer::~SoundtrackPlayer()
     StopAll();
 }
 
-void SoundtrackPlayer::Play(Soundtrack* soundtrack)
+void SoundtrackPlayer::Play(Soundtrack* soundtrack, bool nonLooping)
 {
     if(soundtrack == nullptr) { return; }
 
@@ -150,7 +177,7 @@ void SoundtrackPlayer::Play(Soundtrack* soundtrack)
     }
 
     // Ok, we are going to play this thing.
-    mPlaying.emplace_back(soundtrack);
+    mPlaying.emplace_back(soundtrack, nonLooping);
     mPlaying.back().Play();
 }
 

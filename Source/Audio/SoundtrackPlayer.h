@@ -23,7 +23,7 @@ public:
     // The soundtrack currently being played.
     Soundtrack* mSoundtrack = nullptr;
 
-    PlayingSoundtrack(Soundtrack* soundtrack);
+    PlayingSoundtrack(Soundtrack* soundtrack, bool nonLooping);
 
     void Play();
     void Stop(bool force = false);
@@ -34,6 +34,9 @@ public:
 
 private:
     void ProcessNextNode();
+
+    // If true, this soundtrack doesn't loop.
+    bool mNonLooping = false;
 
     // The results from executing the most recent soundtrack node.
     SoundtrackNodeResults mSoundtrackNodeResults;
@@ -55,7 +58,7 @@ public:
     SoundtrackPlayer(Actor* owner);
     ~SoundtrackPlayer();
 
-    void Play(Soundtrack* soundtrack);
+    void Play(Soundtrack* soundtrack, bool nonLooping = false);
     void Stop(Soundtrack* soundtrack, bool force = false);
     void Stop(const std::string& soundtrackName, bool force = false);
     void StopAll(bool force = false);

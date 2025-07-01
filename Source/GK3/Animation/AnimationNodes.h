@@ -163,7 +163,7 @@ struct FootscuffAnimNode : public AnimNode
 struct PlaySoundtrackAnimNode : public AnimNode
 {
     std::string soundtrackName;
-    //TODO: TBS variant?
+    bool nonLooping = false;
 
     void Play(AnimationState* animState) override;
 };

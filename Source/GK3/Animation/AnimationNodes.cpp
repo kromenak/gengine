@@ -354,7 +354,7 @@ void PlaySoundtrackAnimNode::Play(AnimationState* animState)
 
     Soundtrack* soundtrack = gAssetManager.LoadSoundtrack(soundtrackName, AssetScope::Scene);
     if(soundtrack == nullptr) { return; }
-    soundtrackPlayer->Play(soundtrack);
+    soundtrackPlayer->Play(soundtrack, nonLooping);
 }
 
 void StopSoundtrackAnimNode::Play(AnimationState* animState)
