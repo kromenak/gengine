@@ -415,6 +415,16 @@ void FaceController::UpdateEyeOnFaceTexture(Texture* eyeTexture, Texture* downsa
     // Downsample the eye to the smaller texture.
     DownsampleEyeTexture(eyeTexture, downsampledTexture, downsampleOffset);
 
+    // HACK: Due to the way we downsample textures, there's a limit on how much affect the "downsample offset" has.
+    // HACK: In at least one case (Prince James), the offset is high enough that even with the maximum downsample offset, he still looks goofy.
+    // HACK: To get around this, we can apply extra pixel offset to compensate if the offset is beyond some maximums.
+    // TODO: There's probably a more generalized solution here (e.g. if downsampleOffset is beyond some limits, convert to pixel offsets).
+    float extraOffsetX = 0.0f;
+    if(bias.x <= -2.0f)
+    {
+        extraOffsetX = bias.x + 2.0f;
+    }
+
     // In some cases (Buthane), the eye texture is slightly larger than the eyelids texture, so you get an "under eye face paint" effect.
     // To fix this, don't write any eye texture pixels that would extend beyond the eyelid texture height.
     uint32_t blendHeight = downsampledTexture->GetHeight();
@@ -425,7 +435,7 @@ void FaceController::UpdateEyeOnFaceTexture(Texture* eyeTexture, Texture* downsa
 
     // Slap the downsampled texture onto the face texture at the correct pixel offset.
     Texture::BlendPixels(*downsampledTexture, 0, 0, downsampledTexture->GetWidth(), blendHeight,
-                         *mFaceTexture, offset.x, offset.y);
+                         *mFaceTexture, offset.x + extraOffsetX, offset.y);
 }
 
 void FaceController::DownsampleEyeTexture(Texture* src, Texture* dst, const Vector2& offset)
