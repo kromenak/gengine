@@ -1,6 +1,7 @@
 #include "Chessboard.h"
 
 #include "ActionManager.h"
+#include "Animator.h"
 #include "AssetManager.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
@@ -64,6 +65,10 @@ void Chessboard::Reset(bool swordsGlow)
     // No swords yet.
     gGameProgress.SetGameVariable("Te1SwordCount", 0);
     mSwordCount = 0;
+
+    // Make sure goal door is closed again, if it was opened and we then died.
+    Animation* doorOpenAnim = gAssetManager.LoadAnimation("Te1GoDoor", AssetScope::Scene);
+    gSceneManager.GetScene()->GetAnimator()->Sample(doorOpenAnim, 0);
 }
 
 void Chessboard::Takeoff()
