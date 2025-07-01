@@ -593,6 +593,11 @@ void GKActor::OnVertexAnimationStop()
         Actor::SetPosition(mStartVertexAnimPosition);
         Actor::SetRotation(mStartVertexAnimRotation);
     }
+
+    // When a vertex animation stops/ends, make sure the actor position/rotation match the final position/rotation of the model.
+    // This is most important when action-skipping. It ensures you end up in the same position/rotation whether you skipped or didn't skip.
+    // This sync action usually occurs in LateUpdate, but due to action skip using higher delta time, we may get many vertex anims starting/stopping without LateUpdate being called.
+    SyncActorToModelPositionAndRotation();
 }
 
 Vector3 GKActor::GetModelFacingDirection() const
