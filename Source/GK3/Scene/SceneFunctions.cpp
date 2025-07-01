@@ -56,7 +56,7 @@ namespace
         // In Day 2, 2PM, Gabriel visits Montreaux posing as a journalist. I encountered a bug where Montreaux walks through a door!
         // On closer inspection, this is because the walker boundary has a 1-pixel spot that technically counts as a valid path, but it looks bad to take it.
         // Though I do think it'd be nice if the pathfinding system took "walker size" into account - for now, I can fix this bug by simply disallowing walking on region 6 (cyan) on walker bounds.
-        if(gGameProgress.GetTimeblock() == Timeblock(2, 14))
+        if(gGameProgress.GetTimeblock() == Timeblock(2, 14) || gGameProgress.GetTimeblock() == Timeblock(3, 15))
         {
             gSceneManager.GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(6, 6, true);
         }
