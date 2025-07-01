@@ -580,6 +580,11 @@ void GKActor::OnVertexAnimationStop()
 
 Vector3 GKActor::GetModelFacingDirection() const
 {
+    if(mForcedFacingDir != Vector3::Zero)
+    {
+        return mForcedFacingDir;
+    }
+
     // There are a few different ways to possibly calculate the model's facing direction.
     // The method used may differ from Actor to Actor or be based on the current state of the Actor.
     Vector3 facingDir = Vector3::UnitZ;

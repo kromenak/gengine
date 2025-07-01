@@ -86,6 +86,7 @@ public:
     const CharacterConfig* GetConfig() const { return mCharConfig; }
 
     void SetModelFacingHelper(GKProp* helper) { mModelFacingHelper = helper; }
+    void SetForcedFacingDir(const Vector3& dir) { mForcedFacingDir = dir; }
 
     void SetShadowEnabled(bool enabled) { mShadowActor->SetActive(enabled); }
 
@@ -130,6 +131,7 @@ private:
     // Often, we can calculate the facing of the model from the model itself.
     // Sometimes however, GK3 uses a helper object that animates alongside an animation to track the facing direction.
     GKProp* mModelFacingHelper = nullptr;
+    Vector3 mForcedFacingDir = Vector3::Zero;
 
     // Many objects animate using vertex animations.
     VertexAnimator* mVertexAnimator = nullptr;

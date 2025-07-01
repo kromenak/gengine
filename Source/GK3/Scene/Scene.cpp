@@ -701,14 +701,23 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
                 // Clicked on the floor - move ego to position.
                 if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
                 {
-                    // When the player clicks somewhere on the floor, we try to walk to that spot.
-                    // However, we don't want to allow walking to unwalkable spots. So first find the nearest walkable spot on the walker boundary.
-                    Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(ray.GetPoint(hitInfo.t));
+                    // 99% of the time, we want the normal walk behavior.
+                    // In one scene (the final showdown with Montreaux) we need custom walk behavior of course.
+                    if(mWalkOverrideCallback != nullptr)
+                    {
+                        mWalkOverrideCallback();
+                    }
+                    else
+                    {
+                        // When the player clicks somewhere on the floor, we try to walk to that spot.
+                        // However, we don't want to allow walking to unwalkable spots. So first find the nearest walkable spot on the walker boundary.
+                        Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(ray.GetPoint(hitInfo.t));
 
-                    // Attempt to walk to the clicked position.
-                    // It's 99% likely that a path exists to the walk pos, and the walk will succeed.
-                    // The only edge case is if the walk pos clicked is on an isolated subsection of the walker boundary, in which case ego will walk as close as possible before giving up.
-                    mEgo->WalkToBestEffort(walkPos, Heading::None, nullptr);
+                        // Attempt to walk to the clicked position.
+                        // It's 99% likely that a path exists to the walk pos, and the walk will succeed.
+                        // The only edge case is if the walk pos clicked is on an isolated subsection of the walker boundary, in which case ego will walk as close as possible before giving up.
+                        mEgo->WalkToBestEffort(walkPos, Heading::None, nullptr);
+                    }
                 }
             }
         }

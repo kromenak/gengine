@@ -104,6 +104,8 @@ public:
     void SetOverrideBSP(BSP* bsp);
     void ClearOverrideBSP();
 
+    void SetWalkOverride(const std::function<void()>& callback) { mWalkOverrideCallback = callback; }
+
     SceneData* GetSceneData() const { return mSceneData; }
     Animator* GetAnimator() const { return mAnimator; }
     SoundtrackPlayer* GetSoundtrackPlayer() const { return mSoundtrackPlayer; }
@@ -177,6 +179,9 @@ private:
 
     // Helper class for dealing with scene construction (e.g. editor/tool) support.
     SceneConstruction mConstruction;
+
+    // If set, Ego won't walk when the floor is clicked - instead this callback will be called.
+    std::function<void()> mWalkOverrideCallback = nullptr;
 
     void ApplyAmbientLightColorToActors();
     BSP* GetBSP() const;

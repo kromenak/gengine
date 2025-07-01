@@ -6,6 +6,7 @@
 #include "AssetManager.h"
 #include "Bridge.h"
 #include "Chessboard.h"
+#include "DemonFight.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
 #include "GKActor.h"
@@ -477,6 +478,15 @@ namespace
     }
 }
 
+namespace
+{
+    void TE6_Init(const std::function<void()>& callback)
+    {
+        new DemonFight();
+        if(callback != nullptr) { callback(); }
+    }
+}
+
 void SceneFunctions::Execute(const std::string& functionName, const std::function<void()>& callback)
 {
     // If haven't initialized the function map, do it now.
@@ -542,6 +552,9 @@ void SceneFunctions::Execute(const std::string& functionName, const std::functio
 
         // TE5
         sSceneFunctions["te5-init"] = TE5_Init;
+
+        // TE6
+        sSceneFunctions["te6-init"] = TE6_Init;
         initialized = true;
     }
 
