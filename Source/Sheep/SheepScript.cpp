@@ -450,7 +450,7 @@ void SheepScript::Decompile(const std::string& filePath)
     std::vector<std::string> variableNames;
     for(size_t i = 0; i < mVariables.size(); ++i)
     {
-        std::string varName = mVariables[i].GetTypeString() + "Var" + std::to_string(i);
+        std::string varName = mVariables[i].GetTypeString() + "Var" + std::to_string(i) + "$";
         variableNames.push_back(varName);
 
         std::string varDecl = mVariables[i].GetTypeString() + " " + varName + " = ";
