@@ -72,6 +72,12 @@ void FaceController::Set(FaceElement element, Texture* texture)
         case FaceElement::Forehead:
             SetForehead(texture);
             break;
+        case FaceElement::LeftEye:
+            SetEye(EyeType::Left, texture);
+            break;
+        case FaceElement::RightEye:
+            SetEye(EyeType::Right, texture);
+            break;
     }
 }
 
@@ -87,6 +93,12 @@ void FaceController::Clear(FaceElement element)
             break;
         case FaceElement::Forehead:
             ClearForehead();
+            break;
+        case FaceElement::LeftEye:
+            ClearEye(EyeType::Left);
+            break;
+        case FaceElement::RightEye:
+            ClearEye(EyeType::Right);
             break;
     }
 }

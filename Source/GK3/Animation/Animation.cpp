@@ -573,6 +573,12 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                         case 'h':
                             faceElement = FaceElement::Forehead;
                             break;
+                        case 'l':
+                            faceElement = FaceElement::LeftEye;
+                            break;
+                        case 'r':
+                            faceElement = FaceElement::RightEye;
+                            break;
                         }
 
                         // Create and add node.

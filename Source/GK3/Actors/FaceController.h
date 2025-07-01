@@ -19,7 +19,9 @@ enum class FaceElement
 {
     Forehead,
     Eyelids,
-    Mouth
+    Mouth,
+    LeftEye,
+    RightEye
 };
 
 enum class EyeType
