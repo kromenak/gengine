@@ -84,9 +84,6 @@ private:
     Animation* mWalkStartTurnLeftAnim = nullptr;
     Animation* mWalkStartTurnRightAnim = nullptr;
 
-    // If true, the walk anims are overridden, and don't match the "walk end" anim.
-    bool mUsingOverrideWalkAnims = false;
-
     // WALK PLANNING
     // When a walk begins, a "plan" is generated and stored in the walk ops vector.
     // Ex: we may calculate plan: turn right, then follow path, then end move, then turn to face heading.

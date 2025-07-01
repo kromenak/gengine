@@ -50,7 +50,6 @@ void Walker::SetWalkAnims(Animation* startAnim, Animation* loopAnim,
     mWalkLoopAnim = loopAnim;
     mWalkStartTurnLeftAnim = startTurnLeftAnim;
     mWalkStartTurnRightAnim = startTurnRightAnim;
-    mUsingOverrideWalkAnims = mWalkStartAnim != mCharConfig->walkStartAnim && mWalkLoopAnim != mCharConfig->walkLoopAnim;
 }
 
 void Walker::WalkToBestEffort(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
@@ -259,6 +258,7 @@ void Walker::StopWalk()
 bool Walker::AtPosition(const Vector3& position, float maxDistance)
 {
     Vector3 myPosition = mGKOwner->GetPosition();
+    myPosition.y = position.y;
     float distSq = (myPosition - position).GetLengthSq();
     return distSq <= maxDistance * maxDistance;
 }
@@ -749,41 +749,33 @@ void Walker::NextAction()
         gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartAnim);
         gSceneManager.GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
 
-        // Play walk stop anim.
-        if(mUsingOverrideWalkAnims)
+
+        // While testing the original game, I noticed that "walk end" anims don't seem to actually ever be used!
+        // For example, if you insert a "scene texture swap" anim node into the walk end anim, it never happens. But it will if you put it in walk start/continue anims.
+        // So, perhaps they intended to use "walk end" anims, but then decided not to for some reason?
+        /*
+        AnimParams animParams;
+        animParams.animation = mCharConfig->walkStopAnim;
+        animParams.allowMove = true;
+        animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
+        animParams.fromAutoScript = mFromAutoscript;
+        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+        */
+
+        // If I had to guess, the reason would be: it's too hard to 100% ensure the walker ends up at the correct final position!
+        // To absolutely ensure that, let's set the owner to the final position just to be sure (except for when we don't care about exact end position, such as a walk-to-see situation).
+        if(mWalkToSeeTarget == nullptr)
         {
-            mWalkActions.clear();
-            NextAction();
+            mGKOwner->SetPosition(mFinalPosition);
         }
-        else
-        {
-            // While testing the original game, I noticed that "walk end" anims don't seem to actually ever be used!
-            // For example, if you insert a "scene texture swap" anim node into the walk end anim, it never happens. But it will if you put it in walk start/continue anims.
-            // So, perhaps they intended to use "walk end" anims, but then decided not to for some reason?
-            /*
-            AnimParams animParams;
-            animParams.animation = mCharConfig->walkStopAnim;
-            animParams.allowMove = true;
-            animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
-            animParams.fromAutoScript = mFromAutoscript;
-            animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-            gSceneManager.GetScene()->GetAnimator()->Start(animParams);
-            */
 
-            // If I had to guess, the reason would be: it's too hard to 100% ensure the walker ends up at the correct final position!
-            // To absolutely ensure that, let's set the owner to the final position just to be sure (except for when we don't care about exact end position, such as a walk-to-see situation).
-            if(mWalkToSeeTarget == nullptr)
-            {
-                mGKOwner->SetPosition(mFinalPosition);
-            }
+        // Sampling the walk start anim ensures that the walker is in a default pose, looking straight ahead, before any "turn to face" logic occurs.
+        // Without this, the "turn to face" logic might happen when the walker was in the middle of a long stride, and the turn behavior would look all wrong.
+        gSceneManager.GetScene()->GetAnimator()->Sample(mWalkStartAnim, 0);
 
-            // Sampling the walk start anim ensures that the walker is in a default pose, looking straight ahead, before any "turn to face" logic occurs.
-            // Without this, the "turn to face" logic might happen when the walker was in the middle of a long stride, and the turn behavior would look all wrong.
-            gSceneManager.GetScene()->GetAnimator()->Sample(mWalkStartAnim, 0);
-
-            // No anim to play, so just move right on to the next walk action.
-            PopAndNextAction();
-        }
+        // No anim to play, so just move right on to the next walk action.
+        PopAndNextAction();
     }
     else if(currentWalkOp == WalkOp::TurnToFace)
     {
