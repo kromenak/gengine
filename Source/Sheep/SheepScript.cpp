@@ -408,7 +408,13 @@ void SheepScript::Decompile(const std::string& filePath)
             case SheepInstruction::BranchGoto:
             {
                 int branchAddress = goToReader.ReadInt();
-                gotoLabels[branchAddress] = "Label" + std::to_string(gotoLabels.size()) + "$";
+
+                auto it = gotoLabels.find(branchAddress);
+                if(it == gotoLabels.end())
+                {
+                    int labelNumber = gotoLabels.size();
+                    gotoLabels[branchAddress] = "Label" + std::to_string(labelNumber) + "$";
+                }
                 break;
             }
             default:
