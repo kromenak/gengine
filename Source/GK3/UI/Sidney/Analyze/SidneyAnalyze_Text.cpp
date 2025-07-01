@@ -122,7 +122,9 @@ void SidneyAnalyze::AnalyzeText_OnAnagramParserPressed()
             SidneyUtil::GetAnalyzeLocalizer().GetText("ArcadiaText2");
 
         // Show the parser with the specified anagram text.
-        mAnagramParser->Show(anagramText);
+        mAnagramParser->Show(anagramText, [this](){
+            mAnalyzeTextWindow->SetActive(true);
+        });
 
         // Not 100% sure if this flag is important for anything, but it is set at this point.
         gGameProgress.SetFlag("StartArcadiaAnagram");

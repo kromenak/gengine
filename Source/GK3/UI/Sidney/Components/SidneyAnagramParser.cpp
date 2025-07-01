@@ -202,6 +202,11 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
         exitButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("ExitButton"));
         exitButton->SetPressCallback([this](){
             Hide();
+            if(mExitCallback != nullptr)
+            {
+                mExitCallback();
+                mExitCallback = nullptr;
+            }
         });
         mExitButton = exitButton;
     }
@@ -210,7 +215,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
     Hide();
 }
 
-void SidneyAnagramParser::Show(const std::string& anagramText)
+void SidneyAnagramParser::Show(const std::string& anagramText, const std::function<void()>& exitCallback)
 {
     // Already showing, don't run show code again.
     if(IsActive()) { return; }
@@ -218,6 +223,9 @@ void SidneyAnagramParser::Show(const std::string& anagramText)
 
     // Start in "idle" state.
     mState = State::Idle;
+
+    // Save exit callback.
+    mExitCallback = exitCallback;
 
     // Populate the "Parsing: " text field.
     mParsingHeaderLabel->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Parsing") + " " + anagramText);

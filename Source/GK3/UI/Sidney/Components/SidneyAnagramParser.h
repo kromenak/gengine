@@ -6,6 +6,7 @@
 #pragma once
 #include "Actor.h"
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -20,7 +21,7 @@ class SidneyAnagramParser : public Actor
 public:
     SidneyAnagramParser(Actor* parent);
 
-    void Show(const std::string& anagramText);
+    void Show(const std::string& anagramText, const std::function<void()>& exitCallback);
     void Hide();
 
 protected:
@@ -95,6 +96,9 @@ private:
 
     // A label that displays the translated text as one string.
     UILabel* mTranslatedTextLabel = nullptr;
+
+    // A callback executed if the "exit" button is pressed.
+    std::function<void()> mExitCallback = nullptr;
 
     void AppendMessageText(const std::string& locKey);
 
