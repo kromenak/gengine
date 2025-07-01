@@ -179,7 +179,10 @@ void GKActor::Init(const SceneData& sceneData)
     }
     else
     {
-        StartFidget(GKActor::FidgetType::Idle);
+        if(GetName() != "JAM")
+        {
+            StartFidget(GKActor::FidgetType::Idle);
+        }
     }
 
     // If an init anim was defined, we should make sure to sync the actor to the updated model position/rotation.
@@ -211,9 +214,6 @@ void GKActor::StartFidget(FidgetType type)
         SetModelRotationToActorRotation();
 
         // Play the fidget.
-        // You might ask: should we stop the previous fidget first, to ensure cleanups play? Maybe! This actually does help fix a bug when talking to the moped guy.
-        // On the other hand, stopping the previous fidget first errantly plays extra cleanups in other cases (Gabe talking to Mosely in R33).
-        // Not stopping the previous fidget for now, but may need to revisit this...
         mGasPlayer->Play(newFidget);
         mActiveFidget = type;
         //printf("%s: starting fidget %s\n", GetNoun().c_str(), newFidget->GetName().c_str());
@@ -610,7 +610,7 @@ Vector3 GKActor::GetModelFacingDirection() const
             Debug::DrawLine(worldPoint1, worldPoint2, Color32::Blue);
             Debug::DrawLine(worldPoint2, worldPoint3, Color32::Blue);
             Debug::DrawLine(worldPoint3, worldPoint1, Color32::Blue);
-            Debug::DrawLine(GetPosition(), mModelFacingHelper->GetPosition(), Color32::White);
+            //Debug::DrawLine(GetPosition(), mModelFacingHelper->GetPosition(), Color32::White);
         }
         */
 
@@ -747,8 +747,8 @@ void GKActor::SetModelRotationToActorRotation()
 
     // Get actor's facing direction.
     Vector3 desiredDirection = GetHeading().ToDirection();
-    //Debug::DrawLine(GetPosition(), GetPosition() + modelDirection * 10.0f, Color32::Magenta, 60.0f);
-    //Debug::DrawLine(GetPosition(), GetPosition() + desiredDirection * 10.0f, Color32::Magenta, 60.0f);
+    //Debug::DrawLine(GetPosition(), GetPosition() + modelDirection * 10.0f, Color32::Red, 10.0f);
+    //Debug::DrawLine(GetPosition(), GetPosition() + desiredDirection * 10.0f, Color32::Green, 10.0f);
 
     // Get the angle between the model's direction and the actor's direction.
     float angleRadians = Math::Acos(Vector3::Dot(modelDirection, desiredDirection));
