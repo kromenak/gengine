@@ -119,12 +119,19 @@ void FaceController::SetEyelids(Texture* texture)
 {
     mCurrentEyelidsTexture = texture;
     UpdateFaceTexture();
+
+    // If an eyelid texture is explicitly set, this disables the blink behavior.
+    // The eyelid texture must be cleared to re-enable blinking.
+    mBlinkEnabled = false;
 }
 
 void FaceController::ClearEyelids()
 {
     mCurrentEyelidsTexture = mDefaultEyelidsTexture;
     UpdateFaceTexture();
+
+    // Upon clearing eyelid texture, re-enable blinking.
+    mBlinkEnabled = true;
 }
 
 void FaceController::SetForehead(Texture* texture)
@@ -303,11 +310,14 @@ void FaceController::ClearMood()
 void FaceController::OnUpdate(float deltaTime)
 {
     // Count down and blink after some time.
-    mBlinkTimer -= deltaTime;
-    if(mBlinkTimer <= 0.0f)
+    if(mBlinkEnabled)
     {
-        Blink();
-        RollBlinkTimer();
+        mBlinkTimer -= deltaTime;
+        if(mBlinkTimer <= 0.0f)
+        {
+            Blink();
+            RollBlinkTimer();
+        }
     }
 
     // Update eye jitter.

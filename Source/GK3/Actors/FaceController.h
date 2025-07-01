@@ -101,6 +101,7 @@ private:
 
     // A timer for how frequently the face should blink.
     // Set randomly based on interval specified in face config.
+    bool mBlinkEnabled = true;
     float mBlinkTimer = 0.0f;
 
     // If true, eyes move slightly every few seconds, to make the character feel more real/alive.
