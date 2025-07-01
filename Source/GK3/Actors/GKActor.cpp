@@ -641,7 +641,7 @@ Vector3 GKActor::GetModelFacingDirection() const
         {
             // Use those three points to calculate a facing direction. The "point" of the arrow is pt 1.
             // OF COURSE these points aren't consistent...Mosely uses different ones.
-            if(StringUtil::EqualsIgnoreCase(GetName(), "MOS"))
+            if(StringUtil::EqualsIgnoreCase(GetName(), "MOS") || StringUtil::EqualsIgnoreCase(GetName(), "DEM"))
             {
                 facingDir = Vector3::Normalize(worldPoint3 - ((worldPoint1 + worldPoint2) / 2));
             }
