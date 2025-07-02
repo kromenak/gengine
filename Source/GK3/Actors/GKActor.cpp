@@ -487,7 +487,8 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
 
     // In the original game, starting a vertex animation on a character will cause any in-progress walk to be cancelled.
     // Of course, the trick is to only do this if the vertex animation being played isn't one of the walk animations!
-    if(mWalker->IsWalking() && !mWalker->IsWalkAnimation(animParams.vertexAnimation))
+    // This also seems to not apply to autoscript anims - we don't want to cancel the "turn" part of a walk due to a breathing anim!
+    if(!animParams.fromAutoScript && mWalker->IsWalking() && !mWalker->IsWalkAnimation(animParams.vertexAnimation))
     {
         mWalker->StopWalk();
     }
