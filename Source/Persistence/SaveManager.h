@@ -46,7 +46,8 @@ struct SaveSummary
 {
     bool isQuickSave = false;
     std::string filePath;
-    PersistHeader saveInfo;
+    SaveHeader saveHeader;
+    PersistHeader persistHeader;
 };
 
 class SaveManager

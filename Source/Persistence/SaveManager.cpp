@@ -18,6 +18,55 @@
 #include "SystemUtil.h"
 #include "Texture.h"
 
+namespace
+{
+    struct SortSaves
+    {
+        bool operator()(const SaveSummary& a, const SaveSummary& b)
+        {
+            // Saves are sorted with older (earlier) saves at the top. Recent saves are at the bottom.
+            // If year isn't equal, the one with the earlier year goes first.
+            if(a.saveHeader.year != b.saveHeader.year)
+            {
+                return a.saveHeader.year < b.saveHeader.year;
+            }
+
+            // If year is equal, the one with the earlier month goes first.
+            if(a.saveHeader.month != b.saveHeader.month)
+            {
+                return a.saveHeader.month < b.saveHeader.month;
+            }
+
+            // If month is equal, the one with the earlier day goes first.
+            if(a.saveHeader.day != b.saveHeader.day)
+            {
+                return a.saveHeader.day < b.saveHeader.day;
+            }
+
+            // If day is equal...keep going, comparing hour/minute/second/millisecond.
+            if(a.saveHeader.hour != b.saveHeader.hour)
+            {
+                return a.saveHeader.hour < b.saveHeader.hour;
+            }
+            if(a.saveHeader.minute != b.saveHeader.minute)
+            {
+                return a.saveHeader.minute < b.saveHeader.minute;
+            }
+            if(a.saveHeader.second != b.saveHeader.second)
+            {
+                return a.saveHeader.second < b.saveHeader.second;
+            }
+            if(a.saveHeader.milliseconds != b.saveHeader.milliseconds)
+            {
+                return a.saveHeader.milliseconds < b.saveHeader.milliseconds;
+            }
+
+            // These saves have identical timestamps...sort by filepath I guess.
+            return a.filePath.compare(b.filePath) > 0;
+        }
+    };
+}
+
 SaveManager gSaveManager;
 
 SaveManager::SaveManager()
@@ -79,7 +128,7 @@ void SaveManager::Load(const std::string& loadPathOrDescription)
     // Allow specifying a save to load via user description.
     for(SaveSummary& save : mSaves)
     {
-        if(StringUtil::EqualsIgnoreCase(save.saveInfo.userDescription, loadPathOrDescription))
+        if(StringUtil::EqualsIgnoreCase(save.persistHeader.userDescription, loadPathOrDescription))
         {
             mPendingLoadPath = save.filePath;
             return;
@@ -191,12 +240,11 @@ void SaveManager::RescanSaveDirectory()
 
         //TODO: If we detect that this save file is not valid with the current version of the game (based on SaveHeader data), skip it.
 
-        //TODO: Saves are sorted by their date (in the SaveHeader).
-
         // Create save summary entry, also loading in the persist header data (which contains save description, location, and score).
         mSaves.emplace_back();
         mSaves.back().filePath = path;
-        mSaves.back().saveInfo.OnPersist(ps);
+        mSaves.back().saveHeader = saveHeader;
+        mSaves.back().persistHeader.OnPersist(ps);
 
         // We do allow saves that don't use the standard naming convention (saveXXXX.gk3).
         // However, only those with the standard naming convention are used to derive the next save number.
@@ -217,6 +265,9 @@ void SaveManager::RescanSaveDirectory()
             mSaves.back().isQuickSave = true;
         }
     }
+
+    // Sort saves based on save date/time, putting earlier saves at the top of the list.
+    std::sort(mSaves.begin(), mSaves.end(), SortSaves());
 }
 
 void SaveManager::SaveInternal(const std::string& saveDescription)
@@ -260,7 +311,7 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     SystemUtil::GetTime(saveHeader.year, saveHeader.month, saveHeader.dayOfWeek, saveHeader.day,
                         saveHeader.hour, saveHeader.minute, saveHeader.second, saveHeader.milliseconds);
 
-    // Save out the save header.
+    // Write out the save header.
     saveHeader.OnPersist(ps);
 
     // Create the persist header.
@@ -301,18 +352,24 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     if(mPendingSaveIndex >= 0 && mPendingSaveIndex < mSaves.size())
     {
         mSaves[mPendingSaveIndex].filePath = savePath;
-        mSaves[mPendingSaveIndex].saveInfo = std::move(persistHeader);
+        mSaves[mPendingSaveIndex].saveHeader = std::move(saveHeader);
+        mSaves[mPendingSaveIndex].persistHeader = std::move(persistHeader);
+        // If you overwrite the quick save slot manually, it is still considered to be "the quick save."
     }
     else
     {
         mSaves.emplace_back();
         mSaves.back().filePath = savePath;
-        mSaves.back().saveInfo = std::move(persistHeader);
+        mSaves.back().saveHeader = std::move(saveHeader);
+        mSaves.back().persistHeader = std::move(persistHeader);
         mSaves.back().isQuickSave = mPendingUseQuickSave;
 
         // Increment save number if this wasn't an overwrite of an existing slot.
         ++mNextSaveNumber;
     }
+
+    // Sort saves based on save date/time, putting earlier saves at the top of the list.
+    std::sort(mSaves.begin(), mSaves.end(), SortSaves());
 }
 
 void SaveManager::LoadInternal(const std::string& loadPath)

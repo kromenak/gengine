@@ -380,9 +380,9 @@ void SaveLoadScreen::PopulateSaveList(bool justShown)
         if(i < saves.size())
         {
             const SaveSummary& save = saves[i];
-            entry->nameLabel->SetText(save.saveInfo.userDescription);
-            entry->dayTimeLabel->SetText(gGameProgress.GetTimeblockDisplayName(save.saveInfo.timeblock));
-            entry->scoreLabel->SetText(StringUtil::Format("%03i / %03i", save.saveInfo.score, save.saveInfo.maxScore));
+            entry->nameLabel->SetText(save.persistHeader.userDescription);
+            entry->dayTimeLabel->SetText(gGameProgress.GetTimeblockDisplayName(save.persistHeader.timeblock));
+            entry->scoreLabel->SetText(StringUtil::Format("%03i / %03i", save.persistHeader.score, save.persistHeader.maxScore));
         }
         else // empty slot
         {
@@ -454,9 +454,9 @@ void SaveLoadScreen::SetSelectedSaveIndex(int saveIndex)
 
     // Update the thumbnail.
     const std::vector<SaveSummary>& saves = gSaveManager.GetSaves();
-    if(mSaveIndex >= 0 && mSaveIndex < saves.size() && saves[mSaveIndex].saveInfo.thumbnailTexture != nullptr)
+    if(mSaveIndex >= 0 && mSaveIndex < saves.size() && saves[mSaveIndex].persistHeader.thumbnailTexture != nullptr)
     {
-        mThumbnailImage->SetTexture(saves[mSaveIndex].saveInfo.thumbnailTexture.get());
+        mThumbnailImage->SetTexture(saves[mSaveIndex].persistHeader.thumbnailTexture.get());
     }
     else
     {
