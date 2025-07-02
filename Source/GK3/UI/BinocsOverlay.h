@@ -9,6 +9,7 @@
 
 #include <string>
 
+#include "LayerManager.h"
 #include "Rect.h"
 #include "SheepThread.h"
 #include "StringUtil.h"
@@ -32,6 +33,8 @@ protected:
     void OnUpdate(float deltaTime) override;
 
 private:
+    Layer mLayer;
+
     // Buttons used to move the binocs view up/down/left/right.
     UIButton* mUpButton = nullptr;
     UIButton* mDownButton = nullptr;

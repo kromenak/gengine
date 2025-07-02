@@ -223,7 +223,7 @@ void GameCamera::OnUpdate(float deltaTime)
             {
                 gActionManager.HideActionBar(true);
             }
-            else
+            else if(mOptionBar->CanShow())
             {
                 mOptionBar->Show();
             }

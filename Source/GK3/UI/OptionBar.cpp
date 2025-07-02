@@ -12,6 +12,7 @@
 #include "IniParser.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
+#include "LayerManager.h"
 #include "LocationManager.h"
 #include "Renderer.h"
 #include "TextAsset.h"
@@ -206,6 +207,23 @@ void OptionBar::Hide()
 
     // Since we're closing this bar, stop allowing interacting during actions.
     GEngine::Instance()->SetAllowInteractDuringActions(false);
+}
+
+bool OptionBar::CanShow() const
+{
+    // Showing the option bar is often allowed, but there are a few screens where it isn't allowed.
+    if(gLayerManager.IsTopLayer("PauseLayer") ||
+       gLayerManager.IsTopLayer("ConfirmQuitLayer") ||
+       gLayerManager.IsTopLayer("HelpLayer") ||
+       gLayerManager.IsLayerInStack("SaveLayer") || gLayerManager.IsLayerInStack("LoadLayer") ||
+       gLayerManager.IsTopLayer("DeathLayer") ||
+       gLayerManager.IsTopLayer("BinocsLayer"))
+    {
+        return false;
+    }
+
+    // Allowed to open options bar.
+    return true;
 }
 
 void OptionBar::OnUpdate(float deltaTime)

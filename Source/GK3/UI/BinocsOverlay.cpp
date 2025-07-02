@@ -22,7 +22,8 @@
 #include "UIImage.h"
 #include "UIUtil.h"
 
-BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTransform)
+BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTransform),
+    mLayer("BinocsLayer")
 {
     // Add canvas to render UI elements.
     AddComponent<UICanvas>(5);
@@ -246,6 +247,7 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
 void BinocsOverlay::Show()
 {
     SetActive(true);
+    gLayerManager.PushLayer(&mLayer);
 
     // The binocs operate using the normal game camera in the current scene, but perform some trickery to make things look right.
     mGameCamera = gSceneManager.GetScene()->GetCamera();
@@ -283,6 +285,7 @@ void BinocsOverlay::Hide()
 {
     if(!IsActive()) { return; }
     SetActive(false);
+    gLayerManager.PopLayer(&mLayer);
 
     // Move the game camera back down to the ground, undoing the upward move when we shows the binocs interface.
     Vector3 camPos = mGameCamera->GetPosition();

@@ -27,6 +27,8 @@ public:
     void Show();
     void Hide();
 
+    bool CanShow() const;
+
 protected:
     void OnUpdate(float deltaTime) override;
 
