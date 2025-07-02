@@ -53,6 +53,10 @@ void QuitPopup::Show()
     // Push layer onto stack.
     gLayerManager.PushLayer(&mLayer);
     SetActive(true);
+
+    // If this appears during a non-interactive part of the game, force interactivity.
+    // Without this, you can get soft-locked on this screen if you hit the window "X" button during a cutscene!
+    GEngine::Instance()->SetAllowInteractDuringActions(true);
 }
 
 void QuitPopup::Hide()
@@ -60,4 +64,7 @@ void QuitPopup::Hide()
     // Pop layer off stack.
     gLayerManager.PopLayer(&mLayer);
     SetActive(false);
+
+    // Clear interact during actions flag.
+    GEngine::Instance()->SetAllowInteractDuringActions(false);
 }
