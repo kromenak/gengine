@@ -15,6 +15,7 @@
 #include "MeshRenderer.h"
 #include "Ray.h"
 #include "Renderer.h"
+#include "ReportManager.h"
 #include "SceneManager.h"
 #include "StringUtil.h"
 #include "Vector3.h"
@@ -873,108 +874,75 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
 
 bool Walker::SkipPathNodesOutsideFrustum()
 {
-    // Skipping path nodes outside the view frustum is mainly meant for user-initiated walk actions.
-    // Don't do this for AI walkers (autoscript), if this isn't the Ego, or if we're in a cutscene/action.
-    if(mFromAutoscript || mGKOwner != gSceneManager.GetScene()->GetEgo() || gActionManager.IsActionPlaying())
-    {
-        return false;
-    }
-
     // Ok, we have a path (in mPath) that we can follow.
     // But if 90% of the path is behind the camera, the walker can just skip to the node right before the camera and walk from there!
-    size_t originalPathSize = mPath.size();
-    Vector3 lastPoppedPathPos;
+
+    // Skipping path nodes outside the view frustum is mainly meant for user-initiated walk actions.
+    // Don't do this for AI walkers (autoscript), if this isn't the Ego, or if we're in a cutscene/action.
+    if(mFromAutoscript || mGKOwner != gSceneManager.GetScene()->GetEgo() || mPath.empty())
+    {
+        //printf("Early out skip path nodes - not ego, from autoscript, or path is empty.\n");
+        return false;
+    }
+    //printf("Path size is %zu.\n", mPath.size());
+
+    // Get the camera view frustum.
     Camera* camera = gRenderer.GetCamera();
     Frustum frustum = camera->GetWorldSpaceViewFrustum();
-    while(mPath.size() > 2)
+
+    // Find the first node on the path that is inside the view frustum.
+    int firstInFrustumIndex = -1;
+    for(int i = mPath.size() - 1; i >= 0; --i)
     {
-        // Most basic check: skip path node if not within the frustum.
-        bool skipPathNode = false;
-        if(!frustum.ContainsPoint(mPath.back()))
+        // In addition to the path node itself, we also need to check the expected HEAD position for the character.
+        // Even if a node is off-screen, if the character's head at that position IS on-screen, we can't skip to it.
+        Vector3 headPosAtNode = mPath[i] + Vector3::UnitY * mCharConfig->walkerHeight;
+        if(frustum.ContainsPoint(mPath[i]) || frustum.ContainsPoint(headPosAtNode))
         {
-            skipPathNode = true;
-        }
-
-        // If we think we want to skip this path node (because its outside view frustum), consider some edge cases.
-        // First, the path node is at floor level, but walkers can be rather tall.
-        // See if the walker's head will be visible in the frustum, despite the path pos being outside it.
-        if(skipPathNode)
-        {
-            Vector3 headPosAtNode = mPath.back() + Vector3::UnitY * mCharConfig->walkerHeight;
-            if(frustum.ContainsPoint(headPosAtNode))
-            {
-                skipPathNode = false;
-            }
-        }
-
-        // If the path node is fairly close to the camera position, don't skip it.
-        // This helps to ensure that the walker doesn't "pop in" when coming in from behind the camera.
-        if(skipPathNode)
-        {
-            const float kDontSkipNodeDist = 75.0f;
-            float distSq = (mPath.back() - camera->GetOwner()->GetPosition()).GetLengthSq();
-            if(distSq < kDontSkipNodeDist * kDontSkipNodeDist)
-            {
-                skipPathNode = false;
-            }
-        }
-
-        // Ok, all cases checked!
-        // If path node is skipped, get rid of it.
-        if(skipPathNode)
-        {
-            lastPoppedPathPos = mPath.back();
-            mPath.pop_back();
-        }
-        else
-        {
+            firstInFrustumIndex = i;
             break;
         }
     }
+    //printf("First path node in frustum is %d\n", firstInFrustumIndex);
 
-    // This path node WAS NOT skipped, stop shortening path!
-    // But push the last popped position back onto the path (so that walker starts walking _just_ off-screen).
-    if(mPath.size() < originalPathSize)
+    // If the entire path is inside the frustum, we can't skip anything - early out.
+    if(firstInFrustumIndex == mPath.size() - 1)
     {
-        if((mPath.back() - lastPoppedPathPos).GetLengthSq() > 20.0f * 20.0f)
-        {
-            LineSegment ls(mPath.back(), lastPoppedPathPos);
-            int outSideFrustumCounter = 0;
-            for(float t = 0.1f; t <= 1.0f; t += 0.1f)
-            {
-                if(!frustum.ContainsPoint(ls.GetPoint(t)))
-                {
-                    ++outSideFrustumCounter;
-                    if(outSideFrustumCounter >= 5 || t == 1.0f)
-                    {
-                        mPath.push_back(ls.GetPoint(t));
-                        break;
-                    }
-                }
-            }
-        }
-        else
-        {
-            mPath.push_back(lastPoppedPathPos);
-        }
+        //printf("Early out skip path nodes - the first path node is in the frustum, so nothing can be skipped.\n");
+        return false;
     }
-    //Debug::DrawLine(mPath.back(), mPath[mPath.size() - 2], Color32::Orange, 30.0f);
 
-    // If path was shortened, warp walker directly to last spot.
-    bool pathWasShortened = mPath.size() < originalPathSize;
-    if(pathWasShortened)
+    // We now know the first node index in the frustum. From here, there are two options:
+    // 1) No node is in the view frustum (index will be -1). In this case, we can teleport directly to the final node.
+    // 2) Some node is in the view frustum, but we can't teleport directly there - we must go to one *BEFORE* to avoid character popping onto screen.
+    int lastNeededNodeIndex = firstInFrustumIndex == -1 ? 0 : firstInFrustumIndex + 1;
+
+    // Remove all nodes that we don't need from the path.
+    Vector3 dirFromLastPoppedNode;
+    for(int i = mPath.size() - 1; i > lastNeededNodeIndex; --i)
     {
-        std::cout << "Warp to " << mPath.back() << std::endl;
-        mGKOwner->SetPosition(mPath.back());
+        Vector3 currentPathPos = mPath.back();
+        Vector3 nextPathPos = mPath[mPath.size() - 2];
+        dirFromLastPoppedNode = nextPathPos - currentPathPos;
 
-        if(mPath.size() > 1)
-        {
-            Vector3 dir = Vector3::Normalize(mPath[mPath.size() - 2] - mPath.back());
-            std::cout << "Warp heading " << dir << ", " << Heading::FromDirection(dir) << std::endl;
-            mGKOwner->SetHeading(Heading::FromDirection(dir));
-        }
+        //printf("Removed path node %d\n", i);
+        mPath.pop_back();
     }
-    return pathWasShortened;
+
+    // Calculate skip heading.
+    Heading warpHeading = Heading::FromDirection(dirFromLastPoppedNode);
+
+    // Log that we're skipping to the view.
+    std::string log1 = StringUtil::Format("%s SkipToView from Point(%.1f, %.1f)", mGKOwner->GetName().c_str(), mGKOwner->GetPosition().x, mGKOwner->GetPosition().z);
+    gReportManager.Log("Generic", log1);
+
+    std::string log2 = StringUtil::Format("%s SkipToView to Point(%.1f, %.1f) Heading(%.1f)", mGKOwner->GetName().c_str(), mPath.back().x, mPath.back().z, warpHeading.ToDegrees());
+    gReportManager.Log("Generic", log2);
+
+    // Do the skip!
+    mGKOwner->SetPosition(mPath.back());
+    mGKOwner->SetHeading(warpHeading);
+    return true;
 }
 
 void Walker::RemoveExcessPathNodes()
