@@ -3,23 +3,17 @@
 #include "AssetManager.h"
 #include "GEngine.h"
 #include "InputManager.h"
-#include "UICanvas.h"
 #include "UIImage.h"
+#include "UIUtil.h"
 
 FinishedScreen::FinishedScreen() : Actor(TransformType::RectTransform)
 {
-    AddComponent<UICanvas>(20);
+    // Add canvas taking up entire screen with black background.
+    UI::AddCanvas(this, 20, Color32::Black);
 
-    // Canvas takes up entire screen.
-    RectTransform* rectTransform = GetComponent<RectTransform>();
-    rectTransform->SetSizeDelta(0.0f, 0.0f);
-    rectTransform->SetAnchorMin(Vector2::Zero);
-    rectTransform->SetAnchorMax(Vector2::One);
-
-    // Add finished screen background image.
-    UIImage* background = AddComponent<UIImage>();
-    background->SetTexture(gAssetManager.LoadTexture("FINISHED.BMP"));
-    background->SetReceivesInput(true);
+    // Add finished image.
+    UIImage* background = UI::CreateWidgetActor<UIImage>("Image", this);
+    background->SetTexture(gAssetManager.LoadTexture("FINISHED.BMP"), true);
 }
 
 void FinishedScreen::Show()
