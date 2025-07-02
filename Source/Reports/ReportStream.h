@@ -60,24 +60,19 @@ public:
     ReportStream() = default;
     ReportStream(const std::string& name);
 
-    //ReportStream(const ReportStream& other) = default;
-    //ReportStream(ReportStream&& other) = default;
-    //ReportStream& operator=(const ReportStream& other) = default;
+    void Log(const std::string& content);
 
-    void Log(std::string content);
-    //TODO: operator<<?
-
-    std::string& GetName() { return mName; }
+    const std::string& GetName() { return mName; }
 
     void SetAction(ReportAction action) { mAction = action; }
 
-    void AddOutput(ReportOutput output) { mOutput = (ReportOutput)(mOutput | output); }
-    void RemoveOutput(ReportOutput output) { mOutput = (ReportOutput)(mOutput & ~(output)); }
-    void ClearOutput() { mOutput = (ReportOutput)0; }
+    void AddOutput(ReportOutput output) { mOutput = mOutput | output; }
+    void RemoveOutput(ReportOutput output) { mOutput = mOutput & ~(output); }
+    void ClearOutput() { mOutput = ReportOutput::None; }
 
-    void AddContent(ReportContent content) { mContent = (ReportContent)(mContent | content); }
-    void RemoveContent(ReportContent content) { mContent = (ReportContent)(mContent & ~(content)); }
-    void ClearContent() { mContent = (ReportContent)0; }
+    void AddContent(ReportContent content) { mContent = mContent | content; }
+    void RemoveContent(ReportContent content) { mContent = mContent & ~(content); }
+    void ClearContent() { mContent = ReportContent::None; }
 
     void Enable() { mEnabled = true; }
     void Disable() { mEnabled = false; }

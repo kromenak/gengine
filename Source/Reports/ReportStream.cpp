@@ -17,7 +17,7 @@ ReportStream::ReportStream(const std::string& name) :
 
 }
 
-void ReportStream::Log(std::string content)
+void ReportStream::Log(const std::string& content)
 {
     // Easy part: don't do anything if not enabled.
     if(!mEnabled) { return; }
