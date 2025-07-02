@@ -29,7 +29,7 @@
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_CAPTIONS, enabled);
 }
 
-CaptionsOverlay::CaptionsOverlay() : Actor(TransformType::RectTransform)
+CaptionsOverlay::CaptionsOverlay() : Actor("CaptionsOverlay", TransformType::RectTransform)
 {
     // Draw order should be equal to the status overlay.
     AddComponent<UICanvas>(16);
