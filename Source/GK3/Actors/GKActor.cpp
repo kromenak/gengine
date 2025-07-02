@@ -518,7 +518,7 @@ void GKActor::StopAnimation(VertexAnimation* anim)
     mVertexAnimator->Stop(anim);
 }
 
-AABB GKActor::GetAABB()
+AABB GKActor::GetAABB() const
 {
     return mMeshRenderer->GetAABB();
 }

@@ -35,7 +35,7 @@ public:
     void SampleAnimation(VertexAnimParams& animParams, int frame) override;
     void StopAnimation(VertexAnimation* anim = nullptr) override;
     MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
-    AABB GetAABB() override;
+    AABB GetAABB() const override;
 
 private:
     // The prop's mesh renderer.

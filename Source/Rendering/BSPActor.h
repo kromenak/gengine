@@ -22,7 +22,7 @@ public:
     void AddPolygon(BSPPolygon* polygon) { mPolygons.push_back(polygon); }
 
     void SetAABB(const AABB& aabb) { mAABB = aabb; }
-    AABB GetAABB() override { return mAABB; }
+    AABB GetAABB() const override { return mAABB; }
 
     void SetVisible(bool visible);
     void SetInteractive(bool interactive);

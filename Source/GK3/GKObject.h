@@ -44,7 +44,7 @@ public:
     virtual MeshRenderer* GetMeshRenderer() const { return nullptr;  }
     void SetFixedLightingColor(const Color32& color);
 
-    virtual AABB GetAABB() { return AABB::FromCenterAndSize(GetPosition(), Vector3::One); }
+    virtual AABB GetAABB() const { return AABB::FromCenterAndSize(GetPosition(), Vector3::One); }
 
     Vector3 GetAudioPosition() const;
 

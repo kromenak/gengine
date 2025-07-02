@@ -140,7 +140,7 @@ void GKProp::StopAnimation(VertexAnimation* anim)
     mVertexAnimator->Stop(anim);
 }
 
-AABB GKProp::GetAABB()
+AABB GKProp::GetAABB() const
 {
     return mMeshRenderer->GetAABB();
 }
