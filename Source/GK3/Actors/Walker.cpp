@@ -465,6 +465,10 @@ void Walker::OnUpdate(float deltaTime)
         {
             if(TurnToFace(deltaTime, mTurnToFaceDir, kTurnSpeed))
             {
+                #if defined(DEBUG_WALKER)
+                std::cout << "Finished turning towards " << mTurnToFaceDir << std::endl;
+                #endif
+
                 // Done turning to face, do next action in sequence.
                 PopAndNextAction();
             }
@@ -491,9 +495,6 @@ void Walker::OnUpdate(float deltaTime)
 
 void Walker::WalkToInternal(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool fromAutoscript, bool mustReachDestination)
 {
-    // Clear continue walk anim flag. Since we're starting a new walk.
-    mNeedContinueWalkAnim = false;
-
     // Save if from autoscript.
     mFromAutoscript = fromAutoscript;
 
@@ -588,11 +589,11 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
             mFinalPosition.y = gSceneManager.GetScene()->GetFloorY(mFinalPosition);
 
             /*
-            Debug::DrawLine(GetOwner()->GetPosition(), GetOwner()->GetPosition() + Vector3::UnitY * 100.0f, Color32::Blue, 10.0f);
-            Debug::DrawLine(mPath.back(), mPath.back() + Vector3::UnitY * 100.0f, Color32::Magenta, 10.0f);
+            Debug::DrawLine(mPath[0], mPath[0] + Vector3::UnitY * 100.0f, Color32::Orange, 10.0f);
             for(int i = 1; i < mPath.size(); ++i)
             {
                 Debug::DrawLine(mPath[i - 1], mPath[i], Color32::Red, 10.0f);
+                Debug::DrawLine(mPath[i], mPath[i] + Vector3::UnitY * 100.0f, Color32::Orange, 10.0f);
             }
             */
 
@@ -688,6 +689,10 @@ void Walker::PopAndNextAction()
     {
         mPrevWalkOp = mWalkActions.back();
         mWalkActions.pop_back();
+
+        #if defined(DEBUG_WALKER)
+        std::cout << "Popped walk action." << std::endl;
+        #endif
     }
 
     // Go to next action.
@@ -711,13 +716,12 @@ void Walker::NextAction()
         animParams.allowMove = true;
         animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
         animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = [this](){
-            if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStart)
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams, [this](){
+            if(!mWalkActions.empty() && mWalkActions.back() <= WalkOp::FollowPathStartTurnRight)
             {
                 PopAndNextAction();
             }
-        };
-        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+        });
     }
     else if(currentWalkOp == WalkOp::FollowPathStartTurnLeft)
     {
@@ -730,13 +734,12 @@ void Walker::NextAction()
         animParams.allowMove = true;
         animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
         animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = [this](){
-            if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStartTurnLeft)
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams, [this](){
+            if(!mWalkActions.empty() && mWalkActions.back() <= WalkOp::FollowPathStartTurnRight)
             {
                 PopAndNextAction();
             }
-        };
-        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+        });
     }
     else if(currentWalkOp == WalkOp::FollowPathStartTurnRight)
     {
@@ -749,13 +752,12 @@ void Walker::NextAction()
         animParams.allowMove = true;
         animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
         animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = [this](){
-            if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStartTurnRight)
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams, [this](){
+            if(!mWalkActions.empty() && mWalkActions.back() <= WalkOp::FollowPathStartTurnRight)
             {
                 PopAndNextAction();
             }
-        };
-        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+        });
     }
     else if(currentWalkOp == WalkOp::FollowPath)
     {
@@ -800,7 +802,7 @@ void Walker::NextAction()
         gSceneManager.GetScene()->GetAnimator()->Start(animParams);
         */
 
-        // If I had to guess, the reason would be: it's too hard to 100% ensure the walker ends up at the correct final position!
+        // If I had to guess, why "walk end" anims weren't used: it's too hard to 100% ensure the walker ends up at the correct final position!
         // To absolutely ensure that, let's set the owner to the final position just to be sure (except for when we don't care about exact end position, such as a walk-to-see situation).
         if(mWalkToSeeTarget == nullptr)
         {
@@ -823,10 +825,6 @@ void Walker::NextAction()
     }
     else // WalkOp::None
     {
-        #if defined(DEBUG_WALKER)
-        std::cout << "Walk Sequence Done!" << std::endl;
-        #endif
-
         // No actions left in sequence => walk is finished.
         OnWalkToFinished();
     }
@@ -841,6 +839,10 @@ void Walker::OnWalkAnimFinished()
 
 void Walker::OnWalkToFinished()
 {
+    #if defined(DEBUG_WALKER)
+    std::cout << "Walk Sequence Done!" << std::endl;
+    #endif
+
     // No more path.
     mPath.clear();
 
