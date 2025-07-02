@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "GEngine.h"
+#include "InputManager.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UIUtil.h"
@@ -21,25 +22,25 @@ QuitPopup::QuitPopup() : Actor("QuitPopup", TransformType::RectTransform),
     popupBackground->SetTexture(gAssetManager.LoadTexture("QUITGAME.BMP"), true);
 
     // Create "yes" button.
-    UIButton* yesButton = UI::CreateWidgetActor<UIButton>("YesButton", popupBackground);
-    yesButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-    yesButton->GetRectTransform()->SetAnchoredPosition(261.0f, 59.0f);
-    yesButton->SetUpTexture(gAssetManager.LoadTexture("QG_YES_U.BMP"));
-    yesButton->SetHoverTexture(gAssetManager.LoadTexture("QG_YES_H.BMP"));
-    yesButton->SetDownTexture(gAssetManager.LoadTexture("QG_YES_D.BMP"));
-    yesButton->SetPressCallback([](UIButton* button){
+    mYesButton = UI::CreateWidgetActor<UIButton>("YesButton", popupBackground);
+    mYesButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+    mYesButton->GetRectTransform()->SetAnchoredPosition(261.0f, 59.0f);
+    mYesButton->SetUpTexture(gAssetManager.LoadTexture("QG_YES_U.BMP"));
+    mYesButton->SetHoverTexture(gAssetManager.LoadTexture("QG_YES_H.BMP"));
+    mYesButton->SetDownTexture(gAssetManager.LoadTexture("QG_YES_D.BMP"));
+    mYesButton->SetPressCallback([](UIButton* button){
         GEngine::Instance()->Quit();
         // No SFX for this button press, since the game is quitting.
     });
 
     // Create "no" button.
-    UIButton* noButton = UI::CreateWidgetActor<UIButton>("NoButton", popupBackground);
-    noButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-    noButton->GetRectTransform()->SetAnchoredPosition(418.0f, 59.0f);
-    noButton->SetUpTexture(gAssetManager.LoadTexture("QG_NO_U.BMP"));
-    noButton->SetHoverTexture(gAssetManager.LoadTexture("QG_NO_H.BMP"));
-    noButton->SetDownTexture(gAssetManager.LoadTexture("QG_NO_D.BMP"));
-    noButton->SetPressCallback([this](UIButton* button){
+    mNoButton = UI::CreateWidgetActor<UIButton>("NoButton", popupBackground);
+    mNoButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+    mNoButton->GetRectTransform()->SetAnchoredPosition(418.0f, 59.0f);
+    mNoButton->SetUpTexture(gAssetManager.LoadTexture("QG_NO_U.BMP"));
+    mNoButton->SetHoverTexture(gAssetManager.LoadTexture("QG_NO_H.BMP"));
+    mNoButton->SetDownTexture(gAssetManager.LoadTexture("QG_NO_D.BMP"));
+    mNoButton->SetPressCallback([this](UIButton* button){
         Hide();
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
     });
@@ -67,4 +68,17 @@ void QuitPopup::Hide()
 
     // Clear interact during actions flag.
     GEngine::Instance()->SetAllowInteractDuringActions(false);
+}
+
+void QuitPopup::OnUpdate(float deltaTime)
+{
+    // Keyboard shortcuts for yes/no buttons.
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
+    {
+        mYesButton->AnimatePress();
+    }
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    {
+        mNoButton->AnimatePress();
+    }
 }
