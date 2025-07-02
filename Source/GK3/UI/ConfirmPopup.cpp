@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "IniParser.h"
+#include "InputManager.h"
 #include "TextAsset.h"
 #include "UIButton.h"
 #include "UILabel.h"
@@ -136,24 +137,24 @@ ConfirmPopup::ConfirmPopup() : Actor("ConfirmPopup", TransformType::RectTransfor
     mMessageLabel = label;
 
     // Create "yes" button.
-    UIButton* yesButton = UI::CreateWidgetActor<UIButton>("YesButton", box);
-    yesButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-    yesButton->GetRectTransform()->SetAnchoredPosition(43.0f, 15.0f);
-    yesButton->SetUpTexture(yesButtonUpTexture);
-    yesButton->SetHoverTexture(yesButtonHoverTexture);
-    yesButton->SetDownTexture(yesButtonDownTexture);
-    yesButton->SetPressCallback([this](UIButton* button){
+    mYesButton = UI::CreateWidgetActor<UIButton>("YesButton", box);
+    mYesButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+    mYesButton->GetRectTransform()->SetAnchoredPosition(43.0f, 15.0f);
+    mYesButton->SetUpTexture(yesButtonUpTexture);
+    mYesButton->SetHoverTexture(yesButtonHoverTexture);
+    mYesButton->SetDownTexture(yesButtonDownTexture);
+    mYesButton->SetPressCallback([this](UIButton* button){
         OnYesButtonPressed();
     });
 
     // Create "no" button.
-    UIButton* noButton = UI::CreateWidgetActor<UIButton>("NoButton", box);
-    noButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-    noButton->GetRectTransform()->SetAnchoredPosition(109.0f, 15.0f);
-    noButton->SetUpTexture(noButtonUpTexture);
-    noButton->SetHoverTexture(noButtonHoverTexture);
-    noButton->SetDownTexture(noButtonDownTexture);
-    noButton->SetPressCallback([this](UIButton* button){
+    mNoButton = UI::CreateWidgetActor<UIButton>("NoButton", box);
+    mNoButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+    mNoButton->GetRectTransform()->SetAnchoredPosition(109.0f, 15.0f);
+    mNoButton->SetUpTexture(noButtonUpTexture);
+    mNoButton->SetHoverTexture(noButtonHoverTexture);
+    mNoButton->SetDownTexture(noButtonDownTexture);
+    mNoButton->SetPressCallback([this](UIButton* button){
         OnNoButtonPressed();
     });
 
@@ -186,6 +187,20 @@ void ConfirmPopup::Hide()
     // Pop layer off stack.
     gLayerManager.PopLayer(&mLayer);
     SetActive(false);
+}
+
+void ConfirmPopup::OnUpdate(float deltaTime)
+{
+    // Keyboard shortcuts for yes/no buttons.
+    // NOTE: original game actually doesn't have keyboard shortcuts on this popup. But feels like a good thing to have?
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
+    {
+        mYesButton->AnimatePress();
+    }
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    {
+        mNoButton->AnimatePress();
+    }
 }
 
 void ConfirmPopup::OnYesButtonPressed()

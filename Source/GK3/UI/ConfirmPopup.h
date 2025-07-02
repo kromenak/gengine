@@ -11,6 +11,7 @@
 #include "LayerManager.h"
 
 class RectTransform;
+class UIButton;
 class UILabel;
 
 class ConfirmPopup : public Actor
@@ -20,6 +21,9 @@ public:
 
     void Show(const std::string& message, const std::function<void(bool)>& callback);
     void Hide();
+
+protected:
+    void OnUpdate(float deltaTime) override;
 
 private:
     Layer mLayer;
@@ -32,6 +36,10 @@ private:
 
     // The label that shows whatever message has been passed in.
     UILabel* mMessageLabel = nullptr;
+
+    // The two buttons that can be pressed.
+    UIButton* mYesButton = nullptr;
+    UIButton* mNoButton = nullptr;
 
     // A callback to call when the user has pressed the yes/no buttons.
     std::function<void(bool)> mCallback = nullptr;
