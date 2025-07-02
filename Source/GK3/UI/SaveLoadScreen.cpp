@@ -216,50 +216,54 @@ void SaveLoadScreen::Hide()
 
 void SaveLoadScreen::OnUpdate(float deltaTime)
 {
-    // When up arrow is pressed, move highlight to previous save in the list.
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP) && mSaveIndex > 0)
+    // Other layers can show above this layer, so it must be the top one for keyboard shortcuts to work.
+    if(gLayerManager.IsTopLayer(&mSaveLayer) || gLayerManager.IsTopLayer(&mLoadLayer))
     {
-        // If the previous save is off-screen (due to scrolling), we should scroll one increment so it IS on-screen.
-        int listEntryIndex = SaveIndexToListEntryIndex(mSaveIndex - 1);
-        if(listEntryIndex < 0)
+        // When up arrow is pressed, move highlight to previous save in the list.
+        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP) && mSaveIndex > 0)
         {
-            OnScrollbarUpArrowPressed();
+            // If the previous save is off-screen (due to scrolling), we should scroll one increment so it IS on-screen.
+            int listEntryIndex = SaveIndexToListEntryIndex(mSaveIndex - 1);
+            if(listEntryIndex < 0)
+            {
+                OnScrollbarUpArrowPressed();
+            }
+
+            // Set new highlighted save.
+            SetSelectedSaveIndex(mSaveIndex - 1);
         }
 
-        // Set new highlighted save.
-        SetSelectedSaveIndex(mSaveIndex - 1);
-    }
-
-    // When down arrow is pressed, move highlight to next save in the list.
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN) && mSaveIndex < mSaveEntryCount - 1)
-    {
-        // If the next save is off-screen (due to scrolling), scroll down one so it IS on-screen.
-        int listEntryIndex = SaveIndexToListEntryIndex(mSaveIndex + 1);
-        if(listEntryIndex < 0)
+        // When down arrow is pressed, move highlight to next save in the list.
+        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN) && mSaveIndex < mSaveEntryCount - 1)
         {
-            OnScrollbarDownArrowPressed();
+            // If the next save is off-screen (due to scrolling), scroll down one so it IS on-screen.
+            int listEntryIndex = SaveIndexToListEntryIndex(mSaveIndex + 1);
+            if(listEntryIndex < 0)
+            {
+                OnScrollbarDownArrowPressed();
+            }
+
+            // Set new highlighted save.
+            SetSelectedSaveIndex(mSaveIndex + 1);
         }
 
-        // Set new highlighted save.
-        SetSelectedSaveIndex(mSaveIndex + 1);
-    }
-
-    // Escape exits the screen.
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
-    {
-        mExitButton->AnimatePress();
-    }
-
-    // Return acts as a save/load button press.
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
-    {
-        if(mSaveButton->IsEnabled())
+        // Escape exits the screen.
+        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
         {
-            mSaveButton->AnimatePress();
+            mExitButton->AnimatePress();
         }
-        else if(mLoadButton->IsEnabled())
+
+        // Return acts as a save/load button press.
+        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
         {
-            mLoadButton->AnimatePress();
+            if(mSaveButton->IsEnabled())
+            {
+                mSaveButton->AnimatePress();
+            }
+            else if(mLoadButton->IsEnabled())
+            {
+                mLoadButton->AnimatePress();
+            }
         }
     }
 }
