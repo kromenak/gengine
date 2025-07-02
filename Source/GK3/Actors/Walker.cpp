@@ -182,33 +182,72 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
     // Warp actor to end of path.
     if(!mPath.empty())
     {
+        // Make sure front of path is at floor height.
         mPath.front().y = gSceneManager.GetScene()->GetFloorY(mPath.front());
 
-        //Debug::DrawLine(mPath.front(), mPath.front() + Vector3::UnitY * 10.0f, Color32::Blue, 10.0f);
-        Vector3 oldPos = mGKOwner->GetPosition();
-        mGKOwner->SetPosition(mPath.front());
-
-        // Figure out a facing direction at the end of the path.
-        if(mWalkToSeeTarget != nullptr)
+        // Start with sane defaults for warp position/heading.
+        Vector3 warpPos = mPath.front();
+        Vector3 warpDir;
+        if(mWalkActions.front() == WalkOp::TurnToFace)
         {
-            AABB targetAABB = mWalkToSeeTarget->GetAABB();
-            Vector3 dir = (targetAABB.GetCenter() - mPath.front()).Normalize();
-            mGKOwner->SetHeading(Heading::FromDirection(dir));
-            mTurnToFaceDir = mGKOwner->GetHeading().ToDirection();
-        }
-        else if(mWalkActions.front() == WalkOp::TurnToFace)
-        {
-            mGKOwner->SetHeading(Heading::FromDirection(mTurnToFaceDir));
+            warpDir = mTurnToFaceDir;
         }
         else if(mPath.size() > 1)
         {
-            //Debug::DrawLine(mPath.front(), mPath.front() + Vector3::Normalize(mPath.front() - mPath[1]) * 10.0f, Color32::Green, 10.0f);
-            mGKOwner->SetHeading(Heading::FromDirection(Vector3::Normalize(mPath.front() - mPath[1])));
+            warpDir = mPath.front() - mPath[1];
         }
         else
         {
-            mGKOwner->SetHeading(Heading::FromDirection(Vector3::Normalize(mPath.front() - oldPos)));
+            warpDir = mPath.front() - mGKOwner->GetPosition();
         }
+
+        // If we have a "walk to see" target, we can't necessarily just skip to the end of the path.
+        // We should skip to a position along the path where the target becomes visible to us.
+        if(mWalkToSeeTarget != nullptr)
+        {
+            bool sawTargetAlongPath = false;
+            for(int i = mPath.size() - 1; i > 0; --i)
+            {
+                // Make sure path node is at floor height.
+                mPath[i].y = gSceneManager.GetScene()->GetFloorY(mPath[i]);
+
+                // See if the walk to see target would be in view if the character's head was roughly at this position.
+                Vector3 headPosAtNode = mPath[i] + Vector3::UnitY * mCharConfig->walkerHeight;
+                if(IsWalkToSeeTargetInView(headPosAtNode, warpDir))
+                {
+                    warpPos = mPath[i];
+                    sawTargetAlongPath = true;
+                    break;
+                }
+
+                // For better fidelity, also check a few spots along the path from this node to next node.
+                LineSegment ls(mPath[i], mPath[i - 1]);
+                for(float t = 0.0f; t < 1.0f; t += 0.25f)
+                {
+                    Vector3 pointAlongLine = ls.GetPoint(t);
+                    if(IsWalkToSeeTargetInView(pointAlongLine, warpDir))
+                    {
+                        warpPos = pointAlongLine;
+                        sawTargetAlongPath = true;
+                        break;
+                    }
+                }
+                if(sawTargetAlongPath) { break; }
+            }
+
+            // If we crawled the entire path and never saw the target, we need a fallback.
+            if(!sawTargetAlongPath)
+            {
+                warpDir = mWalkToSeeTarget->GetAABB().GetCenter() - mPath.front();
+            }
+
+            // "Walk to see" uses a final turn to face, so make sure that's set as well.
+            mTurnToFaceDir = warpDir;
+        }
+
+        // Do the warp!
+        mGKOwner->SetPosition(warpPos);
+        mGKOwner->SetHeading(Heading::FromDirection(warpDir));
     }
 
     // Clear the path - we don't need to follow it anymore.
@@ -222,9 +261,6 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
     }
     else // even though we skipped, still want to play "end walk" anim.
     {
-        // Move actor back by "at position" amount, so end walk anim puts us in right spot.
-        mGKOwner->SetPosition(mGKOwner->GetPosition());// -(mGKOwner->GetForward() * kAtNodeDist));
-
         // Remove all walk ops except for the "follow path end" op.
         bool poppedAction = false;
         while(!mWalkActions.empty() && mWalkActions.back() != WalkOp::FollowPathEnd)
