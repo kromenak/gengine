@@ -144,6 +144,7 @@ private:
     void OnWalkToFinished();
 
     bool IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const;
+    bool IsWalkToSeeTargetInView(const Vector3& headPosition, Vector3& outTurnToFaceDir) const;
 
     bool SkipPathNodesOutsideFrustum();
     void RemoveExcessPathNodes();

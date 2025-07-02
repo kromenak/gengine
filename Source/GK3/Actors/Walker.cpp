@@ -829,6 +829,11 @@ void Walker::OnWalkToFinished()
 
 bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
 {
+    return IsWalkToSeeTargetInView(mGKOwner->GetHeadPosition(), outTurnToFaceDir);
+}
+
+bool Walker::IsWalkToSeeTargetInView(const Vector3& headPosition, Vector3& outTurnToFaceDir) const
+{
     // Not in view if it doesn't exist!
     if(mWalkToSeeTarget == nullptr) { return false; }
 
@@ -836,39 +841,51 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
     AABB targetAABB = mWalkToSeeTarget->GetAABB();
     //Debug::DrawAABB(targetAABB, Color32::Orange, 5.0f);
 
-    // Create ray from head in direction of target position.
-    Vector3 headPos = mGKOwner->GetHeadPosition();
-    Vector3 dir = (targetAABB.GetCenter() - headPos).Normalize();
-    Ray ray(headPos, dir);
-    //Debug::DrawLine(targetAABB.GetCenter(), headPos, Color32::Red);
-
-    // Cast a ray from our head in the direction of the target AABB.
-    GKObject* obj = static_cast<GKObject*>(mGKOwner);
-    SceneCastResult result = gSceneManager.GetScene()->RaycastAABBs(ray, &obj, 1);
-
-    // If hit the target with the ray, it must be in view.
-    if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
-       StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
-        (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())))
+    // To see if the target is in view, we need to cast some rays from our head to the target's AABB.
+    // But a single ray at the center of the AABB might not do the trick - we need to cast a few.
+    // For example, if the target is standing behind a desk, a ray to the center will likely not hit, but a ray to the top would.
+    Ray rays[] = {
+        Ray(headPosition, (targetAABB.GetMax() - headPosition).Normalize()),
+        Ray(headPosition, (targetAABB.GetCenter() - headPosition).Normalize()),
+        Ray(headPosition, (targetAABB.GetMin() - headPosition).Normalize())
+    };
+    for(Ray& ray : rays)
     {
-        // Convert ray direction to a "facing" direction,
-        dir.y = 0.0f;
-        outTurnToFaceDir = dir.Normalize();
-        return true;
-    }
-    else
-    {
-        result = gSceneManager.GetScene()->Raycast(ray, false, &obj, 1);
+        //Debug::DrawLine(headPosition, headPosition + ray.direction * 100.0f, Color32::Red);
+
+        // Cast a ray from our head (ignoring ourself).
+        GKObject* obj = static_cast<GKObject*>(mGKOwner);
+        SceneCastResult result = gSceneManager.GetScene()->RaycastAABBs(ray, &obj, 1);
+
+        // If hit the target with the ray, it must be in view.
         if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
            StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
-            (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())))
+           (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())))
         {
-            // Convert ray direction to a "facing" direction,
-            dir.y = 0.0f;
-            outTurnToFaceDir = dir.Normalize();
+            // Regardless of what ray hit (min/center/max), we always want to look at the center.
+            outTurnToFaceDir = (targetAABB.GetCenter() - headPosition);
+            outTurnToFaceDir.y = 0.0f;
+            //Debug::DrawLine(headPosition, headPosition + outTurnToFaceDir.Normalize() * 100.0f, Color32::Green, 30.0f);
             return true;
         }
+        /*
+        else
+        {
+            result = gSceneManager.GetScene()->Raycast(ray, false, &obj, 1);
+            if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
+               StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
+               (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())))
+            {
+                // Convert ray direction to a "facing" direction,
+                dir.y = 0.0f;
+                outTurnToFaceDir = dir.Normalize();
+                return true;
+            }
+        }
+        */
     }
+
+    // If execution gets here, the walk to see target doesn't seem to be in view.
     return false;
 }
 
