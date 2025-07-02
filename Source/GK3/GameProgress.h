@@ -35,7 +35,7 @@ public:
     std::string GetTimeblockDisplayName(const std::string& timeblockStr) const;
 
     void EndCurrentTimeblock(const std::function<void()>& callback);
-    void StartTimeblock(const Timeblock& timeblock, const std::function<void()>& callback);
+    void StartTimeblock(const Timeblock& timeblock, bool loadingSave, const std::function<void()>& callback);
     bool IsChangingTimeblock() const { return mChangingTimeblock; }
 
     // Flags

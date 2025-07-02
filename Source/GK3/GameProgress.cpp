@@ -127,13 +127,13 @@ void GameProgress::EndCurrentTimeblock(const std::function<void()>& callback)
     });
 }
 
-void GameProgress::StartTimeblock(const Timeblock& timeblock, const std::function<void()>& callback)
+void GameProgress::StartTimeblock(const Timeblock& timeblock, bool loadingSave, const std::function<void()>& callback)
 {
     // Change time to new timeblock.
     SetTimeblock(timeblock);
 
     // Show timeblock screen.
-    gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, [this, timeblock, callback](){
+    gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, loadingSave, [this, timeblock, callback](){
 
         // Show beginning movie (if any) for the new timeblock.
         VideoHelper::PlayVideoWithCaptions(timeblock.ToString() + "begin", [this, callback](){

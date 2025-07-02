@@ -79,7 +79,7 @@ TimeblockScreen::TimeblockScreen() : Actor("TimeblockScreen", TransformType::Rec
     });
 }
 
-void TimeblockScreen::Show(const Timeblock& timeblock, float timer, const std::function<void()>& callback)
+void TimeblockScreen::Show(const Timeblock& timeblock, float timer, bool loadingSave, const std::function<void()>& callback)
 {
     mScreenTimer = timer;
     mCallback = callback;
@@ -109,11 +109,24 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, const std::f
     // Populate first image in text animation sequence.
     if(mAnimSequence != nullptr)
     {
-        mTextImage->SetTexture(mAnimSequence->GetTexture(0), true);
+        // If loading a save, the animation doesn't play - just force to show the final text image.
+        // Otherwise, start at first one.
+        if(loadingSave)
+        {
+            mAnimTimer = mAnimSequence->GetTextureCount() - 1;
+            mTextImage->SetTexture(mAnimSequence->GetTexture(static_cast<int>(mAnimTimer)), true);
+        }
+        else
+        {
+            mTextImage->SetTexture(mAnimSequence->GetTexture(0), true);
+        }
     }
 
-    // Play "tick tock" sound effect.
-    gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
+    // Play "tick tock" sound effect (when not loading a save).
+    if(!loadingSave)
+    {
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
+    }
 
     // Hide buttons if this screen is on a timer.
     mContinueButton->SetEnabled(mScreenTimer <= 0.0f);

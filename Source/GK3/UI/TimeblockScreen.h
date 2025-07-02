@@ -18,7 +18,7 @@ class TimeblockScreen : public Actor
 public:
     TimeblockScreen();
 
-    void Show(const Timeblock& timeblock, float timer, const std::function<void()>& callback);
+    void Show(const Timeblock& timeblock, float timer, bool loadingSave, const std::function<void()>& callback);
     void Hide();
 
 protected:

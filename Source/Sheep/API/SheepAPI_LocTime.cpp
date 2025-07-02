@@ -179,7 +179,7 @@ shpvoid SetTime(const std::string& timeblock)
     // This function waits until the next timeblock is fully started (which can take awhile - it waits for the user to hit "continue" on the UI).
     std::function<void()> waitable = AddWait();
     gGameProgress.EndCurrentTimeblock([newTimeblock, waitable](){
-        gGameProgress.StartTimeblock(newTimeblock, waitable);
+        gGameProgress.StartTimeblock(newTimeblock, false, waitable);
     });
     return 0;
 }

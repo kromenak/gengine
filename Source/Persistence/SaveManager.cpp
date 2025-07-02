@@ -374,7 +374,6 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
 
 void SaveManager::LoadInternal(const std::string& loadPath)
 {
-
     //TODO: It might be valuable to create the PersistState *before* unloading the current scene (for verification its a valid save).
     //TODO: To do that, due to scope, we'd have to dynamically allocate though!
 
@@ -404,7 +403,7 @@ void SaveManager::LoadInternal(const std::string& loadPath)
         // If this save was made while changing timeblocks, we need to show the timeblock screen instead of going directly to the gameplay scene.
         if(gGameProgress.IsChangingTimeblock())
         {
-            gGameProgress.StartTimeblock(gGameProgress.GetTimeblock(), [this, loadPath](){
+            gGameProgress.StartTimeblock(gGameProgress.GetTimeblock(), true, [this, loadPath](){
                 LoadInternal_PostSceneLoad(loadPath);
             });
         }

@@ -294,7 +294,7 @@ void GEngine::StartGame() const
         Timeblock timeblock("212P");
         gGameProgress.SetTimeblock(timeblock);
 
-        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [](){
+        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, false, [](){
             gSceneManager.LoadScene("CSE");
         });
     }
@@ -304,7 +304,7 @@ void GEngine::StartGame() const
         Timeblock timeblock("110A");
         gGameProgress.SetTimeblock(timeblock);
 
-        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [](){
+        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, false, [](){
             gSceneManager.LoadScene("R25");
         });
     }

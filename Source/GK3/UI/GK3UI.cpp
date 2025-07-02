@@ -46,14 +46,14 @@ void GK3UI::HideTitleScreen()
     }
 }
 
-void GK3UI::ShowTimeblockScreen(const Timeblock& timeblock, float timer, const std::function<void()>& callback)
+void GK3UI::ShowTimeblockScreen(const Timeblock& timeblock, float timer, bool loadingSave, const std::function<void()>& callback)
 {
     if(mTimeblockScreen == nullptr)
     {
         mTimeblockScreen = new TimeblockScreen();
         mTimeblockScreen->SetIsDestroyOnLoad(false);
     }
-    mTimeblockScreen->Show(timeblock, timer, callback);
+    mTimeblockScreen->Show(timeblock, timer, loadingSave, callback);
 }
 
 void GK3UI::ShowDeathScreen()

@@ -32,7 +32,7 @@ public:
     void ShowTitleScreen();
     void HideTitleScreen();
 
-    void ShowTimeblockScreen(const Timeblock& timeblock, float timer, const std::function<void()>& callback);
+    void ShowTimeblockScreen(const Timeblock& timeblock, float timer, bool loadingSave, const std::function<void()>& callback);
     void ShowDeathScreen();
     void ShowFinishedScreen();
 
