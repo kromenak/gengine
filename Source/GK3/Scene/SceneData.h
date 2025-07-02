@@ -54,6 +54,7 @@ public:
     const std::vector<const SceneModel*>& GetModels() const { return mModels; }
 
     // POSITIONS
+    const std::vector<const ScenePosition*>& GetScenePositions() const { return mPositions; }
     const ScenePosition* GetScenePosition(const std::string& positionName) const;
 
     // CAMERAS

@@ -247,6 +247,16 @@ void Scene::Load()
         }
     }
 
+    // Create actors to represent positions in the scene.
+    // This is just for debug purposes - no use in the final game.
+    const std::vector<const ScenePosition*>& scenePositions = mSceneData->GetScenePositions();
+    for(auto& scenePosition : scenePositions)
+    {
+        Actor* actor = new Actor(scenePosition->label);
+        actor->SetPosition(scenePosition->position);
+        actor->SetRotation(scenePosition->heading.ToQuaternion());
+    }
+
     // Init construction system.
     mConstruction.Init(this, mSceneData);
 }
