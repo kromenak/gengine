@@ -104,7 +104,7 @@ std::string GameProgress::GetTimeblockDisplayName() const
 std::string GameProgress::GetTimeblockDisplayName(const std::string& timeblockStr) const
 {
     // Keys for timeblocks are in form "Day110A".
-    return gLocalizer.GetText("Day" + mTimeblock.ToString());
+    return gLocalizer.GetText("Day" + timeblockStr);
 }
 
 void GameProgress::EndCurrentTimeblock(const std::function<void()>& callback)
