@@ -324,8 +324,9 @@ else() # Linux
     set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/lib/linux")
     add_custom_command(TARGET gk3
         POST_BUILD
-        COMMAND ln -fs "${PLAT_SOURCE_DIR}/Assets" "${PLAT_BINARY_DIR}"  #TODO: Can maybe use ${CMAKE_COMMAND} -E create_symlink?
-        COMMAND ln -fs "${PLAT_SOURCE_DIR}/Data" "${PLAT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E create_symlink "${PLAT_SOURCE_DIR}/Assets" "${PLAT_BINARY_DIR}/Assets"
+        COMMAND ${CMAKE_COMMAND} -E create_symlink "${PLAT_SOURCE_DIR}/Data" "${PLAT_BINARY_DIR}/Data"
+        COMMAND ${CMAKE_COMMAND} -E create_symlink "${PLAT_SOURCE_DIR}/GK3.ini" "${PLAT_BINARY_DIR}/GK3.ini"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavcodec.so" "${LIB_DEST}"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavformat.so" "${LIB_DEST}"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavutil.so" "${LIB_DEST}"
