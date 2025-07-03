@@ -361,8 +361,8 @@ bool GK3UI::CanExitScreen(const Layer& layer)
 bool GK3UI::IsOnExitableScreen() const
 {
     return gInventoryManager.IsInventoryInspectShowing() ||
-        mFingerprintScreen != nullptr && mFingerprintScreen->IsActive() ||
-        mDrivingScreen != nullptr && mDrivingScreen->IsActive();
+        (mFingerprintScreen != nullptr && mFingerprintScreen->IsActive()) ||
+        (mDrivingScreen != nullptr && mDrivingScreen->IsActive());
 }
 
 void GK3UI::ExitCurrentScreen()

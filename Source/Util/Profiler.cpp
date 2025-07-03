@@ -5,8 +5,6 @@
 
 #include <SDL.h>
 
-#include "Platform.h"
-
 uint64_t Profiler::sFrameNumber = 0L;
 std::vector<Sample> Profiler::sActiveSamples;
 

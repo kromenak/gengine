@@ -9,6 +9,7 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <thread>
 #include <utility>
 #include <vector>
 

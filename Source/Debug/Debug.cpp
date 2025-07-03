@@ -33,7 +33,7 @@ void Debug::Init()
 {
     // Load any debug flags that can be set from the INI file.
     Config* config = gAssetManager.LoadConfig("GK3.ini");
-    if(config->GetBool("Debug", "GEngine AlwaysActive", false))
+    if(config != nullptr && config->GetBool("Debug", "GEngine AlwaysActive", false))
     {
         SetFlag("GEngine AlwaysActive");
     }
