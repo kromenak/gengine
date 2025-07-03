@@ -5,11 +5,14 @@
 #include <imgui_impl_sdl.h>
 
 #include "Matrix4.h"
+#include "Platform.h"
 #include "Window.h"
 
 // Some OpenGL calls take in array indexes/offsets as pointers.
 // This macro just makes the syntax clearer for the reader.
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
+
+#define ERR_CHECK(x) if((x) != 0) { printf("%s\n", SDL_GetError()); }
 
 namespace GLState
 {
@@ -105,40 +108,72 @@ namespace
 
 bool GAPI_OpenGL::Init()
 {
-    // Tell SDL we want to use OpenGL 3.3
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    // OpenGL 3.3 (w/ Core Profile) is recommended for broad support and modern development.
+    ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE));
+    ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3));
+    ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3));
 
-    // Request some GL parameters, just in case
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    // Request that color buffer has 32bpp (8 bits per channel).
+    {
+        ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8));
+        ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
+        ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
+
+        // On Linux, when using Nvidia drivers, this caused GL context creation to fail on my test Ubuntu machine.
+        // This problem did not occur with the default Nouveau driver, but then performance was quite bad.
+        // My guess is that Linux is strict about allowing an alpha channel unless SDL_WINDOW_TRANSPARENT (in SDL 3) is used.
+        // See https://github.com/libsdl-org/SDL/issues/7511
+        // Anyway, the game seems to render fine (including shadows and translucent UI) without this, so it's not a big deal.
+        #if !defined(PLATFORM_LINUX)
+        ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8));
+        #endif
+    }
+
+    // A depth value of at least 24 is recommended for good depth precision.
+    ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
+
+    // 8-bits is common for stencil buffer size.
+    ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8));
+
+    // I think we'd always want double buffering, unless certain reasonable target machines don't support it.
+    ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1));
+
+    // Though we almost certainly want hardware-accelerated visuals, I don't think we need to *force* it.
+    // If you don't set this, the system will choose the best option (which will be accelerated if available).
+    //ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1));
 
     // Create OpenGL context.
     mContext = SDL_GL_CreateContext(Window::Get());
     if(mContext == nullptr)
     {
-        printf("Failed to create OpenGL context!\n");
+        printf("Failed to create OpenGL context: %s\n", SDL_GetError());
         return false;
     }
 
-    // Initialize GLEW.
-    glewExperimental = GL_TRUE;
-    GLenum glewInitResult = glewInit();
-    if(glewInitResult != GLEW_OK)
+    // GLEW is required to expose certain vital OpenGL function bindings at runtime.
+    // For example, without GLEW, a call to glCreateShader would fail.
     {
-        printf("glewInit failed! Error: %s\n", glewGetErrorString(glewInitResult));
-        return false;
-    }
+        // This variable is probably misnamed, but it's important on some platforms.
+        // It allows extensions to be loaded even if they aren't explicitly listed in the driver's extension string.
+        // On some platforms (Mac if I recall), this is vital because the extension string is incomplete!
+        glewExperimental = GL_TRUE;
 
-    // Clear any GLEW error.
-    glGetError();
+        // Initialize GLEW.
+        GLenum glewInitResult = glewInit();
+        if(glewInitResult != GLEW_OK)
+        {
+            printf("glewInit failed! Error: %s\n", glewGetErrorString(glewInitResult));
+            return false;
+        }
+
+        // On some platforms, GLEW generates benign errors.
+        // We can ignore this, but we need to call glGetError to clear the error flag.
+        GLenum error = glGetError();
+        if(error != GL_NO_ERROR)
+        {
+            printf("glewInit generated OpenGL error: %d\n", error);
+        }
+    }
 
     // Init OpenGL for IMGUI.
     ImGui_ImplSDL2_InitForOpenGL(Window::Get(), mContext);
@@ -146,9 +181,11 @@ bool GAPI_OpenGL::Init()
 
     // Set a global size for GL_POINTS rendering.
     // This is tuned for the points used in Sidney's Map Analysis - will need to set elsewhere if we need different sizes.
+    //TODO: it's considered a better practice to use gl_PointSize in a vertex shader.
     glPointSize(6.0f);
 
     // Same for GL_LINES rendering.
+    //TODO: there's no way to control this in a vertex shader, but we might want to specify the line width in the VertexArray object?
     glLineWidth(2.0f);
     return true;
 }

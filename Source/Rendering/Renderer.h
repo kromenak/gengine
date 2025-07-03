@@ -28,7 +28,7 @@ public:
     void Present();
 
     void SetCamera(Camera* camera) { mCamera = camera; }
-    Camera* GetCamera() { return mCamera; }
+    Camera* GetCamera() const { return mCamera; }
 
     void AddMeshRenderer(MeshRenderer* mc);
     void RemoveMeshRenderer(MeshRenderer* mc);

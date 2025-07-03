@@ -18,7 +18,6 @@
 #include "SaveManager.h"
 #include "SceneManager.h"
 #include "SequentialFilePathGenerator.h"
-#include "Shader.h"
 #include "Skybox.h"
 #include "Texture.h"
 #include "UICanvas.h"
@@ -104,7 +103,10 @@ bool Renderer::Initialize()
     }
 
     // Set which graphics API to use.
-    GAPI::Set<GAPI_OpenGL>();
+    if(!GAPI::Set<GAPI_OpenGL>())
+    {
+        return false;
+    }
 
     // Make sure the viewport is set to the full window size.
     GAPI::Get()->SetViewport(0, 0, Window::GetWidth(), Window::GetHeight());

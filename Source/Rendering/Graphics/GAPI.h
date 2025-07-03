@@ -25,7 +25,7 @@ class GAPI
 {
 public:
     template<typename T>
-    static void Set()
+    static bool Set()
     {
         // Shutdown the current GAPI.
         if(sCurrent != nullptr)
@@ -37,7 +37,7 @@ public:
 
         // Create the new GAPI.
         sCurrent = new T();
-        sCurrent->Init();
+        return sCurrent->Init();
     }
 
     static GAPI* Get() { return sCurrent; }
