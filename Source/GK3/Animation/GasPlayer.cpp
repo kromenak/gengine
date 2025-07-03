@@ -238,6 +238,12 @@ void GasPlayer::ProcessNextNode()
     int executeCount = 0;
     while(executeCount < 500)
     {
+        // It's possible for a node execution to null out the autoscript, so catch that and break out of this loop.
+        if(mGas == nullptr)
+        {
+            break;
+        }
+
         // First, update the node index and loop if necessary.
         ++mNodeIndex;
         mNodeIndex %= mGas->GetNodeCount();

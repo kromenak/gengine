@@ -240,7 +240,11 @@ float UseClearFlagGasNode::Execute(GasPlayer* player)
 
 float NewIdleGasNode::Execute(GasPlayer* player)
 {
-    player->Play(newGas);
+    // Stop the current autoscript first to ensure that cleanup animations execute.
+    // Then play the new autoscript.
+    player->Stop([this, player](){
+        player->Play(newGas);
+    });
     return 0.0f;
 }
 
