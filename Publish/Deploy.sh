@@ -56,6 +56,9 @@ if [ ${PLATFORM} = "Mac" ]; then
     # Copy over .ini file.
     cp ${ROOT_DIR}/GK3.ini "${ASSETS_DIR}"
 
+    # Copy over README file.
+    cp "${ROOT_DIR}/Publish/README.md" "${ASSETS_DIR}"
+
     # Copy the app bundle to the deploy directory.
     cp -r "${BUILD_DIR}/${APP_FILENAME}" "${DEPLOY_DIR}"
 
@@ -77,6 +80,9 @@ if [ ${PLATFORM} = "Linux" ]; then
     # Copy over .ini file.
     cp "${ROOT_DIR}/GK3.ini" "${DEPLOY_DIR}"
 
+    # Copy over README file.
+    cp "${ROOT_DIR}/Publish/README.md" "${DEPLOY_DIR}"
+
     # Copy the application (and rename to be player-facing).
     cp "${BUILD_DIR}/gk3" "${DEPLOY_DIR}/${APP_FILENAME}"
 
@@ -92,4 +98,3 @@ if [ ${PLATFORM} = "Linux" ]; then
     FINAL_ZIP_NAME="GK3-Linux-${VERSION_NUM}.zip"
     zip -r ${FINAL_ZIP_NAME} .
 fi
-

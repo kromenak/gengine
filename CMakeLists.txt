@@ -466,6 +466,7 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPLOY_DIR}/Data"
         COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/Data/README.md" "${DEPLOY_DIR}/Data"
         COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/GK3.ini" "${DEPLOY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/Publish/README.md" "${DEPLOY_DIR}"
         VERBATIM
     )
     add_custom_command(
