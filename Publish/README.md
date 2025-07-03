@@ -21,5 +21,8 @@ Use the `Tab` key to toggle developer tools mode - this gives you access to a me
 ## Troubleshooting
 This section contains notes or tips to help troubleshoot common issues when running the game.
 
+### Mac Gatekeeper Issues
+The Mac app is not codesigned (purely to avoid the $99 yearly fee), so your Mac will warn you that GK3 is potentially malicious software and refuse to open it. You will need to jump through a few hoops to open the app. See [this Apple support page](https://support.apple.com/en-us/102445) for guidance.
+
 ### Linux Performance Issues
 If the game exhibits poor performance on your Linux system, ensure that you've installed the latest drivers for your graphics card. The default driver provided out-of-the-box by Linux is likely not very effective for 3D rendering. In my testing, the default driver was only able to achieve 15-20 FPS. After installing the latest Nvidia driver, I was able to achieve 60 FPS consistently.
