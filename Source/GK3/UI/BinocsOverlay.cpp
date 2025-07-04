@@ -10,7 +10,6 @@
 #include "GEngine.h"
 #include "IniParser.h"
 #include "LocationManager.h"
-#include "Renderer.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "Scene.h"
@@ -248,6 +247,9 @@ void BinocsOverlay::Show()
 {
     SetActive(true);
     gLayerManager.PushLayer(&mLayer);
+
+    // HACK: Scene layer should not pause when binocs layer is up.
+    gSceneManager.GetScene()->SetPaused(false);
 
     // The binocs operate using the normal game camera in the current scene, but perform some trickery to make things look right.
     mGameCamera = gSceneManager.GetScene()->GetCamera();
