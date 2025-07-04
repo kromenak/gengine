@@ -423,7 +423,7 @@ void SidneyAnalyze::AnalyzeImage_OnRotateShapeButtonPressed()
     {
         // Play zoom in video.
         gActionManager.StartManualAction();
-        AnalyzeImage_PlayVideo("Parch2Zoom.avi", mAnalyzeVideoImages[2], "", [this](){
+        AnalyzeImage_PlayVideo("parch2zoom.avi", mAnalyzeVideoImages[2], "", [this](){
             gActionManager.FinishManualAction();
 
             // Turn off video image once this video finishes.
