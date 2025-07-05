@@ -817,9 +817,17 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
     }
 
     // For each out of bounds node, clamp the frame number within range and re-insert in the frames map.
-    // Note that we never remove the errant old frame number entry from mFrames - but should be fine, since out of bounds frames are never executed anyways.
     for(AnimNode* node : problemNodes)
     {
+        // We need to remove the node from its previous spot, to avoid double-deleting it when the Animation is destroyed.
+        auto& nodesOnFrame = mFrames[node->frameNumber];
+        auto it = std::find(nodesOnFrame.begin(), nodesOnFrame.end(), node);
+        if(it != nodesOnFrame.end())
+        {
+            nodesOnFrame.erase(it);
+        }
+
+        // Clamp frame number, insert it in frames list.
         node->frameNumber = Math::Clamp(node->frameNumber, 0, mFrameCount - 1);
         mFrames[node->frameNumber].push_back(node);
     }
