@@ -140,7 +140,6 @@ private:
     void NextAction();
 
     WalkOp GetCurrentWalkOp() const { return mWalkActions.empty() ? WalkOp::None : mWalkActions.back(); }
-    void OnWalkAnimFinished();
     void OnWalkToFinished();
 
     bool IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const;
@@ -155,6 +154,7 @@ private:
     float GetWalkTurnSpeed(Vector3 toNext);
     bool TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSpeed);
 
+    void PlayWalkLoopAnim(bool fromWalkStart);
     void StopAllWalkAnimations();
 
     void OutputWalkerPlan();

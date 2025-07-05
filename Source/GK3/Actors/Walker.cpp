@@ -436,15 +436,7 @@ void Walker::OnUpdate(float deltaTime)
                 // If walk anim has ended, we need to start it again.
                 if(mNeedContinueWalkAnim)
                 {
-                    mNeedContinueWalkAnim = false;
-
-                    AnimParams animParams;
-                    animParams.animation = mWalkLoopAnim;
-                    animParams.allowMove = true;
-                    animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
-                    animParams.fromAutoScript = mFromAutoscript;
-                    animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
-                    gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+                    PlayWalkLoopAnim(false);
                 }
 
                 // Still following path - turn to face next node in path.
@@ -764,30 +756,14 @@ void Walker::NextAction()
         #if defined(DEBUG_WALKER)
         std::cout << "Follow Path" << std::endl;
         #endif
-
-        AnimParams animParams;
-        animParams.animation = mWalkLoopAnim;
-        animParams.allowMove = true;
-        animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
-        animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
-
-        //TODO: Trying to make the transition from turn-right to walk anim more smooth, but this is probably not right.
-        if(mPrevWalkOp == WalkOp::FollowPathStartTurnRight)
-        {
-            animParams.startFrame = 10;
-        }
-
-        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+        PlayWalkLoopAnim(true);
     }
     else if(currentWalkOp == WalkOp::FollowPathEnd)
     {
         #if defined(DEBUG_WALKER)
         std::cout << "Follow Path End" << std::endl;
         #endif
-        gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartAnim);
-        gSceneManager.GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
-
+        StopAllWalkAnimations();
 
         // While testing the original game, I noticed that "walk end" anims don't seem to actually ever be used!
         // For example, if you insert a "scene texture swap" anim node into the walk end anim, it never happens. But it will if you put it in walk start/continue anims.
@@ -828,13 +804,6 @@ void Walker::NextAction()
         // No actions left in sequence => walk is finished.
         OnWalkToFinished();
     }
-}
-
-void Walker::OnWalkAnimFinished()
-{
-    // Set flag so that we continue the walk anim during the next update loop.
-    // A flag-based system is needed (rather than just continuing right here) to avoid infinite loops with high delta time values!
-    mNeedContinueWalkAnim = true;
 }
 
 void Walker::OnWalkToFinished()
@@ -1085,17 +1054,13 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSp
     float currToDesiredAngle = Math::Acos(Vector3::Dot(currentDir, desiredDir));
     if(currToDesiredAngle > kAtHeadingRadians)
     {
-        float rotateDirection = 0;
-        if(rotateDirection == 0)
-        {
-            // Which way do I rotate to get to facing direction I want?
-            // Can use y-axis of cross product to determine this.
-            Vector3 cross = Vector3::Cross(currentDir, desiredDir);
+        // Which way do I rotate to get to facing direction I want?
+        // Can use y-axis of cross product to determine this.
+        Vector3 cross = Vector3::Cross(currentDir, desiredDir);
 
-            // If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
-            // In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
-            rotateDirection = cross.y >= 0.0f ? 1.0f : -1.0f;
-        }
+        // If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
+        // In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
+        float rotateDirection = cross.y >= 0.0f ? 1.0f : -1.0f;
 
         // Determine how much we'll rotate this frame.
         // If it's enough to where our angle will be less than the "at heading" rotation, just set heading exactly.
@@ -1120,13 +1085,41 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSp
     return doneTurning;
 }
 
+void Walker::PlayWalkLoopAnim(bool fromWalkStart)
+{
+    // If playing the anim, we no longer need to continue it.
+    mNeedContinueWalkAnim = false;
+
+    // Create params to play walk loop anim, allow move, parent to our 3D model.
+    AnimParams animParams;
+    animParams.animation = mWalkLoopAnim;
+    animParams.allowMove = true;
+    animParams.parent = mGKOwner->GetMeshRenderer()->GetOwner();
+    animParams.fromAutoScript = mFromAutoscript;
+
+    // Only Gabe & Grace have "start turn left/right" anims.
+    // In Grace's case, the animations flow smoothly and there's no problem.
+    // In Gabe's case, his "start turn right" anim doesn't flow smoothly into his normal walk anim.
+    // To fix this, we can offset the normal walk anim to match where the "start turn right" anim finishes.
+    if(fromWalkStart && mPrevWalkOp == WalkOp::FollowPathStartTurnRight && mGKOwner->GetName() == "GAB")
+    {
+        animParams.startFrame = 10;
+    }
+
+    // Start the anim.
+    gSceneManager.GetScene()->GetAnimator()->Start(animParams, [this](){
+        // Set flag so that we continue the walk anim during the next update loop.
+        // A flag-based system is needed (rather than just continuing right here) to avoid infinite loops with high delta time values!
+        mNeedContinueWalkAnim = true;
+    });
+}
+
 void Walker::StopAllWalkAnimations()
 {
     gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartAnim, true);
     gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartTurnLeftAnim, true);
     gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartTurnRightAnim, true);
     gSceneManager.GetScene()->GetAnimator()->Stop(mWalkLoopAnim, true);
-    gSceneManager.GetScene()->GetAnimator()->Stop(mCharConfig->walkStopAnim, true);
 }
 
 void Walker::OutputWalkerPlan()
