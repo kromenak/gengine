@@ -450,6 +450,7 @@ endif()
 # Create deploy target, which creates a final release of the game.
 # This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
 add_custom_target(deploy DEPENDS "deploy_output")
+add_dependencies(deploy gk3)
 if(WIN32)
     set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
     set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
@@ -484,13 +485,50 @@ elseif(APPLE)
         VERBATIM
     )
 else() # Linux
+    set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+    set(DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG>")
+    set(ZIP_FILE_NAME "GK3-Linux-${PROJECT_VERSION}.zip")
+    set(APP_FILENAME "Gabriel Knight 3")
+
+    file(GLOB LIBRARY_FILES "${BUILD_DIR}/*.so")
+
+    add_custom_command(
+        OUTPUT "deploy_output_first"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${DEPLOY_DIR}"
+
+        # Copy Assets to deploy directory.
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${ROOT_DIR}/Assets" "${DEPLOY_DIR}/Assets"
+
+        # Make Data directory in app bundle with README file.
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPLOY_DIR}/Data"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/Data/README.md" "${DEPLOY_DIR}/Data"
+
+        # Copy over .ini file.
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/GK3.ini" "${DEPLOY_DIR}"
+
+        # Copy over README file.
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/Publish/README.md" "${DEPLOY_DIR}"
+
+        # Copy the application (and rename to be player-facing).
+        COMMAND ${CMAKE_COMMAND} -E copy "${BUILD_DIR}/gk3" "${DEPLOY_DIR}/${APP_FILENAME}"
+
+        # Replace the rpath of the application. "$ORIGIN" keyword uses the path of the executable at runtime.
+        COMMAND patchelf --set-rpath "$ORIGIN" "${DEPLOY_DIR}/${APP_FILENAME}"
+
+        # Copy over all the libraries.
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_FILES} "${DEPLOY_DIR}"
+        VERBATIM
+    )
     add_custom_command(
         OUTPUT "deploy_output"
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Publish/Deploy.sh ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Linux
+        DEPENDS "deploy_output_first"
+        COMMAND ${CMAKE_COMMAND} -E tar cvf "${ROOT_DIR}/${ZIP_FILE_NAME}" --format=zip .
+        COMMAND ${CMAKE_COMMAND} -E rename "${ROOT_DIR}/${ZIP_FILE_NAME}" "${DEPLOY_DIR}/${ZIP_FILE_NAME}"
+        WORKING_DIRECTORY "${DEPLOY_DIR}"
         VERBATIM
     )
 endif()
-add_dependencies(deploy gk3)
 
 # Add tests subdirectory (creates the "tests" target).
 add_subdirectory(Tests)
