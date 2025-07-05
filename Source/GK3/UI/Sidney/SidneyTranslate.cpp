@@ -289,6 +289,8 @@ void SidneyTranslate::Show(int openFileId)
         if(action != nullptr)
         {
             // Set from/to buttons to the correct state.
+            mFromLanguage = action->language;
+            mToLanguage = Language::English;
             for(int i = 0; i < 4; ++i)
             {
                 mFromButtons[i]->SetSelected(action->language == static_cast<Language>(i));
@@ -500,13 +502,25 @@ void SidneyTranslate::OnTranslateButtonPressed()
         return;
     }
 
+    // One translation has a missing word, and needs some extra logic - detect if we need this!
+    bool needToAddMissingWord = mTranslateFileId == SidneyFileIds::kArcadiaText && !gGameProgress.GetFlag("ArcadiaComplete");
+
     // If we already translated it, we're done here.
     if(mPerformedTranslation)
     {
-        mPopup->ResetToDefaults();
-        mPopup->SetTextAlignment(HorizontalAlignment::Center);
-        mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("NoFurther"));
-        mPopup->ShowOneButton();
+        // But if the word is still missing, ask again.
+        if(needToAddMissingWord)
+        {
+            AskToAddMissingWord();
+        }
+        else
+        {
+            // Otherwise, show "no further translation available" message.
+            mPopup->ResetToDefaults();
+            mPopup->SetTextAlignment(HorizontalAlignment::Center);
+            mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("NoFurther"));
+            mPopup->ShowOneButton();
+        }
         return;
     }
 
@@ -531,28 +545,29 @@ void SidneyTranslate::OnTranslateButtonPressed()
         gGameProgress.ChangeScore(action->scoreEvent);
     }
 
-    // For the Arcadia text, there's some additional logic needed.
-    if(mTranslateFileId == SidneyFileIds::kArcadiaText)
+    // Upon first successful translation, if a word is missing, ask about adding it.
+    if(needToAddMissingWord)
     {
-        // If we've already successfully translated this before, we don't need to enter the missing word.
-        if(!gGameProgress.GetFlag("ArcadiaComplete"))
-        {
-            // We translated to/from the right languages, but the translation is missing a word.
-            // Show "sentence incomplete - do you want to add words?" popup.
-            mPopup->ResetToDefaults();
-            mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("Subject") + "\n" + SidneyUtil::GetTranslateLocalizer().GetText("Question"));
-            mPopup->SetTextAlignment(HorizontalAlignment::Left);
-            mPopup->SetWindowPosition(Vector2(88.0f, 135.0f));
-            mPopup->SetWindowSize(Vector2(280.0f, 120.0f));
-            mPopup->ShowTwoButton([this](){
-                // Show the UI flow (popups) to allow the player to enter the missing word.
-                PromptForMissingWord();
-            });
-        }
+        AskToAddMissingWord();
     }
 
     // The file is translated.
     mPerformedTranslation = true;
+}
+
+void SidneyTranslate::AskToAddMissingWord()
+{
+    // We translated to/from the right languages, but the translation is missing a word.
+    // Show "sentence incomplete - do you want to add words?" popup.
+    mPopup->ResetToDefaults();
+    mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("Subject") + "\n" + SidneyUtil::GetTranslateLocalizer().GetText("Question"));
+    mPopup->SetTextAlignment(HorizontalAlignment::Left);
+    mPopup->SetWindowPosition(Vector2(88.0f, 135.0f));
+    mPopup->SetWindowSize(Vector2(280.0f, 120.0f));
+    mPopup->ShowTwoButton([this](){
+        // Show the UI flow (popups) to allow the player to enter the missing word.
+        PromptForMissingWord();
+    });
 }
 
 void SidneyTranslate::PromptForMissingWord()

@@ -630,7 +630,7 @@ void SidneyAnagramParser::StartScramble()
     if(mState == State::InitialScramble)
     {
         // The number of anagram words detected differs based on whether "SUM" has been added.
-        if(gGameProgress.GetFlag("ArcadiaTranslated"))
+        if(gGameProgress.GetFlag("ArcadiaComplete"))
         {
             mLocWordsPrefix = "Word";
             mWordsCount = 161;

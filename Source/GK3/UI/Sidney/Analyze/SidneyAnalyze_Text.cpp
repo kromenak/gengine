@@ -70,7 +70,7 @@ void SidneyAnalyze::AnalyzeText_EnterState()
     if(mAnalyzeFileId == SidneyFileIds::kArcadiaText)
     {
         // Set text label. If figured out the "SUM" word to add, the text is slightly different.
-        if(gGameProgress.GetFlag("ArcadiaTranslated"))
+        if(gGameProgress.GetFlag("ArcadiaComplete"))
         {
             mAnalyzeTextLabel->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("ArcadiaText"));
         }
@@ -117,7 +117,7 @@ void SidneyAnalyze::AnalyzeText_OnAnagramParserPressed()
 
         // Figure out which text will be fed into the anagram parser.
         // Text differs based on whether you've figured out the missing "SUM" word.
-        std::string anagramText = gGameProgress.GetFlag("ArcadiaTranslated") ?
+        std::string anagramText = gGameProgress.GetFlag("ArcadiaComplete") ?
             SidneyUtil::GetAnalyzeLocalizer().GetText("ArcadiaText") :
             SidneyUtil::GetAnalyzeLocalizer().GetText("ArcadiaText2");
 

@@ -102,5 +102,7 @@ private:
 
     void OpenFile(int fileId);
     void OnTranslateButtonPressed();
+
+    void AskToAddMissingWord();
     void PromptForMissingWord();
 };
