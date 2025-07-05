@@ -49,6 +49,7 @@ void Animator::Start(const AnimParams& animParams, std::function<void()> finishC
 
     // Immediately execute start frame of the animation.
     // Frames execute at the BEGINNING of the time slice for that frame, so frame 0 executes at t=0.
+    mActiveAnimations.back().currentFrame = animParams.startFrame;
     for(int i = 0; i <= animParams.startFrame; ++i)
     {
         ExecuteFrame(mActiveAnimations.size() - 1, i);
