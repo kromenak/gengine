@@ -26,7 +26,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 if(APPLE)
     set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/gk3.app/Contents")
     if(XCODE)
-        set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/$<CONFIG>/Gabriel Knight 3.app/Contents")
+        set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/$<CONFIG>/gk3.app/Contents")
     endif()
 endif()
 
@@ -402,7 +402,6 @@ elseif(APPLE)
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
 
         XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
-        XCODE_ATTRIBUTE_PRODUCT_NAME "Gabriel Knight 3"
         XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.kromenak.gengine"
         XCODE_ATTRIBUTE_MARKETING_VERSION ${PROJECT_VERSION}
         XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION 1
@@ -451,10 +450,16 @@ endif()
 # This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
 add_custom_target(deploy DEPENDS "deploy_output")
 add_dependencies(deploy gk3)
-if(WIN32)
-    set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+if(CMAKE_CONFIGURATION_TYPES)
     set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
-    set(DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG>")
+else()
+    set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+endif()
+set(DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG>")
+
+if(WIN32)
     set(ZIP_FILE_NAME "GK3-Win-${PROJECT_VERSION}.zip")
 
     add_custom_command(
@@ -470,24 +475,34 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/Publish/README.md" "${DEPLOY_DIR}"
         VERBATIM
     )
-    add_custom_command(
-        OUTPUT "deploy_output"
-        DEPENDS "deploy_output_first"
-        COMMAND ${CMAKE_COMMAND} -E tar cvf "${ROOT_DIR}/${ZIP_FILE_NAME}" --format=zip .
-        COMMAND ${CMAKE_COMMAND} -E rename "${ROOT_DIR}/${ZIP_FILE_NAME}" "${DEPLOY_DIR}/${ZIP_FILE_NAME}"
-        WORKING_DIRECTORY "${DEPLOY_DIR}"
-        VERBATIM
-    )
 elseif(APPLE)
+    set(ZIP_FILE_NAME "GK3-Mac-${PROJECT_VERSION}.zip")
+    set(APP_FILENAME "Gabriel Knight 3.app")
+    set(ASSETS_DIR "${DEPLOY_DIR}/${APP_FILENAME}/Contents/Resources")
+
     add_custom_command(
-        OUTPUT "deploy_output"
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Publish/Deploy.sh ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Mac
+        OUTPUT "deploy_output_first"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${DEPLOY_DIR}"
+
+        # Copy app bundle to final destination.
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${BUILD_DIR}/gk3.app" "${DEPLOY_DIR}/${APP_FILENAME}"
+
+        # Copy Assets to deploy directory.
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${ROOT_DIR}/Assets" "${ASSETS_DIR}/Assets"
+
+        # Make Data directory in app bundle with README file.
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${ASSETS_DIR}/Data"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${ASSETS_DIR}/Data"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/Data/README.md" "${ASSETS_DIR}/Data"
+
+        # Copy over .ini file.
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/GK3.ini" "${ASSETS_DIR}"
+
+        # Copy over README file.
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/Publish/README.md" "${DEPLOY_DIR}"
         VERBATIM
     )
 else() # Linux
-    set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-    set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
-    set(DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG>")
     set(ZIP_FILE_NAME "GK3-Linux-${PROJECT_VERSION}.zip")
     set(APP_FILENAME "Gabriel Knight 3")
 
@@ -520,15 +535,17 @@ else() # Linux
         COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_FILES} "${DEPLOY_DIR}"
         VERBATIM
     )
-    add_custom_command(
-        OUTPUT "deploy_output"
-        DEPENDS "deploy_output_first"
-        COMMAND ${CMAKE_COMMAND} -E tar cvf "${ROOT_DIR}/${ZIP_FILE_NAME}" --format=zip .
-        COMMAND ${CMAKE_COMMAND} -E rename "${ROOT_DIR}/${ZIP_FILE_NAME}" "${DEPLOY_DIR}/${ZIP_FILE_NAME}"
-        WORKING_DIRECTORY "${DEPLOY_DIR}"
-        VERBATIM
-    )
 endif()
+
+# Zips the contents of the "Bin/$<CONFIG>" directory for distribution on GitHub or elsewhere.
+add_custom_command(
+    OUTPUT "deploy_output"
+    DEPENDS "deploy_output_first"
+    COMMAND ${CMAKE_COMMAND} -E tar cvf "${ROOT_DIR}/${ZIP_FILE_NAME}" --format=zip .
+    COMMAND ${CMAKE_COMMAND} -E rename "${ROOT_DIR}/${ZIP_FILE_NAME}" "${DEPLOY_DIR}/${ZIP_FILE_NAME}"
+    WORKING_DIRECTORY "${DEPLOY_DIR}"
+    VERBATIM
+)
 
 # Add tests subdirectory (creates the "tests" target).
 add_subdirectory(Tests)
