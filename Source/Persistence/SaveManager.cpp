@@ -252,10 +252,13 @@ void SaveManager::RescanSaveDirectory()
         if(!cropped.empty())
         {
             cropped = cropped.erase(0, 4);
+
+            //TODO: Technically, this logic should detect and account for "gaps" in save game file names.
+            //TODO: For example, if we have save0004.gk3 and save0006.gk3, it should try to use the missing save0005.gk3.
             int num = atoi(cropped.c_str());
-            if(num == mNextSaveNumber)
+            if(num >= mNextSaveNumber)
             {
-                ++mNextSaveNumber;
+                mNextSaveNumber = num + 1;
             }
         }
 
@@ -275,13 +278,6 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     // Save prefs any time the game is saved.
     SavePrefs();
 
-    // Figure out save number to use.
-    int saveNumber = mNextSaveNumber;
-    if(mPendingSaveIndex >= 0)
-    {
-        saveNumber = mPendingSaveIndex + 1;
-    }
-
     // Make sure save game folder exists.
     std::string saveFolderPath = Path::Combine({ Paths::GetUserDataPath(), "Save Games" });
     if(!Directory::CreateAll(saveFolderPath))
@@ -292,10 +288,14 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
 
     // Figure out save file name.
     // This is usually sequential, but a specific filename is used for quicksaves.
-    std::string fileName = StringUtil::Format("save%04i.gk3", saveNumber);
+    std::string fileName = StringUtil::Format("save%04i.gk3", mNextSaveNumber);
     if(mPendingUseQuickSave)
     {
         fileName = kQuickSaveFileName;
+    }
+    else if(mPendingSaveIndex >= 0 && mPendingSaveIndex < mSaves.size())
+    {
+        fileName = Path::GetFileName(mSaves[mPendingSaveIndex].filePath);
     }
 
     // Generate full save file path.
@@ -365,7 +365,10 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
         mSaves.back().isQuickSave = mPendingUseQuickSave;
 
         // Increment save number if this wasn't an overwrite of an existing slot.
-        ++mNextSaveNumber;
+        if(!mPendingUseQuickSave)
+        {
+            ++mNextSaveNumber;
+        }
     }
 
     // Sort saves based on save date/time, putting earlier saves at the top of the list.
