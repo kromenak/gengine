@@ -476,8 +476,9 @@ if(WIN32)
     add_custom_command(
         OUTPUT "deploy_output_exe"
         DEPENDS "deploy_output_clean"
-        COMMAND ${CMAKE_COMMAND} -E copy "${BUILD_DIR}/gk3.exe" "${DEPLOY_DIR}/GK3.exe"
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_FILES} "${DEPLOY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${BUILD_DIR}" "${DEPLOY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${DEPLOY_DIR}/gk3.pdb"
+        COMMAND ${CMAKE_COMMAND} -E rename "${DEPLOY_DIR}/gk3.exe" "${DEPLOY_DIR}/GK3.exe"
         VERBATIM
     )
 elseif(APPLE)
