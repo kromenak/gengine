@@ -213,7 +213,7 @@ if(WIN32)
         glew32                                      # GLEW
         libpng16                                    # libpng
         zdll                                        # zlib
-        SDL2                                        # SDL
+        SDL2 SDL2main                               # SDL
         opengl32                                    # OpenGL
     )
 
@@ -374,6 +374,11 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${IMGUI_SOURCES})
 ##################
 # Here, we mostly have misc configs required to get the engine working on a specific platform, or to help with debugging.
 if(WIN32)
+    #TODO: This should probably be TRUE for release targets, but may want to ensure a log file is being written before doing this.
+    #set_target_properties(gk3 PROPERTIES
+    #    WIN32_EXECUTABLE TRUE
+    #)
+
     # Use repo root as debugger working directory.
     # This allows running the game without copying Assets/Data to the Build folder.
     set_property(TARGET gk3 PROPERTY
