@@ -19,52 +19,51 @@ target_compile_definitions(tests PRIVATE TESTS)
 # Header locations.
 target_include_directories(tests PRIVATE
     ../Source
-    ../Source/Audio
-    ../Source/Barn
-    ../Source/Containers
-    ../Source/Debug
+    ../Source/Engine/Audio
+    ../Source/Engine/Containers
+    ../Source/Engine/Debug
     ../Source/GK3
     ../Source/GK3/Scene
-    ../Source/IO
-    ../Source/Math
-    ../Source/Memory
-    ../Source/Platform
-    ../Source/Primitives
-    ../Source/Rendering
-    ../Source/RTTI
-    ../Source/Sheep
-    ../Source/Util
-    ../Source/Video
+    ../Source/Engine/IO
+    ../Source/Engine/Math
+    ../Source/Engine/Memory
+    ../Source/Engine/Platform
+    ../Source/Engine/Primitives
+    ../Source/Engine/Rendering
+    ../Source/Engine/RTTI
+    ../Source/Engine/Sheep
+    ../Source/Engine/Util
+    ../Source/Engine/Video
 )
 
 # Game source files being tested.
 target_sources(tests PRIVATE
     ../Source/GK3/Timeblock.cpp
 
-    ../Source/IO/BinaryReader.cpp
-    ../Source/IO/BinaryWriter.cpp
-    ../Source/IO/mstream.cpp
+    ../Source/Engine/IO/BinaryReader.cpp
+    ../Source/Engine/IO/BinaryWriter.cpp
+    ../Source/Engine/IO/mstream.cpp
 
-    ../Source/Math/Matrix3.cpp
-    ../Source/Math/Matrix4.cpp
-    ../Source/Math/Quaternion.cpp
-    ../Source/Math/Vector2.cpp
-    ../Source/Math/Vector3.cpp
-    ../Source/Math/Vector4.cpp
+    ../Source/Engine/Math/Matrix3.cpp
+    ../Source/Engine/Math/Matrix4.cpp
+    ../Source/Engine/Math/Quaternion.cpp
+    ../Source/Engine/Math/Vector2.cpp
+    ../Source/Engine/Math/Vector3.cpp
+    ../Source/Engine/Math/Vector4.cpp
 
-    ../Source/Memory/LinearAllocator.cpp
-    ../Source/Memory/StackAllocator.cpp
-    ../Source/Memory/FreestyleAllocator.cpp
+    ../Source/Engine/Memory/LinearAllocator.cpp
+    ../Source/Engine/Memory/StackAllocator.cpp
+    ../Source/Engine/Memory/FreestyleAllocator.cpp
 
-    ../Source/Primitives/AABB.cpp
-    ../Source/Primitives/Collisions.cpp
-    ../Source/Primitives/Line.cpp
-    ../Source/Primitives/LineSegment.cpp
-    ../Source/Primitives/Plane.cpp
-    ../Source/Primitives/Rect.cpp
-    ../Source/Primitives/RectUtil.cpp
-    ../Source/Primitives/Sphere.cpp
-    ../Source/Primitives/Triangle.cpp
+    ../Source/Engine/Primitives/AABB.cpp
+    ../Source/Engine/Primitives/Collisions.cpp
+    ../Source/Engine/Primitives/Line.cpp
+    ../Source/Engine/Primitives/LineSegment.cpp
+    ../Source/Engine/Primitives/Plane.cpp
+    ../Source/Engine/Primitives/Rect.cpp
+    ../Source/Engine/Primitives/RectUtil.cpp
+    ../Source/Engine/Primitives/Sphere.cpp
+    ../Source/Engine/Primitives/Triangle.cpp
 
-    ../Source/RTTI/TypeInfo.cpp
+    ../Source/Engine/RTTI/TypeInfo.cpp
 )

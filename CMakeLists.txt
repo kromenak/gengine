@@ -22,21 +22,13 @@ file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} PLAT_BINARY_DIR)
 # For Xcode, generate schemes for targets. This ensures targets appear in target dropdown.
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 
-# CLion and Xcode differ in where they put the Mac App, and also how they name it. Let's support both!
-if(APPLE)
-    set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/gk3.app/Contents")
-    if(XCODE)
-        set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/$<CONFIG>/gk3.app/Contents")
-    endif()
-endif()
-
 # Generate header containing info about build environment.
 # Important to put generated file in BINARY_DIR - otherwise, conflicts may occur when multiple projects are generated.
 include(CheckIncludeFile)
 CHECK_INCLUDE_FILE(sys/stat.h HAVE_STAT_H)
 CHECK_INCLUDE_FILE(dirent.h HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE(unistd.h HAVE_UNISTD_H)
-configure_file("${PROJECT_SOURCE_DIR}/Source/Platform/BuildEnv.h.in" "${CMAKE_CURRENT_BINARY_DIR}/BuildEnv.h")
+configure_file("${PROJECT_SOURCE_DIR}/Source/Engine/Platform/BuildEnv.h.in" "${CMAKE_CURRENT_BINARY_DIR}/BuildEnv.h")
 
 # Get all cpp/h files in the Source directory using GLOB.
 # Supposedly using GLOB is frowned upon, but...it works really well for now sooooo.
@@ -57,49 +49,23 @@ add_executable(gk3 ${source_files} ${asset_files})
 ###################
 # COMPILER CONFIG
 ###################
-# Add header locations. For any folder listed here, you can add headers in that folder without providing a path.
+# Automatically detect all Source directories to auto-populate the list of include directories.
+file(GLOB_RECURSE ALL_SOURCE_FILES_AND_DIRS CONFIGURE_DEPENDS
+    LIST_DIRECTORIES true
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/*"
+)
+set(ALL_SOURCE_DIRS "")
+foreach(ITEM IN LISTS ALL_SOURCE_FILES_AND_DIRS)
+    if(IS_DIRECTORY "${ITEM}")
+        list(APPEND ALL_SOURCE_DIRS "${ITEM}")
+    endif()
+endforeach()
+
+# Add include directories. This allows including files in these folders w/o specifying a full path.
+# But one danger is ambiguities, if two folders have a file with the same name.
 target_include_directories(gk3 PRIVATE
-    # Source include dirs
     Source
-    Source/Assets
-    Source/Audio
-    Source/Containers
-    Source/Debug
-    Source/GK3
-    Source/GK3/Actions
-    Source/GK3/Actors
-    Source/GK3/Animation
-    Source/GK3/Mechanisms
-    Source/GK3/Scene
-    Source/GK3/UI
-    Source/GK3/UI/DrivingScreen
-    Source/GK3/UI/Sidney
-    Source/GK3/UI/Sidney/Analyze
-    Source/GK3/UI/Sidney/Components
-    Source/Input
-    Source/IO
-    Source/Math
-    Source/Memory
-    Source/ObjectModel
-    Source/Persistence
-    Source/Platform
-    Source/Primitives
-    Source/Rendering
-    Source/Rendering/Graphics
-    Source/Reports
-    Source/RTTI
-    Source/Sheep
-    Source/Sheep/API
-    Source/Sheep/Compiler
-    Source/Sheep/Machine
-    Source/Tools
-    Source/UI
-    Source/Util
-    Source/Util/Threads
-    Source/Video
-    Source/Video/Decode
-    Source/Video/Playback
-    Source/Video/Util
+    ${ALL_SOURCE_DIRS}
 
     # Library include dirs
     Libraries/ffmpeg/include
@@ -271,6 +237,12 @@ elseif(APPLE)
         ${COREFOUNDATION_LIB}                       # Core Foundation
         ${OPENGL_LIB}                               # OpenGL
     )
+
+    # CLion and Xcode differ in where they put the Mac App, and also how they name it. Let's support both!
+    set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/gk3.app/Contents")
+    if(XCODE)
+        set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/$<CONFIG>/gk3.app/Contents")
+    endif()
 
     # Copy libraries after build.
     set(LIB_DEST "${MAC_APP_CONTENTS}/Libraries")
