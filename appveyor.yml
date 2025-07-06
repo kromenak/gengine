@@ -67,7 +67,7 @@ for:
       - image: Ubuntu
   before_build:
     - sh: sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev
-    - sh: cmake -B build_appveyor -DCMAKE_BUILD_TYPE=${CONFIGURATION}
+    - sh: cmake -B build_appveyor -DCMAKE_BUILD_TYPE=Release
   build_script:
     - sh: cmake --build build_appveyor --target deploy
   before_test:
