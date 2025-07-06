@@ -296,6 +296,9 @@ void SaveLoadScreen::PopulateSaveList(bool justShown)
     // Get existing saves from save manager.
     const std::vector<SaveSummary>& saves = gSaveManager.GetSaves();
 
+    // Load button is disabled if no saves exist.
+    mLoadButton->SetCanInteract(!saves.empty());
+
     // If in save mode, we create one more entry for an "empty" slot.
     int entryCount = saves.size();
     if(mSaveButton->IsEnabled())
