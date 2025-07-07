@@ -3,84 +3,32 @@
 #include "Matrix3.h"
 #include "Mesh.h"
 
-TYPEINFO_INIT(UIGrids, UIWidget, 19)
+TYPEINFO_INIT(UIGrids, UIShapes<UIGrid>, 19)
 {
 
 }
 
-UIGrids::UIGrids(Actor* owner) : UIWidget(owner)
+UIGrids::UIGrids(Actor* owner) : UIShapes<UIGrid>(owner)
 {
-    mMaterial.SetDiffuseTexture(&Texture::White);
-}
 
-UIGrids::~UIGrids()
-{
-    delete mMesh;
-}
-
-void UIGrids::Render()
-{
-    if(!IsActiveAndEnabled()) { return; }
-
-    // Generate the mesh, if needed.
-    GenerateMesh();
-
-    // If mesh is still null for some reason, we can't render.
-    if(mMesh == nullptr) { return; }
-
-    // Activate material.
-    mMaterial.Activate(GetRectTransform()->GetLocalToWorldMatrix());
-
-    // Render the mesh!
-    mMesh->Render();
-}
-
-void UIGrids::SetColor(const Color32& color)
-{
-    mMaterial.SetColor(color);
 }
 
 void UIGrids::Add(const Vector2& center, const Vector2& size, float angle, int divisions, bool drawBorder)
 {
-    mGrids.emplace_back();
-    mGrids.back().center = center;
-    mGrids.back().size = size;
-    mGrids.back().angle = angle;
-    mGrids.back().divisions = divisions;
-    mGrids.back().drawBorder = drawBorder;
-    mNeedMeshRegen = true;
+    UIGrid grid;
+    grid.center = center;
+    grid.size = size;
+    grid.angle = angle;
+    grid.divisions = divisions;
+    grid.drawBorder = drawBorder;
+    UIShapes<UIGrid>::Add(grid);
 }
 
-void UIGrids::Clear()
+void UIGrids::GenerateMesh(const std::vector<UIGrid>& shapes, Mesh* mesh)
 {
-    mGrids.clear();
-    mNeedMeshRegen = true;
-}
-
-void UIGrids::GenerateMesh()
-{
-    // Don't need to generate mesh if we have one and not dirty.
-    if(mMesh != nullptr && !mNeedMeshRegen)
-    {
-        return;
-    }
-
-    // If a previous mesh exists, get rid of it.
-    if(mMesh != nullptr)
-    {
-        delete mMesh;
-        mMesh = nullptr;
-    }
-
-    // We don't need a mesh if we have no grids.
-    if(mGrids.empty()) { return; }
-
-    // Create new mesh.
-    mMesh = new Mesh();
-
     // Calculating then number of vertices is a bit more involved - it depends on grid divisions and other options.
     size_t vertexCount = 0;
-    for(auto& grid : mGrids)
+    for(auto& grid : shapes)
     {
         // A 1x1 grid needs no lines...
         // Each size of grid after that requires 2 more lines to be added (vertical and horizontal).
@@ -101,7 +49,7 @@ void UIGrids::GenerateMesh()
     // Generate the grid vertex positions.
     size_t posOffset = 0;
     float* positions = new float[vertexCount * 3];
-    for(auto& grid : mGrids)
+    for(auto& grid : shapes)
     {
         float halfWidth = grid.size.x * 0.5f;
         float halfHeight = grid.size.y * 0.5f;
@@ -202,11 +150,8 @@ void UIGrids::GenerateMesh()
     meshDefinition.AddVertexData(VertexAttribute::Position, positions);
 
     // Create submesh from definition.
-    Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
+    Submesh* submesh = mesh->AddSubmesh(meshDefinition);
 
     // Render it in "lines" mode, since this is a set of lines!
     submesh->SetRenderMode(RenderMode::Lines);
-
-    // Mesh has been generated.
-    mNeedMeshRegen = false;
 }

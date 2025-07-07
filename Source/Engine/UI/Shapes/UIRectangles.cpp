@@ -3,99 +3,47 @@
 #include "Matrix3.h"
 #include "Mesh.h"
 
-TYPEINFO_INIT(UIRectangles, UIWidget, 25)
+TYPEINFO_INIT(UIRectangles, UIShapes<UIRectangle>, 25)
 {
 
 }
 
-UIRectangles::UIRectangles(Actor* owner) : UIWidget(owner)
+UIRectangles::UIRectangles(Actor* owner) : UIShapes<UIRectangle>(owner)
 {
-    mMaterial.SetDiffuseTexture(&Texture::White);
+
 }
 
-UIRectangles::~UIRectangles()
+void UIRectangles::Add(const Vector2& center, const Vector2& size, float angle)
 {
-    delete mMesh;
+    UIRectangle rect;
+    rect.center = center;
+    rect.size = size;
+    rect.angle = angle;
+    UIShapes<UIRectangle>::Add(rect);
 }
 
-void UIRectangles::Render()
+void UIRectangles::GenerateMesh(const std::vector<UIRectangle>& shapes, Mesh* mesh)
 {
-    if(!IsActiveAndEnabled()) { return; }
-
-    // Generate the mesh, if needed.
-    GenerateMesh();
-
-    // If mesh is still null for some reason, we can't render.
-    if(mMesh == nullptr) { return; }
-
-    // Activate material.
-    mMaterial.Activate(GetRectTransform()->GetLocalToWorldMatrix());
-
-    // Render the mesh!
-    mMesh->Render();
-}
-
-void UIRectangles::SetColor(const Color32& color)
-{
-    mMaterial.SetColor(color);
-}
-
-void UIRectangles::AddRectangle(const Vector2& center, const Vector2& size, float angle)
-{
-    mRectangles.emplace_back();
-    mRectangles.back().center = center;
-    mRectangles.back().size = size;
-    mRectangles.back().angle = angle;
-    mNeedMeshRegen = true;
-}
-
-void UIRectangles::ClearRectangles()
-{
-    mRectangles.clear();
-    mNeedMeshRegen = true;
-}
-
-void UIRectangles::GenerateMesh()
-{
-    // Don't need to generate mesh if we have one and not dirty.
-    if(mMesh != nullptr && !mNeedMeshRegen)
-    {
-        return;
-    }
-
-    // If a previous mesh exists, get rid of it.
-    if(mMesh != nullptr)
-    {
-        delete mMesh;
-        mMesh = nullptr;
-    }
-
-    // We don't need a mesh if we have no lines.
-    if(mRectangles.empty()) { return; }
-
-    // Create new mesh.
-    mMesh = new Mesh();
-
     // Each rectangle consists of eight vertices.
     // This is because we need to double up each vertex since we're rendering with Lines approach.
-    size_t vertexCount = mRectangles.size() * 8;
+    size_t vertexCount = shapes.size() * 8;
 
     float* positions = new float[vertexCount * 3];
-    for(int i = 0; i < mRectangles.size(); ++i)
+    for(int i = 0; i < shapes.size(); ++i)
     {
-        float halfWidth = mRectangles[i].size.x * 0.5f;
-        float halfHeight = mRectangles[i].size.y * 0.5f;
+        float halfWidth = shapes[i].size.x * 0.5f;
+        float halfHeight = shapes[i].size.y * 0.5f;
 
-        Matrix3 rotMat = Matrix3::MakeRotateZ(mRectangles[i].angle);
+        Matrix3 rotMat = Matrix3::MakeRotateZ(shapes[i].angle);
         Vector2 topLeftDir = rotMat.TransformVector(Vector2(-halfWidth, halfHeight));
         Vector2 topRightDir = rotMat.TransformVector(Vector2(halfWidth, halfHeight));
         Vector2 botLeftDir = rotMat.TransformVector(Vector2(-halfWidth, -halfHeight));
         Vector2 botRightDir = rotMat.TransformVector(Vector2(halfWidth, -halfHeight));
 
-        Vector2 topLeft = mRectangles[i].center + topLeftDir;
-        Vector2 topRight = mRectangles[i].center + topRightDir;
-        Vector2 bottomLeft = mRectangles[i].center + botLeftDir;
-        Vector2 bottomRight = mRectangles[i].center + botRightDir;
+        Vector2 topLeft = shapes[i].center + topLeftDir;
+        Vector2 topRight = shapes[i].center + topRightDir;
+        Vector2 bottomLeft = shapes[i].center + botLeftDir;
+        Vector2 bottomRight = shapes[i].center + botRightDir;
 
         // Left Side
         positions[i * 24 + 0] = topLeft.x;
@@ -136,11 +84,8 @@ void UIRectangles::GenerateMesh()
     meshDefinition.AddVertexData(VertexAttribute::Position, positions);
 
     // Create submesh from definition.
-    Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
+    Submesh* submesh = mesh->AddSubmesh(meshDefinition);
 
     // Render it in "lines" mode, since this is a set of lines!
     submesh->SetRenderMode(RenderMode::Lines);
-
-    // Mesh has been generated.
-    mNeedMeshRegen = false;
 }

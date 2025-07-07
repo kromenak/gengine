@@ -191,9 +191,9 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
         if(!mMap.IsAnyShapeSelected())
         {
             bool setText = false;
-            for(size_t i = 0; i < mMap.zoomedOut.points->GetPointsCount(); ++i)
+            for(size_t i = 0; i < mMap.zoomedOut.points->GetCount(); ++i)
             {
-                const Vector2& point = mMap.zoomedOut.points->GetPoint(i);
+                const Vector2& point = mMap.zoomedOut.points->Get(i);
                 float distToPointSq = (zoomedOutMapPos - point).GetLengthSq();
                 if(distToPointSq < kHoverPointDistSq)
                 {
@@ -204,9 +204,9 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
             }
             if(!setText)
             {
-                for(size_t i = 0; i < mMap.zoomedOut.lockedPoints->GetPointsCount(); ++i)
+                for(size_t i = 0; i < mMap.zoomedOut.lockedPoints->GetCount(); ++i)
                 {
-                    const Vector2& point = mMap.zoomedOut.lockedPoints->GetPoint(i);
+                    const Vector2& point = mMap.zoomedOut.lockedPoints->Get(i);
                     float distToPointSq = (zoomedOutMapPos - point).GetLengthSq();
                     if(distToPointSq < kHoverPointDistSq)
                     {
@@ -233,11 +233,11 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedInMap(float deltaTime)
         {
             // Add point to zoomed in map at click pos.
             Vector2 zoomedInMapPos = mMap.zoomedIn.GetLocalMousePos();
-            mMap.zoomedIn.points->AddPoint(zoomedInMapPos);
+            mMap.zoomedIn.points->Add(zoomedInMapPos);
             printf("Add pt at %f, %f\n", zoomedInMapPos.x, zoomedInMapPos.y);
 
             // Also convert to zoomed out map position and add point there.
-            mMap.zoomedOut.points->AddPoint(mMap.ToZoomedOutPoint(zoomedInMapPos));
+            mMap.zoomedOut.points->Add(mMap.ToZoomedOutPoint(zoomedInMapPos));
 
             // When you place a point, the latitude/longitude of the point are displayed on-screen.
             AnalyzeMap_SetPointStatusText("MapEnterPointNote", zoomedInMapPos);
@@ -332,7 +332,7 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
     if(!didValidAnalyzeAction)
     {
         // If points are placed, the message is different.
-        if(mMap.zoomedIn.points->GetPointsCount() > 0 || mMap.zoomedIn.lockedPoints->GetPointsCount() > 0)
+        if(mMap.zoomedIn.points->GetCount() > 0 || mMap.zoomedIn.lockedPoints->GetCount() > 0)
         {
             // Says "unclear how to analyze those points."
             ShowAnalyzeMessage("MapIndeterminateNote", Vector2(), HorizontalAlignment::Center);
@@ -401,8 +401,8 @@ void SidneyAnalyze::AnalyzeMap_OnEnterPointsPressed()
 void SidneyAnalyze::AnalyzeMap_OnClearPointsPressed()
 {
     mMap.enteringPoints = false;
-    mMap.zoomedIn.points->ClearPoints();
-    mMap.zoomedOut.points->ClearPoints();
+    mMap.zoomedIn.points->Clear();
+    mMap.zoomedOut.points->Clear();
 }
 
 void SidneyAnalyze::AnalyzeMap_OnDrawGridPressed()
@@ -543,21 +543,21 @@ void SidneyAnalyze::AnalyzeMap_CheckAquariusCompletion()
         ShowAnalyzeMessage("MapLine1Note");
 
         // Correct points move from "active" points to "locked" points.
-        mMap.zoomedIn.points->RemovePoint(rlcPoint);
-        mMap.zoomedIn.lockedPoints->AddPoint(kRLCPoint);
+        mMap.zoomedIn.points->Remove(rlcPoint);
+        mMap.zoomedIn.lockedPoints->Add(kRLCPoint);
 
-        mMap.zoomedIn.points->RemovePoint(cdbPoint);
-        mMap.zoomedIn.lockedPoints->AddPoint(kCDBPoint);
+        mMap.zoomedIn.points->Remove(cdbPoint);
+        mMap.zoomedIn.lockedPoints->Add(kCDBPoint);
 
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(rlcPoint));
-        mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kRLCPoint));
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(rlcPoint));
+        mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kRLCPoint));
 
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(cdbPoint));
-        mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCDBPoint));
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(cdbPoint));
+        mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kCDBPoint));
 
         // Add sun line through the placed points.
-        mMap.zoomedIn.lines->AddLine(kRLCPoint, kSunLineEndPoint);
-        mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kRLCPoint),
+        mMap.zoomedIn.lines->Add(kRLCPoint, kSunLineEndPoint);
+        mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kRLCPoint),
                                       mMap.ToZoomedOutPoint(kSunLineEndPoint));
 
         // Done with Aquarius!
@@ -575,39 +575,39 @@ void SidneyAnalyze::AnalyzeMap_CheckPiscesCompletion()
     Vector2 bugarachPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesBugarachPoint);
     if(coustaussaPoint != Vector2::Zero && bezuPoint != Vector2::Zero && bugarachPoint != Vector2::Zero)
     {
-        for(size_t i = 0; i < mMap.zoomedOut.circles->GetCirclesCount(); ++i)
+        for(size_t i = 0; i < mMap.zoomedOut.circles->GetCount(); ++i)
         {
-            const Circle& circle = mMap.zoomedOut.circles->GetCircle(i);
+            const Circle& circle = mMap.zoomedOut.circles->Get(i);
 
             float centerDiffSq = (circle.center - kCircleCenter).GetLengthSq();
             float radiusDiff = Math::Abs(circle.radius - kCircleRadius);
             if(centerDiffSq < 20 * 20 && radiusDiff < 4)
             {
                 // Put locked points on the zoomed in map.
-                mMap.zoomedIn.points->RemovePoint(coustaussaPoint);
-                mMap.zoomedIn.points->RemovePoint(bezuPoint);
-                mMap.zoomedIn.points->RemovePoint(bugarachPoint);
+                mMap.zoomedIn.points->Remove(coustaussaPoint);
+                mMap.zoomedIn.points->Remove(bezuPoint);
+                mMap.zoomedIn.points->Remove(bugarachPoint);
 
-                mMap.zoomedIn.lockedPoints->AddPoint(kPiscesCoustaussaPoint);
-                mMap.zoomedIn.lockedPoints->AddPoint(kPiscesBezuPoint);
-                mMap.zoomedIn.lockedPoints->AddPoint(kPiscesBugarachPoint);
+                mMap.zoomedIn.lockedPoints->Add(kPiscesCoustaussaPoint);
+                mMap.zoomedIn.lockedPoints->Add(kPiscesBezuPoint);
+                mMap.zoomedIn.lockedPoints->Add(kPiscesBugarachPoint);
 
                 // Same for the zoomed out map.
-                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(coustaussaPoint));
-                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(bezuPoint));
-                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(bugarachPoint));
+                mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(coustaussaPoint));
+                mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(bezuPoint));
+                mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(bugarachPoint));
 
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPiscesCoustaussaPoint));
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPiscesBezuPoint));
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPiscesBugarachPoint));
+                mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kPiscesCoustaussaPoint));
+                mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kPiscesBezuPoint));
+                mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kPiscesBugarachPoint));
 
                 // Put locked circle on zoomed out map.
-                mMap.zoomedOut.circles->ClearCircles();
-                mMap.zoomedIn.circles->ClearCircles();
+                mMap.zoomedOut.circles->Clear();
+                mMap.zoomedIn.circles->Clear();
                 mMap.selectedCircleIndex = -1;
 
-                mMap.zoomedOut.lockedCircles->AddCircle(kCircleCenter, kCircleRadius);
-                mMap.zoomedIn.lockedCircles->AddCircle(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius));
+                mMap.zoomedOut.lockedCircles->Add(kCircleCenter, kCircleRadius);
+                mMap.zoomedIn.lockedCircles->Add(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius));
 
                 // Grace is excited that we figured it out.
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OAG2ZJU2\", 2)", [](const Action* action){
@@ -637,7 +637,7 @@ void SidneyAnalyze::AnalyzeMap_CheckAriesCompletion()
     // To complete Aries, the player must place a Rectangle with a certain position and size.
     for(size_t i = 0; i < mMap.zoomedOut.rectangles->GetCount(); ++i)
     {
-        const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(i);
+        const UIRectangle& rectangle = mMap.zoomedOut.rectangles->Get(i);
 
         float centerDiffSq = (rectangle.center - kCircleCenter).GetLengthSq();
         float sizeDiff = Math::Abs(rectangle.size.x - kSquareAroundCircleSize);
@@ -654,11 +654,11 @@ void SidneyAnalyze::AnalyzeMap_CheckAriesCompletion()
             correctRectangle.size = Vector2::One * kSquareAroundCircleSize;
             correctRectangle.angle = rectangle.angle;
 
-            mMap.zoomedOut.rectangles->ClearRectangles();
-            mMap.zoomedOut.rectangles->AddRectangle(correctRectangle.center, correctRectangle.size, correctRectangle.angle);
+            mMap.zoomedOut.rectangles->Clear();
+            mMap.zoomedOut.rectangles->Add(correctRectangle.center, correctRectangle.size, correctRectangle.angle);
 
-            mMap.zoomedIn.rectangles->ClearRectangles();
-            mMap.zoomedIn.rectangles->AddRectangle(mMap.ToZoomedInPoint(correctRectangle.center),
+            mMap.zoomedIn.rectangles->Clear();
+            mMap.zoomedIn.rectangles->Add(mMap.ToZoomedInPoint(correctRectangle.center),
                                                    mMap.ToZoomedInPoint(correctRectangle.size),
                                                    correctRectangle.angle);
 
@@ -690,10 +690,10 @@ void SidneyAnalyze::AnalyzeMap_CheckTaurusMeridianLine()
         ShowAnalyzeMessage("MapLine2Note");
 
         // Remove points placed by the player.
-        mMap.zoomedIn.points->RemovePoint(serresPoint);
-        mMap.zoomedIn.points->RemovePoint(meridianPoint);
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(serresPoint));
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(meridianPoint));
+        mMap.zoomedIn.points->Remove(serresPoint);
+        mMap.zoomedIn.points->Remove(meridianPoint);
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(serresPoint));
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(meridianPoint));
 
         // It's possible for the player to place these points multiple times.
         // But only the first placement elicits exclamations from Grace.
@@ -704,14 +704,14 @@ void SidneyAnalyze::AnalyzeMap_CheckTaurusMeridianLine()
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZQB2\", 1)");
 
             // Add locked points.
-            mMap.zoomedIn.lockedPoints->AddPoint(kTaurusSerresPoint);
-            mMap.zoomedIn.lockedPoints->AddPoint(kTaurusMeridianPoint);
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTaurusSerresPoint));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTaurusMeridianPoint));
+            mMap.zoomedIn.lockedPoints->Add(kTaurusSerresPoint);
+            mMap.zoomedIn.lockedPoints->Add(kTaurusMeridianPoint);
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTaurusSerresPoint));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTaurusMeridianPoint));
 
             // Place a line segment between the points.
-            mMap.zoomedIn.lines->AddLine(kTaurusSerresPoint, kTaurusMeridianPoint);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTaurusSerresPoint),
+            mMap.zoomedIn.lines->Add(kTaurusSerresPoint, kTaurusMeridianPoint);
+            mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kTaurusSerresPoint),
                                           mMap.ToZoomedOutPoint(kTaurusMeridianPoint));
 
             // Update game state.
@@ -728,7 +728,7 @@ void SidneyAnalyze::AnalyzeMap_CheckTaurusCompletion()
     bool placedMeridianLine = mMap.zoomedIn.GetPlacedPointNearPoint(kTaurusSerresPoint, true) != Vector2::Zero;
     if(placedMeridianLine)
     {
-        const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(0);
+        const UIRectangle& rectangle = mMap.zoomedOut.rectangles->Get(0);
 
         // Convert the rectangle's angle to the range 0 to 2Pi.
         float angle = rectangle.angle;
@@ -752,11 +752,11 @@ void SidneyAnalyze::AnalyzeMap_CheckTaurusCompletion()
             mMap.selectedRectangleIndex = -1;
 
             // "Lock in" the correct rectangle.
-            mMap.zoomedOut.rectangles->ClearRectangles();
-            mMap.zoomedIn.rectangles->ClearRectangles();
+            mMap.zoomedOut.rectangles->Clear();
+            mMap.zoomedIn.rectangles->Clear();
 
-            mMap.zoomedOut.lockedRectangles->AddRectangle(rectangle.center, rectangle.size, kSquareAroundCircleRotationRadians);
-            mMap.zoomedIn.lockedRectangles->AddRectangle(mMap.ToZoomedInPoint(rectangle.center),
+            mMap.zoomedOut.lockedRectangles->Add(rectangle.center, rectangle.size, kSquareAroundCircleRotationRadians);
+            mMap.zoomedIn.lockedRectangles->Add(mMap.ToZoomedInPoint(rectangle.center),
                                                          mMap.ToZoomedInPoint(rectangle.size),
                                                          kSquareAroundCircleRotationRadians);
 
@@ -825,10 +825,10 @@ bool SidneyAnalyze::AnalyzeMap_CheckLeoCompletion()
         ShowAnalyzeMessage("MapLine3Note", Vector2(), HorizontalAlignment::Center);
 
         // Remove points placed by the player.
-        mMap.zoomedIn.points->RemovePoint(lermitagePoint);
-        mMap.zoomedIn.points->RemovePoint(poussinTombPoint);
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(lermitagePoint));
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(poussinTombPoint));
+        mMap.zoomedIn.points->Remove(lermitagePoint);
+        mMap.zoomedIn.points->Remove(poussinTombPoint);
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(lermitagePoint));
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(poussinTombPoint));
 
         // It's possible for the player to place these points multiple times.
         // But only the first placement elicits exclamations from Grace.
@@ -839,14 +839,14 @@ bool SidneyAnalyze::AnalyzeMap_CheckLeoCompletion()
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZBY2\", 1)");
 
             // Add locked points.
-            mMap.zoomedIn.lockedPoints->AddPoint(kLermitagePoint);
-            mMap.zoomedIn.lockedPoints->AddPoint(kPoussinTombPoint);
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kLermitagePoint));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoussinTombPoint));
+            mMap.zoomedIn.lockedPoints->Add(kLermitagePoint);
+            mMap.zoomedIn.lockedPoints->Add(kPoussinTombPoint);
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kLermitagePoint));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kPoussinTombPoint));
 
             // Place a line segment between the points.
-            mMap.zoomedIn.lines->AddLine(kLermitagePoint, kPoussinTombPoint);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kLermitagePoint),
+            mMap.zoomedIn.lines->Add(kLermitagePoint, kPoussinTombPoint);
+            mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kLermitagePoint),
                                           mMap.ToZoomedOutPoint(kPoussinTombPoint));
 
             // Leo is done!
@@ -874,14 +874,14 @@ void SidneyAnalyze::AnalyzeMap_CheckVirgoCompletion()
         ShowAnalyzeMessage("MapRectNote", Vector2(), HorizontalAlignment::Center);
 
         // Remove points placed by the player.
-        mMap.zoomedIn.points->RemovePoint(point1);
-        mMap.zoomedIn.points->RemovePoint(point2);
-        mMap.zoomedIn.points->RemovePoint(point3);
-        mMap.zoomedIn.points->RemovePoint(point4);
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point1));
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point2));
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point3));
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point4));
+        mMap.zoomedIn.points->Remove(point1);
+        mMap.zoomedIn.points->Remove(point2);
+        mMap.zoomedIn.points->Remove(point3);
+        mMap.zoomedIn.points->Remove(point4);
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point1));
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point2));
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point3));
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point4));
 
         // It's possible for the player to place these points multiple times.
         // But only the first placement elicits exclamations from Grace.
@@ -896,27 +896,27 @@ void SidneyAnalyze::AnalyzeMap_CheckVirgoCompletion()
             });
 
             // Add locked points.
-            mMap.zoomedIn.lockedPoints->AddPoint(kTempleCorner1);
-            mMap.zoomedIn.lockedPoints->AddPoint(kTempleCorner2);
-            mMap.zoomedIn.lockedPoints->AddPoint(kTempleCorner3);
-            mMap.zoomedIn.lockedPoints->AddPoint(kTempleCorner4);
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleCorner1));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleCorner2));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleCorner3));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleCorner4));
+            mMap.zoomedIn.lockedPoints->Add(kTempleCorner1);
+            mMap.zoomedIn.lockedPoints->Add(kTempleCorner2);
+            mMap.zoomedIn.lockedPoints->Add(kTempleCorner3);
+            mMap.zoomedIn.lockedPoints->Add(kTempleCorner4);
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTempleCorner1));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTempleCorner2));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTempleCorner3));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTempleCorner4));
 
             // Place line segments between the points.
-            mMap.zoomedIn.lines->AddLine(kTempleCorner1, kTempleCorner2);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleCorner1), mMap.ToZoomedOutPoint(kTempleCorner2));
+            mMap.zoomedIn.lines->Add(kTempleCorner1, kTempleCorner2);
+            mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kTempleCorner1), mMap.ToZoomedOutPoint(kTempleCorner2));
 
-            mMap.zoomedIn.lines->AddLine(kTempleCorner2, kTempleCorner3);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleCorner2), mMap.ToZoomedOutPoint(kTempleCorner3));
+            mMap.zoomedIn.lines->Add(kTempleCorner2, kTempleCorner3);
+            mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kTempleCorner2), mMap.ToZoomedOutPoint(kTempleCorner3));
 
-            mMap.zoomedIn.lines->AddLine(kTempleCorner3, kTempleCorner4);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleCorner3), mMap.ToZoomedOutPoint(kTempleCorner4));
+            mMap.zoomedIn.lines->Add(kTempleCorner3, kTempleCorner4);
+            mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kTempleCorner3), mMap.ToZoomedOutPoint(kTempleCorner4));
 
-            mMap.zoomedIn.lines->AddLine(kTempleCorner4, kTempleCorner1);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleCorner4), mMap.ToZoomedOutPoint(kTempleCorner1));
+            mMap.zoomedIn.lines->Add(kTempleCorner4, kTempleCorner1);
+            mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kTempleCorner4), mMap.ToZoomedOutPoint(kTempleCorner1));
 
             // Virgo is done!
             gGameProgress.ChangeScore("e_sidney_map_virgo");
@@ -932,7 +932,7 @@ void SidneyAnalyze::AnalyzeMap_CheckLibraCompletion()
     // To complete Libra, the player must place a hexagram at a certain position, scale, and angle.
     for(size_t i = 0; i < mMap.zoomedOut.hexagrams->GetCount(); ++i)
     {
-        const UIHexagram& hexagram = mMap.zoomedOut.hexagrams->GetHexagram(i);
+        const UIHexagram& hexagram = mMap.zoomedOut.hexagrams->Get(i);
 
         // Center/radius checks are the same as for the circle earlier...
         float centerDiffSq = (hexagram.center - kCircleCenter).GetLengthSq();
@@ -962,11 +962,11 @@ void SidneyAnalyze::AnalyzeMap_CheckLibraCompletion()
                 mMap.selectedHexagramIndex = -1;
 
                 // "Lock in" the correct hexagram.
-                mMap.zoomedOut.hexagrams->ClearHexagrams();
-                mMap.zoomedIn.hexagrams->ClearHexagrams();
+                mMap.zoomedOut.hexagrams->Clear();
+                mMap.zoomedIn.hexagrams->Clear();
 
-                mMap.zoomedOut.lockedHexagrams->AddHexagram(kCircleCenter, kCircleRadius, Math::ToRadians(kHexagramRotationDegrees));
-                mMap.zoomedIn.lockedHexagrams->AddHexagram(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius), Math::ToRadians(kHexagramRotationDegrees));
+                mMap.zoomedOut.lockedHexagrams->Add(kCircleCenter, kCircleRadius, Math::ToRadians(kHexagramRotationDegrees));
+                mMap.zoomedIn.lockedHexagrams->Add(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius), Math::ToRadians(kHexagramRotationDegrees));
 
                 // Grace says you got it right!
                 gActionManager.ExecuteDialogueAction("02O1K2ZC73", 2, [](const Action* action){
@@ -1000,31 +1000,31 @@ bool SidneyAnalyze::AnalyzeMap_CheckScorpioPlaceTempleDivisions()
         if(point1 != Vector2::Zero && point2 != Vector2::Zero && point3 != Vector2::Zero && point4 != Vector2::Zero)
         {
             // Remove points placed by the player.
-            mMap.zoomedIn.points->RemovePoint(point1);
-            mMap.zoomedIn.points->RemovePoint(point2);
-            mMap.zoomedIn.points->RemovePoint(point3);
-            mMap.zoomedIn.points->RemovePoint(point4);
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point1));
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point2));
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point3));
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point4));
+            mMap.zoomedIn.points->Remove(point1);
+            mMap.zoomedIn.points->Remove(point2);
+            mMap.zoomedIn.points->Remove(point3);
+            mMap.zoomedIn.points->Remove(point4);
+            mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point1));
+            mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point2));
+            mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point3));
+            mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point4));
 
             // Add locked points.
-            mMap.zoomedIn.lockedPoints->AddPoint(kTempleDivisionPoint1);
-            mMap.zoomedIn.lockedPoints->AddPoint(kTempleDivisionPoint2);
-            mMap.zoomedIn.lockedPoints->AddPoint(kTempleDivisionPoint3);
-            mMap.zoomedIn.lockedPoints->AddPoint(kTempleDivisionPoint4);
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleDivisionPoint1));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleDivisionPoint3));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
+            mMap.zoomedIn.lockedPoints->Add(kTempleDivisionPoint1);
+            mMap.zoomedIn.lockedPoints->Add(kTempleDivisionPoint2);
+            mMap.zoomedIn.lockedPoints->Add(kTempleDivisionPoint3);
+            mMap.zoomedIn.lockedPoints->Add(kTempleDivisionPoint4);
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTempleDivisionPoint1));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTempleDivisionPoint3));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
 
             // Place line segments between the points to create the temple layout.
-            mMap.zoomedIn.lines->AddLine(kTempleDivisionPoint1, kTempleDivisionPoint2);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleDivisionPoint1), mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
+            mMap.zoomedIn.lines->Add(kTempleDivisionPoint1, kTempleDivisionPoint2);
+            mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kTempleDivisionPoint1), mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
 
-            mMap.zoomedIn.lines->AddLine(kTempleDivisionPoint3, kTempleDivisionPoint4);
-            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTempleDivisionPoint3), mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
+            mMap.zoomedIn.lines->Add(kTempleDivisionPoint3, kTempleDivisionPoint4);
+            mMap.zoomedOut.lines->Add(mMap.ToZoomedOutPoint(kTempleDivisionPoint3), mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
 
             // Grace says something like "that matches the temple diagram!"
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZR82\", 1)");
@@ -1044,10 +1044,10 @@ void SidneyAnalyze::AnalyzeMap_CheckScorpioCompletion(const Vector2& point)
     if(sitePoint != Vector2::Zero)
     {
         // Replace placed point with locked actual point.
-        mMap.zoomedIn.points->RemovePoint(point);
-        mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point));
-        mMap.zoomedIn.lockedPoints->AddPoint(kTheSitePoint);
-        mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTheSitePoint));
+        mMap.zoomedIn.points->Remove(point);
+        mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(point));
+        mMap.zoomedIn.lockedPoints->Add(kTheSitePoint);
+        mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kTheSitePoint));
 
         // Change score and apply flags.
         gGameProgress.ChangeScore("e_sidney_map_scorpio");
@@ -1095,8 +1095,8 @@ bool SidneyAnalyze::AnalyzeMap_CheckSagitariusCompletion()
         // And your map points get cleared out.
         if(!gGameProgress.GetFlag("Ophiuchus"))
         {
-            mMap.zoomedIn.points->ClearPoints();
-            mMap.zoomedOut.points->ClearPoints();
+            mMap.zoomedIn.points->Clear();
+            mMap.zoomedOut.points->Clear();
             gActionManager.ExecuteDialogueAction("02O0I27NG1", 1);
         }
         else
@@ -1104,40 +1104,40 @@ bool SidneyAnalyze::AnalyzeMap_CheckSagitariusCompletion()
             // Otherwise, wow, you solved Sagitarius.
 
             // Add required locked points.
-            mMap.zoomedIn.lockedPoints->AddPoint(kRedSerpentTailPoint);
-            mMap.zoomedIn.lockedPoints->AddPoint(kRedSerpentHeadPoint);
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kRedSerpentTailPoint));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kRedSerpentHeadPoint));
+            mMap.zoomedIn.lockedPoints->Add(kRedSerpentTailPoint);
+            mMap.zoomedIn.lockedPoints->Add(kRedSerpentHeadPoint);
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kRedSerpentTailPoint));
+            mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kRedSerpentHeadPoint));
 
             // If the player placed points near the optional points, those also get locked.
             Vector2 optPoint1 = mMap.zoomedIn.GetPlacedPointNearPoint(kOptionalPoint1);
             if(optPoint1 != Vector2::Zero)
             {
-                mMap.zoomedIn.lockedPoints->AddPoint(kOptionalPoint1);
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kOptionalPoint1));
+                mMap.zoomedIn.lockedPoints->Add(kOptionalPoint1);
+                mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kOptionalPoint1));
             }
             Vector2 optPoint2 = mMap.zoomedIn.GetPlacedPointNearPoint(kOptionalPoint2);
             if(optPoint2 != Vector2::Zero)
             {
-                mMap.zoomedIn.lockedPoints->AddPoint(kOptionalPoint2);
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kOptionalPoint2));
+                mMap.zoomedIn.lockedPoints->Add(kOptionalPoint2);
+                mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kOptionalPoint2));
             }
             Vector2 optPoint3 = mMap.zoomedIn.GetPlacedPointNearPoint(kOptionalPoint3);
             if(optPoint3 != Vector2::Zero)
             {
-                mMap.zoomedIn.lockedPoints->AddPoint(kOptionalPoint3);
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kOptionalPoint3));
+                mMap.zoomedIn.lockedPoints->Add(kOptionalPoint3);
+                mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kOptionalPoint3));
             }
             Vector2 optPoint4 = mMap.zoomedIn.GetPlacedPointNearPoint(kOptionalPoint4);
             if(optPoint4 != Vector2::Zero)
             {
-                mMap.zoomedIn.lockedPoints->AddPoint(kOptionalPoint4);
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kOptionalPoint4));
+                mMap.zoomedIn.lockedPoints->Add(kOptionalPoint4);
+                mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kOptionalPoint4));
             }
 
             // Remove points placed by the player after locking all needed points.
-            mMap.zoomedIn.points->ClearPoints();
-            mMap.zoomedOut.points->ClearPoints();
+            mMap.zoomedIn.points->Clear();
+            mMap.zoomedOut.points->Clear();
 
             // Play Grace dialogue.
             gActionManager.ExecuteDialogueAction("0273H2ZRS2", 1);
@@ -1162,23 +1162,23 @@ bool SidneyAnalyze::AnalyzeMap_CheckSagitariusCompletion()
 void SidneyAnalyze::AnalyzeMap_FixOldSaveGames()
 {
     // Older save files may have the circle in a slightly wrong spot.
-    if(mMap.zoomedOut.lockedCircles->GetCirclesCount() > 0)
+    if(mMap.zoomedOut.lockedCircles->GetCount() > 0)
     {
-        mMap.zoomedOut.lockedCircles->ClearCircles();
-        mMap.zoomedIn.lockedCircles->ClearCircles();
+        mMap.zoomedOut.lockedCircles->Clear();
+        mMap.zoomedIn.lockedCircles->Clear();
 
-        mMap.zoomedOut.lockedCircles->AddCircle(kCircleCenter, kCircleRadius);
-        mMap.zoomedIn.lockedCircles->AddCircle(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius));
+        mMap.zoomedOut.lockedCircles->Add(kCircleCenter, kCircleRadius);
+        mMap.zoomedIn.lockedCircles->Add(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius));
     }
 
     // Older save files may have the square around the circle at a wrong angle.
     if(mMap.zoomedOut.lockedRectangles->GetCount() > 0)
     {
-        mMap.zoomedOut.lockedRectangles->ClearRectangles();
-        mMap.zoomedIn.lockedRectangles->ClearRectangles();
+        mMap.zoomedOut.lockedRectangles->Clear();
+        mMap.zoomedIn.lockedRectangles->Clear();
 
-        mMap.zoomedOut.lockedRectangles->AddRectangle(kCircleCenter, Vector2::One * kSquareAroundCircleSize, kSquareAroundCircleRotationRadians);
-        mMap.zoomedIn.lockedRectangles->AddRectangle(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInPoint(Vector2::One * kSquareAroundCircleSize), kSquareAroundCircleRotationRadians);
+        mMap.zoomedOut.lockedRectangles->Add(kCircleCenter, Vector2::One * kSquareAroundCircleSize, kSquareAroundCircleRotationRadians);
+        mMap.zoomedIn.lockedRectangles->Add(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInPoint(Vector2::One * kSquareAroundCircleSize), kSquareAroundCircleRotationRadians);
     }
 
     // Since the grid fills the square, it also needs to be updated due to the square angle changing.
@@ -1194,69 +1194,69 @@ void SidneyAnalyze::AnalyzeMap_FixOldSaveGames()
     // The hexagram is placed relative to the square, so it's angle must also change.
     if(mMap.zoomedOut.lockedHexagrams->GetCount() > 0)
     {
-        mMap.zoomedOut.lockedHexagrams->ClearHexagrams();
-        mMap.zoomedIn.lockedHexagrams->ClearHexagrams();
+        mMap.zoomedOut.lockedHexagrams->Clear();
+        mMap.zoomedIn.lockedHexagrams->Clear();
 
-        mMap.zoomedOut.lockedHexagrams->AddHexagram(kCircleCenter, kCircleRadius, Math::ToRadians(kHexagramRotationDegrees));
-        mMap.zoomedIn.lockedHexagrams->AddHexagram(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius), Math::ToRadians(kHexagramRotationDegrees));
+        mMap.zoomedOut.lockedHexagrams->Add(kCircleCenter, kCircleRadius, Math::ToRadians(kHexagramRotationDegrees));
+        mMap.zoomedIn.lockedHexagrams->Add(mMap.ToZoomedInPoint(kCircleCenter), mMap.ToZoomedInDistance(kCircleRadius), Math::ToRadians(kHexagramRotationDegrees));
     }
 
     // Because the square's angle changed, the temple corner points changed too.
-    if(mMap.zoomedOut.lockedPoints->GetPointsCount() >= 13)
+    if(mMap.zoomedOut.lockedPoints->GetCount() >= 13)
     {
-        mMap.zoomedIn.lockedPoints->SetPoint(9, kTempleCorner1);
-        mMap.zoomedIn.lockedPoints->SetPoint(10, kTempleCorner2);
-        mMap.zoomedIn.lockedPoints->SetPoint(11, kTempleCorner3);
-        mMap.zoomedIn.lockedPoints->SetPoint(12, kTempleCorner4);
+        mMap.zoomedIn.lockedPoints->Set(9, kTempleCorner1);
+        mMap.zoomedIn.lockedPoints->Set(10, kTempleCorner2);
+        mMap.zoomedIn.lockedPoints->Set(11, kTempleCorner3);
+        mMap.zoomedIn.lockedPoints->Set(12, kTempleCorner4);
 
-        mMap.zoomedOut.lockedPoints->SetPoint(9, mMap.ToZoomedOutPoint(kTempleCorner1));
-        mMap.zoomedOut.lockedPoints->SetPoint(10, mMap.ToZoomedOutPoint(kTempleCorner2));
-        mMap.zoomedOut.lockedPoints->SetPoint(11, mMap.ToZoomedOutPoint(kTempleCorner3));
-        mMap.zoomedOut.lockedPoints->SetPoint(12, mMap.ToZoomedOutPoint(kTempleCorner4));
+        mMap.zoomedOut.lockedPoints->Set(9, mMap.ToZoomedOutPoint(kTempleCorner1));
+        mMap.zoomedOut.lockedPoints->Set(10, mMap.ToZoomedOutPoint(kTempleCorner2));
+        mMap.zoomedOut.lockedPoints->Set(11, mMap.ToZoomedOutPoint(kTempleCorner3));
+        mMap.zoomedOut.lockedPoints->Set(12, mMap.ToZoomedOutPoint(kTempleCorner4));
     }
 
     // And the lines between the temple corner points changed as well.
-    if(mMap.zoomedOut.lines->GetLinesCount() >= 7)
+    if(mMap.zoomedOut.lines->GetCount() >= 7)
     {
-        mMap.zoomedIn.lines->SetLine(3, kTempleCorner1, kTempleCorner2);
-        mMap.zoomedIn.lines->SetLine(4, kTempleCorner2, kTempleCorner3);
-        mMap.zoomedIn.lines->SetLine(5, kTempleCorner3, kTempleCorner4);
-        mMap.zoomedIn.lines->SetLine(6, kTempleCorner4, kTempleCorner1);
+        mMap.zoomedIn.lines->Set(3, kTempleCorner1, kTempleCorner2);
+        mMap.zoomedIn.lines->Set(4, kTempleCorner2, kTempleCorner3);
+        mMap.zoomedIn.lines->Set(5, kTempleCorner3, kTempleCorner4);
+        mMap.zoomedIn.lines->Set(6, kTempleCorner4, kTempleCorner1);
 
-        mMap.zoomedOut.lines->SetLine(3, mMap.ToZoomedOutPoint(kTempleCorner1), mMap.ToZoomedOutPoint(kTempleCorner2));
-        mMap.zoomedOut.lines->SetLine(4, mMap.ToZoomedOutPoint(kTempleCorner2), mMap.ToZoomedOutPoint(kTempleCorner3));
-        mMap.zoomedOut.lines->SetLine(5, mMap.ToZoomedOutPoint(kTempleCorner3), mMap.ToZoomedOutPoint(kTempleCorner4));
-        mMap.zoomedOut.lines->SetLine(6, mMap.ToZoomedOutPoint(kTempleCorner4), mMap.ToZoomedOutPoint(kTempleCorner1));
+        mMap.zoomedOut.lines->Set(3, mMap.ToZoomedOutPoint(kTempleCorner1), mMap.ToZoomedOutPoint(kTempleCorner2));
+        mMap.zoomedOut.lines->Set(4, mMap.ToZoomedOutPoint(kTempleCorner2), mMap.ToZoomedOutPoint(kTempleCorner3));
+        mMap.zoomedOut.lines->Set(5, mMap.ToZoomedOutPoint(kTempleCorner3), mMap.ToZoomedOutPoint(kTempleCorner4));
+        mMap.zoomedOut.lines->Set(6, mMap.ToZoomedOutPoint(kTempleCorner4), mMap.ToZoomedOutPoint(kTempleCorner1));
     }
 
     // And the temple division points must change.
-    if(mMap.zoomedOut.lockedPoints->GetPointsCount() >= 17)
+    if(mMap.zoomedOut.lockedPoints->GetCount() >= 17)
     {
-        mMap.zoomedIn.lockedPoints->SetPoint(13, kTempleDivisionPoint1);
-        mMap.zoomedIn.lockedPoints->SetPoint(14, kTempleDivisionPoint2);
-        mMap.zoomedIn.lockedPoints->SetPoint(15, kTempleDivisionPoint3);
-        mMap.zoomedIn.lockedPoints->SetPoint(16, kTempleDivisionPoint4);
+        mMap.zoomedIn.lockedPoints->Set(13, kTempleDivisionPoint1);
+        mMap.zoomedIn.lockedPoints->Set(14, kTempleDivisionPoint2);
+        mMap.zoomedIn.lockedPoints->Set(15, kTempleDivisionPoint3);
+        mMap.zoomedIn.lockedPoints->Set(16, kTempleDivisionPoint4);
 
-        mMap.zoomedOut.lockedPoints->SetPoint(13, mMap.ToZoomedOutPoint(kTempleDivisionPoint1));
-        mMap.zoomedOut.lockedPoints->SetPoint(14, mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
-        mMap.zoomedOut.lockedPoints->SetPoint(15, mMap.ToZoomedOutPoint(kTempleDivisionPoint3));
-        mMap.zoomedOut.lockedPoints->SetPoint(16, mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
+        mMap.zoomedOut.lockedPoints->Set(13, mMap.ToZoomedOutPoint(kTempleDivisionPoint1));
+        mMap.zoomedOut.lockedPoints->Set(14, mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
+        mMap.zoomedOut.lockedPoints->Set(15, mMap.ToZoomedOutPoint(kTempleDivisionPoint3));
+        mMap.zoomedOut.lockedPoints->Set(16, mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
     }
 
     // And the lines between the division points must change.
-    if(mMap.zoomedOut.lines->GetLinesCount() >= 9)
+    if(mMap.zoomedOut.lines->GetCount() >= 9)
     {
-        mMap.zoomedIn.lines->SetLine(7, kTempleDivisionPoint1, kTempleDivisionPoint2);
-        mMap.zoomedIn.lines->SetLine(8, kTempleDivisionPoint3, kTempleDivisionPoint4);
+        mMap.zoomedIn.lines->Set(7, kTempleDivisionPoint1, kTempleDivisionPoint2);
+        mMap.zoomedIn.lines->Set(8, kTempleDivisionPoint3, kTempleDivisionPoint4);
 
-        mMap.zoomedOut.lines->SetLine(7, mMap.ToZoomedOutPoint(kTempleDivisionPoint1), mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
-        mMap.zoomedOut.lines->SetLine(8, mMap.ToZoomedOutPoint(kTempleDivisionPoint3), mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
+        mMap.zoomedOut.lines->Set(7, mMap.ToZoomedOutPoint(kTempleDivisionPoint1), mMap.ToZoomedOutPoint(kTempleDivisionPoint2));
+        mMap.zoomedOut.lines->Set(8, mMap.ToZoomedOutPoint(kTempleDivisionPoint3), mMap.ToZoomedOutPoint(kTempleDivisionPoint4));
     }
 
     // And finally, The Site point position is changed.
-    if(mMap.zoomedOut.lockedPoints->GetPointsCount() >= 18)
+    if(mMap.zoomedOut.lockedPoints->GetCount() >= 18)
     {
-        mMap.zoomedIn.lockedPoints->SetPoint(17, kTheSitePoint);
-        mMap.zoomedOut.lockedPoints->SetPoint(17, mMap.ToZoomedOutPoint(kTheSitePoint));
+        mMap.zoomedIn.lockedPoints->Set(17, kTheSitePoint);
+        mMap.zoomedOut.lockedPoints->Set(17, mMap.ToZoomedOutPoint(kTheSitePoint));
     }
 }

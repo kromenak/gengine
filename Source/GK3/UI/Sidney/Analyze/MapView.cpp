@@ -223,9 +223,9 @@ Vector2 MapView::GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoi
     // Iterate through points placed by the user.
     // Find one that is close enough to the desired point and return it.
     UIPoints* pts = useLockedPoints ? lockedPoints : points;
-    for(size_t i = 0; i < pts->GetPointsCount(); ++i)
+    for(size_t i = 0; i < pts->GetCount(); ++i)
     {
-        const Vector2& placedPoint = pts->GetPoint(i);
+        const Vector2& placedPoint = pts->Get(i);
         if((placedPoint - point).GetLengthSq() < kCloseToPointDistSq)
         {
             return placedPoint;
@@ -254,18 +254,18 @@ void MapView::OnPersist(PersistState& ps)
         std::vector<Vector2> xferPoints;
         if(ps.IsSaving())
         {
-            for(int i = 0; i < points->GetPointsCount(); ++i)
+            for(int i = 0; i < points->GetCount(); ++i)
             {
-                xferPoints.push_back(points->GetPoint(i));
+                xferPoints.push_back(points->Get(i));
             }
         }
         ps.Xfer("points", xferPoints);
         if(ps.IsLoading())
         {
-            points->ClearPoints();
+            points->Clear();
             for(Vector2& p : xferPoints)
             {
-                points->AddPoint(p);
+                points->Add(p);
             }
         }
     }
@@ -275,18 +275,18 @@ void MapView::OnPersist(PersistState& ps)
         std::vector<Vector2> xferPoints;
         if(ps.IsSaving())
         {
-            for(int i = 0; i < lockedPoints->GetPointsCount(); ++i)
+            for(int i = 0; i < lockedPoints->GetCount(); ++i)
             {
-                xferPoints.push_back(lockedPoints->GetPoint(i));
+                xferPoints.push_back(lockedPoints->Get(i));
             }
         }
         ps.Xfer("lockedPoints", xferPoints);
         if(ps.IsLoading())
         {
-            lockedPoints->ClearPoints();
+            lockedPoints->Clear();
             for(Vector2& p : xferPoints)
             {
-                lockedPoints->AddPoint(p);
+                lockedPoints->Add(p);
             }
         }
     }
@@ -296,18 +296,18 @@ void MapView::OnPersist(PersistState& ps)
         std::vector<LineSegment> xferLines;
         if(ps.IsSaving())
         {
-            for(int i = 0; i < lines->GetLinesCount(); ++i)
+            for(int i = 0; i < lines->GetCount(); ++i)
             {
-                xferLines.push_back(lines->GetLine(i));
+                xferLines.push_back(lines->Get(i));
             }
         }
         ps.Xfer("lines", xferLines);
         if(ps.IsLoading())
         {
-            lines->ClearLines();
+            lines->Clear();
             for(LineSegment& ls : xferLines)
             {
-                lines->AddLine(ls.start, ls.end);
+                lines->Add(ls.start, ls.end);
             }
         }
     }
@@ -317,18 +317,18 @@ void MapView::OnPersist(PersistState& ps)
         std::vector<Circle> xfer;
         if(ps.IsSaving())
         {
-            for(int i = 0; i < circles->GetCirclesCount(); ++i)
+            for(int i = 0; i < circles->GetCount(); ++i)
             {
-                xfer.push_back(circles->GetCircle(i));
+                xfer.push_back(circles->Get(i));
             }
         }
         ps.Xfer("circles", xfer);
         if(ps.IsLoading())
         {
-            circles->ClearCircles();
+            circles->Clear();
             for(Circle& circle : xfer)
             {
-                circles->AddCircle(circle.center, circle.radius);
+                circles->Add(circle.center, circle.radius);
             }
         }
     }
@@ -338,18 +338,18 @@ void MapView::OnPersist(PersistState& ps)
         std::vector<Circle> xfer;
         if(ps.IsSaving())
         {
-            for(int i = 0; i < lockedCircles->GetCirclesCount(); ++i)
+            for(int i = 0; i < lockedCircles->GetCount(); ++i)
             {
-                xfer.push_back(lockedCircles->GetCircle(i));
+                xfer.push_back(lockedCircles->Get(i));
             }
         }
         ps.Xfer("lockedCircles", xfer);
         if(ps.IsLoading())
         {
-            lockedCircles->ClearCircles();
+            lockedCircles->Clear();
             for(Circle& circle : xfer)
             {
-                lockedCircles->AddCircle(circle.center, circle.radius);
+                lockedCircles->Add(circle.center, circle.radius);
             }
         }
     }
@@ -361,16 +361,16 @@ void MapView::OnPersist(PersistState& ps)
         {
             for(int i = 0; i < rectangles->GetCount(); ++i)
             {
-                xfer.push_back(rectangles->GetRectangle(i));
+                xfer.push_back(rectangles->Get(i));
             }
         }
         ps.Xfer("rectangles", xfer);
         if(ps.IsLoading())
         {
-            rectangles->ClearRectangles();
+            rectangles->Clear();
             for(UIRectangle& rect : xfer)
             {
-                rectangles->AddRectangle(rect.center, rect.size, rect.angle);
+                rectangles->Add(rect.center, rect.size, rect.angle);
             }
         }
     }
@@ -382,16 +382,16 @@ void MapView::OnPersist(PersistState& ps)
         {
             for(int i = 0; i < lockedRectangles->GetCount(); ++i)
             {
-                xfer.push_back(lockedRectangles->GetRectangle(i));
+                xfer.push_back(lockedRectangles->Get(i));
             }
         }
         ps.Xfer("lockedRectangles", xfer);
         if(ps.IsLoading())
         {
-            lockedRectangles->ClearRectangles();
+            lockedRectangles->Clear();
             for(UIRectangle& rect : xfer)
             {
-                lockedRectangles->AddRectangle(rect.center, rect.size, rect.angle);
+                lockedRectangles->Add(rect.center, rect.size, rect.angle);
             }
         }
     }
@@ -403,7 +403,7 @@ void MapView::OnPersist(PersistState& ps)
         {
             for(int i = 0; i < grids->GetCount(); ++i)
             {
-                xfer.push_back(grids->GetGrid(i));
+                xfer.push_back(grids->Get(i));
             }
         }
         ps.Xfer("grids", xfer);
@@ -424,7 +424,7 @@ void MapView::OnPersist(PersistState& ps)
         {
             for(int i = 0; i < lockedGrids->GetCount(); ++i)
             {
-                xfer.push_back(lockedGrids->GetGrid(i));
+                xfer.push_back(lockedGrids->Get(i));
             }
         }
         ps.Xfer("lockedGrids", xfer);
@@ -448,16 +448,16 @@ void MapView::OnPersist(PersistState& ps)
             {
                 for(int i = 0; i < hexagrams->GetCount(); ++i)
                 {
-                    xfer.push_back(hexagrams->GetHexagram(i));
+                    xfer.push_back(hexagrams->Get(i));
                 }
             }
             ps.Xfer("hexagrams", xfer);
             if(ps.IsLoading())
             {
-                hexagrams->ClearHexagrams();
+                hexagrams->Clear();
                 for(UIHexagram& hexagram : xfer)
                 {
-                    hexagrams->AddHexagram(hexagram.center, hexagram.radius, hexagram.angle);
+                    hexagrams->Add(hexagram.center, hexagram.radius, hexagram.angle);
                 }
             }
         }
@@ -469,16 +469,16 @@ void MapView::OnPersist(PersistState& ps)
             {
                 for(int i = 0; i < lockedHexagrams->GetCount(); ++i)
                 {
-                    xfer.push_back(lockedHexagrams->GetHexagram(i));
+                    xfer.push_back(lockedHexagrams->Get(i));
                 }
             }
             ps.Xfer("lockedHexagrams", xfer);
             if(ps.IsLoading())
             {
-                lockedHexagrams->ClearHexagrams();
+                lockedHexagrams->Clear();
                 for(UIHexagram& hexagram : xfer)
                 {
-                    lockedHexagrams->AddHexagram(hexagram.center, hexagram.radius, hexagram.angle);
+                    lockedHexagrams->Add(hexagram.center, hexagram.radius, hexagram.angle);
                 }
             }
         }

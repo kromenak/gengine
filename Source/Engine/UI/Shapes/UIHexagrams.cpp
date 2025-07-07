@@ -2,96 +2,44 @@
 
 #include "Mesh.h"
 
-TYPEINFO_INIT(UIHexagrams, UIWidget, 34)
+TYPEINFO_INIT(UIHexagrams, UIShapes<UIHexagram>, 34)
 {
 
 }
 
-UIHexagrams::UIHexagrams(Actor* owner) : UIWidget(owner)
+UIHexagrams::UIHexagrams(Actor* owner) : UIShapes<UIHexagram>(owner)
 {
-    mMaterial.SetDiffuseTexture(&Texture::White);
+
 }
 
-UIHexagrams::~UIHexagrams()
+void UIHexagrams::Add(const Vector2& center, float radius, float angle)
 {
-    delete mMesh;
+    UIHexagram hexagram;
+    hexagram.center = center;
+    hexagram.radius = radius;
+    hexagram.angle = angle;
+    UIShapes<UIHexagram>::Add(hexagram);
 }
 
-void UIHexagrams::Render()
+void UIHexagrams::GenerateMesh(const std::vector<UIHexagram>& shapes, Mesh* mesh)
 {
-    if(!IsActiveAndEnabled()) { return; }
-
-    // Generate the mesh, if needed.
-    GenerateMesh();
-
-    // If mesh is still null for some reason, we can't render.
-    if(mMesh == nullptr) { return; }
-
-    // Activate material.
-    mMaterial.Activate(GetRectTransform()->GetLocalToWorldMatrix());
-
-    // Render the mesh!
-    mMesh->Render();
-}
-
-void UIHexagrams::SetColor(const Color32& color)
-{
-    mMaterial.SetColor(color);
-}
-
-void UIHexagrams::AddHexagram(const Vector2& center, float radius, float angle)
-{
-    mHexagrams.emplace_back();
-    mHexagrams.back().center = center;
-    mHexagrams.back().radius = radius;
-    mHexagrams.back().angle = angle;
-    mNeedMeshRegen = true;
-}
-
-void UIHexagrams::ClearHexagrams()
-{
-    mHexagrams.clear();
-    mNeedMeshRegen = true;
-}
-
-void UIHexagrams::GenerateMesh()
-{
-    // Don't need to generate mesh if we have one and not dirty.
-    if(mMesh != nullptr && !mNeedMeshRegen)
-    {
-        return;
-    }
-
-    // If a previous mesh exists, get rid of it.
-    if(mMesh != nullptr)
-    {
-        delete mMesh;
-        mMesh = nullptr;
-    }
-
-    // We don't need a mesh if we have no lines.
-    if(mHexagrams.empty()) { return; }
-
-    // Create new mesh.
-    mMesh = new Mesh();
-
     // Each hexagram consists of 12 vertices.
     // This is because we need to double up each vertex since we're rendering with Lines approach.
-    size_t vertexCount = mHexagrams.size() * 12;
+    size_t vertexCount = shapes.size() * 12;
     float* positions = new float[vertexCount * 3];
-    for(int i = 0; i < mHexagrams.size(); ++i)
+    for(int i = 0; i < shapes.size(); ++i)
     {
-        Matrix3 rotMat = Matrix3::MakeRotateZ(mHexagrams[i].angle);
+        Matrix3 rotMat = Matrix3::MakeRotateZ(shapes[i].angle);
         const float kAngleInterval = Math::k2Pi / 6;
         Vector2 points[6];
         for(int j = 0; j < 6; ++j)
         {
             float angle = j * kAngleInterval;
 
-            points[j].x = mHexagrams[i].radius * Math::Sin(angle);
-            points[j].y = mHexagrams[i].radius * Math::Cos(angle);
+            points[j].x = shapes[i].radius * Math::Sin(angle);
+            points[j].y = shapes[i].radius * Math::Cos(angle);
             points[j] = rotMat.TransformVector(points[j]);
-            points[j] += mHexagrams[i].center;
+            points[j] += shapes[i].center;
         }
 
         // Triangle 1, side 1.
@@ -149,11 +97,8 @@ void UIHexagrams::GenerateMesh()
     meshDefinition.AddVertexData(VertexAttribute::Position, positions);
 
     // Create submesh from definition.
-    Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
+    Submesh* submesh = mesh->AddSubmesh(meshDefinition);
 
     // Render it in "lines" mode, since this is a set of lines!
     submesh->SetRenderMode(RenderMode::Lines);
-
-    // Mesh has been generated.
-    mNeedMeshRegen = false;
 }

@@ -179,6 +179,13 @@ public:
 TypeInfo<PClass, PBaseClass> PClass::sTypeInfo(#PClass, PTypeId); \
 void PClass::InitTypeInfo()
 
+// A variant used for templatized types in the type hierarchy.
+//TODO: This uses typeid(T).name() to ensure unique type names and IDs. However, this value is not consistent across compilers.
+//TODO: If type names or IDs are ever needed in serialized data, this would need to change.
+#define TYPEINFO_INIT_TEMPLATE(PClass, PBaseClass) \
+template<typename T> TypeInfo<PClass<T>, PBaseClass> PClass<T>::sTypeInfo((std::string(#PClass) + typeid(T).name()).c_str(), GENERATE_TYPE_ID); \
+template<typename T> void PClass<T>::InitTypeInfo() { }
+
 //#define TYPEINFO_INIT(PClass, PBaseClass) \
 //TypeInfo<PClass, PBaseClass> PClass::sTypeInfo(#PClass, GENERATE_TYPE_ID); \
 //void PClass::InitTypeInfo()

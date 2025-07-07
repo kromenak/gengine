@@ -195,8 +195,8 @@ void MapState::AddShape(const std::string& shapeName)
             // During Pisces is the only time you can place a circle!
             const Vector2 kDefaultCirclePos(599.0f, 770.0f);
             const float kDefaultCircleRadius = 200.0f;
-            zoomedIn.circles->AddCircle(kDefaultCirclePos, kDefaultCircleRadius);
-            zoomedOut.circles->AddCircle(ToZoomedOutPoint(kDefaultCirclePos), (kDefaultCircleRadius / kZoomedInMapSize) * kZoomedOutMapSize);
+            zoomedIn.circles->Add(kDefaultCirclePos, kDefaultCircleRadius);
+            zoomedOut.circles->Add(ToZoomedOutPoint(kDefaultCirclePos), (kDefaultCircleRadius / kZoomedInMapSize) * kZoomedOutMapSize);
         }
     }
     else if(StringUtil::EqualsIgnoreCase(shapeName, "Rectangle"))
@@ -216,8 +216,8 @@ void MapState::AddShape(const std::string& shapeName)
             // You can only place a Rectangle during Aries!
             const Vector2 kDefaultRectanglePos(599.0f, 770.0f);
             const Vector2 kDefaultRectangleSize(400.0f, 400.0f);
-            zoomedIn.rectangles->AddRectangle(kDefaultRectanglePos, kDefaultRectangleSize, 0.0f);
-            zoomedOut.rectangles->AddRectangle(ToZoomedOutPoint(kDefaultRectanglePos), ToZoomedOutPoint(kDefaultRectangleSize), 0.0f);
+            zoomedIn.rectangles->Add(kDefaultRectanglePos, kDefaultRectangleSize, 0.0f);
+            zoomedOut.rectangles->Add(ToZoomedOutPoint(kDefaultRectanglePos), ToZoomedOutPoint(kDefaultRectangleSize), 0.0f);
         }
     }
     else if(StringUtil::EqualsIgnoreCase(shapeName, "Hexagram"))
@@ -237,8 +237,8 @@ void MapState::AddShape(const std::string& shapeName)
             // You can only place a hexagram during Libra!
             const Vector2 kDefaultHexagramPos(599.0f, 770.0f);
             const float kDefaultHexagramRadius = 400.0f;
-            zoomedIn.hexagrams->AddHexagram(kDefaultHexagramPos, kDefaultHexagramRadius, 0.0f);
-            zoomedOut.hexagrams->AddHexagram(ToZoomedOutPoint(kDefaultHexagramPos), (kDefaultHexagramRadius / kZoomedInMapSize) * kZoomedOutMapSize, 0.0f);
+            zoomedIn.hexagrams->Add(kDefaultHexagramPos, kDefaultHexagramRadius, 0.0f);
+            zoomedOut.hexagrams->Add(ToZoomedOutPoint(kDefaultHexagramPos), (kDefaultHexagramRadius / kZoomedInMapSize) * kZoomedOutMapSize, 0.0f);
         }
     }
 }
@@ -248,20 +248,20 @@ void MapState::EraseSelectedShape()
     if(selectedCircleIndex >= 0)
     {
         selectedCircleIndex = -1;
-        zoomedIn.circles->ClearCircles();
-        zoomedOut.circles->ClearCircles();
+        zoomedIn.circles->Clear();
+        zoomedOut.circles->Clear();
     }
     if(selectedRectangleIndex >= 0)
     {
         selectedRectangleIndex = -1;
-        zoomedIn.rectangles->ClearRectangles();
-        zoomedOut.rectangles->ClearRectangles();
+        zoomedIn.rectangles->Clear();
+        zoomedOut.rectangles->Clear();
     }
     if(selectedHexagramIndex >= 0)
     {
         selectedHexagramIndex = -1;
-        zoomedIn.hexagrams->ClearHexagrams();
-        zoomedOut.hexagrams->ClearHexagrams();
+        zoomedIn.hexagrams->Clear();
+        zoomedOut.hexagrams->Clear();
     }
 }
 
@@ -294,7 +294,7 @@ void MapState::DrawGrid(uint8_t size, bool fillShape)
         // The game acts like you can do this whenever you want, but it's actually only possible to fill a Rectangle in one specific scenario.
         if(zoomedOut.lockedRectangles->GetCount() > 0)
         {
-            const UIRectangle& rect = zoomedOut.lockedRectangles->GetRectangle(0);
+            const UIRectangle& rect = zoomedOut.lockedRectangles->Get(0);
             zoomedOut.grids->Add(rect.center, rect.size, rect.angle, size, false);
             zoomedIn.grids->Add(ToZoomedInPoint(rect.center), ToZoomedInPoint(rect.size), rect.angle, size, false);
         }
@@ -316,7 +316,7 @@ void MapState::LockGrid()
 {
     if(zoomedOut.grids->GetCount() > 0)
     {
-        const UIGrid& grid = zoomedOut.grids->GetGrid(0);
+        const UIGrid& grid = zoomedOut.grids->Get(0);
 
         // Recreate grid in locked grids.
         zoomedOut.lockedGrids->Add(grid.center, grid.size, grid.angle, grid.divisions, grid.drawBorder);
@@ -363,10 +363,10 @@ void MapState::UpdateZoomedOutShapeManipulation()
     if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
     {
         // Check for selecting a circle.
-        for(size_t i = 0; i < zoomedOut.circles->GetCirclesCount(); ++i)
+        for(size_t i = 0; i < zoomedOut.circles->GetCount(); ++i)
         {
             // The click pos must be along the edge of the circle, not in the center.
-            const Circle& circle = zoomedOut.circles->GetCircle(i);
+            const Circle& circle = zoomedOut.circles->Get(i);
             Vector2 edgePoint = circle.GetClosestSurfacePoint(zoomedOutMapPos);
             if((edgePoint - zoomedOutMapPos).GetLengthSq() < 2.5f * 2.5f)
             {
@@ -384,7 +384,7 @@ void MapState::UpdateZoomedOutShapeManipulation()
         // Check for selecting a rectangle.
         for(size_t i = 0; i < zoomedOut.rectangles->GetCount(); ++i)
         {
-            const UIRectangle& rectangle = zoomedOut.rectangles->GetRectangle(i);
+            const UIRectangle& rectangle = zoomedOut.rectangles->Get(i);
             if(IsPointOnEdgeOfRectangle(rectangle, zoomedOutMapPos))
             {
                 if(selectedRectangleIndex != i)
@@ -401,7 +401,7 @@ void MapState::UpdateZoomedOutShapeManipulation()
         // Check for selecting a hexagram.
         for(size_t i = 0; i < zoomedOut.hexagrams->GetCount(); ++i)
         {
-            const UIHexagram& hexagram = zoomedOut.hexagrams->GetHexagram(i);
+            const UIHexagram& hexagram = zoomedOut.hexagrams->Get(i);
             if(IsPointOnEdgeOfHexagram(hexagram, zoomedOutMapPos))
             {
                 if(selectedHexagramIndex != i)
@@ -430,7 +430,7 @@ void MapState::UpdateZoomedOutShapeManipulation()
     {
         if(selectedCircleIndex >= 0)
         {
-            const Circle& circle = zoomedOut.circles->GetCircle(selectedCircleIndex);
+            const Circle& circle = zoomedOut.circles->Get(selectedCircleIndex);
             Vector2 edgePoint = circle.GetClosestSurfacePoint(zoomedOutMapPos);
             if((edgePoint - zoomedOutMapPos).GetLengthSq() < 2.5f * 2.5f || zoomedOutClickAction == MapState::ClickAction::ResizeShape)
             {
@@ -444,7 +444,7 @@ void MapState::UpdateZoomedOutShapeManipulation()
         }
         else if(selectedRectangleIndex >= 0)
         {
-            const UIRectangle& rectangle = zoomedOut.rectangles->GetRectangle(selectedRectangleIndex);
+            const UIRectangle& rectangle = zoomedOut.rectangles->Get(selectedRectangleIndex);
             if(IsPointOnEdgeOfRectangle(rectangle, zoomedOutMapPos))
             {
                 resizeShapeCursor = true;
@@ -472,7 +472,7 @@ void MapState::UpdateZoomedOutShapeManipulation()
         }
         else if(selectedHexagramIndex >= 0)
         {
-            const UIHexagram& hexagram = zoomedOut.hexagrams->GetHexagram(selectedHexagramIndex);
+            const UIHexagram& hexagram = zoomedOut.hexagrams->Get(selectedHexagramIndex);
             if(IsPointOnEdgeOfHexagram(hexagram, zoomedOutMapPos))
             {
                 resizeShapeCursor = true;
@@ -528,15 +528,15 @@ void MapState::UpdateZoomedOutShapeManipulation()
         zoomedOutClickActionPos = zoomedOutMapPos;
         if(selectedCircleIndex >= 0)
         {
-            zoomedOutClickShapeCenter = zoomedOut.circles->GetCircle(selectedCircleIndex).center;
+            zoomedOutClickShapeCenter = zoomedOut.circles->Get(selectedCircleIndex).center;
         }
         if(selectedRectangleIndex >= 0)
         {
-            zoomedOutClickShapeCenter = zoomedOut.rectangles->GetRectangle(selectedRectangleIndex).center;
+            zoomedOutClickShapeCenter = zoomedOut.rectangles->Get(selectedRectangleIndex).center;
         }
         if(selectedHexagramIndex >= 0)
         {
-            zoomedOutClickShapeCenter = zoomedOut.hexagrams->GetHexagram(selectedHexagramIndex).center;
+            zoomedOutClickShapeCenter = zoomedOut.hexagrams->Get(selectedHexagramIndex).center;
         }
     }
 
@@ -546,61 +546,61 @@ void MapState::UpdateZoomedOutShapeManipulation()
         {
             if(selectedCircleIndex >= 0)
             {
-                Circle zoomedOutCircle = zoomedOut.circles->GetCircle(selectedCircleIndex);
+                Circle zoomedOutCircle = zoomedOut.circles->Get(selectedCircleIndex);
 
                 Vector3 expectedOffset = zoomedOutClickShapeCenter - zoomedOutClickActionPos;
                 zoomedOutCircle.center = zoomedOutMapPos + expectedOffset;
 
-                zoomedOut.circles->ClearCircles();
-                zoomedOut.circles->AddCircle(zoomedOutCircle.center, zoomedOutCircle.radius);
+                zoomedOut.circles->Clear();
+                zoomedOut.circles->Add(zoomedOutCircle.center, zoomedOutCircle.radius);
 
-                zoomedIn.circles->ClearCircles();
-                zoomedIn.circles->AddCircle(ToZoomedInPoint(zoomedOutCircle.center), ToZoomedInDistance(zoomedOutCircle.radius));
+                zoomedIn.circles->Clear();
+                zoomedIn.circles->Add(ToZoomedInPoint(zoomedOutCircle.center), ToZoomedInDistance(zoomedOutCircle.radius));
             }
             if(selectedRectangleIndex >= 0)
             {
-                UIRectangle zoomedOutRectangle = zoomedOut.rectangles->GetRectangle(selectedRectangleIndex);
+                UIRectangle zoomedOutRectangle = zoomedOut.rectangles->Get(selectedRectangleIndex);
 
                 Vector3 expectedOffset = zoomedOutClickShapeCenter - zoomedOutClickActionPos;
                 zoomedOutRectangle.center = zoomedOutMapPos + expectedOffset;
 
-                zoomedOut.rectangles->ClearRectangles();
-                zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
+                zoomedOut.rectangles->Clear();
+                zoomedOut.rectangles->Add(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
 
-                zoomedIn.rectangles->ClearRectangles();
-                zoomedIn.rectangles->AddRectangle(ToZoomedInPoint(zoomedOutRectangle.center),
+                zoomedIn.rectangles->Clear();
+                zoomedIn.rectangles->Add(ToZoomedInPoint(zoomedOutRectangle.center),
                                                        ToZoomedInPoint(zoomedOutRectangle.size),
                                                        zoomedOutRectangle.angle);
             }
             if(selectedHexagramIndex >= 0)
             {
-                UIHexagram zoomedOutHexagram = zoomedOut.hexagrams->GetHexagram(selectedHexagramIndex);
+                UIHexagram zoomedOutHexagram = zoomedOut.hexagrams->Get(selectedHexagramIndex);
 
                 Vector3 expectedOffset = zoomedOutClickShapeCenter - zoomedOutClickActionPos;
                 zoomedOutHexagram.center = zoomedOutMapPos + expectedOffset;
 
-                zoomedOut.hexagrams->ClearHexagrams();
-                zoomedOut.hexagrams->AddHexagram(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
+                zoomedOut.hexagrams->Clear();
+                zoomedOut.hexagrams->Add(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
 
-                zoomedIn.hexagrams->ClearHexagrams();
-                zoomedIn.hexagrams->AddHexagram(ToZoomedInPoint(zoomedOutHexagram.center), ToZoomedInDistance(zoomedOutHexagram.radius), zoomedOutHexagram.angle);
+                zoomedIn.hexagrams->Clear();
+                zoomedIn.hexagrams->Add(ToZoomedInPoint(zoomedOutHexagram.center), ToZoomedInDistance(zoomedOutHexagram.radius), zoomedOutHexagram.angle);
             }
         }
         else if(zoomedOutClickAction == MapState::ClickAction::ResizeShape)
         {
             if(selectedCircleIndex >= 0)
             {
-                Circle zoomedOutCircle = zoomedOut.circles->GetCircle(selectedCircleIndex);
+                Circle zoomedOutCircle = zoomedOut.circles->Get(selectedCircleIndex);
                 zoomedOutCircle.radius = (zoomedOutCircle.center - zoomedOutMapPos).GetLength();
-                zoomedOut.circles->ClearCircles();
-                zoomedOut.circles->AddCircle(zoomedOutCircle.center, zoomedOutCircle.radius);
+                zoomedOut.circles->Clear();
+                zoomedOut.circles->Add(zoomedOutCircle.center, zoomedOutCircle.radius);
 
-                zoomedIn.circles->ClearCircles();
-                zoomedIn.circles->AddCircle(ToZoomedInPoint(zoomedOutCircle.center), ToZoomedInDistance(zoomedOutCircle.radius));
+                zoomedIn.circles->Clear();
+                zoomedIn.circles->Add(ToZoomedInPoint(zoomedOutCircle.center), ToZoomedInDistance(zoomedOutCircle.radius));
             }
             if(selectedRectangleIndex >= 0)
             {
-                UIRectangle zoomedOutRectangle = zoomedOut.rectangles->GetRectangle(selectedRectangleIndex);
+                UIRectangle zoomedOutRectangle = zoomedOut.rectangles->Get(selectedRectangleIndex);
 
                 Vector2 mouseMoveOffset = zoomedOutMapPos - zoomedOutClickActionPos;
                 Vector2 centerToPos = zoomedOutMapPos - zoomedOutRectangle.center;
@@ -615,17 +615,17 @@ void MapState::UpdateZoomedOutShapeManipulation()
                 zoomedOutRectangle.size.x += distChange;
                 zoomedOutRectangle.size.y += distChange;
 
-                zoomedOut.rectangles->ClearRectangles();
-                zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
+                zoomedOut.rectangles->Clear();
+                zoomedOut.rectangles->Add(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
 
-                zoomedIn.rectangles->ClearRectangles();
-                zoomedIn.rectangles->AddRectangle(ToZoomedInPoint(zoomedOutRectangle.center),
+                zoomedIn.rectangles->Clear();
+                zoomedIn.rectangles->Add(ToZoomedInPoint(zoomedOutRectangle.center),
                                                        ToZoomedInPoint(zoomedOutRectangle.size),
                                                        zoomedOutRectangle.angle);
             }
             if(selectedHexagramIndex >= 0)
             {
-                UIHexagram zoomedOutHexagram = zoomedOut.hexagrams->GetHexagram(selectedHexagramIndex);
+                UIHexagram zoomedOutHexagram = zoomedOut.hexagrams->Get(selectedHexagramIndex);
 
                 Vector2 mouseMoveOffset = zoomedOutMapPos - zoomedOutClickActionPos;
                 Vector2 centerToPos = zoomedOutMapPos - zoomedOutHexagram.center;
@@ -639,18 +639,18 @@ void MapState::UpdateZoomedOutShapeManipulation()
 
                 zoomedOutHexagram.radius += distChange;
 
-                zoomedOut.hexagrams->ClearHexagrams();
-                zoomedOut.hexagrams->AddHexagram(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
+                zoomedOut.hexagrams->Clear();
+                zoomedOut.hexagrams->Add(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
 
-                zoomedIn.hexagrams->ClearHexagrams();
-                zoomedIn.hexagrams->AddHexagram(ToZoomedInPoint(zoomedOutHexagram.center), ToZoomedInDistance(zoomedOutHexagram.radius), zoomedOutHexagram.angle);
+                zoomedIn.hexagrams->Clear();
+                zoomedIn.hexagrams->Add(ToZoomedInPoint(zoomedOutHexagram.center), ToZoomedInDistance(zoomedOutHexagram.radius), zoomedOutHexagram.angle);
             }
         }
         else if(zoomedOutClickAction == MapState::ClickAction::RotateShape)
         {
             if(selectedRectangleIndex >= 0)
             {
-                UIRectangle zoomedOutRectangle = zoomedOut.rectangles->GetRectangle(selectedRectangleIndex);
+                UIRectangle zoomedOutRectangle = zoomedOut.rectangles->Get(selectedRectangleIndex);
 
                 Vector2 prevCenterToMouse = Vector2::Normalize(zoomedOutClickActionPos - zoomedOutClickShapeCenter);
                 Vector2 centerToMouse = Vector2::Normalize(zoomedOutMapPos - zoomedOutClickShapeCenter);
@@ -664,17 +664,17 @@ void MapState::UpdateZoomedOutShapeManipulation()
                 }
                 zoomedOutRectangle.angle += angle;
 
-                zoomedOut.rectangles->ClearRectangles();
-                zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
+                zoomedOut.rectangles->Clear();
+                zoomedOut.rectangles->Add(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
 
-                zoomedIn.rectangles->ClearRectangles();
-                zoomedIn.rectangles->AddRectangle(ToZoomedInPoint(zoomedOutRectangle.center),
+                zoomedIn.rectangles->Clear();
+                zoomedIn.rectangles->Add(ToZoomedInPoint(zoomedOutRectangle.center),
                                                        ToZoomedInPoint(zoomedOutRectangle.size),
                                                        zoomedOutRectangle.angle);
             }
             if(selectedHexagramIndex >= 0)
             {
-                UIHexagram zoomedOutHexagram = zoomedOut.hexagrams->GetHexagram(selectedHexagramIndex);
+                UIHexagram zoomedOutHexagram = zoomedOut.hexagrams->Get(selectedHexagramIndex);
 
                 Vector2 prevCenterToMouse = Vector2::Normalize(zoomedOutClickActionPos - zoomedOutClickShapeCenter);
                 Vector2 centerToMouse = Vector2::Normalize(zoomedOutMapPos - zoomedOutClickShapeCenter);
@@ -688,11 +688,11 @@ void MapState::UpdateZoomedOutShapeManipulation()
                 }
                 zoomedOutHexagram.angle += angle;
 
-                zoomedOut.hexagrams->ClearHexagrams();
-                zoomedOut.hexagrams->AddHexagram(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
+                zoomedOut.hexagrams->Clear();
+                zoomedOut.hexagrams->Add(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
 
-                zoomedIn.hexagrams->ClearHexagrams();
-                zoomedIn.hexagrams->AddHexagram(ToZoomedInPoint(zoomedOutHexagram.center), ToZoomedInDistance(zoomedOutHexagram.radius), zoomedOutHexagram.angle);
+                zoomedIn.hexagrams->Clear();
+                zoomedIn.hexagrams->Add(ToZoomedInPoint(zoomedOutHexagram.center), ToZoomedInDistance(zoomedOutHexagram.radius), zoomedOutHexagram.angle);
             }
         }
         else if(zoomedOutClickAction == MapState::ClickAction::FocusMap)
