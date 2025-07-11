@@ -843,7 +843,7 @@ void GAPI_OpenGL::SetShaderUniformColor(ShaderHandle handle, const char* name, c
         GLint loc = glGetUniformLocation(program, name);
         if(loc >= 0)
         {
-            glUniform4f(loc, color.GetR() / 255.0f, color.GetG() / 255.0f, color.GetB() / 255.0f, color.GetA() / 255.0f);
+            glUniform4f(loc, color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
         }
     }
 }

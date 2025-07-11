@@ -1,5 +1,6 @@
 #include "Color32.h"
 
+#include "Color.h"
 #include "GMath.h"
 
 Color32 Color32::Clear(0, 0, 0, 0);
@@ -18,13 +19,13 @@ Color32 Color32::Yellow(255, 255, 0, 255);
 
 Color32 Color32::Orange(255, 165, 0, 255);
 
-Color32::Color32(unsigned char r, unsigned char g, unsigned char b) :
+Color32::Color32(uint8_t r, uint8_t g, uint8_t b) :
     r(r), g(g), b(b)
 {
 
 }
 
-Color32::Color32(unsigned char r, unsigned char g, unsigned char b, unsigned char a) :
+Color32::Color32(uint8_t r, uint8_t g, uint8_t b, uint8_t a) :
     r(r), g(g), b(b), a(a)
 {
 
@@ -32,60 +33,68 @@ Color32::Color32(unsigned char r, unsigned char g, unsigned char b, unsigned cha
 
 Color32::Color32(int r, int g, int b)
 {
-    this->r = (unsigned char)Math::Clamp(r, 0, 255);
-    this->g = (unsigned char)Math::Clamp(g, 0, 255);
-    this->b = (unsigned char)Math::Clamp(b, 0, 255);
+    this->r = static_cast<uint8_t>(Math::Clamp(r, 0, 255));
+    this->g = static_cast<uint8_t>(Math::Clamp(g, 0, 255));
+    this->b = static_cast<uint8_t>(Math::Clamp(b, 0, 255));
 }
 
 Color32::Color32(int r, int g, int b, int a)
 {
-    this->r = (unsigned char)Math::Clamp(r, 0, 255);
-    this->g = (unsigned char)Math::Clamp(g, 0, 255);
-    this->b = (unsigned char)Math::Clamp(b, 0, 255);
-    this->a = (unsigned char)Math::Clamp(a, 0, 255);
+    this->r = static_cast<uint8_t>(Math::Clamp(r, 0, 255));
+    this->g = static_cast<uint8_t>(Math::Clamp(g, 0, 255));
+    this->b = static_cast<uint8_t>(Math::Clamp(b, 0, 255));
+    this->a = static_cast<uint8_t>(Math::Clamp(a, 0, 255));
+}
+
+Color32::Color32(const Color& other) : Color32(
+    static_cast<int>(other.r * 255.0f),
+    static_cast<int>(other.g * 255.0f),
+    static_cast<int>(other.b * 255.0f),
+    static_cast<int>(other.a * 255.0f))
+{
+
 }
 
 bool Color32::operator==(const Color32& other) const
 {
-    return (Math::AreEqual(r, other.r) &&
-            Math::AreEqual(g, other.g) &&
-            Math::AreEqual(b, other.b) &&
-            Math::AreEqual(a, other.a));
+    return r == other.r &&
+           g == other.g &&
+           b == other.b &&
+           a == other.a;
 }
 
 bool Color32::operator!=(const Color32& other) const
 {
-    return !(Math::AreEqual(r, other.r) &&
-             Math::AreEqual(g, other.g) &&
-             Math::AreEqual(b, other.b) &&
-             Math::AreEqual(a, other.a));
+    return !(*this == other);
 }
 
 Color32 Color32::operator+(const Color32& other) const
 {
+    // Values are clamped 0-255 in Color32(int...) constructor.
     return Color32(r + other.r, g + other.g, b + other.b, a + other.a);
 }
 
 Color32& Color32::operator+=(const Color32& other)
 {
-    r = (unsigned char)Math::Min(r + other.r, 255);
-    g = (unsigned char)Math::Min(g + other.g, 255);
-    b = (unsigned char)Math::Min(b + other.b, 255);
-    a = (unsigned char)Math::Min(a + other.a, 255);
+    r = static_cast<uint8_t>(Math::Min(r + other.r, 255));
+    g = static_cast<uint8_t>(Math::Min(g + other.g, 255));
+    b = static_cast<uint8_t>(Math::Min(b + other.b, 255));
+    a = static_cast<uint8_t>(Math::Min(a + other.a, 255));
     return *this;
 }
 
 Color32 Color32::operator-(const Color32& other) const
 {
+    // Values are clamped 0-255 in Color32(int...) constructor.
     return Color32(r - other.r, g - other.g, b - other.b, a - other.a);
 }
 
 Color32& Color32::operator-=(const Color32& other)
 {
-    r = (unsigned char)Math::Max(r - other.r, 0);
-    g = (unsigned char)Math::Max(g - other.g, 0);
-    b = (unsigned char)Math::Max(b - other.b, 0);
-    a = (unsigned char)Math::Max(a - other.a, 0);
+    r = static_cast<uint8_t>(Math::Max(r - other.r, 0));
+    g = static_cast<uint8_t>(Math::Max(g - other.g, 0));
+    b = static_cast<uint8_t>(Math::Max(b - other.b, 0));
+    a = static_cast<uint8_t>(Math::Max(a - other.a, 0));
     return *this;
 }
 
@@ -97,7 +106,6 @@ Color32 Color32::operator*(const Color32& other) const
 Color32& Color32::operator*=(const Color32& other)
 {
     r *= other.r;
-    g *= other.g;
     g *= other.g;
     b *= other.b;
     a *= other.a;
@@ -116,7 +124,9 @@ Color32& Color32::operator*=(const Color32& other)
 
 std::ostream& operator<<(std::ostream& os, const Color32& c)
 {
-    os << "(" << (unsigned int)c.GetR() << ", " << (unsigned int)c.GetG()
-    << ", " << (unsigned int)c.GetB() << ", " << (unsigned int)c.GetA() << ")";
+    os << "(" << static_cast<uint32_t>(c.r) << ", "
+       <<        static_cast<uint32_t>(c.g) << ", "
+       <<        static_cast<uint32_t>(c.b) << ", "
+       <<        static_cast<uint32_t>(c.a) << ")";
     return os;
 }

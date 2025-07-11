@@ -229,10 +229,10 @@ void UILabel::GenerateMesh()
 
     // Need color to pass as vertex color for text mesh.
     Color32 fontColor = Color32::White;
-    float colorR = (float)fontColor.GetR() / 255.0f;
-    float colorG = (float)fontColor.GetG() / 255.0f;
-    float colorB = (float)fontColor.GetB() / 255.0f;
-    float colorA = (float)fontColor.GetA() / 255.0f;
+    float colorR = (float)fontColor.r / 255.0f;
+    float colorG = (float)fontColor.g / 255.0f;
+    float colorB = (float)fontColor.b / 255.0f;
+    float colorA = (float)fontColor.a / 255.0f;
 
     int charIndex = 0;
     const std::vector<TextLayout::CharInfo>& charInfos = mTextLayout.GetChars();

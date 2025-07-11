@@ -414,9 +414,9 @@ void BSP::ApplyLightmap(const BSPLightmap& lightmap)
                 for(int j = 0; j < height; ++j)
                 {
                     Color32 color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor32(i, j);
-                    sums.x += color.GetR();
-                    sums.y += color.GetG();
-                    sums.z += color.GetB();
+                    sums.x += color.r;
+                    sums.y += color.g;
+                    sums.z += color.b;
                 }
             }
             sums /= static_cast<float>(width * height);

@@ -39,10 +39,10 @@ Texture::Texture(uint32_t width, uint32_t height, Color32 color) : Asset("", Ass
     // Flood-fill pixels with desired color.
     for(int i = 0; i < pixelsSize; i += 4)
     {
-        mPixels[i] = color.GetR();
-        mPixels[i + 1] = color.GetG();
-        mPixels[i + 2] = color.GetB();
-        mPixels[i + 3] = color.GetA();
+        mPixels[i] = color.r;
+        mPixels[i + 1] = color.g;
+        mPixels[i + 2] = color.b;
+        mPixels[i + 3] = color.a;
     }
 }
 
@@ -132,10 +132,10 @@ void Texture::SetPixelColor32(int x, int y, const Color32& color)
     if(index >= (mWidth * mHeight * 4)) { return; }
 
     // Set it.
-    mPixels[index] = color.GetR();
-    mPixels[index + 1] = color.GetG();
-    mPixels[index + 2] = color.GetB();
-    mPixels[index + 3] = color.GetA();
+    mPixels[index] = color.r;
+    mPixels[index + 1] = color.g;
+    mPixels[index + 2] = color.b;
+    mPixels[index + 3] = color.a;
     mDirtyFlags |= DirtyFlags::Pixels;
 }
 
@@ -266,9 +266,9 @@ void Texture::SetTransparentColor(const Color32& color)
     int pixelByteCount = mWidth * mHeight * 4;
     for(int i = 0; i < pixelByteCount; i += 4)
     {
-        if(mPixels[i] == color.GetR() &&
-           mPixels[i + 1] == color.GetG() &&
-           mPixels[i + 2] == color.GetB())
+        if(mPixels[i] == color.r &&
+           mPixels[i + 1] == color.g &&
+           mPixels[i + 2] == color.b)
         {
             mPixels[i + 3] = 0;
         }
