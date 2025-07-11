@@ -62,8 +62,8 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     UIButton* restoreButton = CreateButton(titleImage->GetOwner(), "TITLE_RESTORE", buttonX);
     restoreButton->SetTooltipText("titlerestore");
     restoreButton->SetPressCallback([](UIButton* button){
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
         gGK3UI.ShowLoadScreen();
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
     });
     if(GEngine::Instance()->IsDemoMode())
     {
@@ -76,9 +76,9 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     UIButton* playButton = CreateButton(titleImage->GetOwner(), "TITLE_PLAY", buttonX);
     playButton->SetTooltipText("titleplay");
     playButton->SetPressCallback([this](UIButton* button){
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
         Hide();
         GEngine::Instance()->StartGame();
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
     });
     buttonX -= playButton->GetRectTransform()->GetSize().x + distBetweenButtons;
     mPlayButton = playButton;
