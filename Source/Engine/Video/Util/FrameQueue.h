@@ -1,6 +1,4 @@
 //
-// FrameQueue.h
-//
 // Based very heavily off of the "FrameQueue" struct in ffmpeg's ffplay example.
 //
 // A queue of "frames" from ffmpeg.

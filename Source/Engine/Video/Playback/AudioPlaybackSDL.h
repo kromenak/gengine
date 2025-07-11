@@ -4,11 +4,12 @@
 // Encapsulates playback of audio data through SDL audio subsystem.
 //
 #pragma once
-#include <SDL.h>
+
 extern "C"
 {
     #include <libavformat/avformat.h>
 }
+#include <SDL.h>
 
 struct SwrContext;
 struct VideoState;
@@ -18,12 +19,12 @@ struct VideoState;
 
 struct AudioParams
 {
-    int freq;
-    int channels;
-    int64_t channel_layout;
-    enum AVSampleFormat fmt;
-    int frame_size;
-    int bytes_per_sec;
+    int freq = 0;
+    int channels = 0;
+    int64_t channel_layout = 0;
+    enum AVSampleFormat fmt = AV_SAMPLE_FMT_NONE;
+    int frame_size = 0;
+    int bytes_per_sec = 0;
 };
 
 class AudioPlaybackSDL

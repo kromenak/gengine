@@ -5,6 +5,7 @@
 #include "AssetManager.h"
 #include "Font.h"
 #include "GameProgress.h"
+#include "GK3UI.h"
 #include "Scene.h"
 #include "SidneyButton.h"
 #include "SidneyFiles.h"
@@ -18,7 +19,7 @@
 #include "UINineSlice.h"
 #include "UITextInput.h"
 #include "UIUtil.h"
-#include "VideoPlayer.h"
+#include "UIVideoImage.h"
 
 void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
 {
@@ -314,7 +315,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
         mMAFingerprintImage->GetRectTransform()->SetAnchoredPosition(4.0f, 4.0f);
         mMAFingerprintImage->GetRectTransform()->SetSizeDelta(41.0f, 51.0f);
 
-        mMAFingerprintVideoImage = UI::CreateWidgetActor<UIImage>("FingerprintVideoImage", fingerprintBorder);
+        mMAFingerprintVideoImage = UI::CreateWidgetActor<UIVideoImage>("FingerprintVideoImage", fingerprintBorder);
         mMAFingerprintVideoImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mMAFingerprintVideoImage->GetRectTransform()->SetAnchoredPosition(4.0f, 4.0f);
         mMAFingerprintVideoImage->GetRectTransform()->SetSizeDelta(41.0f, 51.0f);
@@ -809,7 +810,7 @@ void SidneySuspects::OnMatchAnalysisPressed()
 
         // Play video file of the match analysis occurring.
         mMAFingerprintVideoImage->SetEnabled(true);
-        gVideoPlayer.Play(videoName, nullptr, mMAFingerprintVideoImage, [this, compareTexture, matchSuspectIndex](){
+        mMAFingerprintVideoImage->Play(videoName, [this, compareTexture, matchSuspectIndex](){
 
             // Once video completes, the video image shows the compare texture overlay.
             mMAFingerprintVideoImage->SetTexture(compareTexture);

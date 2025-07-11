@@ -2,7 +2,7 @@
 // Based very heavily off of the "Decoder" struct in ffmpeg's ffplay example.
 //
 // A decoder uses a codec to decode packets from a packet queue.
-// Decoded data are called "Frames" and are put into an appropriate FrameQueue.
+// Decoded packets are called "Frames" and are put into an appropriate FrameQueue.
 //
 // A decoder can potentially block indefinitely, so decoding occurs on a separate thread.
 //

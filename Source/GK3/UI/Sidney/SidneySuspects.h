@@ -18,6 +18,7 @@ class UIImage;
 class UILabel;
 class UINineSlice;
 class UITextInput;
+class UIVideoImage;
 
 class SidneySuspects
 {
@@ -146,7 +147,7 @@ private:
     // MATCH ANALYSIS
     Actor* mMatchAnalysisWindow = nullptr;
     UIImage* mMAFingerprintImage = nullptr;
-    UIImage* mMAFingerprintVideoImage = nullptr;
+    UIVideoImage* mMAFingerprintVideoImage = nullptr;
     UILabel* mMAActionLabel = nullptr;
     UILabel* mMASuspectLabel = nullptr;
     SidneyButton* mMALinkToSuspectButton = nullptr;

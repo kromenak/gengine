@@ -2,14 +2,13 @@
 
 extern "C"
 {
-    #include <libavutil/time.h>
     #include <libswscale/swscale.h>
     #include <libswresample/swresample.h>
 }
 
 #include "FrameQueue.h"
-#include "VideoState.h"
 #include "Texture.h"
+#include "VideoState.h"
 
 VideoPlayback::~VideoPlayback()
 {
@@ -17,8 +16,8 @@ VideoPlayback::~VideoPlayback()
     sws_freeContext(mRGBAConvertContext);
     //sws_freeContext(sub_convert_ctx);
 
-    // Free texture.
-    if(mVideoTexture != nullptr)
+    // Free video texture.
+    if(mOwnsVideoTexture && mVideoTexture != nullptr)
     {
         delete mVideoTexture;
     }
@@ -173,21 +172,38 @@ retry:
     }
 }
 
+void VideoPlayback::SetTransparentColor(const Color32& color)
+{
+    // Save transparent color to apply to future generated video pixels.
+    mHasTransparentColor = true;
+    mTransparentColor = color;
+
+    // If a texture already exists, also update its existing video pixels.
+    if(mVideoTexture != nullptr)
+    {
+        mVideoTexture->SetTransparentColor(color);
+    }
+}
+
+void VideoPlayback::ClearTransparentColor()
+{
+    mHasTransparentColor = false;
+}
+
 bool VideoPlayback::UpdateVideoTexture(Frame* videoFrame)
 {
     // Already uploaded video texture to GPU - don't do it again.
     if(videoFrame->uploaded) { return true; }
 
-    AVFrame* avFrame = videoFrame->frame;
-
     // Make sure we have a properly sized video texture.
-    if(mVideoTexture == nullptr || mVideoTexture->GetWidth() != avFrame->width || mVideoTexture->GetHeight() != avFrame->height)
+    AVFrame* avFrame = videoFrame->frame;
+    if(mVideoTexture == nullptr)
     {
-        if(mVideoTexture != nullptr)
-        {
-            delete mVideoTexture;
-        }
         mVideoTexture = new Texture(avFrame->width, avFrame->height);
+    }
+    else if(mVideoTexture->GetWidth() != avFrame->width || mVideoTexture->GetHeight() != avFrame->height)
+    {
+        mVideoTexture->Resize(avFrame->width, avFrame->height);
     }
 
     // Create conversion context to go from input frame format to BGRA format.
@@ -209,6 +225,12 @@ bool VideoPlayback::UpdateVideoTexture(Frame* videoFrame)
     sws_scale(mRGBAConvertContext,
               avFrame->data, avFrame->linesize, 0, avFrame->height, // source
               dest, dest_linesize); // dest
+
+    // After pixels are updated in texture, apply transparent color if any.
+    if(mHasTransparentColor)
+    {
+        mVideoTexture->SetTransparentColor(mTransparentColor);
+    }
 
     // Upload texture data to GPU.
     mVideoTexture->AddDirtyFlags(Texture::DirtyFlags::Pixels);

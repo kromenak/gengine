@@ -1,12 +1,5 @@
 #include "VideoState.h"
 
-extern "C"
-{
-    #include <libavutil/time.h>
-    #include <libswscale/swscale.h>
-    #include <libswresample/swresample.h>
-}
-
 #include "AudioPlaybackSDL.h"
 #include "VideoPlayback.h"
 
@@ -124,6 +117,15 @@ VideoState::VideoState(const char* filename) :
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateThread(): %s\n", SDL_GetError());
         mState = State::Stopped;
     }
+
+    // At this point, background threads are created and running - one to read data from disk, another to decode data to frames, etc.
+    // Before returning, we want to have the first video texture generated, to avoid rendering a single empty/white frame before the video.
+    // So, busy wait until enough data has been decoded to get us that first video texture.
+    // You could view this as a HACK, but the first video frame is typically generated nearly instantaneously at runtime. So this may be a fine way to go about this.
+    while(mState == State::Playing && GetVideoTexture() == nullptr)
+    {
+        Update();
+    }
 }
 
 VideoState::~VideoState()
@@ -211,16 +213,24 @@ int VideoState::GetMasterSyncType()
     if(mSyncType == AV_SYNC_VIDEO_MASTER)
     {
         if(videoStream)
+        {
             return AV_SYNC_VIDEO_MASTER;
+        }
         else
+        {
             return AV_SYNC_AUDIO_MASTER;
+        }
     }
     else if(mSyncType == AV_SYNC_AUDIO_MASTER)
     {
         if(audioStream)
+        {
             return AV_SYNC_AUDIO_MASTER;
+        }
         else
+        {
             return AV_SYNC_EXTERNAL_CLOCK;
+        }
     }
     else
     {
@@ -238,6 +248,30 @@ double VideoState::GetMasterClock()
         return audioClock.GetTime();
     default:
         return externalClock.GetTime();
+    }
+}
+
+void VideoState::SetTransparentColor(const Color32& color)
+{
+    if(videoPlayback != nullptr)
+    {
+        videoPlayback->SetTransparentColor(color);
+    }
+}
+
+void VideoState::ClearTransparentColor()
+{
+    if(videoPlayback != nullptr)
+    {
+        videoPlayback->ClearTransparentColor();
+    }
+}
+
+void VideoState::RelenquishVideoTextureOwnership()
+{
+    if(videoPlayback != nullptr)
+    {
+        videoPlayback->RelenquishVideoTextureOwnership();
     }
 }
 
@@ -445,14 +479,14 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
         if(is->mAborted) { break; }
 
         // Seek requested.
-        if(is->seek_req)
+        if(is->mSeekRequested)
         {
-            int64_t seek_target = is->seek_pos;
-            int64_t seek_min    = is->seek_rel > 0 ? seek_target - is->seek_rel + 2: INT64_MIN;
-            int64_t seek_max    = is->seek_rel < 0 ? seek_target - is->seek_rel - 2: INT64_MAX;
-            // FIXME the +-2 is due to rounding being not done in the correct direction in generation of the seek_pos/seek_rel variables
+            int64_t seek_target = is->mSeekPos;
+            int64_t seek_min = is->mSeekRel > 0 ? seek_target - is->mSeekRel + 2: INT64_MIN;
+            int64_t seek_max = is->mSeekRel < 0 ? seek_target - is->mSeekRel - 2: INT64_MAX;
+            // FIXME the +-2 is due to rounding being not done in the correct direction in generation of the mSeekPos/mSeekRel variables
 
-            int ret = avformat_seek_file(is->format, -1, seek_min, seek_target, seek_max, is->seek_flags);
+            int ret = avformat_seek_file(is->format, -1, seek_min, seek_target, seek_max, is->mSeekFlags);
             if(ret < 0)
             {
                 av_log(NULL, AV_LOG_ERROR, "%s: error while seeking\n", is->format->url);
@@ -474,7 +508,7 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
                     is->videoPackets.Clear();
                     is->videoPackets.EnqueueFlush();
                 }
-                if(is->seek_flags & AVSEEK_FLAG_BYTE)
+                if(is->mSeekFlags & AVSEEK_FLAG_BYTE)
                 {
                     is->externalClock.SetPts(std::numeric_limits<double>::quiet_NaN(), 0);
                 }
@@ -483,7 +517,7 @@ static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* 
                     is->externalClock.SetPts(seek_target / (double)AV_TIME_BASE, 0);
                 }
             }
-            is->seek_req = 0;
+            is->mSeekRequested = 0;
             readEOF = false;
             if(is->mState == State::Paused)
             {

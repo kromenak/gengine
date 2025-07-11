@@ -19,6 +19,7 @@
 #include "Sidney.h"
 #include "TimeblockScreen.h"
 #include "TitleScreen.h"
+#include "VideoPlayer.h"
 
 GK3UI gGK3UI;
 
@@ -338,6 +339,38 @@ void GK3UI::HideGPSOverlay()
     if(mGPSOverlay != nullptr)
     {
         mGPSOverlay->Hide();
+    }
+}
+
+void GK3UI::PlayVideo(const std::string& videoName, bool fullscreen, bool autoclose, const std::function<void()>& callback)
+{
+    if(mVideoPlayer == nullptr)
+    {
+        mVideoPlayer = new VideoPlayer();
+        mVideoPlayer->SetIsDestroyOnLoad(false);
+    }
+    mVideoPlayer->Play(videoName, fullscreen, autoclose, callback);
+}
+
+bool GK3UI::IsVideoPlaying() const
+{
+    return mVideoPlayer != nullptr && mVideoPlayer->IsPlaying();
+}
+
+void GK3UI::StopVideo()
+{
+    if(mVideoPlayer != nullptr)
+    {
+        mVideoPlayer->Stop();
+    }
+}
+
+void GK3UI::HideVideoPlayer()
+{
+    if(mVideoPlayer != nullptr)
+    {
+        mVideoPlayer->Stop();
+        mVideoPlayer->Hide();
     }
 }
 

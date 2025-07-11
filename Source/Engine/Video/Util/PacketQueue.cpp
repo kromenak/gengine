@@ -1,8 +1,3 @@
-//
-// PacketQueue.cpp
-//
-// Clark Kromenaker
-//
 #include "PacketQueue.h"
 
 int PacketQueue::Init()

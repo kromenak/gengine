@@ -25,6 +25,7 @@ class Sidney;
 class Timeblock;
 class TimeblockScreen;
 class TitleScreen;
+class VideoPlayer;
 
 class GK3UI
 {
@@ -71,6 +72,11 @@ public:
     void ShowGPSOverlay();
     void HideGPSOverlay();
 
+    void PlayVideo(const std::string& videoName, bool fullscreen, bool autoclose, const std::function<void()>& callback);
+    bool IsVideoPlaying() const;
+    void StopVideo();
+    void HideVideoPlayer();
+
     bool IsAnyKeyPressedOutsideTextInputAndConsole();
     bool CanExitScreen(const Layer& layer);
 
@@ -104,6 +110,8 @@ private:
     FingerprintScreen* mFingerprintScreen = nullptr;
     BinocsOverlay* mBinocsOverlay = nullptr;
     GPSOverlay* mGPSOverlay = nullptr;
+
+    VideoPlayer* mVideoPlayer = nullptr;
 };
 
 extern GK3UI gGK3UI;

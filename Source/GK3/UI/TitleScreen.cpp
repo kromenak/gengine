@@ -9,7 +9,6 @@
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UIUtil.h"
-#include "VideoPlayer.h"
 #include "Window.h"
 
 namespace
@@ -88,8 +87,8 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     UIButton* introButton = CreateButton(titleImage->GetOwner(), "TITLE_INTRO", buttonX);
     introButton->SetTooltipText("titleintro");
     introButton->SetPressCallback([](UIButton* button) {
+        gGK3UI.PlayVideo("intro.bik", true, true, nullptr);
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
-        gVideoPlayer.Play("intro.bik", true, true, nullptr);
     });
     if(GEngine::Instance()->IsDemoMode())
     {

@@ -7,7 +7,6 @@
 // Each stream keeps its own clock, which can be compared to ensure audio and video stay synced.
 //
 #pragma once
-#include <cmath>
 #include <limits>
 
 /* no AV correction is done if too big error */

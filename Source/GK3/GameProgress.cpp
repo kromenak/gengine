@@ -132,6 +132,9 @@ void GameProgress::StartTimeblock(const Timeblock& timeblock, bool loadingSave, 
     // Change time to new timeblock.
     SetTimeblock(timeblock);
 
+    // Make sure video player is hidden.
+    gGK3UI.HideVideoPlayer();
+
     // Show timeblock screen.
     gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, loadingSave, [this, timeblock, callback](){
 

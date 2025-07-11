@@ -11,7 +11,6 @@
 #include "FileSystem.h"
 #include "GK3UI.h"
 #include "Scene.h"
-#include "VideoPlayer.h"
 
 namespace VideoHelper
 {
@@ -52,7 +51,7 @@ namespace VideoHelper
         }
 
         // Play video.
-        gVideoPlayer.Play(filename, fullscreen, autoclose, [videoName, callback](){
+        gGK3UI.PlayVideo(filename, fullscreen, autoclose, [videoName, callback](){
 
             // If the video ends naturally, any associated captions will also end naturally.
             // But in case of skipping the video, be sure to stop captions prematurely as well.
@@ -74,7 +73,7 @@ namespace VideoHelper
         });
 
         // If video is playing, attempt to play associated captions.
-        if(gVideoPlayer.IsPlaying())
+        if(gGK3UI.IsVideoPlaying())
         {
             Animation* captionsAnim = gAssetManager.LoadYak(Path::GetFileNameNoExtension(videoName), AssetScope::Scene);
             if(captionsAnim != nullptr)

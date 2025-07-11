@@ -11,6 +11,7 @@
 #include "Timers.h"
 #include "UIImage.h"
 #include "UIUtil.h"
+#include "UIVideoImage.h"
 #include "VideoPlayer.h"
 
 void SidneyAnalyze::AnalyzeImage_Init()
@@ -31,9 +32,9 @@ void SidneyAnalyze::AnalyzeImage_Init()
 
     // Create images that are used to render videos in some cases.
     {
-        for(UIImage*& image : mAnalyzeVideoImages)
+        for(UIVideoImage*& image : mAnalyzeVideoImages)
         {
-            image = UI::CreateWidgetActor<UIImage>("VideoImage", mAnalyzeImageWindow);
+            image = UI::CreateWidgetActor<UIVideoImage>("VideoImage", mAnalyzeImageWindow);
             image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             AnalyzeImage_ResetVideoImage(image);
         }
@@ -128,7 +129,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     }
 
     // Reset video images to be the size of the analyze image.
-    for(UIImage* image : mAnalyzeVideoImages)
+    for(UIVideoImage* image : mAnalyzeVideoImages)
     {
         AnalyzeImage_ResetVideoImage(image);
     }
@@ -536,14 +537,14 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
     }
 }
 
-void SidneyAnalyze::AnalyzeImage_ResetVideoImage(UIImage* image)
+void SidneyAnalyze::AnalyzeImage_ResetVideoImage(UIVideoImage* image)
 {
     image->GetRectTransform()->SetAnchoredPosition(mAnalyzeImage->GetRectTransform()->GetAnchoredPosition());
     image->GetRectTransform()->SetSizeDelta(mAnalyzeImage->GetRectTransform()->GetSizeDelta());
     image->SetEnabled(false);
 }
 
-void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIImage* image, const std::string& finalTextureName, const std::function<void()>& finishCallback)
+void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideoImage* image, const std::string& finalTextureName, const std::function<void()>& finishCallback)
 {
     // Make sure image is enabled.
     image->SetEnabled(true);
@@ -553,7 +554,7 @@ void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIImage
 
     // Play video on video image. The video uses a green chromakey background.
     Color32 transparentColor(3, 251, 3);
-    gVideoPlayer.Play(videoName, &transparentColor, image, [image, finalTextureName, finishCallback](){
+    image->Play(videoName, transparentColor, [image, finalTextureName, finishCallback](){
 
         // Manual action is done.
         gActionManager.FinishManualAction();

@@ -71,9 +71,9 @@ void Decoder::Abort(FrameQueue* frameQueue)
     mPacketQueue->Clear();
 }
 
+// This function is called by the decoder thread created in the "Start" function.
 int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
 {
-    // This function is called by the decoder thread created in the "Start" function.
     int ret = AVERROR(EAGAIN);
 
     // Loop until one of the following occurs:

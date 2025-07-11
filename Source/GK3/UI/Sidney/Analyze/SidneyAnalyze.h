@@ -23,6 +23,7 @@ class UIButton;
 class UIImage;
 class UILabel;
 class UIScrollRect;
+class UIVideoImage;
 
 class SidneyAnalyze
 {
@@ -107,7 +108,7 @@ private:
     // ANALYZE IMAGE
     Actor* mAnalyzeImageWindow = nullptr;
     UIImage* mAnalyzeImage = nullptr;
-    UIImage* mAnalyzeVideoImages[3] = { 0 };
+    UIVideoImage* mAnalyzeVideoImages[3] = { 0 };
 
     void AnalyzeImage_Init();
     void AnalyzeImage_EnterState();
@@ -120,8 +121,8 @@ private:
     void AnalyzeImage_OnRotateShapeButtonPressed();
     void AnalyzeImage_OnZoomClarifyButtonPressed();
 
-    void AnalyzeImage_ResetVideoImage(UIImage* image);
-    void AnalyzeImage_PlayVideo(const std::string& videoName, UIImage* image, const std::string& finalTextureName, const std::function<void()>& finishCallback);
+    void AnalyzeImage_ResetVideoImage(UIVideoImage* image);
+    void AnalyzeImage_PlayVideo(const std::string& videoName, UIVideoImage* image, const std::string& finalTextureName, const std::function<void()>& finishCallback);
 
     // ANALYZE TEXT
     Actor* mAnalyzeTextWindow = nullptr;

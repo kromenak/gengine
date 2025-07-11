@@ -1,44 +1,39 @@
 //
 // Clark Kromenaker
 //
-// Manager class for video playback.
+// A dedicated "video player" UI for watching videos that aren't integrated into other UI.
 //
 #pragma once
+#include "Actor.h"
+
 #include <functional>
 #include <string>
 
-#include "Color32.h"
 #include "LayerManager.h"
 #include "Vector2.h"
 
-class Actor;
 class UIImage;
+class UIVideoImage;
 struct VideoState;
 
-class VideoPlayer
+class VideoPlayer : public Actor
 {
 public:
     VideoPlayer();
-    ~VideoPlayer();
 
-    void Initialize();
-    void Update();
+    void Show();
+    void Hide();
 
-    void Play(const std::string& name);
-    void Play(const std::string& name, bool fullscreen, bool autoclose, std::function<void()> stopCallback);
-    void Play(const std::string& name, Color32* transparentColor, UIImage* image, const std::function<void()>& callback);
+    void Play(const std::string& videoName, bool fullscreen, bool autoclose, const std::function<void()>& callback);
     void Stop();
 
-    bool IsPlaying() const { return mVideo != nullptr; }
+    bool IsPlaying() const;
+
+protected:
+    void OnUpdate(float deltaTime) override;
 
 private:
     Layer mLayer;
-
-    // The video being played; null if none.
-    VideoState* mVideo = nullptr;
-
-    // Root canvas for all video UI components.
-    Actor* mVideoCanvasActor = nullptr;
 
     // A background image that takes up the full screen behind a video.
     // When playing a "fullscreen" video, this is totally black.
@@ -48,16 +43,8 @@ private:
     // If desired video playback size doesn't match the actual video, a solid black letterbox is applied.
     UIImage* mVideoLetterbox = nullptr;
 
-    // Image that displays the actual video texture.
-    UIImage* mVideoImage = nullptr;
-
-    // An outside caller can specify a custom image to play the video on.
-    // If set, that's saved here.
-    UIImage* mOverrideVideoImage = nullptr;
-
-    // If set, this color in the video file will be considered transparent.
-    bool mHasTransparentColor = false;
-    Color32 mTransparentColor;
+    // Image that displays the actual video.
+    UIVideoImage* mVideoImage = nullptr;
 
     // Position to show the video on-screen. Zero is center of screen.
     Vector2 mVideoPosition;
@@ -70,6 +57,8 @@ private:
         Custom          // Video plays at a completely custom size.
     };
     SizeMode mVideoSizeMode = SizeMode::Native;
+
+    // The custom video size when "Custom" video size mode is used.
     Vector2 mCustomVideoSize;
 
     // If true, video is letterboxed if aspect ratio of video doesn't match
@@ -81,6 +70,6 @@ private:
 
     // Callback that is fired when video playback stops (either due to EOF or skip).
     std::function<void()> mStopCallback = nullptr;
-};
 
-extern VideoPlayer gVideoPlayer;
+    void RefreshUI();
+};

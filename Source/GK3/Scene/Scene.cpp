@@ -16,6 +16,7 @@
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GameTimers.h"
+#include "GK3UI.h"
 #include "GKActor.h"
 #include "GKProp.h"
 #include "InventoryManager.h"
@@ -784,9 +785,9 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 
 void Scene::SkipCurrentAction()
 {
-    if(gVideoPlayer.IsPlaying())
+    if(gGK3UI.IsVideoPlaying())
     {
-        gVideoPlayer.Stop();
+        gGK3UI.StopVideo();
         return;
     }
 

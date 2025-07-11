@@ -10,7 +10,6 @@ extern "C"
 {
     #include <libavformat/avformat.h>
 }
-#include <SDL.h>
 
 #include "Decoder.h"
 #include "FrameQueue.h"
@@ -18,12 +17,13 @@ extern "C"
 #include "PtsClock.h"
 
 class AudioPlaybackSDL;
-class VideoPlayback;
+class Color32;
 class Texture;
+class VideoPlayback;
 
 enum SyncType
 {
-    AV_SYNC_AUDIO_MASTER, /* default choice */
+    AV_SYNC_AUDIO_MASTER,   /* default choice */
     AV_SYNC_VIDEO_MASTER,
     AV_SYNC_EXTERNAL_CLOCK, /* synchronize to an external clock */
 };
@@ -90,6 +90,10 @@ struct VideoState
     int GetMasterSyncType();
     double GetMasterClock();
 
+    void SetTransparentColor(const Color32& color);
+    void ClearTransparentColor();
+
+    void RelenquishVideoTextureOwnership();
     Texture* GetVideoTexture();
 
 private:
@@ -121,10 +125,10 @@ private:
     SDL_cond* mContinueReadCondition = nullptr;
 
     // Seek functionality.
-    bool seek_req = false;
-    int seek_flags = 0;
-    int64_t seek_pos = 0L;
-    int64_t seek_rel = 0L;
+    bool mSeekRequested = false;
+    int mSeekFlags = 0;
+    int64_t mSeekPos = 0L;
+    int64_t mSeekRel = 0L; // ???
 
     int OpenStream(int streamIndex);
     void CloseStream(int streamIndex);

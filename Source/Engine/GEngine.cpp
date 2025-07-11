@@ -147,9 +147,6 @@ bool GEngine::Initialize()
     // Create action manager.
     gActionManager.Init();
 
-    // Create video player.
-    gVideoPlayer.Initialize();
-
     // Create console UI - this persists for the entire game.
     ConsoleUI* consoleUI = new ConsoleUI(false);
     consoleUI->SetIsDestroyOnLoad(false);
@@ -320,13 +317,13 @@ void GEngine::OnPersist(PersistState& ps)
 void GEngine::ShowOpeningMovies()
 {
     // Play opening movie.
-    gVideoPlayer.Play("Sierra.avi", true, true, [this](){
+    gGK3UI.PlayVideo("Sierra.avi", true, true, [this](){
 
         // On first launch of game, show the intro movie before the title screen.
         // Otherwise, go straight to the title screen.
         if(gSaveManager.GetRunCount() <= 1)
         {
-            gVideoPlayer.Play("intro.bik", true, true, [this](){
+            gGK3UI.PlayVideo("intro.bik", true, true, [this](){
                 ShowTitleScreen();
             });
         }
@@ -641,9 +638,6 @@ void GEngine::Update()
 
     // Also update audio system (before or after game logic?)
     gAudioManager.Update(deltaTime);
-
-    // Update video playback.
-    gVideoPlayer.Update();
 
     // Update cursors.
     gCursorManager.Update(deltaTime);

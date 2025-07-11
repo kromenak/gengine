@@ -5,7 +5,7 @@
 //
 #include "VideoState.h"
 
-static int get_video_frame(VideoState *is, AVFrame *frame)
+static int GetVideoFrame(VideoState *is, AVFrame *frame)
 {
     // Decode a frame.
     // Returns 1 if frame was decoded, 0 if no decoded frame, -1 on abort.
@@ -67,7 +67,7 @@ int DecodeVideoThread(void* arg)
     while(true)
     {
         // Decode video frame (and also do some sync check stuff).
-        int got_frame = get_video_frame(is, avFrame);
+        int got_frame = GetVideoFrame(is, avFrame);
         if(got_frame < 0)
         {
             goto the_end;

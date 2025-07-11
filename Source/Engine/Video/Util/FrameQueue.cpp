@@ -1,8 +1,3 @@
-//
-// FrameQueue.cpp
-//
-// Clark Kromenaker
-//
 #include "FrameQueue.h"
 
 #include "PacketQueue.h"
