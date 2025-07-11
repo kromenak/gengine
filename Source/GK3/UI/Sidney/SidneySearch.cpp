@@ -1082,7 +1082,7 @@ void SidneySearch::OnBackButtonPressed()
 
 void SidneySearch::OnForwardButtonPressed()
 {
-    mHistoryIndex = Math::Min(mHistoryIndex + 1, mHistory.size() - 1);
+    mHistoryIndex = Math::Min<int>(mHistoryIndex + 1, mHistory.size() - 1);
     ShowWebPage(mHistory[mHistoryIndex]);
     RefreshHistoryButtons();
 }

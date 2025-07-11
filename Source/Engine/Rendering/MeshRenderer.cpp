@@ -255,7 +255,7 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
             // The ray definitely hit a submesh of this mesh.
             // However, we should still ignore the hit IF it hit a transparent pixel on the submesh.
             // For example, if a mesh is a water surface with a leaf on it, the leaf blocks the ray, but other see-through pixels would not.
-            int materialIndex = Math::Min(submeshIndex, mMaterials.size() - 1);
+            int materialIndex = Math::Min<int>(submeshIndex, mMaterials.size() - 1);
             Material& material = mMaterials[materialIndex];
             Texture* texture = material.GetDiffuseTexture();
             if(texture != nullptr && texture->GetRenderType() != Texture::RenderType::Opaque)

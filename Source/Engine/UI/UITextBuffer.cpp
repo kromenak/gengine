@@ -37,8 +37,8 @@ void UITextBuffer::PopulateTextLayout(TextLayout& textLayout)
 
     // The top of the text display is older text.
     // Subtract offset to get to the index of the last thing we want to show.
-    int endIndex = Math::Max(0, scrollback.size() - 1 - mLineOffset);
-    int startIndex = Math::Max(0, endIndex - mLineCount + 1);
+    int endIndex = Math::Max<int>(0, scrollback.size() - 1 - mLineOffset);
+    int startIndex = Math::Max<int>(0, endIndex - mLineCount + 1);
 
     for(int i = startIndex; i <= endIndex; ++i)
     {

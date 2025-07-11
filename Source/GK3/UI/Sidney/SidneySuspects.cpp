@@ -751,7 +751,7 @@ void SidneySuspects::OnUnlinkToSuspectPressed()
     }
     else
     {
-        info.selectedLinkedFileIndex = Math::Clamp(info.selectedLinkedFileIndex, 0, info.linkedFileIds.size() - 1);
+        info.selectedLinkedFileIndex = Math::Clamp<int>(info.selectedLinkedFileIndex, 0, info.linkedFileIds.size() - 1);
     }
 
     // Re-show this suspect to refresh the UI.

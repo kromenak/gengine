@@ -80,6 +80,6 @@ void StatusOverlay::OnUpdate(float deltaTime)
     // Update status color based on time remaining.
     Color32 color = mStatusLabel->GetColor();
     float t = Math::Clamp(mShowTimer / kStartFadeTime, 0.0f, 1.0f);
-    color.SetA(Math::Lerp((unsigned char)0, (unsigned char)255, t));
+    color.a = Math::Lerp<uint8_t>(0, 255, t);
     mStatusLabel->SetColor(color);
 }

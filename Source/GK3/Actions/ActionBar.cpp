@@ -372,7 +372,7 @@ UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon, const std:
 
     // Put into buttons array at desired position.
     // Note that "one past the last index" is a valid index here - that'll put the thing on the end of the list.
-    index = Math::Clamp(index, 0, mButtons.size());
+    index = Math::Clamp<int>(index, 0, mButtons.size());
     mButtons.insert(mButtons.begin() + index, { verb, button });
 
     // Set size correctly.

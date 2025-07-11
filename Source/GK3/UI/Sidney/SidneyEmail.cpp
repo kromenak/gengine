@@ -757,7 +757,7 @@ UILabel* SidneyEmail::GetBodyLabel(const std::string& text)
 
 void SidneyEmail::OnNextEmailButtonPressed()
 {
-    mCurrentEmailIndex = Math::Min(mCurrentEmailIndex + 1, mReceivedEmails.size() - 1);
+    mCurrentEmailIndex = Math::Min<int>(mCurrentEmailIndex + 1, mReceivedEmails.size() - 1);
     ViewEmail(mReceivedEmails[mCurrentEmailIndex], mCurrentEmailIndex);
 }
 
