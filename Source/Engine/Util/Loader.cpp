@@ -7,28 +7,25 @@ ThreadedTaskQueue Loader::sLoadingTasks(1);
 
 int Loader::sLoadingCount = 0;
 std::function<void()> Loader::sLoadingFinishedCallback;
+Stopwatch Loader::sLoadingStopwatch;
 
 void Loader::Shutdown()
 {
     sLoadingTasks.Shutdown();
 }
 
-void Loader::Load(std::function<void()> loadFunc)
+void Loader::Load(const std::function<void()>& loadFunc)
 {
     if(loadFunc != nullptr)
     {
-        sLoadingCount++;
+        AddLoadingTask();
         sLoadingTasks.AddTask(loadFunc, []() {
-            sLoadingCount--;
-            if(sLoadingCount == 0)
-            {
-                OnLoadingFinished();
-            }
+            RemoveLoadingTask();
         });
     }
 }
 
-void Loader::DoAfterLoading(std::function<void()> callback)
+void Loader::DoAfterLoading(const std::function<void()>& callback)
 {
     // Save callback.
     if(callback != nullptr)
@@ -40,6 +37,31 @@ void Loader::DoAfterLoading(std::function<void()> callback)
     // So, do the callback right away!
     if(sLoadingCount == 0)
     {
+        OnLoadingFinished();
+    }
+}
+
+void Loader::AddLoadingTask()
+{
+    // If this is the first loading task added, reset the stopwatch.
+    // We are now timing a new "batch" of loading tasks.
+    if(sLoadingCount == 0)
+    {
+        printf("Starting load\n");
+        sLoadingStopwatch.Reset();
+    }
+
+    ++sLoadingCount;
+}
+
+void Loader::RemoveLoadingTask()
+{
+    --sLoadingCount;
+
+    // If no more active loading tasks, consider the current loading "batch" to be done.
+    if(sLoadingCount == 0)
+    {
+        printf("Loading completed in %f seconds.\n", sLoadingStopwatch.GetSeconds());
         OnLoadingFinished();
     }
 }

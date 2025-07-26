@@ -11,17 +11,18 @@
 #include <functional>
 
 #include "ThreadPool.h"
+#include "Timers.h"
 
 class Loader
 {
 public:
     static void Shutdown();
 
-    static void Load(std::function<void()> loadFunc);
-    static void DoAfterLoading(std::function<void()> callback);
+    static void Load(const std::function<void()>& loadFunc);
+    static void DoAfterLoading(const std::function<void()>& callback);
 
-    static void AddLoadingTask() { ++sLoadingCount; }
-    static void RemoveLoadingTask() { --sLoadingCount; }
+    static void AddLoadingTask();
+    static void RemoveLoadingTask();
     static bool IsLoading() { return sLoadingCount > 0; }
 
 private:
@@ -33,6 +34,9 @@ private:
 
     // Callback for when loading finishes.
     static std::function<void()> sLoadingFinishedCallback;
+
+    // Tracks how long loading takes and outputs some timing data to the log.
+    static Stopwatch sLoadingStopwatch;
 
     static void OnLoadingFinished();
 };
