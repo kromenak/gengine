@@ -418,10 +418,10 @@ void FingerprintScreen::Show(const std::string& nounName)
             // Set fingerprint texture on the image.
             FingerprintObject::Fingerprint& fp = mActiveObject->fingerprints[fpIndex];
             Texture* printTexture = gAssetManager.LoadTexture(fp.textureName);
-            printTexture->SetTransparentColor(Color32::Black);
-            //Texture* alphaTexture = gAssetManager.LoadTexture(printTexture->GetNameNoExtension() + "A");
-            //printTexture->ApplyAlphaChannel(*alphaTexture, true);
             mPrintsToCollect[imageIndex].image->SetTexture(printTexture, true);
+
+            // Fingerprint images are surrounded by black pixels that should render as transparent.
+            mPrintsToCollect[imageIndex].image->SetTransparentColor(Color32::Black);
 
             // Enable the image and position it correctly.
             mPrintsToCollect[imageIndex].image->SetEnabled(true);

@@ -17,13 +17,13 @@ void SceneAsset::FixGK3SkyboxTextures(SkyboxTextures& textures)
     // Not sure why this choice was made, but it's required for skybox seams to match up.
     // Note that we can ONLY do this operation here if the textures have SCENE scope.
     // If not, then re-entering the scene would rotate the textures again, giving wrong results.
-    if(textures.named.down != nullptr && textures.named.down->GetScope() == AssetScope::Scene)
+    if(textures.named.bottom != nullptr && textures.named.bottom->GetScope() == AssetScope::Scene)
     {
-        textures.named.down->RotateCounterclockwise();
+        textures.named.bottom->RotateCounterclockwise();
     }
-    if(textures.named.up != nullptr && textures.named.up->GetScope() == AssetScope::Scene)
+    if(textures.named.top != nullptr && textures.named.top->GetScope() == AssetScope::Scene)
     {
-        textures.named.up->RotateCounterclockwise();
+        textures.named.top->RotateCounterclockwise();
     }
 }
 
@@ -88,11 +88,11 @@ void SceneAsset::ParseFromData(uint8_t* data, uint32_t dataLength)
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "down"))
                     {
-                        skyboxTextures.named.down = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                        skyboxTextures.named.bottom = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "up"))
                     {
-                        skyboxTextures.named.up = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                        skyboxTextures.named.top = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "azimuth"))
                     {

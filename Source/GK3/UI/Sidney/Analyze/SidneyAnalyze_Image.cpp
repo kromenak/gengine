@@ -544,17 +544,17 @@ void SidneyAnalyze::AnalyzeImage_ResetVideoImage(UIVideoImage* image)
     image->SetEnabled(false);
 }
 
-void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideoImage* image, const std::string& finalTextureName, const std::function<void()>& finishCallback)
+void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideoImage* videoImage, const std::string& finalTextureName, const std::function<void()>& finishCallback)
 {
     // Make sure image is enabled.
-    image->SetEnabled(true);
+    videoImage->SetEnabled(true);
 
     // Play a manual action during the movie.
     gActionManager.StartManualAction();
 
     // Play video on video image. The video uses a green chromakey background.
     Color32 transparentColor(3, 251, 3);
-    image->Play(videoName, transparentColor, [image, finalTextureName, finishCallback](){
+    videoImage->Play(videoName, transparentColor, [videoImage, finalTextureName, finishCallback](){
 
         // Manual action is done.
         gActionManager.FinishManualAction();
@@ -563,7 +563,8 @@ void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideo
         Texture* finalTexture = gAssetManager.LoadTexture(finalTextureName, AssetScope::Scene);
         if(finalTexture != nullptr)
         {
-            image->SetTexture(finalTexture);
+            videoImage->SetTransparentColor(Color32::Magenta);
+            videoImage->SetTexture(finalTexture);
         }
 
         // Execute callback.

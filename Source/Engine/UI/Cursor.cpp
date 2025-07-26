@@ -103,17 +103,25 @@ void Cursor::Load(uint8_t* data, uint32_t dataLength)
     #endif
 
     // Create a surface from the texture.
-    const Uint32 kTextureBytesPerPixel = 4;
-    const Uint32 kTextureBitsPerPixel = kTextureBytesPerPixel * 8;
-    Uint32 texturePitch = kTextureBytesPerPixel * texture->GetWidth();
+    const Uint32 textureBytesPerPixel = texture->GetBytesPerPixel();
+    const Uint32 textureBitsPerPixel = textureBytesPerPixel * 8;
+    Uint32 texturePitch = textureBytesPerPixel * texture->GetWidth();
     SDL_Surface* srcSurface = SDL_CreateRGBSurfaceFrom(texture->GetPixelData(), texture->GetWidth(), texture->GetHeight(),
-                                                       kTextureBitsPerPixel,
+                                                       textureBitsPerPixel,
                                                        texturePitch,
                                                        rmask, gmask, bmask, amask);
     if(srcSurface == nullptr)
     {
         printf("Create cursor %s failed: couldn't create surface from texture (%s).\n", mName.c_str(), SDL_GetError());
         return;
+    }
+
+    // If texture is 3BPP, it won't have an alpha channel. But such textures CAN still have transparent pixels.
+    // In this case, when the source surface is blitted to the destination surface, magenta will be treated as transparent.
+    if(texture->GetBytesPerPixel() < 4)
+    {
+        Uint32 colorkey = SDL_MapRGB(srcSurface->format, 255, 0, 255); // Magenta
+        SDL_SetColorKey(srcSurface, SDL_TRUE, colorkey);
     }
 
     // Create cursors for each frame.
@@ -126,7 +134,8 @@ void Cursor::Load(uint8_t* data, uint32_t dataLength)
         srcRect.h = frameHeight;
 
         // Copy frame from texture into a destination surface.
-        SDL_Surface* dstSurface = SDL_CreateRGBSurface(0, frameWidth, frameHeight, kTextureBitsPerPixel, rmask, gmask, bmask, amask);
+        // This destination surface should always be 32-bit (RGBA) so it can have transparent pixels.
+        SDL_Surface* dstSurface = SDL_CreateRGBSurface(0, frameWidth, frameHeight, 32, rmask, gmask, bmask, amask);
         if(dstSurface == nullptr)
         {
             printf("Create cursor %s failed: couldn't create dest surface for frame %i (%s).\n", mName.c_str(), i, SDL_GetError());

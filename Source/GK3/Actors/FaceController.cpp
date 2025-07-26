@@ -23,8 +23,8 @@ TYPEINFO_INIT(FaceController, Component, 6)
 
 FaceController::FaceController(Actor* owner) : Component(owner)
 {
-    mDownsampledLeftEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black);
-    mDownsampledRightEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black);
+    mDownsampledLeftEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black, Texture::Format::RGB);
+    mDownsampledRightEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black, Texture::Format::RGB);
 }
 
 FaceController::~FaceController()
@@ -457,7 +457,7 @@ void FaceController::DownsampleEyeTexture(Texture* src, Texture* dst, const Vect
     stbir_resize_subpixel(src->GetPixelData(), src->GetWidth(), src->GetHeight(), 0,    // input image data
                           dst->GetPixelData(), dst->GetWidth(), dst->GetHeight(), 0,    // output image data
                           STBIR_TYPE_UINT8,                                             // data type
-                          4,                                                            // number of channels; these textures are RGBA
+                          src->GetBytesPerPixel(),                                      // number of channels
                           -1,                                                           // alpha channel; ignore
                           0,                                                            // flags
                           STBIR_EDGE_CLAMP, STBIR_EDGE_CLAMP,                           // horizontal & vertical edge mode

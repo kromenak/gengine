@@ -32,9 +32,9 @@ public:
     void SetBlendEnabled(bool enabled) override;
     void SetBlendMode(BlendMode blendMode) override;
 
-    TextureHandle CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels) override;
+    TextureHandle CreateTexture(uint32_t width, uint32_t height, Texture::Format format, uint8_t* pixels) override;
     void DestroyTexture(TextureHandle handle) override;
-    void SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, uint8_t* pixels) override;
+    void SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, Texture::Format format, uint8_t* pixels) override;
     void GenerateMipmaps(TextureHandle handle) override;
     void SetTextureWrapMode(TextureHandle handle, Texture::WrapMode wrapMode) override;
     void SetTextureFilterMode(TextureHandle handle, Texture::FilterMode filterMode, bool useMipmaps) override;

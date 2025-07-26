@@ -79,6 +79,11 @@ void UIImage::SetColor(const Color32& color)
     mMaterial.SetColor(color);
 }
 
+void UIImage::SetTransparentColor(const Color32& color)
+{
+    mMaterial.SetColor("gDiscardColor", color);
+}
+
 void UIImage::SetTexture(Texture* texture, bool resizeImage)
 {
     // Setting a null texture is actually an error (the system just renders garbage or whatever was leftover from last render).

@@ -26,12 +26,12 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
 
     // The top-left-most pixel of each glyph in the texture is a special color that signifies the start of a new glyph.
     // Very often, this is (1, 0). But not always! We need to iterate from top-left to find the first non-background-color pixel.
-    Color32 fontBackgroundColor = mFontTexture->GetPixelColor32(0, 0);
+    Color32 fontBackgroundColor = mFontTexture->GetPixelColor(0, 0);
     Color32 glyphStartColor;
     uint32_t currentX = 0;
     for(; currentX < mFontTexture->GetWidth(); ++currentX)
     {
-        glyphStartColor = mFontTexture->GetPixelColor32(currentX, 0);
+        glyphStartColor = mFontTexture->GetPixelColor(currentX, 0);
         if(glyphStartColor != fontBackgroundColor)
         {
             break;
@@ -63,7 +63,7 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
         bool foundGlyphStartColor = false;
         for(currentX = currentX + 1; currentX < mFontTexture->GetWidth(); ++currentX)
         {
-            Color32 color = mFontTexture->GetPixelColor32(currentX, currentY);
+            Color32 color = mFontTexture->GetPixelColor(currentX, currentY);
             if(color == glyphStartColor)
             {
                 foundGlyphStartColor = true;
@@ -128,7 +128,7 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
     // indicates what color should be replaced with the foreground color.
     if(mColorMode == ColorMode::ColorReplace)
     {
-        mReplaceColor = mFontTexture->GetPixelColor32(0, 1);
+        mReplaceColor = mFontTexture->GetPixelColor(0, 1);
     }
 
     /*
@@ -179,7 +179,6 @@ void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
             const IniKeyValue& keyValue = parser.GetKeyValue();
             if(StringUtil::EqualsIgnoreCase(keyValue.key, "font"))
             {
-                //TODO: If font contains non-ASCII chars (pretty likely), this won't work for those chars.
                 mFontCharacters = keyValue.value;
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "bitmap name"))

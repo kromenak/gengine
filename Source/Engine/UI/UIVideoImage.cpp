@@ -67,15 +67,11 @@ bool UIVideoImage::Play(const std::string& videoName, const std::function<void()
 
 bool UIVideoImage::Play(const std::string& videoName, const Color32& transparentColor, const std::function<void()>& callback)
 {
-    // Call other "Play" to get the video playing.
-    bool result = Play(videoName, callback);
+    // Use the passed in color as the transparent color in this video.
+    SetTransparentColor(transparentColor);
 
-    // If video was played successfully (non-null), set its transparent color.
-    if(mVideo != nullptr)
-    {
-        mVideo->SetTransparentColor(transparentColor);
-    }
-    return result;
+    // Play per usual.
+    return Play(videoName, callback);
 }
 
 void UIVideoImage::Stop()

@@ -134,7 +134,7 @@ struct PersistHeader
                 PNG::ImageData imageData;
                 imageData.width = thumbnailTexture->GetWidth();
                 imageData.height = thumbnailTexture->GetHeight();
-                imageData.bytesPerPixel = 4;
+                imageData.bytesPerPixel = thumbnailTexture->GetBytesPerPixel();
                 imageData.pixelData = thumbnailTexture->GetPixelData();
 
                 static const size_t kPngScratchSize = 83886080;

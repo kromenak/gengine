@@ -85,6 +85,44 @@ namespace
         uint32_t count = 0;
     };
 
+    GLenum TextureFormatToOGLFormat(Texture::Format format)
+    {
+        switch(format)
+        {
+            case Texture::Format::BGR:
+                return GL_BGR;
+            case Texture::Format::RGB:
+                return GL_RGB;
+            case Texture::Format::BGRA:
+                return GL_BGRA;
+            case Texture::Format::RGBA:
+                return GL_RGBA;
+            default:
+                assert(false);
+                return GL_RGBA;
+        }
+    }
+
+    GLenum TextureFormatToOGLInternalFormat(Texture::Format format)
+    {
+        // Even if pixel data is provided in BGR(A) order, the internal format must be RGB order.
+        // Why? Simply because OpenGL only supports RGB order for the interal format (see glTexImage2D tables 1 & 2).
+        switch(format)
+        {
+            case Texture::Format::BGR:
+            case Texture::Format::RGB:
+                return GL_RGB;
+
+            case Texture::Format::BGRA:
+            case Texture::Format::RGBA:
+                return GL_RGBA;
+
+            default:
+                assert(false);
+                return GL_RGBA;
+        }
+    }
+
     GLenum PrimitiveToDrawMode(GAPI::Primitive primitive)
     {
         switch(primitive)
@@ -187,6 +225,10 @@ bool GAPI_OpenGL::Init()
     // Same for GL_LINES rendering.
     //TODO: there's no way to control this in a vertex shader, but we might want to specify the line width in the VertexArray object?
     glLineWidth(2.0f);
+
+    // Globally, our pixel data is tightly packed and may be either RGBA/BGRA or RGB/BGR data.
+    // Because we have tightly packed RGB/BGR data, the default unpack alignment (4) won't work in certain cases. We need to use 1 instead.
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     return true;
 }
 
@@ -362,7 +404,7 @@ void GAPI_OpenGL::SetBlendMode(BlendMode blendMode)
     }
 }
 
-TextureHandle GAPI_OpenGL::CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels)
+TextureHandle GAPI_OpenGL::CreateTexture(uint32_t width, uint32_t height, Texture::Format format, uint8_t* pixels)
 {
     // Generate a texture ID.
     // Note that the texture ID is not guaranteed to be unique within the current run of the program!
@@ -379,7 +421,7 @@ TextureHandle GAPI_OpenGL::CreateTexture(uint32_t width, uint32_t height, uint8_
     //      OpenGL assumes the pixel data is from bottom-left, but GK3 pixel arrays are from top left!
     //      You'd think this would be a problem, but GK3 also uses DX style UVs (top-left).
     //      So...having both the texture and UVs upside down, two wrongs make a right!
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, TextureFormatToOGLInternalFormat(format), width, height, 0, TextureFormatToOGLFormat(format), GL_UNSIGNED_BYTE, pixels);
     return reinterpret_cast<TextureHandle>(textureId);
 }
 
@@ -389,10 +431,10 @@ void GAPI_OpenGL::DestroyTexture(TextureHandle handle)
     glDeleteTextures(1, &textureId);
 }
 
-void GAPI_OpenGL::SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, uint8_t* pixels)
+void GAPI_OpenGL::SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, Texture::Format format, uint8_t* pixels)
 {
     GLState::BindTexture(reinterpret_cast<uintptr_t>(handle));
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, TextureFormatToOGLFormat(format), GL_UNSIGNED_BYTE, pixels);
 }
 
 void GAPI_OpenGL::GenerateMipmaps(TextureHandle handle)
@@ -456,23 +498,23 @@ TextureHandle GAPI_OpenGL::CreateCubemap(const CubemapParams& params)
 
     // Create each texture for the cubemap.
     // Note that we MUST create 6 textures, or the cubemap will not display properly.
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, params.front.width, params.front.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, params.front.pixels);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, params.front.width, params.front.height, 0,
+                 TextureFormatToOGLFormat(params.front.format), GL_UNSIGNED_BYTE, params.front.pixels);
 
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, params.back.width, params.back.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, params.back.pixels);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, params.back.width, params.back.height, 0,
+                 TextureFormatToOGLFormat(params.back.format), GL_UNSIGNED_BYTE, params.back.pixels);
 
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, params.right.width, params.right.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, params.right.pixels);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, params.right.width, params.right.height, 0,
+                 TextureFormatToOGLFormat(params.right.format), GL_UNSIGNED_BYTE, params.right.pixels);
 
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, params.left.width, params.left.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, params.left.pixels);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, params.left.width, params.left.height, 0,
+                 TextureFormatToOGLFormat(params.left.format), GL_UNSIGNED_BYTE, params.left.pixels);
 
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, params.top.width, params.top.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, params.top.pixels);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, params.top.width, params.top.height, 0,
+                 TextureFormatToOGLFormat(params.top.format), GL_UNSIGNED_BYTE, params.top.pixels);
 
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, params.bottom.width, params.bottom.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, params.bottom.pixels);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, params.bottom.width, params.bottom.height, 0,
+                 TextureFormatToOGLFormat(params.bottom.format), GL_UNSIGNED_BYTE, params.bottom.pixels);
 
     // These settings help to avoid visible seams around the edges of the skybox.
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

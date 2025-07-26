@@ -20,8 +20,8 @@ Skybox* GeneralBlock::CreateSkybox()
     textures.named.right = gAssetManager.LoadSceneTexture(skyboxRightTextureName, AssetScope::Scene);
     textures.named.back = gAssetManager.LoadSceneTexture(skyboxBackTextureName, AssetScope::Scene);
     textures.named.front = gAssetManager.LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene);
-    textures.named.down = gAssetManager.LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene);
-    textures.named.up = gAssetManager.LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene);
+    textures.named.bottom = gAssetManager.LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene);
+    textures.named.top = gAssetManager.LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene);
 
     // GK3 does some non-standard stuff with the skybox textures.
     SceneAsset::FixGK3SkyboxTextures(textures);

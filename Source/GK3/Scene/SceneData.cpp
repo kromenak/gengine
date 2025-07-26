@@ -105,9 +105,7 @@ void SceneData::ResolveSceneData()
     // Also figure out whether we have a walker boundary - if so, create one.
     if(!mGeneralSettings.walkerBoundaryTextureName.empty())
     {
-        // Small thing, but since Texture class automatically uses magenta as a transparent color, clear that in this case.
         Texture* walkerTexture = gAssetManager.LoadTexture(mGeneralSettings.walkerBoundaryTextureName, AssetScope::Scene);
-        walkerTexture->ClearTransparentColor();
 
         mWalkerBoundary = new WalkerBoundary();
         mWalkerBoundary->SetTexture(walkerTexture);

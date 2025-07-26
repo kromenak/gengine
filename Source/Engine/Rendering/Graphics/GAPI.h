@@ -111,10 +111,10 @@ public:
     virtual void SetBlendMode(BlendMode blendMode) = 0;
 
     // Textures
-    virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels) = 0;
+    virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, Texture::Format format, uint8_t* pixels) = 0;
     virtual void DestroyTexture(TextureHandle handle) = 0;
 
-    virtual void SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, uint8_t* pixels) = 0;
+    virtual void SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, Texture::Format format, uint8_t* pixels) = 0;
     virtual void GenerateMipmaps(TextureHandle handle) = 0;
     virtual void SetTextureWrapMode(TextureHandle handle, Texture::WrapMode wrapMode) = 0;
     virtual void SetTextureFilterMode(TextureHandle handle, Texture::FilterMode filterMode, bool useMipmaps) = 0;
@@ -127,6 +127,7 @@ public:
     {
         uint32_t width = 0;
         uint32_t height = 0;
+        Texture::Format format = Texture::Format::BGR;
         uint8_t* pixels = nullptr;
     };
     struct CubemapParams

@@ -29,8 +29,8 @@ struct SkyboxTextures
             Texture* right;
             Texture* back;
             Texture* front;
-            Texture* down;
-            Texture* up;
+            Texture* bottom;
+            Texture* top;
         } named;
         Texture* array[6] = { 0 };
     };

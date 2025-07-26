@@ -243,9 +243,16 @@ CodecResult PNG::Decode(BinaryReader& reader, ImageData& result)
     int interlaceType = 0;
     png_get_IHDR(pngRead, pngInfo, &result.width, &result.height, &bitDepth, &colorType, &interlaceType, nullptr, nullptr);
 
+    // Based on color type, determine number of components per pixel. RGB has 3 components, RGBA has components, etc.
+    int componentCount = 4;
+    if(colorType == PNG_COLOR_TYPE_RGB)
+    {
+        componentCount = 3;
+    }
+
     // The "bit depth" field returns the number of bits for a single pixel component.
-    // To get the bytes per pixel, we need to multiply by the number of components (4 for RGBA) and divide by number of bits in a byte (8).
-    result.bytesPerPixel = (bitDepth * 4) / 8;
+    // To get the bytes per pixel, we need to multiply by the number of components per pixel and divide by number of bits in a byte (8).
+    result.bytesPerPixel = (bitDepth * componentCount) / 8;
 
     //TODO: Gamma?
     //TODO: Other transforms and options can be set here too!

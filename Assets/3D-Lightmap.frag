@@ -8,6 +8,9 @@ out vec4 oColor;
 // Built-in uniforms
 uniform float gAlphaTest;
 
+uniform vec4 gDiscardColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
+uniform float gDiscardColorTolerance = 0.1f;
+
 // Uniforms
 // The diffuse/color texture that the lightmap is applied onto.
 uniform sampler2D uDiffuse;
@@ -24,7 +27,7 @@ void main()
 {
     // Grab color texel. Discard if below alpha test value.
     vec4 texel = texture(uDiffuse, fUV1);
-    if(texel.a < gAlphaTest) { discard; }
+    if(texel.a < gAlphaTest || distance(texel.rgb, gDiscardColor.rgb) < gDiscardColorTolerance) { discard; }
 
     // Show/hide diffuse texture. May want to show just lightmap texture for debugging.
     texel = (uDiffuseVisible * texel) + ((1.0f - uDiffuseVisible) * vec4(1.0f, 1.0f, 1.0f, 1.0f));

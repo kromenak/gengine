@@ -205,13 +205,13 @@ uint8_t Skybox::Raycast(const Ray& ray)
             {
                 //printf("Down\n");
                 finalUV = Vector2(1.0f - pointUV.z, pointUV.x);
-                maskTexture = mMaskTextures.named.down;
+                maskTexture = mMaskTextures.named.bottom;
             }
             else if(Math::Approximately(hitPoint.y, kSkyboxSize, kSideDetectPrecision))
             {
                 //printf("Up\n");
                 finalUV = Vector2(1.0f - pointUV.z, 1.0f - pointUV.x);
-                maskTexture = mMaskTextures.named.up;
+                maskTexture = mMaskTextures.named.top;
             }
 
             // Ok, our raycast did hit a side of the skybox, and we've determined which side.
@@ -226,7 +226,7 @@ uint8_t Skybox::Raycast(const Ray& ray)
                 Vector2 pixelPos(finalUV.x * maskTexture->GetWidth(), finalUV.y * maskTexture->GetHeight());
 
                 // Get the palette index at that position.
-                return maskTexture->GetPaletteIndex(static_cast<int>(pixelPos.x), static_cast<int>(pixelPos.y));
+                return maskTexture->GetPixelPaletteIndex(static_cast<int>(pixelPos.x), static_cast<int>(pixelPos.y));
             }
 
             // No mask texture, so we won't hit anything.
@@ -309,27 +309,33 @@ void Skybox::CreateMeshAndCubemap()
         GAPI::CubemapParams params;
         params.left.width = mTextures.named.left->GetWidth();
         params.left.height = mTextures.named.left->GetHeight();
+        params.left.format = mTextures.named.left->GetFormat();
         params.left.pixels = mTextures.named.left->GetPixelData();
 
         params.right.width = mTextures.named.right->GetWidth();
         params.right.height = mTextures.named.right->GetHeight();
+        params.right.format = mTextures.named.right->GetFormat();
         params.right.pixels = mTextures.named.right->GetPixelData();
 
         params.back.width = mTextures.named.back->GetWidth();
         params.back.height = mTextures.named.back->GetHeight();
+        params.back.format = mTextures.named.back->GetFormat();
         params.back.pixels = mTextures.named.back->GetPixelData();
 
         params.front.width = mTextures.named.front->GetWidth();
         params.front.height = mTextures.named.front->GetHeight();
+        params.front.format = mTextures.named.front->GetFormat();
         params.front.pixels = mTextures.named.front->GetPixelData();
 
-        params.bottom.width = mTextures.named.down->GetWidth();
-        params.bottom.height = mTextures.named.down->GetHeight();
-        params.bottom.pixels = mTextures.named.down->GetPixelData();
+        params.bottom.width = mTextures.named.bottom->GetWidth();
+        params.bottom.height = mTextures.named.bottom->GetHeight();
+        params.bottom.format = mTextures.named.bottom->GetFormat();
+        params.bottom.pixels = mTextures.named.bottom->GetPixelData();
 
-        params.top.width = mTextures.named.up->GetWidth();
-        params.top.height = mTextures.named.up->GetHeight();
-        params.top.pixels = mTextures.named.up->GetPixelData();
+        params.top.width = mTextures.named.top->GetWidth();
+        params.top.height = mTextures.named.top->GetHeight();
+        params.top.format = mTextures.named.top->GetFormat();
+        params.top.pixels = mTextures.named.top->GetPixelData();
 
         // Create cubemap from params.
         mCubemapHandle = GAPI::Get()->CreateCubemap(params);

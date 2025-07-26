@@ -37,8 +37,11 @@ void SceneConstruction::Init(Scene* scene, SceneData* sceneData)
         MeshRenderer* walkerBoundaryMeshRenderer = walkerBoundaryActor->AddComponent<MeshRenderer>();
         walkerBoundaryMeshRenderer->SetMesh(quad);
 
+        // Create a material to render the walker boundary.
+        // Since this texture uses magenta as a legit color, set the discard color to some random color that's unlikely to appear in this visualization.
         Material m;
         m.SetDiffuseTexture(walkerBoundary->GetTexture());
+        m.SetColor("gDiscardColor", Color32(100, 0, 0, 0));
         walkerBoundaryMeshRenderer->SetMaterial(0, m);
 
         Vector3 size = walkerBoundary->GetSize();

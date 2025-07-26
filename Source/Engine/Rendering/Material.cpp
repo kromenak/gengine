@@ -54,6 +54,9 @@ void Material::Activate(const Matrix4& objectToWorldMatrix)
     // Set built-in alpha test value.
     mShader->SetUniformFloat("gAlphaTest", sAlphaTestValue);
 
+    // Always default to magenta as discard color.
+    mShader->SetUniformColor("gDiscardColor", Color32::Magenta);
+
     // Set user-defined color values.
     for(auto& entry : mColors)
     {

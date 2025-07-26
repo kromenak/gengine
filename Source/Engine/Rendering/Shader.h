@@ -14,37 +14,6 @@ class TextAsset;
 class Vector3;
 class Vector4;
 
-enum class UniformType
-{
-    Unknown,
-
-    Float,
-    Int,
-    Uint,
-    Bool,
-
-    Vector2,
-    Vector3,
-    Vector4,
-
-    Matrix2,
-    Matrix3,
-    Matrix4,
-
-    Texture2D,
-    TextureCube
-    //TODO: Add more as needed
-};
-
-struct Uniform
-{
-    // Type of the uniform.
-    UniformType type = UniformType::Unknown;
-
-    // Uniform name.
-    std::string name;
-};
-
 class Shader : public Asset
 {
     TYPEINFO_SUB(Shader, Asset);

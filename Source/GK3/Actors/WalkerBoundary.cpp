@@ -110,44 +110,44 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
 
             // ANYWAY, here's the idea: if the current index is less than 128, see if a neighbor is a lower palette index.
             // If so, we will want to walk there instead. If no, this is a less than ideal place to walk, but at least it is walkable.
-            int index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
+            int index = mTexture->GetPixelPaletteIndex(path[i].x, path[i].y);
             if(index < 128)
             {
                 while(true)
                 {
                     // If any up/down/left/right has a lower palette index, go there!
-                    if(mTexture->GetPaletteIndex(path[i].x + 1, path[i].y) < index)
+                    if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y) < index)
                     {
                         path[i].x += 1;
                     }
-                    else if(mTexture->GetPaletteIndex(path[i].x - 1, path[i].y) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y) < index)
                     {
                         path[i].x -= 1;
                     }
-                    else if(mTexture->GetPaletteIndex(path[i].x, path[i].y + 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x, path[i].y + 1) < index)
                     {
                         path[i].y += 1;
                     }
-                    else if(mTexture->GetPaletteIndex(path[i].x, path[i].y - 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x, path[i].y - 1) < index)
                     {
                         path[i].y -= 1;
                     }
-                    else if(mTexture->GetPaletteIndex(path[i].x + 1, path[i].y + 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y + 1) < index)
                     {
                         path[i].x += 1;
                         path[i].y += 1;
                     }
-                    else if(mTexture->GetPaletteIndex(path[i].x + 1, path[i].y - 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y - 1) < index)
                     {
                         path[i].x += 1;
                         path[i].y -= 1;
                     }
-                    else if(mTexture->GetPaletteIndex(path[i].x - 1, path[i].y - 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y - 1) < index)
                     {
                         path[i].x -= 1;
                         path[i].y -= 1;
                     }
-                    else if(mTexture->GetPaletteIndex(path[i].x - 1, path[i].y + 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y + 1) < index)
                     {
                         path[i].x -= 1;
                         path[i].y += 1;
@@ -159,7 +159,7 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
                     }
 
                     // Update index being considered for next run through loop.
-                    index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
+                    index = mTexture->GetPixelPaletteIndex(path[i].x, path[i].y);
 
                     // If the palette index is below some threshold, we're in an "acceptably walkable" zone, so we can stop iterating.
                     if(index < 4)
@@ -195,7 +195,7 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
                     }
                     else
                     {
-                        int paletteIndex = mTexture->GetPaletteIndex(current.x, current.y);
+                        int paletteIndex = mTexture->GetPixelPaletteIndex(current.x, current.y);
                         if(paletteIndex > 6 && paletteIndex < 128)
                         {
                             canWalk = false;
@@ -462,7 +462,7 @@ int WalkerBoundary::GetRegionForTexturePos(const Vector2& texturePos) const
     // Palette index 0 is walkable, with indexes 1-9 indicating less and less walkable areas.
     // Palette index 255 is "unwalkable" area.
     // Palette indexes 128-254 are for special regions.
-    return mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
+    return mTexture->GetPixelPaletteIndex(texturePos.x, texturePos.y);
 }
 
 namespace

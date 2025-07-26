@@ -470,21 +470,21 @@ DrivingScreenBlip* DrivingScreen::CreateBlip()
     if(mBlipTexture == nullptr)
     {
         mBlipTexture = new Texture(6, 6, Color32::White);
-        mBlipTexture->SetPixelColor32(0, 0, Color32::Clear);
-        mBlipTexture->SetPixelColor32(1, 0, Color32::Clear);
-        mBlipTexture->SetPixelColor32(0, 1, Color32::Clear);
+        mBlipTexture->SetPixelColor(0, 0, Color32::Clear);
+        mBlipTexture->SetPixelColor(1, 0, Color32::Clear);
+        mBlipTexture->SetPixelColor(0, 1, Color32::Clear);
 
-        mBlipTexture->SetPixelColor32(5, 0, Color32::Clear);
-        mBlipTexture->SetPixelColor32(4, 0, Color32::Clear);
-        mBlipTexture->SetPixelColor32(5, 1, Color32::Clear);
+        mBlipTexture->SetPixelColor(5, 0, Color32::Clear);
+        mBlipTexture->SetPixelColor(4, 0, Color32::Clear);
+        mBlipTexture->SetPixelColor(5, 1, Color32::Clear);
 
-        mBlipTexture->SetPixelColor32(5, 5, Color32::Clear);
-        mBlipTexture->SetPixelColor32(4, 5, Color32::Clear);
-        mBlipTexture->SetPixelColor32(5, 4, Color32::Clear);
+        mBlipTexture->SetPixelColor(5, 5, Color32::Clear);
+        mBlipTexture->SetPixelColor(4, 5, Color32::Clear);
+        mBlipTexture->SetPixelColor(5, 4, Color32::Clear);
 
-        mBlipTexture->SetPixelColor32(0, 5, Color32::Clear);
-        mBlipTexture->SetPixelColor32(1, 5, Color32::Clear);
-        mBlipTexture->SetPixelColor32(0, 4, Color32::Clear);
+        mBlipTexture->SetPixelColor(0, 5, Color32::Clear);
+        mBlipTexture->SetPixelColor(1, 5, Color32::Clear);
+        mBlipTexture->SetPixelColor(0, 4, Color32::Clear);
     }
 
     // Create blip as child of the map.

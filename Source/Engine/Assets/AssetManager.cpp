@@ -282,14 +282,12 @@ Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scop
     // This pixel is obviously supposed to be transparent when rendered.
     if(texture != nullptr && texture->GetRenderType() == Texture::RenderType::AlphaTest)
     {
-        if(texture->GetPixelColor32(0, 0).a == 0 &&
-           texture->GetPixelColor32(1, 0).a > 0 &&
-           texture->GetPixelColor32(2, 0).a == 0 &&
-           texture->GetPixelColor32(1, 1).a == 0)
+        if(texture->GetPixelColor(0, 0) == Color32::Magenta &&
+           texture->GetPixelColor(2, 0) == Color32::Magenta &&
+           texture->GetPixelColor(1, 1) == Color32::Magenta)
         {
-            texture->SetPixelColor32(1, 0, Color32::Clear);
+            texture->SetPixelColor(1, 0, Color32::Magenta);
         }
-
     }
     return texture;
 }

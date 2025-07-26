@@ -25,6 +25,7 @@ public:
     void Render() override;
 
     void SetColor(const Color32& color);
+    void SetTransparentColor(const Color32& color);
 
     void SetTexture(Texture* texture, bool resizeImage = false);
     Texture* GetTexture() const { return mMaterial.GetDiffuseTexture(); }

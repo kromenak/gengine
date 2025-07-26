@@ -7,6 +7,7 @@
 #pragma once
 #include "Asset.h"
 
+#include <cstdint>
 #include <string>
 
 #include "Color32.h"
@@ -20,9 +21,9 @@ class Texture : public Asset
 public:
     enum class RenderType
     {
-        Opaque,		// Texture is fully opaque
-        AlphaTest,	// Texture has only opaque and transparent pixels
-        Translucent	// Texture has pixels that are partially transparent
+        Opaque,     // Texture is fully opaque
+        AlphaTest,  // Texture has only opaque and transparent pixels
+        Translucent // Texture has pixels that are partially transparent
     };
 
     // Dictates how the texture acts when it is magnified or minified.
@@ -49,11 +50,22 @@ public:
         Properties = 4, // Other properties (filter mode, wrap mode, etc) have changed.
     };
 
+    enum class Format : uint8_t
+    {
+        // 24 bpp
+        BGR,
+        RGB,
+
+        // 32 bpp
+        BGRA,
+        RGBA,
+    };
+
     static Texture White;
     static Texture Black;
 
-    Texture(uint32_t width, uint32_t height);
-    Texture(uint32_t width, uint32_t height, Color32 color);
+    Texture(uint32_t width, uint32_t height, Format format = Format::RGBA);
+    Texture(uint32_t width, uint32_t height, Color32 color, Format format = Format::RGBA);
     Texture(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     Texture(BinaryReader& reader);
     ~Texture();
@@ -62,12 +74,18 @@ public:
 
     // Activates the texture in the graphics library.
     void Activate(uint8_t textureUnit);
-    static void Deactivate();
+    static void Deactivate(uint8_t textureUnit);
 
     uint32_t GetWidth() const { return mWidth; }
     uint32_t GetHeight() const { return mHeight; }
+
+    uint8_t GetBytesPerPixel() const { return mBytesPerPixel; }
+    Format GetFormat() const { return mFormat; }
+
     uint8_t* GetPixelData() const { return mPixels; }
 
+    // Sampling/Rendering Properties
+    //TODO: It may make sense to move this stuff up to the material layer?
     RenderType GetRenderType() const { return mRenderType; }
 
     void SetFilterMode(FilterMode filterMode);
@@ -78,24 +96,28 @@ public:
 
     void SetMipmaps(bool useMipmaps);
 
+    // Set or Get Pixels
     // Coordinates are from top-left corner of texture.
-    void SetPixelColor32(int x, int y, const Color32& color);
-    Color32 GetPixelColor32(int x, int y) const;
+    void SetAllPixelsColor(Color32 color);
+    void SetPixelColor(uint32_t x, uint32_t y, Color32 color);
+    void SetPixelColor(uint32_t pixelIndex, Color32 color);
+    Color32 GetPixelColor(uint32_t x, uint32_t y) const;
+    Color32 GetPixelColor(uint32_t pixelIndex) const;
 
-    void SetPaletteIndex(int x, int y, uint8_t val);
-    uint8_t GetPaletteIndex(int x, int y) const;
-
-    //void Blit(Texture* source, int destX, int destY);
+    // Set or Get Palette Indexes
+    void SetPixelPaletteIndex(uint32_t x, uint32_t y, uint8_t val);
+    uint8_t GetPixelPaletteIndex(uint32_t x, uint32_t y) const;
 
     // Blend's source pixels into dest based on source's alpha channel.
-    static void BlendPixels(const Texture& source, Texture& dest, int destX, int destY);
-    static void BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
-                            Texture& dest, int destX, int destY);
+    static void BlendPixels(const Texture& source, Texture& dest, uint32_t destX, uint32_t destY);
+    static void BlendPixels(const Texture& source, uint32_t sourceX, uint32_t sourceY, uint32_t sourceWidth, uint32_t sourceHeight,
+                            Texture& dest, uint32_t destX, uint32_t destY);
 
-    // Alpha and transparency
+    // Alpha and Transparency
+    //TODO: The idea of a "transparent color" may make more sense at the material layer? See gDiscardColor in our shaders.
     void SetTransparentColor(const Color32& color);
     void ClearTransparentColor();
-    void ApplyAlphaChannel(const Texture& alphaTexture, bool useRGB = false);
+    void ApplyAlphaChannel(const Texture& alphaTexture);
 
     // Image Modifications
     void FlipVertically();
@@ -118,17 +140,24 @@ private:
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
 
-    // Some textures have palettes.
+    // The format of the pixel data. This matches exactly the data stored in the pixels array.
+    Format mFormat = Format::RGBA;
+
+    // The number of bytes per pixel for this image.
+    // 4 => 32-bit RGBA image, 3 => 24-bit RGB image, 1 => 8-bit palettized image.
+    uint8_t mBytesPerPixel = 4;
+
+    // Pixel data, from the TOP-LEFT CORNER of the image.
+    uint8_t* mPixels = nullptr;
+
+    // A palette storing RGBA colors.
+    // Palettized images don't store pixel data directly. Instead, each pixel specifies an index into this palette.
     uint8_t* mPalette = nullptr;
     uint32_t mPaletteSize = 0;
 
     // If a texture has a palette, the indexes into the palette are stored here.
+    // By iterating this and populating the associated pixels array with the color from the palette, you can convert a palettized image to an RGBA one.
     uint8_t* mPaletteIndexes = nullptr;
-
-    // Pixel data, from the top-left corner of the image.
-    // SDL and DirectX (I think) expect pixel data from top-left corner.
-    // OpenGL expects from bottom-left, but we compensate for that by using flipped UVs!
-    uint8_t* mPixels = nullptr;
 
     // Handle to texture in underlying graphics API.
     void* mTextureHandle = nullptr;
@@ -151,12 +180,12 @@ private:
     // A newly created texture will automatically have its "dirty pixels" flag set, since we must upload pixel data before use.
     DirtyFlags mDirtyFlags = DirtyFlags::Pixels;
 
-    static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
+    void LoadInternal(BinaryReader& reader);
+    void LoadCompressedFormat(BinaryReader& reader);
+    void LoadBmpFormat(BinaryReader& reader);
+    void LoadPngFormat(BinaryReader& reader);
 
-    void ParseFromData(BinaryReader& reader);
-    void ParseFromCompressedFormat(BinaryReader& reader);
-    void ParseFromBmpFormat(BinaryReader& reader);
-    void ParseFromPngFormat(BinaryReader& reader);
+    void CreatePixelsFromPaletteData();
 };
 
 ENUM_CLASS_FLAGS(Texture::DirtyFlags);

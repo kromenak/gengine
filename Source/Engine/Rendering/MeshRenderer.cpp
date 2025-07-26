@@ -261,7 +261,7 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
             if(texture != nullptr && texture->GetRenderType() != Texture::RenderType::Opaque)
             {
                 Vector2 pixelPos(uvCoord.x * texture->GetWidth(), uvCoord.y * texture->GetHeight());
-                Color32 color = texture->GetPixelColor32(pixelPos.x, pixelPos.y);
+                Color32 color = texture->GetPixelColor(pixelPos.x, pixelPos.y);
                 wasAHit = (color.a > 0);
             }
 

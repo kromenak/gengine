@@ -25,7 +25,7 @@ void BSPSurface::Activate(const Material& material)
     }
     else
     {
-        Texture::Deactivate();
+        Texture::Deactivate(0);
     }
 
     // Activate lightmap texture and multiplier.
@@ -199,7 +199,7 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
                     // We got the UV, convert that into a specific pixel color from this polygon's surface texture.
                     Vector2 pixelPos(pointUV.x * mSurfaces[polygon->surfaceIndex].texture->GetWidth(),
                                      pointUV.y * mSurfaces[polygon->surfaceIndex].texture->GetHeight());
-                    Color32 color = mSurfaces[polygon->surfaceIndex].texture->GetPixelColor32(pixelPos.x, pixelPos.y);
+                    Color32 color = mSurfaces[polygon->surfaceIndex].texture->GetPixelColor(pixelPos.x, pixelPos.y);
 
                     // If the color is transparent, this doesn't count as a hit - the ray "goes through" the transparent area.
                     // But if at all opaque, we count this as a hit.
@@ -405,7 +405,7 @@ void BSP::ApplyLightmap(const BSPLightmap& lightmap)
             int height = mSurfaces[light.surfaceIndex].lightmapTexture->GetHeight();
 
             // Use a single center point to calculate the color?
-            //light.color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor32(width / 2, height / 2);
+            //light.color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor(width / 2, height / 2);
 
             // Or sum and average all pixels in the lightmap?
             Vector3 sums;
@@ -413,7 +413,7 @@ void BSP::ApplyLightmap(const BSPLightmap& lightmap)
             {
                 for(int j = 0; j < height; ++j)
                 {
-                    Color32 color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor32(i, j);
+                    Color32 color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor(i, j);
                     sums.x += color.r;
                     sums.y += color.g;
                     sums.z += color.b;
