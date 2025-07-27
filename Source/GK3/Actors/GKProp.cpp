@@ -16,7 +16,7 @@ TYPEINFO_INIT(GKProp, GKObject, 32)
 GKProp::GKProp() : GKObject()
 {
     mMeshRenderer = AddComponent<MeshRenderer>();
-    mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit"));
+    mMeshRenderer->SetShader(gAssetManager.GetShader("LitTexture"));
 
     mVertexAnimator = AddComponent<VertexAnimator>();
 

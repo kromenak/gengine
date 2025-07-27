@@ -72,7 +72,7 @@ void Debug::Render()
 {
     if(sDrawShader == nullptr)
     {
-        sDrawShader = gAssetManager.LoadShader("3D-Color");
+        sDrawShader = gAssetManager.LoadShader("Color", "Uber", { });
     }
 
     // We can just use any old material for now (uses default shader under the hood).

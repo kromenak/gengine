@@ -39,7 +39,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${source_files})
 
 # Do the same for Assets folder, so they also appear in IDE.
 file(GLOB_RECURSE asset_files CONFIGURE_DEPENDS
-    "Assets/*.txt" "Assets/*.shp" "Assets/*.frag" "Assets/*.vert"
+    "Assets/*.txt" "Assets/*.shp" "Assets/*.glsl"
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${asset_files})
 

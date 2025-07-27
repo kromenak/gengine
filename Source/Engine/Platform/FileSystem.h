@@ -65,10 +65,19 @@ namespace Path
     std::string GetExtension(const std::string& path, bool includeDot = false);
 
     /**
-     * Removes the extension from the file name.
+     * Applies an extension to the given path.
+     * If an extension already exists, it is REPLACED with the desired extension.
+     */
+    std::string SetExtension(const std::string& path, const std::string& extension);
+
+    /**
+     * Removes the extension from the path.
      * Just returns a copy of the current file name if no extension is present.
      */
-    inline std::string RemoveExtension(const std::string& fileName) { return fileName.substr(0, fileName.find_last_of('.')); }
+    inline std::string RemoveExtension(const std::string& path)
+    {
+        return HasExtension(path) ? path.substr(0, path.find_last_of('.')) : path;
+    }
 
     /**
      * Detects whether a path is absolute.

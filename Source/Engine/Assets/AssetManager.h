@@ -97,8 +97,9 @@ public:
     TextAsset* LoadText(const std::string& name, AssetScope scope = AssetScope::Global);
     Config* LoadConfig(const std::string& name);
 
-    Shader* LoadShader(const std::string& name);
-    Shader* LoadShader(const std::string& vertName, const std::string& fragName);
+    Shader* GetShader(const std::string& id);
+    Shader* LoadShader(const std::string& idToUse, const std::string& vertexShaderFileNameNoExt, const std::string& fragmentShaderFileNameNoExt, const std::vector<std::string>& featureFlags);
+    Shader* LoadShader(const std::string& idToUse, const std::string& shaderFileNameNoExt, const std::vector<std::string>& featureFlags);
 
     // Unloading Assets
     void UnloadAssets(AssetScope scope);

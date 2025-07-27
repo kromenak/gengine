@@ -221,6 +221,26 @@ std::string Path::GetExtension(const std::string& path, bool includeDot)
     return path.substr(lastExtensionPos + 1);
 }
 
+std::string Path::SetExtension(const std::string& path, const std::string& extension)
+{
+    // If an extension already exists, remove it.
+    std::string updatedPath = path;
+    if(HasExtension(path))
+    {
+        updatedPath = RemoveExtension(path);
+    }
+
+    // Make sure the dot is present between before the extension.
+    // If the passed in extension already has a dot, we don't need to do this.
+    if(extension.empty() || extension[0] != '.')
+    {
+        updatedPath.push_back('.');
+    }
+
+    // Return path with extension added.
+    return updatedPath + extension;
+}
+
 bool Directory::Exists(const std::string& path)
 {
     #if defined(PLATFORM_WINDOWS)

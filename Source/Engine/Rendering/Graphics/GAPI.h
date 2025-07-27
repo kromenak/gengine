@@ -7,6 +7,9 @@
 // This allows the game to use different graphics libraries while isolating the graphics code.
 //
 #pragma once
+#include <string>
+#include <vector>
+
 #include "Color32.h"
 #include "MeshDefinition.h"
 #include "Rect.h"
@@ -153,7 +156,19 @@ public:
     virtual void SetIndexBufferData(BufferHandle handle, uint32_t indexCount, uint16_t* indexData) = 0;
 
     // Shaders
-    virtual ShaderHandle CreateShader(const uint8_t* vertSource, const uint8_t* fragSource) = 0;
+    struct ShaderParams
+    {
+        // The source text for the vertex and fragment shaders.
+        // In some cases, these may point to the same source text, if both shaders are in the same source file!
+        const char* vertexShaderSource = nullptr;
+        const char* fragmentShaderSource = nullptr;
+
+        // A set of feature flags to enable when compiling the shader.
+        // The exact use depends on the specific GAPI, but probably this amounts to adding some #defines to the shader source.
+        std::vector<std::string> featureFlags;
+    };
+    virtual const char* GetShaderFileExtension() const = 0;
+    virtual ShaderHandle CreateShader(const ShaderParams& shaderParams) = 0;
     virtual void DestroyShader(ShaderHandle handle) = 0;
     virtual void ActivateShader(ShaderHandle handle) = 0;
 

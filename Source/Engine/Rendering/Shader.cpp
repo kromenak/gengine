@@ -1,5 +1,7 @@
 #include "Shader.h"
 
+#include "AssetManager.h"
+#include "FileSystem.h"
 #include "GAPI.h"
 #include "TextAsset.h"
 
@@ -8,10 +10,39 @@ TYPEINFO_INIT(Shader, Asset, GENERATE_TYPE_ID)
 
 }
 
-Shader::Shader(const std::string& name, TextAsset* vertShaderBytes, TextAsset* fragShaderBytes) : Asset(name, AssetScope::Manual)
+Shader::Shader(const std::string& name, const std::string& vertexShaderFileNameNoExt, const std::string& fragmentShaderFileNameNoExt,
+               const std::vector<std::string>& featureFlags) : Asset(name, AssetScope::Manual)
 {
-    mShaderHandle = GAPI::Get()->CreateShader(vertShaderBytes->GetText(),
-                                              fragShaderBytes->GetText());
+    // Load text assets for vertex and fragment shader sources.
+    std::string vertexShaderFileName = Path::SetExtension(vertexShaderFileNameNoExt, GAPI::Get()->GetShaderFileExtension());
+    TextAsset* vertexShaderSource = gAssetManager.LoadText(vertexShaderFileName, AssetScope::Manual);
+
+    std::string fragmentShaderFileName = Path::SetExtension(fragmentShaderFileNameNoExt, GAPI::Get()->GetShaderFileExtension());
+    TextAsset* fragmentShaderSource = gAssetManager.LoadText(vertexShaderFileName, AssetScope::Manual);
+
+    // Create from source if both source files loaded successfully.
+    if(vertexShaderSource != nullptr && fragmentShaderSource != nullptr)
+    {
+        CreateShader(vertexShaderSource, fragmentShaderSource, featureFlags);
+        delete vertexShaderSource;
+        delete fragmentShaderSource;
+    }
+}
+
+Shader::Shader(const std::string& name, const std::string& shaderFileNameNoExt, const std::vector<std::string>& featureFlags) : Asset(name, AssetScope::Manual)
+{
+    // Load text asset containing shader source.
+    std::string shaderFileNameWithExt = Path::SetExtension(shaderFileNameNoExt, GAPI::Get()->GetShaderFileExtension());
+    TextAsset* shaderSource = gAssetManager.LoadText(shaderFileNameWithExt, AssetScope::Manual);
+
+    // Create shader from source.
+    // When a single source file is provided, we assume both vertex and fragment shader are in one file,
+    // wrapped in #defines for VERTEX_SHADER and FRAGMENT_SHADER.
+    if(shaderSource != nullptr)
+    {
+        CreateShader(shaderSource, shaderSource, featureFlags);
+        delete shaderSource;
+    }
 }
 
 Shader::~Shader()
@@ -52,4 +83,13 @@ void Shader::SetUniformMatrix4(const char* name, const Matrix4& mat)
 void Shader::SetUniformColor(const char* name, const Color32& color)
 {
     GAPI::Get()->SetShaderUniformColor(mShaderHandle, name, color);
+}
+
+void Shader::CreateShader(TextAsset* vertexShaderText, TextAsset* fragmentShaderText, const std::vector<std::string>& featureFlags)
+{
+    GAPI::ShaderParams shaderParams;
+    shaderParams.vertexShaderSource = reinterpret_cast<char*>(vertexShaderText->GetText());
+    shaderParams.fragmentShaderSource = reinterpret_cast<char*>(fragmentShaderText->GetText());
+    shaderParams.featureFlags = featureFlags;
+    mShaderHandle = GAPI::Get()->CreateShader(shaderParams);
 }

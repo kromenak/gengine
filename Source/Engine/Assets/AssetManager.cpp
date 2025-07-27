@@ -376,43 +376,59 @@ Config* AssetManager::LoadConfig(const std::string& name)
     return LoadAsset<Config>(SanitizeAssetName(name, ".CFG"), AssetScope::Global, &mConfigCache);
 }
 
-Shader* AssetManager::LoadShader(const std::string& name)
+Shader* AssetManager::GetShader(const std::string& id)
 {
-    // Assumes vert/frag shaders have the same name.
-    return LoadShader(name, name);
+    // Attempt to return a cached shader.
+    return mShaderCache.Get(id);
 }
 
-Shader* AssetManager::LoadShader(const std::string& vertName, const std::string& fragName)
+Shader* AssetManager::LoadShader(const std::string& idToUse, const std::string& vertexShaderFileNameNoExt,
+                                 const std::string& fragmentShaderFileNameNoExt, const std::vector<std::string>& featureFlags)
 {
-    // Determine the name of this shader asset.
-    std::string shaderName = vertName;
-    if(!StringUtil::EqualsIgnoreCase(vertName, fragName))
-    {
-        shaderName.push_back('_');
-        shaderName += fragName;
-    }
-
-    // Return existing shader if already loaded.
-    Shader* cachedShader = mShaderCache.Get(shaderName);
+    // If shader by this name is already loaded, return that.
+    Shader* cachedShader = GetShader(idToUse);
     if(cachedShader != nullptr)
     {
         return cachedShader;
     }
 
-    // Ok, we have to actually load this shader...
-    // Load the vertex and fragment shader files from the disk.
-    TextAsset* vertShader = LoadAsset<TextAsset>(vertName + ".vert", AssetScope::Manual, nullptr, false);
-    TextAsset* fragShader = LoadAsset<TextAsset>(fragName + ".frag", AssetScope::Manual, nullptr, false);
+    // Otherwise, create a new shader.
+    Shader* shader = new Shader(idToUse, vertexShaderFileNameNoExt, fragmentShaderFileNameNoExt, featureFlags);
 
-    // Create the shader from the text assets.
-    Shader* shader = new Shader(shaderName, vertShader, fragShader);
-
-    // Text assets are no longer needed.
-    delete vertShader;
-    delete fragShader;
+    // If not valid, delete and return null. Log should display compiler error.
+    if(!shader->IsValid())
+    {
+        delete shader;
+        return nullptr;
+    }
 
     // Cache and return.
-    mShaderCache.Set(shaderName, shader);
+    mShaderCache.Set(idToUse, shader);
+    return shader;
+}
+
+Shader* AssetManager::LoadShader(const std::string& idToUse, const std::string& shaderFileNameNoExt, const std::vector<std::string>& featureFlags)
+{
+    // Very similar to above, but assumes both vertex and fragment shader are stored in a single source file.
+    // Return cached shader if one exists.
+    Shader* cachedShader = mShaderCache.Get(idToUse);
+    if(cachedShader != nullptr)
+    {
+        return cachedShader;
+    }
+
+    // Create new shader.
+    Shader* shader = new Shader(idToUse, shaderFileNameNoExt, featureFlags);
+
+    // If not valid, delete and return null. Log should display compiler error.
+    if(!shader->IsValid())
+    {
+        delete shader;
+        return nullptr;
+    }
+
+    // Cache and return.
+    mShaderCache.Set(idToUse, shader);
     return shader;
 }
 
@@ -506,19 +522,14 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 
 std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
 {
-    // If a three-letter extension already exists, accept it and assume the caller knows what they're doing.
-    int lastIndex = assetName.size() - 1;
-    if(lastIndex > 3 && assetName[lastIndex - 3] == '.')
+    // If an extension already exists, accept it and assume the caller knows what they're doing.
+    if(Path::HasExtension(assetName))
     {
         return assetName;
     }
 
-    // No three-letter extension, add the expected extension.
-    if(!Path::HasExtension(assetName, expectedExtension))
-    {
-        return assetName + expectedExtension;
-    }
-    return assetName;
+    // No extension, so apply the expected extension.
+    return Path::SetExtension(assetName, expectedExtension);
 }
 
 template<typename T>

@@ -124,25 +124,18 @@ bool Renderer::Initialize()
     GAPI::Get()->SetPolygonWindingOrder(GAPI::WindingOrder::Clockwise);
 
     // Load default shader.
-    Shader* defaultShader = gAssetManager.LoadShader("3D-Tex");
+    Shader* defaultShader = gAssetManager.LoadShader("Texture", "Uber", { "FEATURE_TEXTURING" });
     if(defaultShader == nullptr) { return false; }
     Material::sDefaultShader = defaultShader;
 
     // Pre-load additional shaders.
     // One reason this is important is because GL commands can only run on the main thread.
     // Avoid dealing with background thread loading of shaders by loading them all up front.
-    std::string shaders[] = {
-        "3D-Lightmap",
-        "3D-Tex-Lit",
-        "3D-Skybox"
-    };
-    for(auto& shader : shaders)
-    {
-        //printf("Load %s\n", shader.c_str());
-        gAssetManager.LoadShader(shader);
-    }
-    gAssetManager.LoadShader("3D-Tex", "UI-Text-ColorReplace");
-    gAssetManager.LoadShader("3D-Tex", "UI-Point-Circle");
+    gAssetManager.LoadShader("LightmapTexture", "Uber", { "FEATURE_TEXTURING", "FEATURE_LIGHTMAPS" });
+    gAssetManager.LoadShader("LitTexture", "Uber", { "FEATURE_TEXTURING", "FEATURE_LIGHTING" });
+    gAssetManager.LoadShader("Skybox", "Uber", { "FEATURE_SKYBOX" });
+    gAssetManager.LoadShader("TextColorReplace", "Uber", { "FEATURE_TEXTURING", "FEATURE_COLOR_REPLACE" });
+    gAssetManager.LoadShader("PointsAsCircles", "Uber", { "FEATURE_TEXTURING", "FEATURE_DRAW_POINTS_AS_CIRCLES" });
 
     // Create simple shapes (useful for debugging/visualization).
     // Line

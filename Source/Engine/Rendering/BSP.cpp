@@ -66,7 +66,7 @@ void BSP::Load(uint8_t* data, uint32_t dataLength)
     ParseFromData(data, dataLength);
 
     // Use lightmap shader for BSP rendering.
-    mMaterial.SetShader(gAssetManager.LoadShader("3D-Lightmap"));
+    mMaterial.SetShader(gAssetManager.GetShader("LightmapTexture"));
 }
 
 BSPActor* BSP::CreateBSPActor(const std::string& objectName)

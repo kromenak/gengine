@@ -52,7 +52,7 @@ GKActor::GKActor(const SceneActor* actorDef) :
 
     // Add 3D model renderer using lit textured shader.
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
-    mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit")); // Shader must be applied first
+    mMeshRenderer->SetShader(gAssetManager.GetShader("LitTexture")); // Shader must be applied first
     mMeshRenderer->SetModel(mActorDef->model);
 
     // Add vertex animator so the 3D model can be animated.
@@ -80,7 +80,7 @@ GKActor::GKActor(const SceneActor* actorDef) :
     shadowMeshRenderer->SetMesh(quad);
 
     // The shadow texture is similar to a BSP lightmap texture, so we'll render it in the same way.
-    Material m(gAssetManager.LoadShader("3D-Lightmap"));
+    Material m(gAssetManager.GetShader("LightmapTexture"));
     m.SetDiffuseTexture(&Texture::White);
     m.SetTexture("uLightmap", gAssetManager.LoadSceneTexture("SHADOW.BMP"));
     m.SetVector4("uLightmapScaleOffset", Vector4::One);

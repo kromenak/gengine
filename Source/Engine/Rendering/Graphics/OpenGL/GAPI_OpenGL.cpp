@@ -16,6 +16,10 @@
 
 namespace GLState
 {
+    // A #version string that's added to the top of shader source files before compiling.
+    // It's nice to do this in code (rather than baking this into the shader source file) so that shader source isn't tied to a specific GL version.
+    const char* shaderVersionDefine = "";
+
     // The texture unit that is currently active.
     uint8_t activeTextureUnit = 0;
     void SetTextureUnit(uint8_t textureUnit)
@@ -150,6 +154,9 @@ bool GAPI_OpenGL::Init()
     ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE));
     ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3));
     ERR_CHECK(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3));
+
+    // When we compile shaders, we want the version in the shader source to match the OpenGL version we used.
+    GLState::shaderVersionDefine = "#version 330 core";
 
     // Request that color buffer has 32bpp (8 bits per channel).
     {
@@ -659,13 +666,14 @@ void GAPI_OpenGL::SetIndexBufferData(BufferHandle handle, uint32_t indexCount, u
 
 namespace
 {
-    GLuint CompileShader(const char* source, GLuint shaderType)
+    GLuint CompileShader(const char* source, const char* defines, GLuint shaderType)
     {
         // Create shader.
         GLuint shaderId = glCreateShader(shaderType);
 
         // Load source code.
-        glShaderSource(shaderId, 1, &source, nullptr);
+        const GLchar* sources[] = { defines, source };
+        glShaderSource(shaderId, 2, sources, nullptr);
 
         // Compile it.
         glCompileShader(shaderId);
@@ -744,11 +752,21 @@ namespace
     }
 }
 
-ShaderHandle GAPI_OpenGL::CreateShader(const uint8_t* vertSource, const uint8_t* fragSource)
+ShaderHandle GAPI_OpenGL::CreateShader(const ShaderParams& shaderParams)
 {
+    // Generate a #define string from the feature flag list.
+    std::string defines;
+    for(auto& flag : shaderParams.featureFlags)
+    {
+        defines += "#define " + flag + " 1\n";
+    }
+
+    std::string vertexShaderDefines = std::string(GLState::shaderVersionDefine) + "\n#define VERTEX_SHADER 1\n" + defines;
+    std::string fragmentShaderDefines = std::string(GLState::shaderVersionDefine) + "\n#define FRAGMENT_SHADER 1\n" + defines;
+
     // Compile the shaders, or fail.
-    GLuint vertexShaderId = CompileShader(reinterpret_cast<const char*>(vertSource), GL_VERTEX_SHADER);
-    GLuint fragmentShaderId = CompileShader(reinterpret_cast<const char*>(fragSource), GL_FRAGMENT_SHADER);
+    GLuint vertexShaderId = CompileShader(shaderParams.vertexShaderSource, vertexShaderDefines.c_str(), GL_VERTEX_SHADER);
+    GLuint fragmentShaderId = CompileShader(shaderParams.fragmentShaderSource, fragmentShaderDefines.c_str(), GL_FRAGMENT_SHADER);
     if(vertexShaderId == GL_NONE || fragmentShaderId == GL_NONE)
     {
         glDeleteShader(vertexShaderId);

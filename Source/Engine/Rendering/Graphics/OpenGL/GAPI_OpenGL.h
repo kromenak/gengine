@@ -53,7 +53,8 @@ public:
     void DestroyIndexBuffer(BufferHandle handle) override;
     void SetIndexBufferData(BufferHandle handle, uint32_t indexCount, uint16_t* indexData) override;
 
-    ShaderHandle CreateShader(const uint8_t* vertSource, const uint8_t* fragSource) override;
+    const char* GetShaderFileExtension() const override { return "glsl"; }
+    ShaderHandle CreateShader(const ShaderParams& shaderParams) override;
     void DestroyShader(ShaderHandle handle) override;
     void ActivateShader(ShaderHandle handle) override;
 

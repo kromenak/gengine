@@ -10,7 +10,7 @@ TYPEINFO_INIT(UIPoints, UIShapes<Vector2>, 24)
 
 UIPoints::UIPoints(Actor* owner) : UIShapes<Vector2>(owner)
 {
-    mMaterial.SetShader(gAssetManager.LoadShader("3D-Tex", "UI-Point-Circle"));
+    mMaterial.SetShader(gAssetManager.GetShader("PointsAsCircles"));
     mMaterial.SetDiffuseTexture(&Texture::White);
 }
 

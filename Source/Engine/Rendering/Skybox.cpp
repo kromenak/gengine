@@ -252,7 +252,7 @@ void Skybox::CreateMeshAndCubemap()
     }
 
     // Use skybox shader to render the skybox.
-    mMaterial.SetShader(gAssetManager.LoadShader("3D-Skybox"));
+    mMaterial.SetShader(gAssetManager.GetShader("Skybox"));
 
     // Generate cubemap from skybox textures.
     {

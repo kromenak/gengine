@@ -159,7 +159,7 @@ Shader* Font::GetShader() const
 {
     if(mColorMode == ColorMode::ColorReplace)
     {
-        return gAssetManager.LoadShader("3D-Tex", "UI-Text-ColorReplace");
+        return gAssetManager.GetShader("TextColorReplace");
     }
     return Material::sDefaultShader;
 }
