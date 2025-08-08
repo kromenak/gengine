@@ -10,24 +10,19 @@
 #include "UILabel.h"
 #include "UITextBuffer.h"
 #include "UITextInput.h"
+#include "UIUtil.h"
 #include "Window.h"
 
 ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform),
     mMini(mini)
 {
     // Add canvas for UI rendering. Draws above most other stuff.
-    AddComponent<UICanvas>(100);
-
-    // Create screen-sized canvas.
-    RectTransform* canvasTransform = GetComponent<RectTransform>();
-    canvasTransform->SetSizeDelta(0.0f, 0.0f);
-    canvasTransform->SetAnchorMin(Vector2::Zero);
-    canvasTransform->SetAnchorMax(Vector2::One);
+    UI::AddCanvas(this, 100);
 
     // Create background image actor and save transform (so we can move it around).
     Actor* background = new Actor("Background", TransformType::RectTransform);
     mBackgroundTransform = background->GetComponent<RectTransform>();
-    mBackgroundTransform->SetParent(canvasTransform);
+    mBackgroundTransform->SetParent(GetTransform());
 
     // Add background image that is tiled.
     // Only difference between mini and full is a different background image.
@@ -135,7 +130,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
         {
             Actor* imageActor = new Actor("Cain", TransformType::RectTransform);
             RectTransform* imageRT = imageActor->GetComponent<RectTransform>();
-            imageRT->SetParent(canvasTransform);
+            imageRT->SetParent(GetTransform());
 
             mConsoleToggleImage = imageActor->AddComponent<UIImage>();
 

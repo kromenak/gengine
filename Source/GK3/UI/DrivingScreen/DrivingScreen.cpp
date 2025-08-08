@@ -138,11 +138,11 @@ void DrivingScreen::Show(FollowMode followMode)
 
         // Make sure the map fits snugly in the window area, with aspect ratio preserved.
         // We do this every time the UI shows in case resolution has changed.
-        mMapImage->ResizeToFitPreserveAspect(Window::GetSize());
+        //mMapImage->ResizeToFitPreserveAspect(Window::GetSize());
 
         //HACK: Applying a slight "fudge" to the y-size fixes some issues with button positioning at high resolutions (where the image is way scaled up).
         //HACK: Not 100% sure why that happens...
-        mMapImage->GetRectTransform()->SetSizeDeltaY(mMapImage->GetRectTransform()->GetSizeDelta().y + 0.5f);
+        //mMapImage->GetRectTransform()->SetSizeDeltaY(mMapImage->GetRectTransform()->GetSizeDelta().y + 0.5f);
 
         // Put all blips in starting positions, with paths set if needed.
         mFollowMode = followMode;

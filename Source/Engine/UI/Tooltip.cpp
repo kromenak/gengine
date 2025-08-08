@@ -31,10 +31,7 @@ Tooltip* Tooltip::Get()
 
 Tooltip::Tooltip() : Actor("Tooltip", TransformType::RectTransform)
 {
-    UICanvas* canvas = AddComponent<UICanvas>(101);
-    canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-    canvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
-    canvas->GetRectTransform()->SetPixelPerfect(true);
+    UI::AddCanvas(this, 101);
 
     Color32 backgroundColor;
     Color32 borderColor;
@@ -157,21 +154,21 @@ void Tooltip::OnUpdate(float deltaTime)
         if(mShowDelayTimer <= 0.0f)
         {
             // Position the tooltip relative to the mouse cursor.
-            // The x-position should be equal to the mouse's x-position.
-            Vector2 tooltipPos = mRoot->GetAnchoredPosition();
-            tooltipPos.x = gInputManager.GetMousePosition().x;
+            // First, get mouse position in tooltip's local space.
+            Vector2 tooltipPos = GetTransform()->GetWorldToLocalMatrix().TransformPoint(gInputManager.GetMousePosition());
 
-            // The tooltip is usually below the mouse cursor by some offset.
-            // However, if too close to the bottom of the screen, it flips to being *above* the cursor instead.
-            tooltipPos.y = gInputManager.GetMousePosition().y - 40.0f;
-            if(tooltipPos.y < 10.0f)
+            // Position tooltip about 40 units below the mouse pointer.
+            // BUT if too close to bottom of the screen, move it above the mouse pointer instead!
+            float newY = tooltipPos.y - 40.0f;
+            if(newY < 10.0f)
             {
-                tooltipPos.y = gInputManager.GetMousePosition().y + 10.0f;
+                newY = tooltipPos.y + 10.0f;
             }
-
-            // After all that, also make sure it is on-screen horizontally.
+            tooltipPos.y = newY;
             mRoot->SetAnchoredPosition(tooltipPos);
-            mRoot->MoveInsideRect(Window::GetRect());
+
+            // Also make sure it stays on-screen horizontally.
+            mRoot->MoveInsideRect(static_cast<RectTransform*>(GetTransform())->GetWorldRect());
 
             // Show the tooltip root.
             mRoot->GetOwner()->SetActive(true);

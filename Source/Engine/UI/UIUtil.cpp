@@ -11,10 +11,14 @@ UICanvas* UI::AddCanvas(Actor* actor, int canvasOrder, const Color32& color)
     // Add canvas.
     UICanvas* canvas = actor->AddComponent<UICanvas>(canvasOrder);
 
-    // Let's assume that the majority of canvases are going to be "Center Stretch" - essentially taking up all space of their parent.
+    // Root canvases with no parents will be scaled using the auto-scaling functionality in the UICanvas class.
+    // For non-root canvases, we need some sane default - let's assume they take up all the space of their parent.
     // This is what we want in a lot of cases. The caller can of course change this after the canvas is returned.
-    canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-    canvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+    if(actor->GetParent() != nullptr)
+    {
+        canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+        canvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+    }
 
     // If a color is needed, add an image with the desired color.
     if(color != Color32::Clear)

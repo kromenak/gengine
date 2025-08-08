@@ -9,7 +9,7 @@
     in vec4 vColor;     // Defaults to (0, 0, 0, 1)
     in vec3 vNormal;    // Defaults to (0, 0, 1)
     in vec2 vUV1;       // Defaults to (0, 1)
- 
+
     // OUTPUTS
     // Values passed to the fragment shader.
     out vec4 fColor;
@@ -51,6 +51,11 @@
     uniform vec4 uLightmapScaleOffset;
     #endif
 
+    #if FEATURE_DRAW_POINTS_AS_CIRCLES
+    // When drawing point primitives, the size of a point in pixels.
+    uniform float gPointSize = 6.0f;
+    #endif
+
     void main()
     {
         // Transform vertex position obj->world->view->proj.
@@ -82,6 +87,11 @@
         // Pass surface-to-light offset to pixel shader.
         // Do not normalize for proper interpolation.
         fLightDir = (localLightPos - vec4(vPos, 1.0f)).xyz;
+        #endif
+
+        #if FEATURE_DRAW_POINTS_AS_CIRCLES
+        // Set the built-in variable that tells OpenGL the pixel size of the point.
+        gl_PointSize = gPointSize;
         #endif
     }
 

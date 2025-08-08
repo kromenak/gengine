@@ -10,6 +10,7 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UIUtil.h"
 
 /*static*/ int CaptionsOverlay::sCaptionsEnabled = -1;
 
@@ -32,13 +33,7 @@
 CaptionsOverlay::CaptionsOverlay() : Actor("CaptionsOverlay", TransformType::RectTransform)
 {
     // Draw order should be equal to the status overlay.
-    AddComponent<UICanvas>(16);
-
-    // Canvas takes up entire screen.
-    RectTransform* rectTransform = GetComponent<RectTransform>();
-    rectTransform->SetSizeDelta(0.0f, 0.0f);
-    rectTransform->SetAnchorMin(Vector2::Zero);
-    rectTransform->SetAnchorMax(Vector2::One);
+    UI::AddCanvas(this, 16);
 
     // Load font data.
     TextAsset* fontColors = gAssetManager.LoadText("FONTCOLOR.TXT", AssetScope::Manual);

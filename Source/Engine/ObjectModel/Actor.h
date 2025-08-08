@@ -63,6 +63,7 @@ public:
     void SetUpdateEnabled(bool updateEnabled) { mUpdateEnabled = updateEnabled; }
 
     // TRANSFORM CONVENIENCE ACCESSORS
+    Actor* GetParent() const { return mTransform->GetParent() != nullptr ? mTransform->GetParent()->GetOwner() : nullptr; }
     Transform* GetTransform() const { return mTransform; }
 
     Vector3 GetPosition() const { return mTransform->GetPosition(); }

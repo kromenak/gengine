@@ -16,6 +16,8 @@ class UIPoints : public UIShapes<Vector2>
 public:
     UIPoints(Actor* owner);
 
+    void Render() override;
+
 protected:
     void GenerateMesh(const std::vector<Vector2>& shapes, Mesh* mesh) override;
 

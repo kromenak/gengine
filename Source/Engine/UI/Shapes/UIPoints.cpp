@@ -1,5 +1,6 @@
 #include "UIPoints.h"
 
+#include "Actor.h"
 #include "AssetManager.h"
 #include "Mesh.h"
 
@@ -12,6 +13,19 @@ UIPoints::UIPoints(Actor* owner) : UIShapes<Vector2>(owner)
 {
     mMaterial.SetShader(gAssetManager.GetShader("PointsAsCircles"));
     mMaterial.SetDiffuseTexture(&Texture::White);
+}
+
+void UIPoints::Render()
+{
+    // If the UI is scaled up, the point sizes aren't affected automatically by the world transform matrix.
+    // To deal with this, we can dynamically set the point size based on this UI's scale.
+    //TODO: I wonder if we can do this in the vertex shader? Maybe transform point size by the world transform somehow?
+    const float kDefaultPointSize = 6.0f;
+    Vector3 scale = GetOwner()->GetTransform()->GetWorldScale();
+    mMaterial.SetFloat("gPointSize", kDefaultPointSize * scale.x);
+
+    // Render per usual.
+    UIShapes<Vector2>::Render();
 }
 
 void UIPoints::GenerateMesh(const std::vector<Vector2>& shapes, Mesh* mesh)

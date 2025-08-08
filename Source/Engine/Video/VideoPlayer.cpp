@@ -165,7 +165,7 @@ void VideoPlayer::RefreshUI()
         }
         case SizeMode::Fullscreen:
         {
-            videoSize = Window::GetSize();
+            videoSize = static_cast<RectTransform*>(GetTransform())->GetSizeDelta();
 
             // For fullscreen videos, don't allow upscaling more than 2x original size.
             // This is a restriction used by the original engine.

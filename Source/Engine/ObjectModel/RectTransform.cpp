@@ -213,36 +213,51 @@ Rect RectTransform::GetWorldRect(bool includeChildren)
     return worldRect;
 }
 
-void RectTransform::MoveInsideRect(const Rect& other)
+Matrix4 RectTransform::GetRectToLocalMatrix()
+{
+    // In addition to the usual "local to world" transformation that all transforms do,
+    // A rect transform may also need to first do an initial "rect to local" transformation.
+
+    // This takes the quad used for rendering and does two things:
+    // 1) Repositions the quad based on the pivot. If pivot is in bottom left, the rect min is (0, 0). If elsewhere, there's an offset.
+    // 2) Scale the quad based on the rect size.
+    Rect rect = GetRect();
+    return Matrix4::MakeTranslate(rect.GetMin()) * Matrix4::MakeScale(rect.GetSize());
+}
+
+void RectTransform::MoveInsideRect(const Rect& otherWorldRect)
 {
     // Calculate our rect, taking into account children.
-    Rect ourRect = GetWorldRect(true);
+    Rect ourWorldRect = GetWorldRect(true);
 
-    Vector2 min = ourRect.GetMin();
-    Vector2 max = ourRect.GetMax();
+    Vector2 min = ourWorldRect.GetMin();
+    Vector2 max = ourWorldRect.GetMax();
 
-    Vector2 otherMin = other.GetMin();
-    Vector2 otherMax = other.GetMax();
+    Vector2 otherMin = otherWorldRect.GetMin();
+    Vector2 otherMax = otherWorldRect.GetMax();
 
-    // If our rect is outside of other rect, apply a diff to move it back inside.
-    Vector2 anchoredPos = GetAnchoredPosition();
+    // If our rect is outside of other rect, calculate a diff to move it back inside.
+    Vector2 diff = Vector2::Zero;
     if(min.x < otherMin.x)
     {
-        anchoredPos.x += (otherMin.x - min.x);
+        diff.x += (otherMin.x - min.x);
     }
     if(max.x > otherMax.x)
     {
-        anchoredPos.x += (otherMax.x - max.x);
+        diff.x += (otherMax.x - max.x);
     }
     if(min.y < otherMin.y)
     {
-        anchoredPos.y += (otherMin.y - min.y);
+        diff.y += (otherMin.y - min.y);
     }
     if(max.y > otherMax.y)
     {
-        anchoredPos.y += (otherMax.y - max.y);
+        diff.y += (otherMax.y - max.y);
     }
-    SetAnchoredPosition(anchoredPos);
+
+    // The diff is in world space, but we want to apply it in local space.
+    Vector3 localDiff = GetWorldToLocalMatrix().TransformVector(diff);
+    SetAnchoredPosition(GetAnchoredPosition() + localDiff);
 
     // Can be helpful to visualize how this works.
     //Debug::DrawScreenRect(ourRect, Color32::Green);

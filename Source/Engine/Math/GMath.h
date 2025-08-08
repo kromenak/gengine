@@ -62,6 +62,16 @@ namespace Math
         return 1 << exp;
     }
 
+    inline float Log(float val)
+    {
+        return std::log(val);
+    }
+
+    inline float LogBase2(float val)
+    {
+        return std::log2(val);
+    }
+
     inline float Mod(float num1, float num2)
     {
         // floating-point equivalent of "return num1 % num2;"

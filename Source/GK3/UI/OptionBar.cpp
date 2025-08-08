@@ -177,12 +177,22 @@ void OptionBar::Show()
     mExitScreenButton->SetEnabled(gGK3UI.IsOnExitableScreen());
 
     // Position option bar over mouse.
-    // "Minus half size" because option bar's pivot is lower-left corner, but want mouse at center.
-    // Also, round the "half size" to ensure the UI renders "pixel perfect" - on exact pixel spots rather than between them.
-    Vector2 halfSize = mOptionBarRoot->GetSize() * 0.5f;
-    halfSize.x = Math::Round(halfSize.x);
-    halfSize.y = Math::Round(halfSize.y);
-    mOptionBarRoot->SetAnchoredPosition(gInputManager.GetMousePosition() - halfSize);
+    {
+        // Option bar pivot is in lower-left corner, but want mouse at center.
+        // So get "half size" to offset by that amount from mouse cursor.
+        Vector2 halfSize = mOptionBarRoot->GetSize() * 0.5f;
+
+        // Also, round the "half size" to ensure the UI renders "pixel perfect" - on exact pixel spots rather than between them.
+        halfSize.x = Math::Round(halfSize.x);
+        halfSize.y = Math::Round(halfSize.y);
+
+        // Due to possible parent transform scaling, we can't assume the world space matches this canvas's space.
+        // So, convert mouse world position to local space.
+        Vector3 localMousePos = GetTransform()->GetWorldToLocalMatrix().TransformPoint(gInputManager.GetMousePosition());
+
+        // Set option bar to mouse pos minus half its size.
+        mOptionBarRoot->SetAnchoredPosition(localMousePos - halfSize);
+    }
 
     // Force to be fully on screen.
     KeepOnScreen();

@@ -214,8 +214,12 @@ void MapView::Init(Actor* parent, bool zoomedIn)
 
 Vector2 MapView::GetLocalMousePos()
 {
-    // Subtract min from mouse pos to get point relative to lower left corner.
-    return gInputManager.GetMousePosition() - mapImage->GetRectTransform()->GetWorldRect().GetMin();
+    // The mouse position is relative to the bottom-left corner of the screen. And it's in "world space."
+    // First, convert mouse pos to the map's local space. This is necessary due to potential parent RectTransform scaling.
+    Vector2 localMousePos = mapImage->GetRectTransform()->GetWorldToLocalMatrix().TransformPoint(gInputManager.GetMousePosition());
+
+    // Subtract min from mouse pos to get point relative to lower left corner of this rect.
+    return localMousePos - mapImage->GetRectTransform()->GetRect().GetMin();
 }
 
 Vector2 MapView::GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints)

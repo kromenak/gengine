@@ -25,7 +25,8 @@ namespace
 
         // The y-position of the buttons on this screen varies based on the screen resolution.
         // While hard to 100% verify, this seems to give close to the correct result.
-        float y = 27.0f + (Window::GetSize().y - 480.0f) * 0.0917f;
+        //float y = 27.0f + (Window::GetSize().y - 480.0f) * 0.0917f;
+        float y = 27.0f + (0.0f) * 0.0917f;
 
         // Anchor to bottom-right and position based off that.
         button->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
@@ -41,12 +42,13 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     // Add title screen image.
     UIImage* titleImage = UI::CreateWidgetActor<UIImage>("Background", this);
     titleImage->SetTexture(gAssetManager.LoadTexture("TITLE.BMP"), true);
-    titleImage->ResizeToFitPreserveAspect(Window::GetSize());
+    //titleImage->ResizeToFitPreserveAspect(Window::GetSize());
 
     // The distance between buttons varies based on screen resolution.
     // Not sure how true this is to the original game, but it gives pretty good-looking results.
     float buttonX = -33.0f;
-    float distBetweenButtons = Math::RoundToInt(Math::Min(18.0f + (Window::GetSize().x - 640.0f) * 0.15f, 100.0f));
+    //float distBetweenButtons = Math::RoundToInt(Math::Min(18.0f + (Window::GetSize().x - 640.0f) * 0.15f, 100.0f));
+    float distBetweenButtons = Math::RoundToInt(Math::Min(18.0f + (0.0f) * 0.15f, 100.0f));
 
     // Add "quit" button.
     UIButton* quitButton = CreateButton(titleImage->GetOwner(), "TITLE_QUIT", buttonX);

@@ -41,6 +41,9 @@ public:
 
     RectTransform* GetRectTransform() const { return mRectTransform; }
 
+protected:
+    void OnUpdate(float deltaTime) override;
+
 private:
     // An array of all canvases that currently exist.
     static std::vector<UICanvas*> sCanvases;
@@ -60,4 +63,17 @@ private:
 
     // If true, the canvas only renders within its RectTransform borders, masking anything outside of it.
     bool mMasked = false;
+
+    // If true, and this is a root canvas, the canvas will be automatically scaled up at higher resolutions.
+    bool mAutoScale = true;
+
+    // When canvas is autoscaled, the scale amount will be offset by this amount.
+    // Useful if certain UIs look better at larger/smaller scale, even at a higher resolution.
+    int32_t mAutoScaleOffset = 0;
+
+    // Track the last calculated scale factor and window height. Just helps to avoid dirtying transforms every frame.
+    float mLastScaleFactor = 0.0f;
+    uint32_t mLastWindowHeight = 0.0f;
+
+    void RefreshScale();
 };

@@ -71,15 +71,11 @@ public:
     // Rects!
     Rect GetRect() const;
     Rect GetWorldRect(bool includeChildren = false);
-
-    // A transform has a singular "point" that is it's position.
-    // But a RectTransform's Rect may be positioned in relation to that point based on size/pivot settings.
-    // This function provides a "rectToLocal" transform for positioning the rect relative to the local origin.
-    Matrix4 GetLocalRectOffset() { return Matrix4::MakeTranslate(GetRect().GetMin()); }
+    Matrix4 GetRectToLocalMatrix();
 
     // Sometimes, you want to make sure a RectTransform is inside of some Rect area.
     // Good example: a UI widget (action bar, option bar) that you want to keep within the screen rect.
-    void MoveInsideRect(const Rect& other);
+    void MoveInsideRect(const Rect& otherWorldRect);
 
     void SetPixelPerfect(bool pixelPerfect) { mPixelPerfect = pixelPerfect; }
 

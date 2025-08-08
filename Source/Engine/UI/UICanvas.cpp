@@ -3,7 +3,9 @@
 #include "Actor.h"
 #include "GAPI.h"
 #include "InputManager.h"
+#include "Rect.h"
 #include "UIWidget.h"
+#include "Window.h"
 
 std::vector<UICanvas*> UICanvas::sCanvases;
 UIWidget* UICanvas::sMouseOverWidget = nullptr;
@@ -109,6 +111,8 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
 TYPEINFO_INIT(UICanvas, Component, 14)
 {
     TYPEINFO_VAR(UICanvas, VariableType::Int, mDrawOrder);
+    TYPEINFO_VAR(UICanvas, VariableType::Bool, mAutoScale);
+    TYPEINFO_VAR(UICanvas, VariableType::Int, mAutoScaleOffset);
 }
 
 UICanvas::UICanvas(Actor* owner) : Component(owner)
@@ -116,6 +120,9 @@ UICanvas::UICanvas(Actor* owner) : Component(owner)
     // Get RectTransform for this canvas.
     mRectTransform = GetOwner()->GetComponent<RectTransform>();
     assert(mRectTransform != nullptr);
+
+    // Set scale correctly on creation.
+    RefreshScale();
 
     // Add to list of canvases.
     sCanvases.push_back(this);
@@ -127,6 +134,11 @@ UICanvas::UICanvas(Actor* owner, int order) : Component(owner),
     // Get RectTransform for this canvas.
     mRectTransform = GetOwner()->GetComponent<RectTransform>();
     assert(mRectTransform != nullptr);
+
+    // Set scale correctly on creation.
+    //TODO: This assumes that the owner is parented correctly before UICanvas component is added.
+    //TODO: We may want to be notified if transform parent changes?
+    RefreshScale();
 
     // Attempt to find an ideal spot to slot in this canvas, based on desired draw order.
     for(int i = 0; i < sCanvases.size(); ++i)
@@ -203,5 +215,56 @@ void UICanvas::RemoveWidget(UIWidget* widget)
         // We also need to immediately UpdateInput so the sMouseOverWidget updates to whatever else might be under the mouse at this moment.
         // If we don't do this, there's a chance a scene item can be clicked when a UI widget was supposed to block it.
         UICanvas::UpdateMouseInput();
+    }
+}
+
+void UICanvas::OnUpdate(float deltaTime)
+{
+    // When active/enabled, refresh scale every frame to ensure it stays at the correct scale even if resolution changes.
+    //TODO: Perhaps a more efficient option would be to only do this if the window resolution changes (event-based approach).
+    RefreshScale();
+}
+
+void UICanvas::RefreshScale()
+{
+    // Scaling behavior only applies for root-level canvases.
+    // Canvases that are children of other transforms (usually for masking behavior) are assumed to be manually sized as desired for now.
+    if(GetOwner()->GetParent() == nullptr)
+    {
+        float scaleFactor = 1.0f;
+        uint32_t windowHeight = Window::GetHeight();
+        if(mAutoScale)
+        {
+            // Anchor must be at bottom left in this mode, for simplicity.
+            // This aligns with how the UI world coordinate system has origin in bottom left.
+            mRectTransform->SetAnchor(AnchorPreset::BottomLeft);
+
+            // Calculate how much to scale up the canvas based on the resolution.
+            // GK3 UI was authored at 640x480 resolution - that's the lowest supported playable window size.
+            // But whenever the height doubles, we want to also double the scale factor.
+            const Vector2 kReferenceResolution(640.0f, 480.0f);
+            scaleFactor = Math::Max(windowHeight / kReferenceResolution.y, 1.0f);
+
+            // To avoid artifacts from rendering UI images/glyphs across pixel boundaries, we only want integer scale factors.
+            // This can be a bit limiting, but I haven't found another way to avoid artifacting yet.
+            scaleFactor = Math::Floor(scaleFactor);
+
+            // Add any additional offset that was manually specified for this canvas.
+            scaleFactor += mAutoScaleOffset;
+        }
+
+        // Only update transform properties of scale factor or window height has changed. This avoids dirtying transforms every frame.
+        if(!Math::AreEqual(mLastScaleFactor, scaleFactor) || mLastWindowHeight != windowHeight)
+        {
+            mLastScaleFactor = scaleFactor;
+            mLastWindowHeight = windowHeight;
+
+            // Now here's the magic: we scale UP the rect transform by some factor...
+            mRectTransform->SetScale(Vector3(scaleFactor, scaleFactor, 1.0f));
+
+            // ...but at the same time, scale DOWN the width/height of this transform.
+            Vector2 sizeDelta = Window::GetSize() / scaleFactor;
+            mRectTransform->SetSizeDelta(sizeDelta);
+        }
     }
 }

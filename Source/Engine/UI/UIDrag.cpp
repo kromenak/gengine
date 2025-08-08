@@ -1,7 +1,6 @@
 #include "UIDrag.h"
 
 #include "CursorManager.h"
-#include "Debug.h"
 #include "InputManager.h"
 
 TYPEINFO_INIT(UIDrag, UIWidget, 18)
@@ -60,9 +59,12 @@ void UIDrag::OnUpdate(float deltaTime)
                 mouseDelta = mAllowedDragDirection * distInDragDir;
             }
 
-            // Move anchored position to match.
+            // To account for scaled parent transforms, we need to convert delta from world space to local space.
+            Vector3 localMouseDelta = GetRectTransform()->GetWorldToLocalMatrix().TransformVector(mouseDelta);
+
+            // Move anchored position to match mouse change.
             Vector2 anchoredPos = GetRectTransform()->GetAnchoredPosition();
-            anchoredPos += mouseDelta;
+            anchoredPos += localMouseDelta;
             GetRectTransform()->SetAnchoredPosition(anchoredPos);
 
             // Keep within boundary rect, if rect is valid/set.

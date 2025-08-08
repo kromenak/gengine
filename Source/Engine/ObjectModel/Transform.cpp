@@ -144,7 +144,12 @@ const Matrix4& Transform::GetLocalToWorldMatrix()
             mLocalToWorldMatrix = mParent->GetLocalToWorldMatrix() * mLocalToWorldMatrix;
         }
 
+        // The local to world matrix is no longer dirty.
         mLocalToWorldDirty = false;
+
+        // The world to local matrix is calculated from the local to world matrix.
+        // So, any update will dirty the world to local matrix!
+        mWorldToLocalDirty = true;
     }
     return mLocalToWorldMatrix;
 }

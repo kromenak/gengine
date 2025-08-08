@@ -408,7 +408,7 @@ void ActionBar::RefreshButtonLayout()
 void ActionBar::CenterOnPointer()
 {
     // Position action bar at mouse position.
-    mButtonHolder->SetAnchoredPosition(gInputManager.GetMousePosition());
+    mButtonHolder->SetAnchoredPosition(GetTransform()->GetWorldToLocalMatrix().TransformPoint(gInputManager.GetMousePosition()));
 
     // Moving the button holder may put it offscreen, if the pointer is near the screen edge.
     // So, move it back on-screen in that case.

@@ -224,12 +224,12 @@ bool GAPI_OpenGL::Init()
     ImGui_ImplSDL2_InitForOpenGL(Window::Get(), mContext);
     ImGui_ImplOpenGL3_Init("#version 150");
 
-    // Set a global size for GL_POINTS rendering.
-    // This is tuned for the points used in Sidney's Map Analysis - will need to set elsewhere if we need different sizes.
-    //TODO: it's considered a better practice to use gl_PointSize in a vertex shader.
-    glPointSize(6.0f);
+    // Enable the "gl_PointSize" parameter in vertex shaders.
+    // This allows us to specify on a per-object basis the size of point primitives.
+    // We can also dynamically scale point size based on UI scaling.
+    glEnable(GL_PROGRAM_POINT_SIZE);
 
-    // Same for GL_LINES rendering.
+    // Set a constant line width.
     //TODO: there's no way to control this in a vertex shader, but we might want to specify the line width in the VertexArray object?
     glLineWidth(2.0f);
 

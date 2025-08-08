@@ -138,8 +138,9 @@ void InventoryScreen::RefreshLayout()
     const float kSpacingY = 10.0f;
 
     // These constants control how close to the right/bottom screen edges inventory items can get.
-    const float kMaxX = Window::GetWidth() * 0.9f;
-    const float kMaxY = -(Window::GetHeight() * 0.75f);
+    RectTransform* rt = static_cast<RectTransform*>(GetTransform());
+    const float kMaxX = rt->GetSizeDelta().x * 0.9f;
+    const float kMaxY = -(rt->GetSizeDelta().y * 0.75f);
 
     // As we calculate the position of each inventory item, keep track of the current row.
     // For scrolling purposes, also track the first and last row that are visible on-screen.
