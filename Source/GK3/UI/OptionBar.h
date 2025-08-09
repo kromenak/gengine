@@ -95,6 +95,9 @@ private:
     UIToggle* mCameraGlideToggle = nullptr;
     UIToggle* mCaptionsToggle = nullptr;
 
+    // A "more options" button, which exposes additional options that weren't in the original game.
+    UIButton* mMoreOptionsButton = nullptr;
+
     void KeepOnScreen();
 
     void CreateMainSection(std::unordered_map<std::string, IniKeyValue>& config);

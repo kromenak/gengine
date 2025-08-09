@@ -67,6 +67,10 @@ void MainMenuTool::Render()
         // WINDOW menu
         if(ImGui::BeginMenu("Window"))
         {
+            if(ImGui::MenuItem("Settings", nullptr, settingsToolActive))
+            {
+                settingsToolActive = !settingsToolActive;
+            }
             if(ImGui::MenuItem("Scene Hierarchy", nullptr, hierarchyToolActive))
             {
                 hierarchyToolActive = !hierarchyToolActive;

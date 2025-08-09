@@ -25,4 +25,6 @@ namespace Tools
     void ProcessEvent(const SDL_Event& event);
     bool EatingMouseInputs();
     bool EatingKeyboardInputs();
+
+    void ShowSettings();
 }

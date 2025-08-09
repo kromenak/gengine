@@ -16,6 +16,7 @@
 #include "LocationManager.h"
 #include "Renderer.h"
 #include "TextAsset.h"
+#include "Tools.h"
 #include "UIButton.h"
 #include "UIDrag.h"
 #include "UIDropdown.h"
@@ -134,6 +135,17 @@ OptionBar::OptionBar() : Actor("OptionBar", TransformType::RectTransform)
     mSceneBlockerButton = AddComponent<UIButton>();
     mSceneBlockerButton->SetPressCallback([this](UIButton* button) {
         Hide();
+    });
+
+    // Create "more options" button. These are options that weren't included in the original game.
+    mMoreOptionsButton = UI::CreateWidgetActor<UIButton>("MoreOptions", this);
+    mMoreOptionsButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
+    mMoreOptionsButton->SetUpTexture(gAssetManager.LoadTexture("I_OPERATE_STD.BMP"));
+    mMoreOptionsButton->SetHoverTexture(gAssetManager.LoadTexture("I_OPERATE_HOV.BMP"));
+    mMoreOptionsButton->SetDownTexture(gAssetManager.LoadTexture("I_OPERATE_DWN.BMP"));
+    mMoreOptionsButton->SetTooltipText("tb_optAdvanced");
+    mMoreOptionsButton->SetPressCallback([](UIButton* button){
+        Tools::ShowSettings();
     });
 
     // Create sections.
@@ -263,6 +275,9 @@ void OptionBar::OnUpdate(float deltaTime)
     mCinematicsOnButton->SetCanInteract(!gGK3UI.IsOnDrivingScreen());
 
     // Note: Close button is always interactive.
+
+    // Only show the "more options" button if the advanced options section is open.
+    mMoreOptionsButton->SetEnabled(mAdvancedOptionsSection->IsActive());
 
     // Most keyboard input counts as a cancel action, unless some text input is active (like debug window).
     // Any key press EXCEPT ~ counts as a cancel action.

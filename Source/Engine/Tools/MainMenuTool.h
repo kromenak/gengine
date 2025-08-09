@@ -14,6 +14,7 @@ public:
     // And they're public so they can easily be passed around the tool system.
     bool hierarchyToolActive = false;
     bool assetsToolActive = false;
+    bool settingsToolActive = false;
 
     void Render();
 };

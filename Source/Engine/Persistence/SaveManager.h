@@ -42,6 +42,12 @@
     #define PREFS_MIPMAPS "Mip Mapping"
     #define PREFS_TRILINEAR_FILTERING "Trilinear Filtering"
 
+#define PREFS_UI "UI"
+    #define PREFS_USE_ORIGINAL_UI_SCALING_LOGIC "Use Original UI Scaling Logic"
+    #define PREFS_SCALE_UI_AT_HIGH_RESOLUTIONS "Scale UIs at High Resolutions"
+    #define PREFS_PIXEL_PERFECT_UI_SCALING "Pixel Perfect UI Scaling"
+    #define PREFS_REFERENCE_HEIGHT "Reference Height"
+
 struct SaveSummary
 {
     bool isQuickSave = false;

@@ -6,11 +6,11 @@
 #include "GAPI.h"
 #include "InputManager.h"
 #include "SceneManager.h"
-#include "Window.h"
 
 #include "AssetsTool.h"
 #include "HierarchyTool.h"
 #include "MainMenuTool.h"
+#include "SettingsTool.h"
 
 namespace
 {
@@ -20,10 +20,15 @@ namespace
     // Are tools active globally?
     bool toolsActive = false;
 
+    // Do we want to render the main menu?
+    // Usually true, but not if we're showing a tool in isolation.
+    bool renderMainMenu = true;
+
     // Individual tools.
     MainMenuTool mainMenu;
     HierarchyTool hierarchy;
     AssetsTool assets;
+    SettingsTool settings;
 }
 
 void Tools::Init()
@@ -55,7 +60,7 @@ void Tools::Update()
     // Toggle tools with Tab key.
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_TAB))
     {
-        toolsActive = !toolsActive;
+        SetActive(!Active());
     }
 }
 
@@ -81,22 +86,41 @@ void Tools::Render()
     // Render any tools.
     if(toolsActive)
     {
-        mainMenu.Render();
+        // Render the main menu, which grants access to all other tools.
+        // We usually DO want to render this, but not if we're rendering a specific tool in isolation.
+        if(renderMainMenu)
+        {
+            mainMenu.Render();
+        }
+
+        // Render specific tools based on whether they are active.
         hierarchy.Render(mainMenu.hierarchyToolActive);
         assets.Render(mainMenu.assetsToolActive);
+        settings.Render(mainMenu.settingsToolActive);
 
         // Optionally show demo window.
         //ImGui::ShowDemoWindow();
     }
 
-    // Render with OpenGL.
+    // Render the frame.
     ImGui::Render();
     GAPI::Get()->ImGuiRenderDrawData();
+
+    // Handle disabling tools if an isolated tool window (such as settings) is closed.
+    // A more tedious way to do this would be to manually track whether tools are active AND anything was rendered (check all the bools).
+    // Luckily, IMGUI tracks active window count. Note that this is still 1 when nothing is showing (I guess maybe that's the entire frame?).
+    if(ImGui::GetIO().MetricsActiveWindows == 1)
+    {
+        toolsActive = false;
+    }
 }
 
 void Tools::SetActive(bool active)
 {
     toolsActive = active;
+
+    // If tools are activated via normal means, make sure main menu always renders.
+    renderMainMenu = true;
 }
 
 bool Tools::Active()
@@ -117,5 +141,16 @@ bool Tools::EatingMouseInputs()
 bool Tools::EatingKeyboardInputs()
 {
     return toolsActive && ImGui::GetIO().WantCaptureKeyboard;
+}
+
+void Tools::ShowSettings()
+{
+    // Show settings in isolation. This means:
+    // 1) Tools are active.
+    // 2) But don't show the main menu - we only want settings.
+    // 3) Show the settings tool.
+    toolsActive = true;
+    renderMainMenu = false;
+    mainMenu.settingsToolActive = true;
 }
 
