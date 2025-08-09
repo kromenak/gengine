@@ -343,6 +343,14 @@ void Window::SetResolution(const Resolution& resolution)
     PositionWindowSanely();
 }
 
+Vector2 Window::GetPosition()
+{
+    int x;
+    int y;
+    SDL_GetWindowPosition(window, &x, &y);
+    return Vector2(x, y);
+}
+
 void Window::SetPosition(int x, int y)
 {
     SDL_SetWindowPosition(window, x, y);

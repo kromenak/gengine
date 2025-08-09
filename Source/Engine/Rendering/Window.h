@@ -45,6 +45,7 @@ namespace Window
     inline Rect GetRect() { return Rect(0, 0, static_cast<float>(GetWidth()), static_cast<float>(GetHeight())); }
 
     // Position
+    Vector2 GetPosition();
     void SetPosition(int x, int y);
     void OnPositionChanged();
 
