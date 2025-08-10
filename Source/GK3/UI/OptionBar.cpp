@@ -373,6 +373,10 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
         gInventoryManager.InventoryInspect();
     });
 
+    // Since the active inventory item may not be set when first starting the game, zero the size until an image is set.
+    // This fixes a bug where the default size of 100x100 causes the option bar to be taller than it visually seems to be, which affects dragging boundaries.
+    mActiveInventoryItemButton->GetRectTransform()->SetSizeDelta(Vector2::Zero);
+
     // Add inventory button.
     mInventoryButton = CreateButton(config, "closed", mOptionBarRoot->GetOwner());
     mInventoryButton->SetPressCallback([this](UIButton* button) {
