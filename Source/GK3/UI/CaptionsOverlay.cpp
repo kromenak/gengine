@@ -124,8 +124,15 @@ void CaptionsOverlay::AddCaption(const std::string& captionText, const std::stri
     // Set font based on speaker.
     caption.label->SetFont(font);
 
+    // GK3 captions use double spaces after sentences, which aren't as common these days.
+    // There are even some TRIPLE spaces, which I think must be typos...
+    // Anyway, this bit converts them to use single spaces instead.
+    std::string modifiedCaptionText = captionText;
+    StringUtil::ReplaceAll(modifiedCaptionText, "   ", " ");
+    StringUtil::ReplaceAll(modifiedCaptionText, "  ", " ");
+
     // Set text.
-    caption.label->SetText(captionText);
+    caption.label->SetText(modifiedCaptionText);
 
     // Set caption rect height based on font used and amount of text lines needed.
     float height = static_cast<float>(font->GetGlyphHeight() * caption.label->GetLineCount());

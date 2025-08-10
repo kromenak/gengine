@@ -97,6 +97,18 @@ namespace StringUtil
         str.erase(std::remove(str.begin(), str.end(), remove), str.end());
     }
 
+    inline void ReplaceAll(std::string& str, const std::string& whatToReplace, const std::string& replaceWith)
+    {
+        // Iterate, finding all instances of the string to replace.
+        size_t pos = 0;
+        while((pos = str.find(whatToReplace, pos)) != std::string::npos)
+        {
+            // Replace with desired replacement.
+            str.replace(pos, whatToReplace.length(), replaceWith);
+            pos += replaceWith.length(); // Advance past the replaced text
+        }
+    }
+
     inline std::vector<std::string> Split(const std::string& str, char delim, bool removeEmpty = false)
     {
         std::stringstream ss(str);
