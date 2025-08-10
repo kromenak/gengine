@@ -20,6 +20,8 @@ class BSP;
 class GameCamera;
 class SheepScript;
 class UIButton;
+class UICanvas;
+class UIImage;
 
 class BinocsOverlay : public Actor
 {
@@ -35,7 +37,19 @@ protected:
 private:
     Layer mLayer;
 
+    // The canvas for this screen.
+    UICanvas* mCanvas = nullptr;
+
+    // The image with the binocs center missing (so you can see through).
+    // And the images blocking the scene on each side.
+    UIImage* mCutoutImage = nullptr;
+    UIImage* mBottomImage = nullptr;
+    UIImage* mTopImage = nullptr;
+    UIImage* mLeftImage = nullptr;
+    UIImage* mRightImage = nullptr;
+
     // Buttons used to move the binocs view up/down/left/right.
+    UIImage* mArrowButtonsBacking = nullptr;
     UIButton* mUpButton = nullptr;
     UIButton* mDownButton = nullptr;
     UIButton* mLeftButton = nullptr;
@@ -152,4 +166,6 @@ private:
 
     void OnZoomInButtonPressed();
     void OnZoomOutButtonPressed();
+
+    void RefreshUIScaling();
 };

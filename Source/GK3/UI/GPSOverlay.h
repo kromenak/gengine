@@ -128,4 +128,5 @@ private:
     bool ParseLayout(const IniSection& section);
     void ParseLocation(const IniSection& section);
     void ApplyLayout(int index);
+    void RefreshLayout();
 };

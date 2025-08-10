@@ -79,6 +79,10 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
     // Push layer onto stack.
     gLayerManager.PushLayer(&mLayer);
 
+    // Show the screen.
+    // Be sure to do this before refreshing the layout, so that the canvas sizing/scaling is accurate.
+    SetActive(true);
+
     // Save current actor name and inventory.
     mCurrentActorName = actorName;
     mCurrentInventory = &inventory;
@@ -88,9 +92,6 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 
     // Layout the buttons on screen.
     RefreshLayout();
-
-    // Actually show the stuff!
-    SetActive(true);
 }
 
 void InventoryScreen::Hide()

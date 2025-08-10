@@ -4,13 +4,13 @@
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "GK3UI.h"
-#include "GEngine.h"
 #include "LocationManager.h"
-#include "Texture.h"
+#include "SaveManager.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UIUtil.h"
+#include "Window.h"
 
 DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform),
     mLayer("DeathLayer")
@@ -18,22 +18,15 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
     mLayer.OverrideAudioState(true);
 
     // Canvas takes up the entire screen.
-    UICanvas* canvas = AddComponent<UICanvas>(20);
-    canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-    canvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
-
-    // Add a black background image.
-    UIImage* blackBackground = AddComponent<UIImage>();
-    blackBackground->SetTexture(&Texture::Black);
+    mCanvas = UI::AddCanvas(this, 20, Color32::Black);
 
     // Add death screen background image.
-    UIImage* background = UI::CreateWidgetActor<UIImage>("Background", this);
-    background->SetTexture(gAssetManager.LoadTexture("DEATHSCREEN.BMP"), true);
-    background->SetReceivesInput(true);
+    mBackgroundImage = UI::CreateWidgetActor<UIImage>("Background", this);
+    mBackgroundImage->SetTexture(gAssetManager.LoadTexture("DEATHSCREEN.BMP"), true);
 
     // Add buttons for retry, replay, and quit.
     {
-        UIButton* retryButton = UI::CreateWidgetActor<UIButton>("RetryButton", background);
+        UIButton* retryButton = UI::CreateWidgetActor<UIButton>("RetryButton", mBackgroundImage);
         retryButton->SetUpTexture(gAssetManager.LoadTexture("DS_RTRY_N.BMP"));
         retryButton->SetHoverTexture(gAssetManager.LoadTexture("DS_RTRY_H.BMP"));
         retryButton->SetDownTexture(gAssetManager.LoadTexture("DS_RTRY_D.BMP"));
@@ -41,11 +34,12 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         retryButton->SetPressCallback([this](UIButton* button){
             OnRetryButtonPressed();
         });
-        retryButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        retryButton->GetRectTransform()->SetAnchoredPosition(181.0f, 24.0f);
+        retryButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+        retryButton->GetRectTransform()->SetAnchoredPosition(-40.0f - 18.0f - 40.0f, 24.0f);
+        mRetryButton = retryButton;
     }
     {
-        UIButton* restoreButton = UI::CreateWidgetActor<UIButton>("RestoreButton", background);
+        UIButton* restoreButton = UI::CreateWidgetActor<UIButton>("RestoreButton", mBackgroundImage);
         restoreButton->SetUpTexture(gAssetManager.LoadTexture("DS_REST_N.BMP"));
         restoreButton->SetHoverTexture(gAssetManager.LoadTexture("DS_REST_H.BMP"));
         restoreButton->SetDownTexture(gAssetManager.LoadTexture("DS_REST_D.BMP"));
@@ -53,11 +47,12 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         restoreButton->SetPressCallback([](UIButton* button){
             gGK3UI.ShowLoadScreen();
         });
-        restoreButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        restoreButton->GetRectTransform()->SetAnchoredPosition(280.0f, 24.0f);
+        restoreButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+        restoreButton->GetRectTransform()->SetAnchoredPosition(0.0f, 24.0f);
+        mRestoreButton = restoreButton;
     }
     {
-        UIButton* quitButton = UI::CreateWidgetActor<UIButton>("QuitButton", background);
+        UIButton* quitButton = UI::CreateWidgetActor<UIButton>("QuitButton", mBackgroundImage);
         quitButton->SetUpTexture(gAssetManager.LoadTexture("DS_QUIT_N.BMP"));
         quitButton->SetHoverTexture(gAssetManager.LoadTexture("DS_QUIT_H.BMP"));
         quitButton->SetDownTexture(gAssetManager.LoadTexture("DS_QUIT_D.BMP"));
@@ -65,8 +60,9 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         quitButton->SetPressCallback([](UIButton* button){
             gGK3UI.ShowQuitPopup();
         });
-        quitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        quitButton->GetRectTransform()->SetAnchoredPosition(379.0f, 24.0f);
+        quitButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+        quitButton->GetRectTransform()->SetAnchoredPosition(40.0f + 18.0f + 40.0f, 24.0f);
+        mQuitButton = quitButton;
     }
 
     // Not active by default.
@@ -78,6 +74,9 @@ void DeathScreen::Show()
     // Push layer onto stack.
     gLayerManager.PushLayer(&mLayer);
     SetActive(true);
+
+    // Make sure UI is scaled to match resolution.
+    RefreshUIScaling();
 
     // Play death stinger sound effect.
     PlayAudioParams params;
@@ -93,6 +92,11 @@ void DeathScreen::Hide()
     SetActive(false);
 }
 
+void DeathScreen::OnUpdate(float deltaTime)
+{
+    RefreshUIScaling();
+}
+
 void DeathScreen::OnRetryButtonPressed()
 {
     Hide();
@@ -101,4 +105,38 @@ void DeathScreen::OnRetryButtonPressed()
     // For example, in the TE3 location, the function should be in the TE3.SHP file.
     std::string scriptStr = StringUtil::Format("wait CallSheep(\"%s\", \"PostDeath$\")", gLocationManager.GetLocation().c_str());
     gActionManager.ExecuteSheepAction(scriptStr);
+}
+
+void DeathScreen::RefreshUIScaling()
+{
+    Vector2 bgImageSize(640.0f, 480.0f);
+
+    // The original game actually does scale this UI up to match the current resolution.
+    // The logic is similar to the title screen, though the button logic differs.
+    bool useOriginalUIScalingLogic = gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_USE_ORIGINAL_UI_SCALING_LOGIC, true);
+    if(useOriginalUIScalingLogic && Window::GetHeight() <= 1080.0f)
+    {
+        // Turn off canvas autoscaling. This sets canvas scale to 1, and width/height equal to window width/height.
+        mCanvas->SetAutoScale(false);
+
+        // Resize background image to fit within window size, preserving aspect ratio.
+        mBackgroundImage->ResizeToFitPreserveAspect(Window::GetSize());
+
+        // The background image size is now whatever was calculated.
+        bgImageSize = mBackgroundImage->GetRectTransform()->GetSizeDelta();
+    }
+    else // not using original game's logic.
+    {
+        // In this case, just use 640x480 and have it auto-scale when the resolution gets too big.
+        mCanvas->SetAutoScale(true);
+        mBackgroundImage->ResizeToTexture();
+    }
+
+    // This seems to give close to the same results of the original game for button positions.
+    float buttonY = 24.0f + (bgImageSize.y - 480.0f) * 0.0917f;
+    float distBetweenButtons = Math::RoundToInt(Math::Min(18.0f + (bgImageSize.x - 640.0f) * 0.15f, 100.0f));
+
+    mRestoreButton->GetRectTransform()->SetAnchoredPosition(0.0f, buttonY);
+    mRetryButton->GetRectTransform()->SetAnchoredPosition(-80 - distBetweenButtons, buttonY);
+    mQuitButton->GetRectTransform()->SetAnchoredPosition(80 + distBetweenButtons, buttonY);
 }

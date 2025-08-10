@@ -4,8 +4,9 @@
 #include "GEngine.h"
 #include "GK3UI.h"
 #include "InputManager.h"
+#include "SaveManager.h"
 #include "SoundtrackPlayer.h"
-#include "Texture.h"
+#include "UICanvas.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UIUtil.h"
@@ -13,7 +14,7 @@
 
 namespace
 {
-    UIButton* CreateButton(Actor* parent, const std::string& buttonId, float xPos)
+    UIButton* CreateButton(Component* parent, const std::string& buttonId)
     {
         UIButton* button = UI::CreateWidgetActor<UIButton>(buttonId, parent);
 
@@ -23,45 +24,31 @@ namespace
         button->SetHoverTexture(gAssetManager.LoadTexture(buttonId + "_H.BMP"));
         button->SetDisabledTexture(gAssetManager.LoadTexture(buttonId + "_X.BMP"));
 
-        // The y-position of the buttons on this screen varies based on the screen resolution.
-        // While hard to 100% verify, this seems to give close to the correct result.
-        //float y = 27.0f + (Window::GetSize().y - 480.0f) * 0.0917f;
-        float y = 27.0f + (0.0f) * 0.0917f;
-
         // Anchor to bottom-right and position based off that.
         button->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
-        button->GetRectTransform()->SetAnchoredPosition(xPos, y);
         return button;
     }
 }
 
-TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
+TitleScreen::TitleScreen() : Actor("TitleScreen", TransformType::RectTransform)
 {
-    UI::AddCanvas(this, 0, Color32::Black);
+    mCanvas = UI::AddCanvas(this, 0, Color32::Black);
 
     // Add title screen image.
-    UIImage* titleImage = UI::CreateWidgetActor<UIImage>("Background", this);
-    titleImage->SetTexture(gAssetManager.LoadTexture("TITLE.BMP"), true);
-    //titleImage->ResizeToFitPreserveAspect(Window::GetSize());
-
-    // The distance between buttons varies based on screen resolution.
-    // Not sure how true this is to the original game, but it gives pretty good-looking results.
-    float buttonX = -33.0f;
-    //float distBetweenButtons = Math::RoundToInt(Math::Min(18.0f + (Window::GetSize().x - 640.0f) * 0.15f, 100.0f));
-    float distBetweenButtons = Math::RoundToInt(Math::Min(18.0f + (0.0f) * 0.15f, 100.0f));
+    mBackgroundImage = UI::CreateWidgetActor<UIImage>("Background", this);
+    mBackgroundImage->SetTexture(gAssetManager.LoadTexture("TITLE.BMP"), true);
 
     // Add "quit" button.
-    UIButton* quitButton = CreateButton(titleImage->GetOwner(), "TITLE_QUIT", buttonX);
+    UIButton* quitButton = CreateButton(mBackgroundImage, "TITLE_QUIT");
     quitButton->SetTooltipText("titlequit");
     quitButton->SetPressCallback([](UIButton* button){
         // Unlike most other quit buttons in the game, this one quits directly - no quit popup confirmation.
         GEngine::Instance()->Quit();
     });
-    buttonX -= quitButton->GetRectTransform()->GetSize().x + distBetweenButtons;
     mQuitButton = quitButton;
 
     // Add "restore" button.
-    UIButton* restoreButton = CreateButton(titleImage->GetOwner(), "TITLE_RESTORE", buttonX);
+    UIButton* restoreButton = CreateButton(mBackgroundImage, "TITLE_RESTORE");
     restoreButton->SetTooltipText("titlerestore");
     restoreButton->SetPressCallback([](UIButton* button){
         gGK3UI.ShowLoadScreen();
@@ -71,22 +58,20 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     {
         restoreButton->SetCanInteract(false);
     }
-    buttonX -= restoreButton->GetRectTransform()->GetSize().x + distBetweenButtons;
     mRestoreButton = restoreButton;
 
     // Add "play" button.
-    UIButton* playButton = CreateButton(titleImage->GetOwner(), "TITLE_PLAY", buttonX);
+    UIButton* playButton = CreateButton(mBackgroundImage, "TITLE_PLAY");
     playButton->SetTooltipText("titleplay");
     playButton->SetPressCallback([this](UIButton* button){
         Hide();
         GEngine::Instance()->StartGame();
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
     });
-    buttonX -= playButton->GetRectTransform()->GetSize().x + distBetweenButtons;
     mPlayButton = playButton;
 
     // Add "intro" button.
-    UIButton* introButton = CreateButton(titleImage->GetOwner(), "TITLE_INTRO", buttonX);
+    UIButton* introButton = CreateButton(mBackgroundImage, "TITLE_INTRO");
     introButton->SetTooltipText("titleintro");
     introButton->SetPressCallback([](UIButton* button) {
         gGK3UI.PlayVideo("intro.bik", true, true, nullptr);
@@ -97,6 +82,9 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
         introButton->SetCanInteract(false);
     }
     mIntroButton = introButton;
+
+    // Make sure UI scale and button positions are correct for current resolution.
+    RefreshUIScaling();
 }
 
 void TitleScreen::Show()
@@ -127,6 +115,7 @@ void TitleScreen::Hide()
 
 void TitleScreen::OnUpdate(float deltaTime)
 {
+    // Each button on the title screen has a keyboard shortcut.
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_I))
     {
         mIntroButton->AnimatePress();
@@ -143,4 +132,60 @@ void TitleScreen::OnUpdate(float deltaTime)
     {
         mQuitButton->AnimatePress();
     }
+
+    // Keep UI scale correct if resolution changes.
+    RefreshUIScaling();
+}
+
+void TitleScreen::RefreshUIScaling()
+{
+    // The authored size of the background image is 640x480.
+    Vector2 bgImageSize(640.0f, 480.0f);
+
+    // If we want to use the original game's scaling logic, we can do so.
+    // But this logic breaks down after ~1080p (in fact, it was only ever defined up to 1024x768).
+    // After that, we should fall back on the auto scaling logic.
+    bool useOriginalUIScalingLogic = gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_USE_ORIGINAL_UI_SCALING_LOGIC, true);
+    if(useOriginalUIScalingLogic && Window::GetHeight() <= 1080.0f)
+    {
+        // Turn off canvas autoscaling. This sets canvas scale to 1, and width/height equal to window width/height.
+        mCanvas->SetAutoScale(false);
+
+        // Resize background image to fit within window size, preserving aspect ratio.
+        mBackgroundImage->ResizeToFitPreserveAspect(Window::GetSize());
+
+        // The background image size is now whatever was calculated.
+        bgImageSize = mBackgroundImage->GetRectTransform()->GetSizeDelta();
+    }
+    else // not using original game's logic.
+    {
+        // In this case, just use 640x480 and have it auto-scale when the resolution gets too big.
+        mCanvas->SetAutoScale(true);
+        mBackgroundImage->ResizeToTexture();
+    }
+
+    // The logic here positions the buttons correctly for 640x480, 800x600, and 1024x768 resolutions.
+    // For larger resolutions (up to 1080p), it extrapolates and the results are pretty good.
+    // Beyond that, we revert to 640x480 (with autoscaling) anyways, so the result is still good.
+
+    // The y-position of the buttons on this screen varies based on the background image height.
+    // While hard to 100% verify, this seems to give close to the correct result.
+    float buttonY = 27.0f + (bgImageSize.y - 480.0f) * 0.0917f;
+
+    // Math for button x-pos and distances between buttons.
+    // Again, hard to say if this is anywhere near how the original game actually did it, but it gives very similar results.
+    float buttonX = -33.0f - (bgImageSize.y - 480.0f) * 0.16f;
+    float distBetweenButtons = Math::RoundToInt(Math::Min(18.0f + (bgImageSize.x - 640.0f) * 0.15f, 100.0f));
+
+    mQuitButton->GetRectTransform()->SetAnchoredPosition(buttonX, buttonY);
+    buttonX -= mQuitButton->GetRectTransform()->GetSize().x + distBetweenButtons;
+
+    mRestoreButton->GetRectTransform()->SetAnchoredPosition(buttonX, buttonY);
+    buttonX -= mRestoreButton->GetRectTransform()->GetSize().x + distBetweenButtons;
+
+    mPlayButton->GetRectTransform()->SetAnchoredPosition(buttonX, buttonY);
+    buttonX -= mPlayButton->GetRectTransform()->GetSize().x + distBetweenButtons;
+
+    mIntroButton->GetRectTransform()->SetAnchoredPosition(buttonX, buttonY);
+    buttonX -= mPlayButton->GetRectTransform()->GetSize().x + distBetweenButtons;
 }

@@ -84,6 +84,8 @@ GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
 
 void GPSOverlay::Show()
 {
+    SetActive(true);
+
     // Figure out our current location.
     std::string location = gLocationManager.GetLocation();
     auto it = mLocations.find(location);
@@ -97,24 +99,11 @@ void GPSOverlay::Show()
         mCurrentLocation = &mLocations.begin()->second;
     }
 
-    // Figure out which UI layout to use, based on window resolution.
-    Vector2 windowSize = Window::GetSize();
-    int layoutIndex = 2;
-    if(windowSize.x <= 640)
-    {
-        layoutIndex = 0;
-    }
-    else if(windowSize.x <= 800)
-    {
-        layoutIndex = 1;
-    }
-
-    // Apply the desired layout.
-    ApplyLayout(layoutIndex);
+    // Refresh layout based on screen resolution.
+    RefreshLayout();
 
     // When initially showing the device, it shows in a powered-off state.
     SetPoweredOnUIVisible(false);
-    SetActive(true);
 
     // But after a moment, we'll show the powered-on state.
     mPowerDelayTimer = kPowerDelay;
@@ -163,6 +152,10 @@ void GPSOverlay::OnUpdate(float deltaTime)
         SetTargetReticuleTexturePos(egoTexturePos);
         SetLatLongFromTexturePos(egoTexturePos);
     }
+
+    // Refresh layout based on screen resolution.
+    // It's actually necessary to do this in Update, since players can change the resolution while this UI is displayed.
+    RefreshLayout();
 }
 
 void GPSOverlay::SetPoweredOnUIVisible(bool visible)
@@ -473,4 +466,23 @@ void GPSOverlay::ApplyLayout(int index)
     mPowerButton->SetDownTexture(mLayouts[index].powerButtonDownTexture);
     mPowerButton->SetHoverTexture(mLayouts[index].powerButtonHoverTexture);
     mPowerButton->SetDisabledTexture(mLayouts[index].powerButtonDisabledTexture);
+}
+
+void GPSOverlay::RefreshLayout()
+{
+    // The devs created specific layouts for 640x480, 800x600, and 1024x768 resolutions.
+    // For anything higher than 1024x768 that is not scaled, use the 1024x768 resolution.
+    // However, once UI scaling starts to occur, it looks better to just use the 640x480 version.
+    int layoutIndex = 2; // 1024x768
+    if(Window::GetWidth() <= 640 || GetComponent<UICanvas>()->GetScaleFactor() > 1.0f)
+    {
+        layoutIndex = 0; // 640x480
+    }
+    else if(Window::GetWidth() <= 800)
+    {
+        layoutIndex = 1; // 800x600
+    }
+
+    // Apply the desired layout.
+    ApplyLayout(layoutIndex);
 }

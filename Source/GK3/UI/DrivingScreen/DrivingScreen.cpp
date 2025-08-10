@@ -8,11 +8,13 @@
 #include "GameProgress.h"
 #include "IniParser.h"
 #include "LocationManager.h"
+#include "SaveManager.h"
 #include "SoundtrackPlayer.h"
 #include "StringTokenizer.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
+#include "UICanvas.h"
 #include "UIImage.h"
 #include "UIUtil.h"
 #include "Window.h"
@@ -21,16 +23,21 @@ DrivingScreen::DrivingScreen() : Actor("DrivingScreen", TransformType::RectTrans
 {
     // Add fullscreen canvas with black background.
     // Driving screen should draw above scene transitioner so it doesn't appear on this screen.
-    UI::AddCanvas(this, 5, Color32::Black);
+    mCanvas = UI::AddCanvas(this, 5, Color32::Black);
+
+    /*
+    //TODO: This puts a blurry image behind the main map image for higher resolutions with black bars. Good or bad?
+    UIImage* blurryBG = UI::CreateWidgetActor<UIImage>("MapBlurry", this);
+    blurryBG->SetTexture(gAssetManager.LoadTexture("DM_BASE.BMP"));
+    blurryBG->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+    blurryBG->SetColor(Color32(255, 255, 255, 50));
+    */
 
     // Add map background image.
     mMapTexture = gAssetManager.LoadTexture("DM_BASE.BMP");
     mMapImage = UI::CreateWidgetActor<UIImage>("Map", this);
     mMapImage->SetTexture(mMapTexture, true);
     mMapActor = mMapImage->GetOwner();
-
-    // Due to how the map image scales with resolution, this seems to avoid some "off by one" pixel errors at some scales.
-    mMapImage->GetRectTransform()->SetPixelPerfect(false);
 
     // Add location buttons.
     AddLocation("VGR", "ARM", Vector2(458.0f, -225.0f)); // Devil's Armchair
@@ -136,13 +143,9 @@ void DrivingScreen::Show(FollowMode followMode)
         showWOD = showWOD || currentTimeblock >= Timeblock(2, 5, Timeblock::PM);
         mLocationButtons["WOD"].button->SetEnabled(showWOD);
 
-        // Make sure the map fits snugly in the window area, with aspect ratio preserved.
-        // We do this every time the UI shows in case resolution has changed.
-        //mMapImage->ResizeToFitPreserveAspect(Window::GetSize());
-
-        //HACK: Applying a slight "fudge" to the y-size fixes some issues with button positioning at high resolutions (where the image is way scaled up).
-        //HACK: Not 100% sure why that happens...
-        //mMapImage->GetRectTransform()->SetSizeDeltaY(mMapImage->GetRectTransform()->GetSizeDelta().y + 0.5f);
+        // Actually show the UI.
+        SetActive(true);
+        RefreshUIScaling();
 
         // Put all blips in starting positions, with paths set if needed.
         mFollowMode = followMode;
@@ -177,8 +180,7 @@ void DrivingScreen::Show(FollowMode followMode)
         // Also play motorcycle driving away SFX.
         soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPHARLEYAWAY.STK"));
 
-        // Actually show the UI.
-        SetActive(true);
+
 
         // When Gabe attempts to follow the Black Sedan during 202A timeblock, some dialogue plays over the map screen.
         // This doesn't seem to be accounted for in any NVC or Sheepscript, so it must be hardcoded...
@@ -950,4 +952,32 @@ void DrivingScreen::OnLocationButtonPressed(const std::string& locationCode)
 
     // Change to the desired location.
     ExitToLocation(realLocationCode);
+}
+
+void DrivingScreen::RefreshUIScaling()
+{
+    // The original game actually does scale this UI up to match the current resolution.
+    // The logic is similar to the title screen, though this screen's a lot simpler because it has no buttons to position.
+    bool useOriginalUIScalingLogic = gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_USE_ORIGINAL_UI_SCALING_LOGIC, true);
+    if(useOriginalUIScalingLogic)
+    {
+        // Turn off canvas autoscaling. This sets canvas scale to 1, and width/height equal to window width/height.
+        mCanvas->SetAutoScale(false);
+
+        // Due to how the map image scales with resolution, this seems to avoid some "off by one" pixel errors at some scales.
+        mMapImage->GetRectTransform()->SetPixelPerfect(false);
+
+        // Resize background image to fit within window size, preserving aspect ratio.
+        mMapImage->ResizeToFitPreserveAspect(Window::GetSize());
+
+        //HACK: Applying a slight "fudge" to the y-size fixes some issues with button positioning at high resolutions (where the image is way scaled up).
+        mMapImage->GetRectTransform()->SetSizeDeltaY(mMapImage->GetRectTransform()->GetSizeDelta().y + 0.5f);
+    }
+    else // not using original game's logic.
+    {
+        // In this case, just use 640x480 and have it auto-scale when the resolution gets too big.
+        mCanvas->SetAutoScale(true);
+        mMapImage->GetRectTransform()->SetPixelPerfect(true);
+        mMapImage->ResizeToTexture();
+    }
 }

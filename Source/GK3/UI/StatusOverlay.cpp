@@ -7,13 +7,18 @@
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "StringUtil.h"
+#include "UICanvas.h"
 #include "UILabel.h"
 #include "UIUtil.h"
 
-StatusOverlay::StatusOverlay() : Actor("Status", TransformType::RectTransform)
+StatusOverlay::StatusOverlay() : Actor("StatusOverlay", TransformType::RectTransform)
 {
     // Needs to be a canvas so it can render stuff.
-    UI::AddCanvas(this, 10);
+    UICanvas* canvas = UI::AddCanvas(this, 10);
+
+    // Tell this canvas to favor being one increment smaller than the autoscale logic usually calculates.
+    // Somewhat subjective, but the status text feels like it gets too big too quickly with normal autoscaling.
+    canvas->SetAutoScaleBias(-1);
 
     // Create status text actor at top of screen.
     mStatusLabel = UI::CreateWidgetActor<UILabel>("Label", this);

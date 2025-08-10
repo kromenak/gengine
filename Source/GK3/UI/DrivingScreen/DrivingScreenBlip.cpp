@@ -57,6 +57,14 @@ void DrivingScreenBlip::SkipToPathNode(const std::string& nodeName)
     }
 }
 
+void DrivingScreenBlip::SetMapScale(const Vector2& mapScale)
+{
+    mMapScale = mapScale;
+
+    // Scale up the blip so it stays the same relative size when the map is larger.
+    mImage->GetRectTransform()->SetScale(mapScale);
+}
+
 void DrivingScreenBlip::SetMapPosition(const std::string& nodeName)
 {
     // Find node with this name and add it to path.

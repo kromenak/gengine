@@ -29,7 +29,7 @@ public:
     void SetFollow(DrivingScreenBlip* other) { mFollowBlip = other; }
 
     // Positioning
-    void SetMapScale(const Vector2& mapScale) { mMapScale = mapScale; }
+    void SetMapScale(const Vector2& mapScale);
     void SetMapPosition(const std::string& nodeName);
     void SetMapPosition(const Vector2& position);
 

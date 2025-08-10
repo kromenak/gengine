@@ -218,6 +218,32 @@ void UICanvas::RemoveWidget(UIWidget* widget)
     }
 }
 
+float UICanvas::GetScaleFactor() const
+{
+    float scaleFactor = 1.0f;
+    if(mAutoScale)
+    {
+        // Calculate how much to scale up the canvas based on the resolution.
+        // GK3 UI was authored at 640x480 resolution - that's the lowest supported playable window size.
+        // But whenever the height doubles, we want to also double the scale factor.
+        const Vector2 kReferenceResolution(640.0f, 480.0f);
+        scaleFactor = Math::Max(Window::GetHeight() / kReferenceResolution.y, 1.0f);
+
+        // To avoid artifacts from rendering UI images/glyphs across pixel boundaries, we only want integer scale factors.
+        // This can be a bit limiting, but I haven't found another way to avoid artifacting yet.
+        scaleFactor = Math::Floor(scaleFactor);
+
+        // Add any additional offset that was manually specified for this canvas.
+        scaleFactor = Math::Max(scaleFactor + mAutoScaleOffset, 1.0f);
+    }
+    return scaleFactor;
+}
+
+void UICanvas::OnEnable()
+{
+    RefreshScale();
+}
+
 void UICanvas::OnUpdate(float deltaTime)
 {
     // When active/enabled, refresh scale every frame to ensure it stays at the correct scale even if resolution changes.
@@ -231,32 +257,23 @@ void UICanvas::RefreshScale()
     // Canvases that are children of other transforms (usually for masking behavior) are assumed to be manually sized as desired for now.
     if(GetOwner()->GetParent() == nullptr)
     {
-        float scaleFactor = 1.0f;
+        uint32_t windowWidth = Window::GetWidth();
         uint32_t windowHeight = Window::GetHeight();
         if(mAutoScale)
         {
             // Anchor must be at bottom left in this mode, for simplicity.
             // This aligns with how the UI world coordinate system has origin in bottom left.
             mRectTransform->SetAnchor(AnchorPreset::BottomLeft);
-
-            // Calculate how much to scale up the canvas based on the resolution.
-            // GK3 UI was authored at 640x480 resolution - that's the lowest supported playable window size.
-            // But whenever the height doubles, we want to also double the scale factor.
-            const Vector2 kReferenceResolution(640.0f, 480.0f);
-            scaleFactor = Math::Max(windowHeight / kReferenceResolution.y, 1.0f);
-
-            // To avoid artifacts from rendering UI images/glyphs across pixel boundaries, we only want integer scale factors.
-            // This can be a bit limiting, but I haven't found another way to avoid artifacting yet.
-            scaleFactor = Math::Floor(scaleFactor);
-
-            // Add any additional offset that was manually specified for this canvas.
-            scaleFactor += mAutoScaleOffset;
         }
 
+        // Calculate scale factor.
+        float scaleFactor = GetScaleFactor();
+
         // Only update transform properties of scale factor or window height has changed. This avoids dirtying transforms every frame.
-        if(!Math::AreEqual(mLastScaleFactor, scaleFactor) || mLastWindowHeight != windowHeight)
+        if(!Math::AreEqual(mLastScaleFactor, scaleFactor) || mLastWindowHeight != windowHeight || mLastWindowWidth != windowWidth)
         {
             mLastScaleFactor = scaleFactor;
+            mLastWindowWidth = windowWidth;
             mLastWindowHeight = windowHeight;
 
             // Now here's the magic: we scale UP the rect transform by some factor...
