@@ -2,9 +2,9 @@
 
 #include "Actor.h"
 #include "GAPI.h"
+#include "GKPrefs.h"
 #include "InputManager.h"
 #include "Rect.h"
-#include "SaveManager.h"
 #include "UIWidget.h"
 #include "Window.h"
 
@@ -223,11 +223,10 @@ float UICanvas::GetScaleFactor() const
 {
     // Only autoscale if enabled for this canvas AND enabled globally.
     float scaleFactor = 1.0f;
-    if(mAutoScale && gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_SCALE_UI_AT_HIGH_RESOLUTIONS, true))
+    if(mAutoScale && Prefs::ScaleUIAtHighResolutions())
     {
         // Also only autoscale if above the minimum window height set globally.
-        float minimumScaleUIHeight = gSaveManager.GetPrefs()->GetInt(PREFS_UI, PREFS_SCALE_UI_MINIMUM_HEIGHT, 1280);
-        if(Window::GetHeight() >= minimumScaleUIHeight)
+        if(Window::GetHeight() >= Prefs::GetMinimumScaleUIHeight())
         {
             // Calculate how much to scale up the canvas based on the resolution.
             // GK3 UI was authored at 640x480 resolution - that's the lowest supported playable window size.
@@ -237,7 +236,7 @@ float UICanvas::GetScaleFactor() const
 
             // To avoid artifacts from rendering UI images/glyphs across pixel boundaries, we only want integer scale factors.
             // This can be a bit limiting, but I haven't found another way to avoid artifacting yet.
-            if(gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_PIXEL_PERFECT_UI_SCALING, true))
+            if(Prefs::UsePixelPerfectUIScaling())
             {
                 scaleFactor = Math::Floor(scaleFactor);
             }

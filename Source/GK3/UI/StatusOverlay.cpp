@@ -14,11 +14,7 @@
 StatusOverlay::StatusOverlay() : Actor("StatusOverlay", TransformType::RectTransform)
 {
     // Needs to be a canvas so it can render stuff.
-    UICanvas* canvas = UI::AddCanvas(this, 10);
-
-    // Tell this canvas to favor being one increment smaller than the autoscale logic usually calculates.
-    // Somewhat subjective, but the status text feels like it gets too big too quickly with normal autoscaling.
-    canvas->SetAutoScaleBias(-1);
+    UI::AddCanvas(this, 10);
 
     // Create status text actor at top of screen.
     mStatusLabel = UI::CreateWidgetActor<UILabel>("Label", this);

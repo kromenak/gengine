@@ -3,8 +3,8 @@
 #include "AssetManager.h"
 #include "GEngine.h"
 #include "GK3UI.h"
+#include "GKPrefs.h"
 #include "InputManager.h"
-#include "SaveManager.h"
 #include "SoundtrackPlayer.h"
 #include "UICanvas.h"
 #include "UIButton.h"
@@ -145,8 +145,7 @@ void TitleScreen::RefreshUIScaling()
     // If we want to use the original game's scaling logic, we can do so.
     // But this logic breaks down after ~1080p (in fact, it was only ever defined up to 1024x768).
     // After that, we should fall back on the auto scaling logic.
-    bool useOriginalUIScalingLogic = gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_USE_ORIGINAL_UI_SCALING_LOGIC, true);
-    if(useOriginalUIScalingLogic && Window::GetHeight() <= gSaveManager.GetPrefs()->GetInt(PREFS_UI, PREFS_SCALE_UI_MINIMUM_HEIGHT, 1280))
+    if(Prefs::UseOriginalUIScalingLogic() && Window::GetHeight() < Prefs::GetMinimumScaleUIHeight())
     {
         // Turn off canvas autoscaling. This sets canvas scale to 1, and width/height equal to window width/height.
         mCanvas->SetAutoScale(false);

@@ -2,8 +2,8 @@
 
 #include "AssetManager.h"
 #include "GEngine.h"
+#include "GKPrefs.h"
 #include "InputManager.h"
-#include "SaveManager.h"
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UIUtil.h"
@@ -50,8 +50,7 @@ void FinishedScreen::RefreshUIScaling()
 {
     // The original game actually does scale this UI up to match the current resolution.
     // The logic is similar to the title screen, though this screen's a lot simpler because it has no buttons to position.
-    bool useOriginalUIScalingLogic = gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_USE_ORIGINAL_UI_SCALING_LOGIC, true);
-    if(useOriginalUIScalingLogic)
+    if(Prefs::UseOriginalUIScalingLogic())
     {
         // Turn off canvas autoscaling. This sets canvas scale to 1, and width/height equal to window width/height.
         mCanvas->SetAutoScale(false);

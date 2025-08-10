@@ -7,11 +7,11 @@
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GEngine.h"
+#include "GKPrefs.h"
 #include "IniParser.h"
 #include "LocationManager.h"
 #include "TextAsset.h"
 #include "Texture.h"
-#include "SaveManager.h"
 #include "Scene.h"
 #include "SceneGeometryData.h"
 #include "SceneManager.h"
@@ -488,8 +488,7 @@ void BinocsOverlay::RefreshUIScaling()
 
     // The original game actually does scale this UI up to match the current resolution.
     // The logic is similar to the title screen, though the button logic differs.
-    bool useOriginalUIScalingLogic = gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_USE_ORIGINAL_UI_SCALING_LOGIC, true);
-    if(useOriginalUIScalingLogic && Window::GetHeight() <= 1080.0f)
+    if(Prefs::UseOriginalUIScalingLogic() && Window::GetHeight() <= Prefs::GetMinimumScaleUIHeight())
     {
         // Turn off canvas autoscaling. This sets canvas scale to 1, and width/height equal to window width/height.
         mCanvas->SetAutoScale(false);

@@ -6,9 +6,9 @@
 #include "AssetManager.h"
 #include "DrivingScreenBlip.h"
 #include "GameProgress.h"
+#include "GKPrefs.h"
 #include "IniParser.h"
 #include "LocationManager.h"
-#include "SaveManager.h"
 #include "SoundtrackPlayer.h"
 #include "StringTokenizer.h"
 #include "TextAsset.h"
@@ -958,8 +958,7 @@ void DrivingScreen::RefreshUIScaling()
 {
     // The original game actually does scale this UI up to match the current resolution.
     // The logic is similar to the title screen, though this screen's a lot simpler because it has no buttons to position.
-    bool useOriginalUIScalingLogic = gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_USE_ORIGINAL_UI_SCALING_LOGIC, true);
-    if(useOriginalUIScalingLogic)
+    if(Prefs::UseOriginalUIScalingLogic())
     {
         // Turn off canvas autoscaling. This sets canvas scale to 1, and width/height equal to window width/height.
         mCanvas->SetAutoScale(false);
