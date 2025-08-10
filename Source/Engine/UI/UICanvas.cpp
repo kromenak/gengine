@@ -4,6 +4,7 @@
 #include "GAPI.h"
 #include "InputManager.h"
 #include "Rect.h"
+#include "SaveManager.h"
 #include "UIWidget.h"
 #include "Window.h"
 
@@ -112,7 +113,7 @@ TYPEINFO_INIT(UICanvas, Component, 14)
 {
     TYPEINFO_VAR(UICanvas, VariableType::Int, mDrawOrder);
     TYPEINFO_VAR(UICanvas, VariableType::Bool, mAutoScale);
-    TYPEINFO_VAR(UICanvas, VariableType::Int, mAutoScaleOffset);
+    TYPEINFO_VAR(UICanvas, VariableType::Int, mAutoScaleBias);
 }
 
 UICanvas::UICanvas(Actor* owner) : Component(owner)
@@ -220,21 +221,30 @@ void UICanvas::RemoveWidget(UIWidget* widget)
 
 float UICanvas::GetScaleFactor() const
 {
+    // Only autoscale if enabled for this canvas AND enabled globally.
     float scaleFactor = 1.0f;
-    if(mAutoScale)
+    if(mAutoScale && gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_SCALE_UI_AT_HIGH_RESOLUTIONS, true))
     {
-        // Calculate how much to scale up the canvas based on the resolution.
-        // GK3 UI was authored at 640x480 resolution - that's the lowest supported playable window size.
-        // But whenever the height doubles, we want to also double the scale factor.
-        const Vector2 kReferenceResolution(640.0f, 480.0f);
-        scaleFactor = Math::Max(Window::GetHeight() / kReferenceResolution.y, 1.0f);
+        // Also only autoscale if above the minimum window height set globally.
+        float minimumScaleUIHeight = gSaveManager.GetPrefs()->GetInt(PREFS_UI, PREFS_SCALE_UI_MINIMUM_HEIGHT, 1280);
+        if(Window::GetHeight() >= minimumScaleUIHeight)
+        {
+            // Calculate how much to scale up the canvas based on the resolution.
+            // GK3 UI was authored at 640x480 resolution - that's the lowest supported playable window size.
+            // The amount to scale up is how much taller our resolution is than 480 pixels.
+            const float kReferenceHeight = 480.0f;
+            scaleFactor = Math::Max(Window::GetHeight() / kReferenceHeight, 1.0f);
 
-        // To avoid artifacts from rendering UI images/glyphs across pixel boundaries, we only want integer scale factors.
-        // This can be a bit limiting, but I haven't found another way to avoid artifacting yet.
-        scaleFactor = Math::Floor(scaleFactor);
+            // To avoid artifacts from rendering UI images/glyphs across pixel boundaries, we only want integer scale factors.
+            // This can be a bit limiting, but I haven't found another way to avoid artifacting yet.
+            if(gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_PIXEL_PERFECT_UI_SCALING, true))
+            {
+                scaleFactor = Math::Floor(scaleFactor);
+            }
 
-        // Add any additional offset that was manually specified for this canvas.
-        scaleFactor = Math::Max(scaleFactor + mAutoScaleOffset, 1.0f);
+            // Add any additional offset that was manually specified for this canvas.
+            scaleFactor = Math::Max(scaleFactor + mAutoScaleBias, 1.0f);
+        }
     }
     return scaleFactor;
 }

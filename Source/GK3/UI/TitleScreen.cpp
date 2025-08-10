@@ -146,7 +146,7 @@ void TitleScreen::RefreshUIScaling()
     // But this logic breaks down after ~1080p (in fact, it was only ever defined up to 1024x768).
     // After that, we should fall back on the auto scaling logic.
     bool useOriginalUIScalingLogic = gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_USE_ORIGINAL_UI_SCALING_LOGIC, true);
-    if(useOriginalUIScalingLogic && Window::GetHeight() <= 1080.0f)
+    if(useOriginalUIScalingLogic && Window::GetHeight() <= gSaveManager.GetPrefs()->GetInt(PREFS_UI, PREFS_SCALE_UI_MINIMUM_HEIGHT, 1280))
     {
         // Turn off canvas autoscaling. This sets canvas scale to 1, and width/height equal to window width/height.
         mCanvas->SetAutoScale(false);
