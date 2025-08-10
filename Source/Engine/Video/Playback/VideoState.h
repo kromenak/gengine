@@ -105,9 +105,9 @@ private:
     SDL_Thread* mReadThread = nullptr;
 
     // Whether to sync to audio, video, or an external clock.
-    // Syncing to external *seems* to give much better results (at least for logo vids).
-    // For long cutscenes with lip-syncing...we'll have to see.
-    int mSyncType = AV_SYNC_EXTERNAL_CLOCK; //AV_SYNC_AUDIO_MASTER;
+    // Syncing to video seems bad - it can cause audio to delay or pitch up/down weirdly.
+    // Syncing to video or external both seem to work, but syncing to audio seems to give slightly better results.
+    int mSyncType = AV_SYNC_AUDIO_MASTER;
 
     // If true, playback is aborted.
     bool mAborted = false;

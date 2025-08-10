@@ -5,43 +5,47 @@
 //
 #include "VideoState.h"
 
-static int GetVideoFrame(VideoState *is, AVFrame *frame)
+namespace
 {
-    // Decode a frame.
-    // Returns 1 if frame was decoded, 0 if no decoded frame, -1 on abort.
-    int got_picture = is->videoDecoder.DecodeFrame(frame, nullptr);
-
-    // Looks like aborting.
-    if(got_picture < 0)
+    int GetVideoFrame(VideoState* is, AVFrame* frame)
     {
-        return -1;
-    }
+        // Decode a frame.
+        // Returns 1 if frame was decoded, 0 if no decoded frame, -1 on abort.
+        int gotVideoFrame = is->videoDecoder.DecodeFrame(frame, nullptr);
 
-    // We got a picture, but we might purposely ignore it for sync purposes!
-    if(got_picture > 0)
-    {
-        // If not sync'd to video (so, sync'd to audio or external)...
-        if(is->GetMasterSyncType() != AV_SYNC_VIDEO_MASTER)
+        // Looks like aborting.
+        if(gotVideoFrame < 0)
         {
-            if(frame->pts != AV_NOPTS_VALUE)
+            return -1;
+        }
+
+        // We got a picture, but we might purposely ignore it for sync purposes!
+        if(gotVideoFrame > 0)
+        {
+            // If not synced to video, we need to check if this frame is needed based on the audio or external clocks.
+            // We also need a valid pts value to do timestamp calculations - if not present, we can't tell whether we would want to drop this frame.
+            if(is->GetMasterSyncType() != AV_SYNC_VIDEO_MASTER && frame->pts != AV_NOPTS_VALUE)
             {
-                // Under certain conditions, we might ignore the incoming picture
-                // if too far out of sync with the master clock.
+                // Calculate how far ahead or behind this video frame is compared to the master clock.
+                // Positive = this frame is in the future, negative = this frame is in the past.
                 double dpts = av_q2d(is->videoStream->time_base) * frame->pts;
                 double diff = dpts - is->GetMasterClock();
+
+                // If the diff is within the sync threshold AND this frame is in the past, we actually don't need it!
+                // The time to display this frame has passed, so we can drop it.
                 if(!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
-                    //diff - is->frame_last_filter_delay < 0 &&
-                    is->videoDecoder.GetSerial() == is->videoClock.GetSerial() &&
-                    is->videoPackets.GetPacketCount() > 0)
+                   diff < 0 &&
+                   is->videoDecoder.GetSerial() == is->videoClock.GetSerial() &&
+                   is->videoPackets.GetPacketCount() > 0)
                 {
                     //is->frame_drops_early++; // useful for debug output
                     av_frame_unref(frame);
-                    got_picture = 0;
+                    gotVideoFrame = 0;
                 }
             }
         }
+        return gotVideoFrame;
     }
-    return got_picture;
 }
 
 int DecodeVideoThread(void* arg)
