@@ -406,8 +406,8 @@ elseif(APPLE)
             POST_BUILD
             COMMAND mkdir -p "${MAC_APP_FRAMEWORKS}"
             COMMAND cp -R "${PLAT_SOURCE_DIR}/Libraries/SDL/SDL2.framework" "${MAC_APP_FRAMEWORKS}"
-            COMMAND ${CMAKE_COMMAND} -E create_symlink "${PLAT_SOURCE_DIR}/Assets" "${MAC_APP_CONTENTS}/Resources"
-            COMMAND ${CMAKE_COMMAND} -E create_symlink "${PLAT_SOURCE_DIR}/Data" "${MAC_APP_CONTENTS}/Resources"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink "${PLAT_SOURCE_DIR}/Assets" "${MAC_APP_CONTENTS}/Resources/Assets"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink "${PLAT_SOURCE_DIR}/Data" "${MAC_APP_CONTENTS}/Resources/Data"
         )
     endif()
 else() # Linux
