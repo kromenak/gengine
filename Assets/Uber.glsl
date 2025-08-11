@@ -2,7 +2,7 @@
 // Benefits of this approach: fewer shader files to wrangle, less shader code duplication.
 // Downsides to this approach: can be harder to maintain interleaving shader features!
 
-#if VERTEX_SHADER
+#ifdef VERTEX_SHADER
     // INPUT VERTEX DATA
     // If a mesh doesn't include certain vertex data, defaults are used.
     in vec3 vPos;       // Required
@@ -16,17 +16,17 @@
     out vec3 fNormal;
     out vec2 fUV1;
 
-    #if FEATURE_LIGHTING
+    #ifdef FEATURE_LIGHTING
     // Calculated direction from this vertex to the light source, in local space.
     out vec3 fLightDir;
     #endif
 
-    #if FEATURE_LIGHTMAPS
+    #ifdef FEATURE_LIGHTMAPS
     // Secondary UV for sampling a lightmap texture.
     out vec2 fUV2;
     #endif
 
-    #if FEATURE_SKYBOX
+    #ifdef FEATURE_SKYBOX
     // A direction vector "UV" used to sample the skybox cubemap in fragment shader.
     out vec3 fCubemapUV;
     #endif
@@ -37,7 +37,7 @@
     uniform mat4 gObjectToWorldMatrix;
     uniform mat4 gWorldToProjMatrix;
 
-    #if FEATURE_LIGHTING
+    #ifdef FEATURE_LIGHTING
     // The position of the light source, in world space.
     uniform vec4 uLightPos = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -46,12 +46,12 @@
     uniform mat4 gWorldToObjectMatrix;
     #endif
 
-    #if FEATURE_LIGHTMAPS
+    #ifdef FEATURE_LIGHTMAPS
     // Scale (xy) and offset (zw) from diffuse UVs to lightmap UVs.
     uniform vec4 uLightmapScaleOffset;
     #endif
 
-    #if FEATURE_DRAW_POINTS_AS_CIRCLES
+    #ifdef FEATURE_DRAW_POINTS_AS_CIRCLES
     // When drawing point primitives, the size of a point in pixels.
     uniform float gPointSize = 6.0f;
     #endif
@@ -68,18 +68,18 @@
         fNormal = vNormal;
         fUV1 = vUV1;
 
-        #if FEATURE_SKYBOX
+        #ifdef FEATURE_SKYBOX
         // For skybox, sample cubemap with dir vector from origin to vertex.
         // We can use vPos directly since (vPos - (0,0,0) = vPos).
         fCubemapUV = vPos;
         #endif
 
-        #if FEATURE_LIGHTMAPS
+        #ifdef FEATURE_LIGHTMAPS
         // Calculate light map UV by applying offset/scale to texture UV.
         fUV2 = (vUV1 + uLightmapScaleOffset.zw) * uLightmapScaleOffset.xy;
         #endif
 
-        #if FEATURE_LIGHTING
+        #ifdef FEATURE_LIGHTING
         // Convert light position to object space, pass to pixel shader.
         mat4 worldToObjectMatrix = gWorldToObjectMatrix;
         vec4 localLightPos = worldToObjectMatrix * uLightPos;
@@ -89,27 +89,26 @@
         fLightDir = (localLightPos - vec4(vPos, 1.0f)).xyz;
         #endif
 
-        #if FEATURE_DRAW_POINTS_AS_CIRCLES
+        #ifdef FEATURE_DRAW_POINTS_AS_CIRCLES
         // Set the built-in variable that tells OpenGL the pixel size of the point.
         gl_PointSize = gPointSize;
         #endif
     }
-
-#elif FRAGMENT_SHADER
+#elif defined(FRAGMENT_SHADER)
     // INPUTS (should match vertex shader outputs above)
     in vec4 fColor;
     in vec3 fNormal;
     in vec2 fUV1;
 
-    #if FEATURE_LIGHTING
+    #ifdef FEATURE_LIGHTING
     in vec3 fLightDir;
     #endif
 
-    #if FEATURE_LIGHTMAPS
+    #ifdef FEATURE_LIGHTMAPS
     in vec2 fUV2;
     #endif
 
-    #if FEATURE_SKYBOX
+    #ifdef FEATURE_SKYBOX
     in vec3 fCubemapUV;
     #endif
 
@@ -129,12 +128,12 @@
     uniform vec4 gDiscardColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
     uniform float gDiscardColorTolerance = 0.1f;
 
-    #if FEATURE_TEXTURING
+    #ifdef FEATURE_TEXTURING
     // Samples a diffuse texture.
     uniform sampler2D uDiffuse;
     #endif
 
-    #if FEATURE_LIGHTING
+    #ifdef FEATURE_LIGHTING
     // Base level of lighting in the scene.
     // Even if no light source is touching the surface, it will be this bright.
     uniform vec4 uAmbientColor = vec4(0.06f, 0.08f, 0.06f, 1.0f);
@@ -143,7 +142,7 @@
     uniform vec4 uLightColor = vec4(0.6f, 0.6f, 0.6f, 1.0f);
     #endif
 
-    #if FEATURE_LIGHTMAPS
+    #ifdef FEATURE_LIGHTMAPS
     // The lightmap texture that is overlaid on (multiplied into) the color texture.
     uniform sampler2D uLightmap;
 
@@ -155,11 +154,11 @@
     uniform float uLightmapMultiplier = 2.0f;
     #endif
 
-    #if FEATURE_SKYBOX
+    #ifdef FEATURE_SKYBOX
     uniform samplerCube uCubeMap;
     #endif
 
-    #if FEATURE_COLOR_REPLACE
+    #ifdef FEATURE_COLOR_REPLACE
     uniform vec4 uReplaceColor;
     #endif
 
@@ -167,11 +166,11 @@
     {
         // If using textures, sample the texture and tint by uColor uniform.
         // If not using textures, use the input interpolated color from the vertex shader.
-        #if FEATURE_SKYBOX
+        #ifdef FEATURE_SKYBOX
         vec4 texel = texture(uCubeMap, fCubemapUV);
-        #elif FEATURE_COLOR_REPLACE
+        #elif defined(FEATURE_COLOR_REPLACE)
         vec4 texel = texture(uDiffuse, fUV1);
-        #elif FEATURE_TEXTURING
+        #elif defined(FEATURE_TEXTURING)
         vec4 texel = texture(uDiffuse, fUV1) * uColor;
         #else
         vec4 texel = fColor * uColor;
@@ -180,7 +179,7 @@
         // Check for discard due to alpha test or discard color.
         if(texel.a < gAlphaTest || distance(texel.rgb, gDiscardColor.rgb) < gDiscardColorTolerance) { discard; }
 
-        #if FEATURE_DRAW_POINTS_AS_CIRCLES
+        #ifdef FEATURE_DRAW_POINTS_AS_CIRCLES
         // By default, points render as squares.
         // When rendering points, "gl_PointCoord" varies from 0.0-1.0 from bottom-left to top-right of the point.
         // We can do a bit of math to discard some pixels and make it look like a circle.
@@ -196,7 +195,7 @@
         #endif
 
         // Apply lighting if desired.
-        #if FEATURE_LIGHTING
+        #ifdef FEATURE_LIGHTING
         // Normal must be renormalized - interpolation from vertex shader may have changed length.
         vec3 normalDir = normalize(fNormal);
 
@@ -211,7 +210,7 @@
         texel = allLightColors * texel;
         #endif
 
-        #if FEATURE_LIGHTMAPS
+        #ifdef FEATURE_LIGHTMAPS
         // Show/hide diffuse texture. May want to show just lightmap texture for debugging.
         texel = (uDiffuseVisible * texel) + ((1.0f - uDiffuseVisible) * vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -223,7 +222,7 @@
         texel = texel * lightmapTexel;
         #endif
 
-        #if FEATURE_COLOR_REPLACE
+        #ifdef FEATURE_COLOR_REPLACE
         // If the texel's RGB matches the replace color's RGB, replace with main color.
         // Otherwise, just use texel color.
         if(texel.rgb == uReplaceColor.rgb)
