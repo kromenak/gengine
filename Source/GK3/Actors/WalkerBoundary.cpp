@@ -2,10 +2,12 @@
 
 #include <queue>
 
+#include "Actor.h"
 #include "Debug.h"
 #include "GMath.h"
 #include "ResizableQueue.h"
 #include "Texture.h"
+#include "Walker.h"
 
 namespace
 {
@@ -116,38 +118,46 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
                 while(true)
                 {
                     // If any up/down/left/right has a lower palette index, go there!
-                    if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y) < index)
+                    if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y) < index &&
+                       IsTexturePosWalkable(Vector2(path[i].x + 1, path[i].y)))
                     {
                         path[i].x += 1;
                     }
-                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y) < index &&
+                            IsTexturePosWalkable(Vector2(path[i].x - 1, path[i].y)))
                     {
                         path[i].x -= 1;
                     }
-                    else if(mTexture->GetPixelPaletteIndex(path[i].x, path[i].y + 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x, path[i].y + 1) < index &&
+                            IsTexturePosWalkable(Vector2(path[i].x, path[i].y + 1)))
                     {
                         path[i].y += 1;
                     }
-                    else if(mTexture->GetPixelPaletteIndex(path[i].x, path[i].y - 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x, path[i].y - 1) < index &&
+                            IsTexturePosWalkable(Vector2(path[i].x, path[i].y - 1)))
                     {
                         path[i].y -= 1;
                     }
-                    else if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y + 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y + 1) < index &&
+                            IsTexturePosWalkable(Vector2(path[i].x + 1, path[i].y + 1)))
                     {
                         path[i].x += 1;
                         path[i].y += 1;
                     }
-                    else if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y - 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x + 1, path[i].y - 1) < index &&
+                            IsTexturePosWalkable(Vector2(path[i].x + 1, path[i].y - 1)))
                     {
                         path[i].x += 1;
                         path[i].y -= 1;
                     }
-                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y - 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y - 1) < index &&
+                            IsTexturePosWalkable(Vector2(path[i].x - 1, path[i].y - 1)))
                     {
                         path[i].x -= 1;
                         path[i].y -= 1;
                     }
-                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y + 1) < index)
+                    else if(mTexture->GetPixelPaletteIndex(path[i].x - 1, path[i].y + 1) < index &&
+                            IsTexturePosWalkable(Vector2(path[i].x - 1, path[i].y + 1)))
                     {
                         path[i].x -= 1;
                         path[i].y += 1;
@@ -313,13 +323,34 @@ void WalkerBoundary::ClearUnwalkableRect(const std::string& name)
     }
 }
 
-void WalkerBoundary::DrawUnwalkableRects()
+void WalkerBoundary::DrawUnwalkableAreas()
 {
+    // Draw visualization of rectangular areas that will be pathed around.
     for(auto& entry : mUnwalkableRects)
     {
         Vector3 worldMin = TexturePosToWorldPos(entry.second.GetMin());
         Vector3 worldMax = TexturePosToWorldPos(entry.second.GetMax());
         Debug::DrawRectXZ(Rect(Vector2(worldMin.x, worldMin.z), Vector2(worldMax.x, worldMax.z)), 15.0f, Color32::Orange);
+    }
+
+    // Draw visualizations of walkers who will be pathed around.
+    for(Walker* walker : mWalkers)
+    {
+        Debug::DrawSphere(walker->GetOwner()->GetPosition(), 10.0f, Color32::Orange);
+    }
+}
+
+void WalkerBoundary::AddWalker(Walker* walker)
+{
+    mWalkers.push_back(walker);
+}
+
+void WalkerBoundary::RemoveWalker(Walker * walker)
+{
+    auto it = std::find(mWalkers.begin(), mWalkers.end(), walker);
+    if(it != mWalkers.end())
+    {
+        mWalkers.erase(it);
     }
 }
 
@@ -341,6 +372,25 @@ bool WalkerBoundary::IsTexturePosWalkable(const Vector2& texturePos) const
     for(auto& unwalkableRect : mUnwalkableRects)
     {
         if(unwalkableRect.second.Contains(texturePos))
+        {
+            return false;
+        }
+    }
+
+    // Also unwalkable if this position is too close to a walker in the scene.
+    Vector3 worldPos = TexturePosToWorldPos(texturePos);
+    for(Walker* walker : mWalkers)
+    {
+        // Make y-pos equal so that we only consider distance on the x/z plane.
+        Vector3 walkerPos = walker->GetOwner()->GetPosition();
+        walkerPos.y = worldPos.y;
+        float distSq = (worldPos - walkerPos).GetLengthSq();
+
+        // Each walker's radius is about 10 units. There are outliers (like Chicken or Demon), but this mostly works.
+        // BUT we need to factor in the radius of this walker AND myself - so we actually use 20 here!
+        //TODO: If the radius differed per walker, we'd want to query the walkers and sum the radii.
+        const float kCombinedRadiiSq = 20.0f * 20.0f;
+        if(distSq <= kCombinedRadiiSq)
         {
             return false;
         }

@@ -81,7 +81,7 @@ void SceneConstruction::Render()
     // Render unwalkable rects when the walker boundary visualization is active.
     if(mWalkerBoundaryActor != nullptr && mWalkerBoundaryActor->IsActive())
     {
-        mSceneData->GetWalkerBoundary()->DrawUnwalkableRects();
+        mSceneData->GetWalkerBoundary()->DrawUnwalkableAreas();
     }
 
     // Render regions if desired.

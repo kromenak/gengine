@@ -29,8 +29,9 @@ class Walker : public Component
     TYPEINFO_SUB(Walker, Component);
 public:
     Walker(Actor* owner);
+    ~Walker();
 
-    void SetWalkerBoundary(WalkerBoundary* walkerBoundary) { mWalkerBoundary = walkerBoundary; }
+    void SetWalkerBoundary(WalkerBoundary* walkerBoundary);
     void SetCharacterConfig(const CharacterConfig& characterConfig);
     void SetWalkAnims(Animation* startAnim, Animation* loopAnim,
                       Animation* startTurnLeftAnim, Animation* startTurnRightAnim);
@@ -53,6 +54,8 @@ public:
     bool IsWalkAnimation(VertexAnimation* vertexAnim) const;
 
 protected:
+    void OnEnable() override;
+    void OnDisable() override;
     void OnUpdate(float deltaTime) override;
 
 private:

@@ -37,6 +37,30 @@ Walker::Walker(Actor* owner) : Component(owner),
 
 }
 
+Walker::~Walker()
+{
+    // To remove this walker from the walker boundary.
+    SetWalkerBoundary(nullptr);
+}
+
+void Walker::SetWalkerBoundary(WalkerBoundary* walkerBoundary)
+{
+    // Remove from old walker boundary.
+    if(mWalkerBoundary != nullptr)
+    {
+        mWalkerBoundary->RemoveWalker(this);
+    }
+
+    // Change walker boundary.
+    mWalkerBoundary = walkerBoundary;
+
+    // Add to new walker boundary.
+    if(mWalkerBoundary != nullptr)
+    {
+        mWalkerBoundary->AddWalker(this);
+    }
+}
+
 void Walker::SetCharacterConfig(const CharacterConfig& characterConfig)
 {
     mCharConfig = &characterConfig;
@@ -321,6 +345,24 @@ bool Walker::IsWalkAnimation(VertexAnimation* vertexAnim) const
     return false;
 }
 
+void Walker::OnEnable()
+{
+    // When enabled, add to walker boundary so pathfinding goes around us.
+    if(mWalkerBoundary != nullptr)
+    {
+        mWalkerBoundary->AddWalker(this);
+    }
+}
+
+void Walker::OnDisable()
+{
+    // When disabled, remove from walker boundary so we're no longer pathed around.
+    if(mWalkerBoundary != nullptr)
+    {
+        mWalkerBoundary->RemoveWalker(this);
+    }
+}
+
 void Walker::OnUpdate(float deltaTime)
 {
     // Debug draw the path if desired.
@@ -535,7 +577,15 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
         Vector3 endPos = walkPosition;
         if(mWalkerBoundary != nullptr)
         {
+            // Remove ourselves from the walker boundary temporarily so we don't try to path around ourselves.
+            // This seems like a HACK, but it might be a fine solution. Alternative is to pass "this" as an argument to FindPath.
+            mWalkerBoundary->RemoveWalker(this);
+
+            // Find the path.
             mWalkerBoundary->FindPath(startPos, endPos, mPath);
+
+            // Add ourselves back to the walker boundary.
+            mWalkerBoundary->AddWalker(this);
         }
 
         // Whether a path was found or not actually isn't that important here - even when a path isn't found, mPath contains a "best effort" to get close to the goal.

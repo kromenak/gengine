@@ -181,7 +181,6 @@ bool GEngine::Initialize()
     Loader::DoAfterLoading([]() {
         gGameProgress.SetTimeblock(Timeblock("110A"));
         gSceneManager.LoadScene("R25");
-        //gGK3UI.ShowSaveProgressBar();
     });
     #endif
 

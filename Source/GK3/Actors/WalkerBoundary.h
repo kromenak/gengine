@@ -13,6 +13,7 @@
 #include "Vector3.h"
 
 class Texture;
+class Walker;
 
 class WalkerBoundary
 {
@@ -34,7 +35,10 @@ public:
 
     void SetUnwalkableRect(const std::string& name, const Rect& worldRect);
     void ClearUnwalkableRect(const std::string& name);
-    void DrawUnwalkableRects();
+    void DrawUnwalkableAreas();
+
+    void AddWalker(Walker* walker);
+    void RemoveWalker(Walker* walker);
 
 private:
     // The texture provides vital data about walkable areas.
@@ -54,6 +58,10 @@ private:
 
     // Rectangular areas that are blocked and unwalkable.
     std::vector<std::pair<std::string, Rect>> mUnwalkableRects;
+
+    // Walkers to be considerate of when calculating paths.
+    // In a scene with other walkers, we want to calculate paths that don't walk through other walkers.
+    std::vector<Walker*> mWalkers;
 
     // The pathfinding grids are quite dense, and we can save some time by skipping over some nodes in the grid.
     // This value starts higher, but is cut in half when we can't find a path.
