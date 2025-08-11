@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "Loader.h"
 
 #include "ThreadPool.h"
