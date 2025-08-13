@@ -1,5 +1,6 @@
 #include "GameCamera.h"
 
+#include "ActionBar.h"
 #include "ActionManager.h"
 #include "AudioListener.h"
 #include "Camera.h"
@@ -219,9 +220,9 @@ void GameCamera::OnUpdate(float deltaTime)
     {
         if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
         {
-            if(gActionManager.IsActionBarShowing())
+            if(gActionManager.IsActionBarShowing() && gActionManager.GetActionBar()->Dismiss())
             {
-                gActionManager.HideActionBar(true);
+                // Do nothing in this case - we just dismissed the action bar.
             }
             else if(mOptionBar->CanShow())
             {
@@ -271,13 +272,26 @@ void GameCamera::OnUpdate(float deltaTime)
 
             // For debugging...
             std::cout << "Pos: " << GetPosition() << ", Heading: " << Heading::FromQuaternion(GetRotation()) << std::endl;
-
         }
 
         // Pressing escape acts as a "skip" or "cancel" action, depending on current state of the game.
         if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
         {
-            gSceneManager.GetScene()->SkipCurrentAction();
+            // If the action bar is showing, this will cancel the action bar.
+            // Or if the option bar is showing, this will hide the option bar.
+            // Otherwise, it will skip the current action.
+            if(gActionManager.IsActionBarShowing() && gActionManager.GetActionBar()->Dismiss())
+            {
+                // Do nothing in this case - we just dismissed the action bar.
+            }
+            else if(mOptionBar->IsActive())
+            {
+                mOptionBar->Hide();
+            }
+            else
+            {
+                gSceneManager.GetScene()->SkipCurrentAction();
+            }
         }
     }
 }

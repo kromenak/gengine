@@ -335,13 +335,26 @@ void ActionBar::RemoveVerb(const std::string& verb)
     }
 }
 
+bool ActionBar::Dismiss()
+{
+    // Dismiss is similar to hide/cancel, but it's disallowed in some cases.
+    if(mAllowDismiss)
+    {
+        OnCancelButtonPressed();
+        return true;
+    }
+    return false;
+}
+
 void ActionBar::OnUpdate(float deltaTime)
 {
     if(IsShowing())
     {
-        if(mAllowDismiss && gGK3UI.IsAnyKeyPressedOutsideTextInputAndConsole())
+        // Any key press causes the action bar to be dismissed.
+        // ESC as well, BUT that scenario is handled in GameCamera, since the logic is more complex there.
+        if(gGK3UI.IsAnyKeyPressedOutsideTextInputAndConsole() && !gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
         {
-            OnCancelButtonPressed();
+            Dismiss();
         }
     }
 }

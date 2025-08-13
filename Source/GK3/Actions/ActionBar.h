@@ -42,6 +42,7 @@ public:
 
     void SetAllowCancel(bool allowCancel) { mAllowCancel = allowCancel; }
     void SetAllowDismiss(bool allowDismiss) { mAllowDismiss = allowDismiss; }
+    bool Dismiss();
 
 protected:
     void OnUpdate(float deltaTime) override;
