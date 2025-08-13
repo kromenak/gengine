@@ -9,6 +9,7 @@
 
 class Actor;
 class AABB;
+class Frustum;
 class Line;
 class LineSegment;
 class Plane;
@@ -52,6 +53,7 @@ namespace Intersect
 
     // Plane
     bool TestPlanePlane(const Plane& p1, const Plane& p2);
+    bool TestPlaneLineSegment(const Plane& p, const LineSegment& ls, float& outLineSegmentT);
 
     // Ray
     bool TestRayAABB(const Ray& r, const AABB& aabb, float& outRayT);
@@ -69,6 +71,9 @@ namespace Intersect
 
     // Line
     bool LineLine2D(const Vector2& line0P0, const Vector2& line0P1, const Vector2& line1P0, const Vector2& line1P1, float& outLine0T);
+
+    // Frustum
+    bool TestFrustumLineSegment(const Frustum& f, const LineSegment& ls);
 }
 
 //

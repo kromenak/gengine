@@ -35,7 +35,6 @@ bool Frustum::ContainsPoint(const Vector3& point) const
 {
     // All frustum planes have their normals pointing inwards.
     // Therefore, a point is contained within the frustum if signed distance from ALL planes is positive.
-    //TODO: Should zero be included? Minor edge case, maybe not important.
     return near.GetSignedDistance(point) >= 0.0f &&
         far.GetSignedDistance(point) >= 0.0f &&
         left.GetSignedDistance(point) >= 0.0f &&

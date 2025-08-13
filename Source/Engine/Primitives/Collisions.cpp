@@ -2,8 +2,10 @@
 
 #include "AABB.h"
 #include "Debug.h"
+#include "Frustum.h"
 #include "GMath.h"
 #include "Line.h"
+#include "LineSegment.h"
 #include "Plane.h"
 #include "Ray.h"
 #include "Sphere.h"
@@ -142,6 +144,32 @@ bool Intersect::TestPlanePlane(const Plane& p1, const Plane& p2)
     return !Math::IsZero(lineDir.GetLengthSq());
 }
 
+bool Intersect::TestPlaneLineSegment(const Plane& p, const LineSegment& ls, float& outLineSegmentT)
+{
+    // If you view a plane as a 4D vector, you can take the dot product between it and a point or vector.
+    // For a point, you treat the "w" as 1. For a vector, you treat it as zero.
+    // When using a point (w = 1), the dot product equation is the same as calculating the "signed distance" between a point and plane (see Plane::GetSignedDistance).
+
+    // ANYWAY, if the signed distance is zero, it means the point is ON the plane!
+    // So to test intersection, we need to find where "Plane dot L(t) = 0".
+    // If you expand the plane & line segment equations and rearrange to isolate t, you get:
+    //       "t = -((P dot start) / (P dot (end - start))"
+
+    // Notice that the plane dot product is used twice here, but in the numerator its against a point (w=1). In the denominator, against a vector (w=0).
+
+    // First, calculate the numerator. This is just the dot product of the normal and start point, with distance added in (because w = 1).
+    float numerator = Vector3::Dot(p.normal, ls.start) + p.distance;
+
+    // The denominator uses a vector from start to end points. w = 0 here, so we don't add the distance.
+    float denominator = Vector3::Dot(p.normal, ls.end - ls.start);
+
+    // Final calculation gives us the "t" value. Can plug this into the line segment equation to get the exact point of intersection.
+    outLineSegmentT = -(numerator / denominator);
+
+    // An intersection only occurs if "t" is 0 to 1.
+    return outLineSegmentT >= 0.0f && outLineSegmentT <= 1.0f;
+}
+
 bool Intersect::TestRayAABB(const Ray& r, const AABB& aabb, float& outRayT)
 {
     Vector3 min = aabb.GetMin();
@@ -235,6 +263,32 @@ bool Intersect::LineLine2D(const Vector2& line0P0, const Vector2& line0P1, const
     dist /= denom;
     outLine0T = dist;
     return true;
+}
+
+bool Intersect::TestFrustumLineSegment(const Frustum& f, const LineSegment& ls)
+{
+    // If the frustum actually contains either the start or end point, the line segment must intersect the frustum.
+    // If the line segment is wholly contained within the frustum, we also consider that an intersection (controversial perhaps).
+    if(f.ContainsPoint(ls.start) || f.ContainsPoint(ls.end))
+    {
+        return true;
+    }
+
+    // Otherwise, both start/end points may be outside the frustrum BUT the line segment can still pass through the frustum.
+    // To detect this, we need the line segment to intersect with at least one plane AND the intersection point must be inside the frustum.
+    float t;
+    if((Intersect::TestPlaneLineSegment(f.top, ls, t) && f.ContainsPoint(ls.GetPoint(t))) ||
+       (Intersect::TestPlaneLineSegment(f.bottom, ls, t) && f.ContainsPoint(ls.GetPoint(t))) ||
+       (Intersect::TestPlaneLineSegment(f.left, ls, t) && f.ContainsPoint(ls.GetPoint(t))) ||
+       (Intersect::TestPlaneLineSegment(f.right, ls, t) && f.ContainsPoint(ls.GetPoint(t))) ||
+       (Intersect::TestPlaneLineSegment(f.near, ls, t) && f.ContainsPoint(ls.GetPoint(t))) ||
+       (Intersect::TestPlaneLineSegment(f.far, ls, t) && f.ContainsPoint(ls.GetPoint(t))))
+    {
+        return true;
+    }
+
+    // No intersection detected.
+    return false;
 }
 
 bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, const Vector3& sphereMoveOffset, float& outSphereT, Vector3& outCollisionNormal)

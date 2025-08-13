@@ -968,14 +968,26 @@ bool Walker::SkipPathNodesOutsideFrustum()
     int firstInFrustumIndex = -1;
     for(int i = mPath.size() - 1; i >= 0; --i)
     {
-        // In addition to the path node itself, we also need to check the expected HEAD position for the character.
-        // Even if a node is off-screen, if the character's head at that position IS on-screen, we can't skip to it.
-        Vector3 headPosAtNode = mPath[i] + Vector3::UnitY * mCharConfig->walkerHeight;
-        if(frustum.ContainsPoint(mPath[i]) || frustum.ContainsPoint(headPosAtNode))
+        // We must also test the head position - if we just tested the path position, you might have the the shoes just offscreen, but the entire body in the frame!
+        Vector3 headPos = mPath[i] + Vector3::UnitY * (mCharConfig->walkerHeight + mCharConfig->shoeThickness);
+
+        // Furthermore, we must check all points between path and head pos (a line segment test).
+        // There are times when a walk pos may be close to the camera, and the floor position and head position are both off-camera.
+        // But the body still appears on the camera.
+        LineSegment ls(mPath[i], headPos);
+        if(Intersect::TestFrustumLineSegment(frustum, ls))
         {
             firstInFrustumIndex = i;
             break;
         }
+
+        //TODO: Potentially another way to do this is to position the AABB at each path node and see if the AABB intersects the frustum.
+        //TODO: Could give better results?
+        //AABB aabb = mGKOwner->GetAABB();
+        //Vector3 extents = aabb.GetExtents();
+        //Vector3 center = mPath[i] + Vector3::UnitY * extents.y;
+        //AABB pathAabb = AABB::FromCenterAndExtents(center, extents);
+        //check aabb intersects frustrum...
     }
     //printf("First path node in frustum is %d\n", firstInFrustumIndex);
 
@@ -1004,7 +1016,17 @@ bool Walker::SkipPathNodesOutsideFrustum()
     }
 
     // Calculate skip heading.
-    Heading warpHeading = Heading::FromDirection(dirFromLastPoppedNode);
+    // If we're skipping right to the end, and there's a "turn to face" op, use the turn to face direction.
+    // Otherwise, use the calculated direction from earlier.
+    Heading warpHeading = Heading::None;
+    if(firstInFrustumIndex == -1 && mWalkActions.front() == WalkOp::TurnToFace)
+    {
+        warpHeading = Heading::FromDirection(mTurnToFaceDir);
+    }
+    else
+    {
+        warpHeading = Heading::FromDirection(dirFromLastPoppedNode);
+    }
 
     // Log that we're skipping to the view.
     std::string log1 = StringUtil::Format("%s SkipToView from Point(%.1f, %.1f)", mGKOwner->GetName().c_str(), mGKOwner->GetPosition().x, mGKOwner->GetPosition().z);
