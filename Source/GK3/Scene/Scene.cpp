@@ -798,10 +798,15 @@ void Scene::SkipCurrentAction()
         return;
     }
 
-    // If no action, but ego is walking, this can skip the walk.
-    if(mEgo != nullptr && mEgo->GetWalker()->IsWalking())
+    // If no action, do walk skip. This skips all walking actors (ego or otherwise) to the end of their current walk.
+    // Side note: for the longest time, I thought this only skips Ego's walk. But it actually skips ALL walker walks!
+    // Even if Ego is not walking, and other characters are, their walks get skipped.
+    for(GKActor* actor : mActors)
     {
-        mEgo->GetWalker()->SkipToEnd();
+        if(actor->GetWalker()->IsWalking())
+        {
+            actor->GetWalker()->SkipToEnd();
+        }
     }
 }
 
