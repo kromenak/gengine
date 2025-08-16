@@ -452,6 +452,10 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
         StopFidget();
     }
 
+    //TODO: Not 100% sure about this, but makes sure actors stay grounded from time to time.
+    //TODO: This fixes Mosely getting embedded in ground when you approach blood pools at Devil's Armchair, and action skip, for example.
+    SnapToFloor();
+
     // Set anim stop callback.
     animParams.stopCallback = std::bind(&GKActor::OnVertexAnimationStop, this);
 
