@@ -206,9 +206,6 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
     // Warp actor to end of path.
     if(!mPath.empty())
     {
-        // Make sure front of path is at floor height.
-        mPath.front().y = gSceneManager.GetScene()->GetFloorY(mPath.front());
-
         // Start with sane defaults for warp position/heading.
         Vector3 warpPos = mPath.front();
         Vector3 warpDir;
@@ -229,41 +226,7 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
         // We should skip to a position along the path where the target becomes visible to us.
         if(mWalkToSeeTarget != nullptr)
         {
-            bool sawTargetAlongPath = false;
-            for(int i = mPath.size() - 1; i > 0; --i)
-            {
-                // Make sure path node is at floor height.
-                mPath[i].y = gSceneManager.GetScene()->GetFloorY(mPath[i]);
-
-                // See if the walk to see target would be in view if the character's head was roughly at this position.
-                Vector3 headPosAtNode = mPath[i] + Vector3::UnitY * mCharConfig->walkerHeight;
-                if(IsWalkToSeeTargetInView(headPosAtNode, warpDir))
-                {
-                    warpPos = mPath[i];
-                    sawTargetAlongPath = true;
-                    break;
-                }
-
-                // For better fidelity, also check a few spots along the path from this node to next node.
-                LineSegment ls(mPath[i], mPath[i - 1]);
-                for(float t = 0.0f; t < 1.0f; t += 0.25f)
-                {
-                    Vector3 pointAlongLine = ls.GetPoint(t);
-                    if(IsWalkToSeeTargetInView(pointAlongLine, warpDir))
-                    {
-                        warpPos = pointAlongLine;
-                        sawTargetAlongPath = true;
-                        break;
-                    }
-                }
-                if(sawTargetAlongPath) { break; }
-            }
-
-            // If we crawled the entire path and never saw the target, we need a fallback.
-            if(!sawTargetAlongPath)
-            {
-                warpDir = mWalkToSeeTarget->GetAABB().GetCenter() - mPath.front();
-            }
+            FindPathNodeWhereWalkToSeeIsInView(warpPos, warpDir);
 
             // "Walk to see" uses a final turn to face, so make sure that's set as well.
             mTurnToFaceDir = warpDir;
@@ -405,14 +368,7 @@ void Walker::OnUpdate(float deltaTime)
         if(currentWalkOp == WalkOp::FollowPathStart)
         {
             // Possible to finish path while still in the start phase, for very short paths.
-            Vector3 facingDir;
-            if(IsWalkToSeeTargetInView(facingDir))
-            {
-                // Make sure final action is a "turn to face" using this facing dir.
-                mTurnToFaceDir = facingDir;
-                PopAndNextAction();
-            }
-            else if(AdvancePath())
+            if(AdvancePath())
             {
                 // In this case, we want to skip all follow path bits and go right to "follow path end".
                 while(GetCurrentWalkOp() != WalkOp::FollowPathEnd)
@@ -430,14 +386,7 @@ void Walker::OnUpdate(float deltaTime)
         }
         else if(currentWalkOp == WalkOp::FollowPathStartTurnLeft || currentWalkOp == WalkOp::FollowPathStartTurnRight)
         {
-            Vector3 facingDir;
-            if(IsWalkToSeeTargetInView(facingDir))
-            {
-                // Make sure final action is a "turn to face" using this facing dir.
-                mTurnToFaceDir = facingDir;
-                PopAndNextAction();
-            }
-            else if(!AdvancePath())
+            if(!AdvancePath())
             {
                 // HACK: Wait until the "turn" anim has the character put its foot down before starting to turn to the target.
                 // About 0.66s seems to look OK, but could probably be finessed a bit.
@@ -451,15 +400,7 @@ void Walker::OnUpdate(float deltaTime)
         }
         else if(currentWalkOp == WalkOp::FollowPath)
         {
-            // If we have a "walk to see" target, check whether it has come into view.
-            Vector3 facingDir;
-            if(IsWalkToSeeTargetInView(facingDir))
-            {
-                // Make sure final action is a "turn to face" using this facing dir.
-                mTurnToFaceDir = facingDir;
-                PopAndNextAction();
-            }
-            else if(AdvancePath()) // Otherwise, see if finished following path.
+            if(AdvancePath())
             {
                 // If we get here and we have a "walk to see" target, it means we got to end of path without ever actully seeing the thing!
                 // So, force-set it to something reasonable!
@@ -609,26 +550,38 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
             }
         }
 
-        // Make sure first node is at the right y-pos.
-        // Also put all other nodes in the path at the same y-pos for starters.
-        UpdateNextNodesYPos();
+        // Make sure all path nodes are at floor height for their x/z position in the world.
         for(int i = 0; i < mPath.size(); ++i)
         {
-            mPath[i].y = mPath.back().y;
+            mPath[i].y = gSceneManager.GetScene()->GetFloorY(mPath[i]);
+        }
+
+        // If we have a walk to see target, pre-calculate where along the path we will see the target.
+        if(mWalkToSeeTarget != nullptr)
+        {
+            Vector3 walkToSeePathPos;
+            int pathIndex = FindPathNodeWhereWalkToSeeIsInView(walkToSeePathPos, mTurnToFaceDir);
+
+            // Stopping at the exact moment the target is seen can look unrealistic - like you barely see a sliver around the corner and you look at it.
+            // So, let's try going to the NEXT path node so we're hopefully wide out in the open when we see the thing.
+            if(pathIndex > 1)
+            {
+                --pathIndex;
+            }
+
+            // Since the object is in view at this path index, we intend to stop walking here.
+            // As a result, we can just erase all the nodes after this one.
+            mPath.erase(mPath.begin(), mPath.begin() + pathIndex);
         }
 
         // Attempt to shorten the path, if applicable, to speed up the walk process.
         bool shortened = SkipPathNodesOutsideFrustum();
-
-        // Again, since the skip path nodes code may have removed some nodes.
-        UpdateNextNodesYPos();
 
         // There's a small chance the path will be empty at this point - if so, we don't walk anywhere.
         if(!mPath.empty())
         {
             // Cache final position for later use.
             mFinalPosition = mPath.front();
-            mFinalPosition.y = gSceneManager.GetScene()->GetFloorY(mFinalPosition);
 
             /*
             Debug::DrawLine(mPath[0], mPath[0] + Vector3::UnitY * 100.0f, Color32::Orange, 10.0f);
@@ -651,7 +604,6 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
             {
                 // Need to decide which start anim to play.
                 WalkOp startOp = WalkOp::FollowPathStart;
-
                 bool hasTurnToStartAnims = mWalkStartTurnLeftAnim != nullptr && mWalkStartTurnRightAnim != nullptr;
                 if(hasTurnToStartAnims)
                 {
@@ -894,56 +846,120 @@ bool Walker::IsWalkToSeeTargetInView(const Vector3& headPosition, Vector3& outTu
     // Not in view if it doesn't exist!
     if(mWalkToSeeTarget == nullptr) { return false; }
 
-    //TODO: Could maybe cache this AABB to reduce per-frame computation.
+    // Get the target's AABB.
     AABB targetAABB = mWalkToSeeTarget->GetAABB();
-    //Debug::DrawAABB(targetAABB, Color32::Orange, 5.0f);
+    Vector3 center = targetAABB.GetCenter();
 
-    // To see if the target is in view, we need to cast some rays from our head to the target's AABB.
-    // But a single ray at the center of the AABB might not do the trick - we need to cast a few.
-    // For example, if the target is standing behind a desk, a ray to the center will likely not hit, but a ray to the top would.
-    Ray rays[] = {
-        Ray(headPosition, (targetAABB.GetMax() - headPosition).Normalize()),
-        Ray(headPosition, (targetAABB.GetCenter() - headPosition).Normalize()),
-        Ray(headPosition, (targetAABB.GetMin() - headPosition).Normalize())
-    };
-    for(Ray& ray : rays)
+    // Before getting into the more complex raycasting, let's say that you can't see something if it's too far away.
+    //TODO: This needs to be tested thoroughly, but ~200 units seems to work pretty well?
+    if((headPosition - center).GetLengthSq() > 200.0f * 200.0f)
     {
-        //Debug::DrawLine(headPosition, headPosition + ray.direction * 100.0f, Color32::Red);
+        return false;
+    }
 
-        // Cast a ray from our head (ignoring ourself).
+    // We need to see if the AABB is within the walker's view.
+    // To do this, we'll raycast from the walker's head to a few spots on the AABB and hope for the best.
+    // This isn't perfect, but trying to balance realistic behavior and performance.
+    Vector3 castPositions[] = {
+        Plane(Vector3::UnitY, targetAABB.GetMax()).GetClosestPoint(center),
+        Plane(Vector3::UnitX, targetAABB.GetMax()).GetClosestPoint(center),
+        Plane(Vector3::UnitZ, targetAABB.GetMax()).GetClosestPoint(center),
+        Plane(-Vector3::UnitY, targetAABB.GetMin()).GetClosestPoint(center),
+        Plane(-Vector3::UnitX, targetAABB.GetMin()).GetClosestPoint(center),
+        Plane(-Vector3::UnitZ, targetAABB.GetMin()).GetClosestPoint(center),
+        //targetAABB.GetMin(),
+        //targetAABB.GetMax(),
+    };
+    for(Vector3& position : castPositions)
+    {
+        // Calculate vector from our head to the AABB point.
+        Vector3 startToEnd = position - headPosition;
+        //Debug::DrawLine(headPosition, position, Color32::Red, 5.0f);
+
+        // The "t" value of that AABB point is actually just the length of this vector.
+        // We'll need that later, so grab it here.
+        float t = startToEnd.GetLength();
+
+        // And then get a ray for the raycast.
+        Ray ray(headPosition, startToEnd.Normalize());
+
+        // Raycast into the scene and see what we hit, if anything.
         GKObject* obj = static_cast<GKObject*>(mGKOwner);
-        SceneCastResult result = gSceneManager.GetScene()->RaycastAABBs(ray, &obj, 1);
+        SceneCastResult result = gSceneManager.GetScene()->Raycast(ray, false, &obj, 1);
 
-        // If hit the target with the ray, it must be in view.
+        // There are a few scenarios under which we consider the target to be "in view":
+        // 1) If the raycast actually hit an object with a matching name or noun.
+        // 2) If it hit something else, BUT our T value is closer. This indicates that the target's AABB was in view, even if the ray didn't hit it directly.
         if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
            StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
-           (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())))
+           (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())) ||
+           result.hitInfo.t >= t)
         {
             // Regardless of what ray hit (min/center/max), we always want to look at the center.
+            //TODO: Or do we?
             outTurnToFaceDir = (targetAABB.GetCenter() - headPosition);
             outTurnToFaceDir.y = 0.0f;
-            //Debug::DrawLine(headPosition, headPosition + outTurnToFaceDir.Normalize() * 100.0f, Color32::Green, 30.0f);
+
+            // This absolutely must be normalized, or the turn to face behavior will be wrong.
+            outTurnToFaceDir.Normalize();
             return true;
         }
-        /*
-        else
-        {
-            result = gSceneManager.GetScene()->Raycast(ray, false, &obj, 1);
-            if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
-               StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
-               (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())))
-            {
-                // Convert ray direction to a "facing" direction,
-                dir.y = 0.0f;
-                outTurnToFaceDir = dir.Normalize();
-                return true;
-            }
-        }
-        */
     }
 
     // If execution gets here, the walk to see target doesn't seem to be in view.
     return false;
+}
+
+int Walker::FindPathNodeWhereWalkToSeeIsInView(Vector3& outInViewPos, Vector3& outTurnToFaceDir)
+{
+    // No path node where it's in view...if it doesn't exist.
+    // Also can't find any node if the path is empty.
+    if(mWalkToSeeTarget == nullptr || mPath.empty()) { return 0; }
+
+    // Iterate from the start of the path to the end, trying to find a node where the walk-to-see target is in view.
+    int pathNodeIndex = -1;
+    Vector3 facingDir;
+    Vector3 seenPos;
+    for(int i = mPath.size() - 1; i > 0 && pathNodeIndex == -1; --i)
+    {
+        // Make sure path node is at floor height.
+        //mPath[i].y = gSceneManager.GetScene()->GetFloorY(mPath[i]);
+
+        // See if the walk to see target would be in view if the character's head was roughly at this position.
+        Vector3 headPosAtNode = mPath[i] + Vector3::UnitY * mCharConfig->walkerHeight;
+        if(IsWalkToSeeTargetInView(headPosAtNode, facingDir))
+        {
+            seenPos = mPath[i];
+            pathNodeIndex = i;
+            break;
+        }
+
+        // For better fidelity, check not only this path node, but the path leading to the next path node.
+        LineSegment ls(mPath[i], mPath[i - 1]);
+        for(float t = 0.25f; t < 1.0f; t += 0.25f)
+        {
+            Vector3 pointAlongLine = ls.GetPoint(t);
+            headPosAtNode = ls.GetPoint(t) + Vector3::UnitY * mCharConfig->walkerHeight;
+            if(IsWalkToSeeTargetInView(headPosAtNode, facingDir))
+            {
+                seenPos = pointAlongLine;
+                pathNodeIndex = i - 1; // consider it "seen" at the next node
+                break;
+            }
+        }
+    }
+
+    // If we crawled the entire path and never saw the target, we need a fallback.
+    // Just act like we will see it at the last node on the path in this case.
+    if(pathNodeIndex == -1)
+    {
+        facingDir = mWalkToSeeTarget->GetAABB().GetCenter() - mPath.front();
+        pathNodeIndex = 0;
+    }
+
+    outInViewPos = seenPos;
+    outTurnToFaceDir = facingDir;
+    return pathNodeIndex;
 }
 
 bool Walker::SkipPathNodesOutsideFrustum()
@@ -952,7 +968,7 @@ bool Walker::SkipPathNodesOutsideFrustum()
     // But if 90% of the path is behind the camera, the walker can just skip to the node right before the camera and walk from there!
 
     // Skipping path nodes outside the view frustum is mainly meant for user-initiated walk actions.
-    // Don't do this for AI walkers (autoscript), if this isn't the Ego, or if we're in a cutscene/action.
+    // Don't do this for AI walkers (autoscript), of if this isn't ego.
     if(mFromAutoscript || mGKOwner != gSceneManager.GetScene()->GetEgo() || mPath.empty())
     {
         //printf("Early out skip path nodes - not ego, from autoscript, or path is empty.\n");
@@ -1041,30 +1057,6 @@ bool Walker::SkipPathNodesOutsideFrustum()
     return true;
 }
 
-void Walker::RemoveExcessPathNodes()
-{
-    // If path is long enough, attempt to remove nodes that are too close to one another.
-    if(mPath.size() > 2)
-    {
-        const float kCloseDist = 5.0f;
-        Vector3 prev = mPath[0];
-        for(auto it = mPath.begin() + 1; it != mPath.end() - 1;)
-        {
-            // If this node is too close to the previous node, remove it.
-            Vector3 curr = *it;
-            if((curr - prev).GetLengthSq() < kCloseDist * kCloseDist)
-            {
-                it = mPath.erase(it);
-            }
-            else
-            {
-                prev = curr;
-                ++it;
-            }
-        }
-    }
-}
-
 bool Walker::AdvancePath()
 {
     if(!mPath.empty())
@@ -1090,10 +1082,6 @@ bool Walker::AdvancePath()
             {
                 mPath.pop_back();
             }
-
-            // When we're about to walk to a path node, make sure it's y-pos is accurate.
-            // The pathing system operates on the XZ plane, but the world being navigated has height!
-            UpdateNextNodesYPos();
         }
     }
 
@@ -1101,15 +1089,7 @@ bool Walker::AdvancePath()
     return mPath.empty();
 }
 
-void Walker::UpdateNextNodesYPos()
-{
-    if(!mPath.empty())
-    {
-        mPath.back().y = gSceneManager.GetScene()->GetFloorY(mPath.back());
-    }
-}
-
-float Walker::GetWalkTurnSpeed(Vector3 toNext)
+float Walker::GetWalkTurnSpeed(const Vector3& toNext)
 {
     const float kFastestTurnSpeedDist = 30.0f;
     const float kSlowestTurnSpeedDist = 100.0f;

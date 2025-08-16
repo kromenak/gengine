@@ -147,14 +147,13 @@ private:
 
     bool IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const;
     bool IsWalkToSeeTargetInView(const Vector3& headPosition, Vector3& outTurnToFaceDir) const;
+    int FindPathNodeWhereWalkToSeeIsInView(Vector3& outInViewPos, Vector3& outTurnToFaceDir);
 
     bool SkipPathNodesOutsideFrustum();
-    void RemoveExcessPathNodes();
 
     bool AdvancePath();
-    void UpdateNextNodesYPos();
 
-    float GetWalkTurnSpeed(Vector3 toNext);
+    float GetWalkTurnSpeed(const Vector3& toNext);
     bool TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSpeed);
 
     void PlayWalkLoopAnim(bool fromWalkStart);
