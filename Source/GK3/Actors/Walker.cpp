@@ -120,7 +120,7 @@ void Walker::WalkToSee(GKObject* target, const std::function<void()>& finishCall
         // We don't need the item to be *exactly* in front of our face.
         // We only need to turn if the item is fairly far from our current facing direction.
         float dot = Vector3::Dot(mGKOwner->GetForward(), facingDir);
-        if(dot < 0.5f)
+        if(dot < 0.8f)
         {
             mTurnToFaceDir = facingDir;
             mWalkActions.push_back(WalkOp::TurnToFace);
