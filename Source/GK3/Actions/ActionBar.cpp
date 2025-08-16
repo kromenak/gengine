@@ -7,7 +7,7 @@
 #include "InventoryManager.h"
 #include "StringUtil.h"
 #include "UIButton.h"
-#include "UICanvas.h"
+#include "UIUtil.h"
 #include "VerbManager.h"
 #include "Window.h"
 
@@ -38,13 +38,7 @@ namespace
 ActionBar::ActionBar() : Actor("ActionBar", TransformType::RectTransform)
 {
     // Create canvas, to contain the UI components.
-    UICanvas* canvas = AddComponent<UICanvas>(11);
-
-    // Canvas rect fills the entire screen.
-    RectTransform* rectTransform = canvas->GetRectTransform();
-    rectTransform->SetSizeDelta(0.0f, 0.0f);
-    rectTransform->SetAnchorMin(Vector2::Zero);
-    rectTransform->SetAnchorMax(Vector2::One);
+    UI::AddCanvas(this, 11);
 
     // The background of the action bar consists of a fullscreen clickable button area.
     // This stops interaction with the scene while action bar is visible.
@@ -61,7 +55,7 @@ ActionBar::ActionBar() : Actor("ActionBar", TransformType::RectTransform)
     // Since we will set the action bar's position based on mouse position, set the anchor to the lower-left corner.
     Actor* buttonHolderActor = new Actor("ButtonHolder", TransformType::RectTransform);
     mButtonHolder = buttonHolderActor->GetComponent<RectTransform>();
-    mButtonHolder->SetParent(rectTransform);
+    mButtonHolder->SetParent(GetTransform());
     mButtonHolder->SetAnchorMin(Vector2::Zero);
     mButtonHolder->SetAnchorMax(Vector2::Zero);
     mButtonHolder->SetPivot(0.5f, 0.5f);
