@@ -77,6 +77,7 @@ void Debug::Render()
 
     // We can just use any old material for now (uses default shader under the hood).
     Material material(sDrawShader);
+    material.SetFloat("gDiscardColorTolerance", -1.0f); // disables discard color - we want magenta to render in this case
 
     // Iterate over all draw commands and render them.
     auto it = sDrawCommands.begin();
