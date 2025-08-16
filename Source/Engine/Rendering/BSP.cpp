@@ -82,9 +82,11 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
     // OK, we found it! Create the actor.
     BSPActor* actor = new BSPActor(this, objectName);
 
-    // Generate AABB from this BSP object's position data.
+    // Iterate this BSP object's data to generate an AABB and facing direction for the actor.
     bool firstPoint = true;
     AABB aabb;
+    Vector3 cumulativeFacingDir = Vector3::Zero;
+    int polygonCount = 0;
     for(size_t surfaceIndex = 0; surfaceIndex < mSurfaces.size(); surfaceIndex++)
     {
         if(mSurfaces[surfaceIndex].objectIndex == objectIndex)
@@ -95,6 +97,7 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
             {
                 if(mPolygons[polygonIndex].surfaceIndex == surfaceIndex)
                 {
+                    ++polygonCount;
                     actor->AddPolygon(&mPolygons[polygonIndex]);
 
                     int start = mPolygons[polygonIndex].vertexIndexOffset;
@@ -111,11 +114,26 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
                             aabb.GrowToContain(mVertices[mVertexIndices[k]]);
                         }
                     }
+
+                    // If there are enough vertices, calculate a facing direction for this polygon.
+                    // Add it to the cumulative facing direction so we can calculate an average later.
+                    if(mPolygons[polygonIndex].vertexIndexCount > 2)
+                    {
+                        cumulativeFacingDir += Triangle::GetNormal(mVertices[mVertexIndices[start]], mVertices[mVertexIndices[start + 1]], mVertices[mVertexIndices[start + 2]]);
+                    }
                 }
             }
         }
     }
     actor->SetAABB(aabb);
+
+    // Set the actor's rotation based on the average facing direction of the polygons.
+    // This isn't perfect, but it does give a good result particularly for boxy objects (posters, paintings, panels, etc).
+    if(cumulativeFacingDir != Vector3::Zero && polygonCount > 0)
+    {
+        actor->SetHeading(Heading::FromDirection(cumulativeFacingDir / polygonCount));
+        //Debug::DrawLine(aabb.GetCenter(), aabb.GetCenter() + actor->GetForward() * 10.0f, Color32::Magenta, 30.0f);
+    }
 
     // Position actor at center of BSP object position.
     actor->SetPosition(GetPosition(objectName));

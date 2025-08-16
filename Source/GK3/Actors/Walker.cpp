@@ -516,6 +516,16 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
         // Attempt to find a path between current position and walk position.
         Vector3 startPos = GetOwner()->GetPosition();
         Vector3 endPos = walkPosition;
+
+        // If we have a walk to see target and we get here (meaning we can't see it),
+        // Apply a slight bias towards walking to be "in front" of the thing.
+        // This helps in scenarios where the character should be looking at a surface, such as a painting or panel in the Museum.
+        if(mWalkToSeeTarget != nullptr)
+        {
+            endPos = walkPosition + mWalkToSeeTarget->GetForward() * 5.0f;
+        }
+
+        // Actually do the pathfinding!
         if(mWalkerBoundary != nullptr)
         {
             // Remove ourselves from the walker boundary temporarily so we don't try to path around ourselves.
