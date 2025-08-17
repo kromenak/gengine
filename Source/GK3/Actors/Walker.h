@@ -149,6 +149,7 @@ private:
     bool IsWalkToSeeTargetInView(const Vector3& headPosition, Vector3& outTurnToFaceDir) const;
     int FindPathNodeWhereWalkToSeeIsInView(Vector3& outInViewPos, Vector3& outTurnToFaceDir);
 
+    int FindEarliestPathNodeInsideActiveTriggerRegion(Vector3& outEnterTriggerRegionPos);
     bool SkipPathNodesOutsideFrustum();
 
     bool AdvancePath();

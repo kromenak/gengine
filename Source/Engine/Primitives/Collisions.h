@@ -14,6 +14,7 @@ class Line;
 class LineSegment;
 class Plane;
 class Ray;
+class Rect;
 class Sphere;
 class Triangle;
 class Vector2;
@@ -71,6 +72,8 @@ namespace Intersect
 
     // Line
     bool LineLine2D(const Vector2& line0P0, const Vector2& line0P1, const Vector2& line1P0, const Vector2& line1P1, float& outLine0T);
+    bool LineSegmentLineSegment2D(const Vector2& line0P0, const Vector2& line0P1, const Vector2& line1P0, const Vector2& line1P1, float& outLine0T);
+    bool LineSegmentRect2D(const Rect& rect, const Vector2& lineP0, const Vector2& lineP1, float& outLineEnterT, float& outLineExitT);
 
     // Frustum
     bool TestFrustumLineSegment(const Frustum& f, const LineSegment& ls);

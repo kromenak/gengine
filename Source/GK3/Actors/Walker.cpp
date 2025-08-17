@@ -517,8 +517,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
         Vector3 startPos = GetOwner()->GetPosition();
         Vector3 endPos = walkPosition;
 
-        // If we have a walk to see target and we get here (meaning we can't see it),
-        // Apply a slight bias towards walking to be "in front" of the thing.
+        // If we have a walk-to-see target, apply a slight bias towards walking to be "in front" of the thing.
         // This helps in scenarios where the character should be looking at a surface, such as a painting or panel in the Museum.
         if(mWalkToSeeTarget != nullptr)
         {
@@ -561,31 +560,65 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
         }
 
         // Make sure all path nodes are at floor height for their x/z position in the world.
+        // It's somewhat inefficient to do this for every path node (especially if the path will be shortened later).
+        // But this is also the only way to ensure calculations for shortening path are accurate!
         for(int i = 0; i < mPath.size(); ++i)
         {
             mPath[i].y = gSceneManager.GetScene()->GetFloorY(mPath[i]);
         }
 
-        // If we have a walk to see target, pre-calculate where along the path we will see the target.
-        if(mWalkToSeeTarget != nullptr)
+        // SHORTENING END PORTION OF PATH
+        // There are some cases where we chop nodes off the front of the path vector so that we don't walk as far as originally intended.
         {
-            Vector3 walkToSeePathPos;
-            int pathIndex = FindPathNodeWhereWalkToSeeIsInView(walkToSeePathPos, mTurnToFaceDir);
+            // By default, the end path node is at index 0 (front of the vector).
+            int endOfPathIndex = 0;
 
-            // Stopping at the exact moment the target is seen can look unrealistic - like you barely see a sliver around the corner and you look at it.
-            // So, let's try going to the NEXT path node so we're hopefully wide out in the open when we see the thing.
-            if(pathIndex > 1)
+            // If we have a walk-to-see target, we will stop walking prematurely if the target comes into view.
+            if(mWalkToSeeTarget != nullptr)
             {
-                --pathIndex;
+                // Calculate node at which the walk-to-see comes into view.
+                // Worst case, this function returns 0, meaning "just walk all the way to the end."
+                Vector3 walkToSeePathPos;
+                int pathIndex = FindPathNodeWhereWalkToSeeIsInView(walkToSeePathPos, mTurnToFaceDir);
+
+                // Stopping at the exact moment the target is seen can look unrealistic - like you barely see a sliver around the corner and you look at it.
+                // So, let's try going to the NEXT path node so we're hopefully wide out in the open when we see the thing.
+                if(pathIndex > 1)
+                {
+                    --pathIndex;
+                }
+
+                // The object is in view at this index, so we can stop walking here.
+                endOfPathIndex = pathIndex;
             }
 
-            // Since the object is in view at this path index, we intend to stop walking here.
-            // As a result, we can just erase all the nodes after this one.
-            mPath.erase(mPath.begin(), mPath.begin() + pathIndex);
+            // Check if the path should end early due to a path node being inside an active trigger region.
+            bool shortenedByTrigger = false;
+            Vector3 enterTriggerRegionPos;
+            int insideTriggerRegionPathIndex = FindEarliestPathNodeInsideActiveTriggerRegion(enterTriggerRegionPos);
+            if(insideTriggerRegionPathIndex >= 0 && insideTriggerRegionPathIndex > endOfPathIndex)
+            {
+                shortenedByTrigger = true;
+                endOfPathIndex = insideTriggerRegionPathIndex;
+            }
+
+            // If the end-of-path index is greater than zero, we should chop off any nodes that no longer need to be included.
+            // For example, if we updated that the end of path index should be 4 instead of 0, get rid of nodes at index 0-3.
+            if(endOfPathIndex > 0)
+            {
+                mPath.erase(mPath.begin(), mPath.begin() + endOfPathIndex);
+
+                // When shorted by a trigger region, the final walk position is also modified.
+                if(shortenedByTrigger)
+                {
+                    mPath.front() = enterTriggerRegionPos;
+                }
+            }
         }
 
-        // Attempt to shorten the path, if applicable, to speed up the walk process.
-        bool shortened = SkipPathNodesOutsideFrustum();
+        // SHORTEN START OF PATH
+        // Some nodes of the path may be outside the view - the game skips these to speed up walks in some cases.
+        bool skippedStartPathNodes = SkipPathNodesOutsideFrustum();
 
         // There's a small chance the path will be empty at this point - if so, we don't walk anywhere.
         if(!mPath.empty())
@@ -610,7 +643,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, con
 
             // We need a start walk, but NOT if the path was shortened.
             // In that case, the walker warps to the nearest offscreen position, so the start walk can be skipped.
-            if(!shortened)
+            if(!skippedStartPathNodes)
             {
                 // Need to decide which start anim to play.
                 WalkOp startOp = WalkOp::FollowPathStart;
@@ -970,6 +1003,65 @@ int Walker::FindPathNodeWhereWalkToSeeIsInView(Vector3& outInViewPos, Vector3& o
     outInViewPos = seenPos;
     outTurnToFaceDir = facingDir;
     return pathNodeIndex;
+}
+
+int Walker::FindEarliestPathNodeInsideActiveTriggerRegion(Vector3& outEnterTriggerRegionPos)
+{
+    // If walking our calculated path would cause us to walk through an active scene region trigger, we should stop walking there.
+    // A good example of this is in the Lobby in Day 1, 10AM: if you want to the door, the path goes through Jean's trigger region.
+
+    // By default, use -1 because it's possible NO path node is inside an active trigger.
+    int earliestPathIndex = -1;
+
+    // This logic only applies to the Ego in the current scene.
+    if(mGKOwner == gSceneManager.GetScene()->GetEgo())
+    {
+        // Iterate all triggers in the scene - this is often zero. Scenes rarely have trigger regions.
+        for(auto& trigger : gSceneManager.GetScene()->GetSceneData()->GetTriggers())
+        {
+            // If there's a valid action associated with this trigger, then walking through it WOULD trigger an action.
+            // In that case, we need to see if our path goes into that region.
+            if(gActionManager.GetAction(trigger->label, "WALK") != nullptr)
+            {
+                // For each node on the path (from start to end), see if any node enters this trigger region.
+                // If so, that would trigger the region action, and we should stop walking there.
+                for(int i = mPath.size() - 1; i > 0; --i)
+                {
+                    Vector2 pathPos(mPath[i].x, mPath[i].z);
+                    if(trigger->rect.Contains(pathPos))
+                    {
+                        // Only record if node is earlier in the path (higher index) than anything discovered before.
+                        if(i > earliestPathIndex)
+                        {
+                            earliestPathIndex = i;
+
+                            // We could stop here, but let's finesse a bit more...
+                            // In this case, it's better to walk to the exact point where we would enter the trigger, rather than the actual path node.
+                            // So, figure out the exact point that our walk path will enter the trigger region.
+                            if(i < mPath.size() - 1)
+                            {
+                                // Imagine a line segment between the first path node in the region, and the one right before it.
+                                // This is a 2D test, so the path nodes are converted to 2D points.
+                                Vector2 beforePathPos(mPath[i + 1].x, mPath[i + 1].z);
+                                float enterRectT;
+                                float exitRectT;
+                                if(Intersect::LineSegmentRect2D(trigger->rect, beforePathPos, pathPos, enterRectT, exitRectT))
+                                {
+                                    // Carefully calculate the intersection point, converting from 2D back to 3D.
+                                    Vector2 enterRectPos = beforePathPos + (pathPos - beforePathPos) * enterRectT;
+                                    outEnterTriggerRegionPos = Vector3(enterRectPos.x, mPath[i].y, enterRectPos.y);
+
+                                    //Debug::DrawLine(mPath[i], mPath[i + 1], Color32::Green, 30.0f);
+                                    //Debug::DrawLine(GetOwner()->GetPosition(), outEnterTriggerRegionPos, Color32::Red, 30.0f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return earliestPathIndex;
 }
 
 bool Walker::SkipPathNodesOutsideFrustum()

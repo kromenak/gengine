@@ -8,6 +8,7 @@
 #include "LineSegment.h"
 #include "Plane.h"
 #include "Ray.h"
+#include "Rect.h"
 #include "Sphere.h"
 #include "Triangle.h"
 #include "Vector2.h"
@@ -250,6 +251,8 @@ bool Intersect::TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& 
 
 bool Intersect::LineLine2D(const Vector2& line0P0, const Vector2& line0P1, const Vector2& line1P0, const Vector2& line1P1, float& outLine0T)
 {
+    //TODO: I regret not commenting this code when it was added! Figure out what the algorithm is here, and why it works.
+    //TODO: I believe the code stems from the logic here: https://en.wikipedia.org/wiki/Intersection_(geometry)#Two_lines
     Vector2 d1 = line0P1 - line0P0;
     Vector2 d2 = line1P1 - line1P0;
 
@@ -262,6 +265,92 @@ bool Intersect::LineLine2D(const Vector2& line0P0, const Vector2& line0P1, const
     float dist = d2.x * (line0P0.y - line1P0.y) - d2.y * (line0P0.x - line1P0.x);
     dist /= denom;
     outLine0T = dist;
+    return true;
+}
+
+bool Intersect::LineSegmentLineSegment2D(const Vector2& line0P0, const Vector2& line0P1, const Vector2& line1P0, const Vector2& line1P1, float& outLine0T)
+{
+    // See if the two intersect as infinite lines, for starters.
+    if(LineLine2D(line0P0, line0P1, line1P0, line1P1, outLine0T))
+    {
+        // If so, check if the intersection occurred within the segments of both lines.
+        // For line 0, we simply need "t" to be between 0 and 1.
+        if(outLine0T >= 0.0f && outLine0T <= 1.0f)
+        {
+            // For line 1, we can do a little math to determine its "t" value. This also needs to be between 0 and 1.
+            Vector2 intersectionPoint = line0P0 + (line0P1 - line0P0) * outLine0T;
+            float line1T = (intersectionPoint - line1P0).GetLength() / (line1P1 - line1P0).GetLength();
+            return line1T >= 0.0f && line1T <= 1.0f;
+        }
+    }
+
+    // Either no intersection at all, or the intersection is outside the start/end of one or both line segments.
+    return false;
+}
+
+bool Intersect::LineSegmentRect2D(const Rect& rect, const Vector2& lineP0, const Vector2& lineP1, float& outLineEnterT, float& outLineExitT)
+{
+    // Get the 4 points making up the rectangle.
+    Vector2 bottomLeft = rect.GetMin();
+    Vector2 topRight = rect.GetMax();
+    Vector2 bottomRight(topRight.x, bottomLeft.y);
+    Vector2 topLeft(bottomLeft.x, topRight.y);
+
+    // Treat each side of the rectangle as a line segment. Do an intersection test against the side and the passed in line segment.
+    // There are three possible outcomes:
+    // 1) The line segment doesn't intersect with any side of the rectangle. We return false.
+    // 2) The line segment intersects with only one side of the rectangle. We return only an "enter" t value.
+    // 3) The line segment intersects with two sides of the rectangle. We return "enter" and "exit" t values.
+
+    // Setting the count to 1 each time may seem weird, but it just makes absolutely sure we don't go out of bounds of the array.
+    // Remember, only two intersections SHOULD BE geometrically possible...show me a line segment intersecting three sides of a rectangle!
+    int count = 0;
+    float t[2] = { FLT_MAX, FLT_MAX };
+    if(LineSegmentLineSegment2D(lineP0, lineP1, bottomLeft, bottomRight, t[count]))
+    {
+        count = 1;
+    }
+    if(LineSegmentLineSegment2D(lineP0, lineP1, bottomRight, topRight, t[count]))
+    {
+        count = 1;
+    }
+    if(LineSegmentLineSegment2D(lineP0, lineP1, topRight, topLeft, t[count]))
+    {
+        count = 1;
+    }
+    if(LineSegmentLineSegment2D(lineP0, lineP1, topLeft, bottomLeft, t[count]))
+    {
+        count = 1;
+    }
+
+    // No intersections, return false.
+    if(count == 0)
+    {
+        return false;
+    }
+
+    // The "t" values may be invalid after all the tests.
+    // Make sure they are within a valid 0-1 range, or revert them to their default values.
+    if(t[0] < 0.0f || t[0] > 1.0f)
+    {
+        t[0] = FLT_MAX;
+    }
+    if(t[1] < 0.0f || t[1] > 1.0f)
+    {
+        t[1] = FLT_MAX;
+    }
+
+    // In the case there were two intersections, the smaller number represents the "entry" intersection (closer to the line segment start point).
+    if(t[0] < t[1])
+    {
+        outLineEnterT = t[0];
+        outLineExitT = t[1];
+    }
+    else
+    {
+        outLineEnterT = t[1];
+        outLineExitT = t[0];
+    }
     return true;
 }
 
