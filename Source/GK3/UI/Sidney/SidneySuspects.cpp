@@ -760,6 +760,14 @@ void SidneySuspects::OnUnlinkToSuspectPressed()
 
 void SidneySuspects::OnMatchAnalysisPressed()
 {
+    // Gabe doesn't do match analysis - he'll say "Grace does this stuff."
+    if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+    {
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7A2ZQR1\", 1)");
+        return;
+    }
+
+    // Based on the file being analyzed, decide on textures/videos and who will be a match.
     Texture* fingerprintTexture = nullptr;
     Texture* compareTexture = nullptr;
     std::string videoName;
