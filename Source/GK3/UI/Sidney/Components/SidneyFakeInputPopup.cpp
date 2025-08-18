@@ -14,11 +14,15 @@
 
 SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& name) : Actor(name, TransformType::RectTransform)
 {
-    AddComponent<UICanvas>(2);
+    // Make a child of the passed in parent.
     GetTransform()->SetParent(parent->GetTransform());
 
+    // Add a canvas.
+    AddComponent<UICanvas>(2);
+
     // The size is consistent in all use-cases in the game.
-    GetComponent<RectTransform>()->SetSizeDelta(240.0f, 105.0f);
+    // (Added one extra pixel of width so border is pixel-aligned.)
+    GetComponent<RectTransform>()->SetSizeDelta(241.0f, 105.0f);
 
     // Add a box with border around it.
     UINineSlice* boxImage = UI::CreateWidgetActor<UINineSlice>("Box", this, SidneyUtil::GetGrayBoxParams(Color32::Black));

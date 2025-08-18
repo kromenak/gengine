@@ -54,8 +54,6 @@ public:
     UINineSlice(Actor* actor);
     UINineSlice(Actor* actor, const UINineSliceParams& params);
 
-    void Render() override { }
-
     void SetTexturesAndColors(const UINineSliceParams& params, bool resizeTextures);
 
 private:
