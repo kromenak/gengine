@@ -16,6 +16,7 @@ public:
 
     void Focus();
     void Unfocus();
+    bool IsFocused() const { return mFocused; }
     void AllowInputToChangeFocus(bool allow) { mAllowInputToChangeFocus = allow; }
 
     void SetMaxLength(int maxLength) { mTextInput.SetMaxLength(maxLength); }

@@ -3,10 +3,12 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
+#include "Console.h"
 #include "Font.h"
 #include "GameProgress.h"
 #include "IniParser.h"
 #include "InputManager.h"
+#include "LayerManager.h"
 #include "SidneyButton.h"
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"
@@ -469,8 +471,8 @@ void SidneySearch::OnUpdate(float deltaTime)
 {
     if(!mRoot->IsActive()) { return; }
 
-    // If enter is pressed, act like a search was done.
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
+    // If enter is pressed, and text input is focused, act like a search was done.
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN) && mTextInput->IsFocused())
     {
         OnSearchButtonPressed();
     }
@@ -488,6 +490,22 @@ void SidneySearch::OnUpdate(float deltaTime)
 
     // Keep menu bar updated.
     mMenuBar.Update();
+
+    // When search is active, and the scene is the top layer, the text input should stay focused.
+    // On the other hand, if another layer is open (e.g. inventory, save/load, etc), we should unfocus until we return to this layer.
+    bool sceneIsTopLayer = gLayerManager.IsTopLayer("SceneLayer");
+    if(sceneIsTopLayer)
+    {
+        // Only take focus if nothing else has it - fixes stealing focus from the debug console, for example.
+        if(!gInputManager.IsTextInput())
+        {
+            mTextInput->Focus();
+        }
+    }
+    else
+    {
+        mTextInput->Unfocus();
+    }
 }
 
 void SidneySearch::OnPersist(PersistState& ps)

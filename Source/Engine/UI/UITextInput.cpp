@@ -40,7 +40,10 @@ void UITextInput::Unfocus()
     if(mFocused)
     {
         // Stop capturing keyboard input.
-        gInputManager.StopTextInput();
+        if(gInputManager.GetTextInput() == &mTextInput)
+        {
+            gInputManager.StopTextInput();
+        }
 
         // Turn off any caret.
         if(mCaret != nullptr)
@@ -103,6 +106,13 @@ void UITextInput::OnUpdate(float deltaTime)
                 Unfocus();
             }
         }
+    }
+
+    // Check if still focused.
+    // Only one text input can be focused at a time, and sometimes focus can be stolen unexpectedly.
+    if(mFocused && gInputManager.GetTextInput() != &mTextInput)
+    {
+        mFocused = false;
     }
 
     // When focused, keep text up-to-date.
