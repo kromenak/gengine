@@ -32,7 +32,7 @@ GKProp::GKProp(Model* model) : GKProp()
     SetName(mMeshRenderer->GetModelName());
 
     // If this prop acts as a billboard, add the billboard component to it.
-    if(model->IsBillboard())
+    if(model != nullptr && model->IsBillboard())
     {
         AddComponent<Billboard>();
     }
