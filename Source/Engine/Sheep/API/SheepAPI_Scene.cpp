@@ -92,6 +92,10 @@ shpvoid SetActorPosition(const std::string& actorName, const std::string& positi
         return 0;
     }
 
+    // If the actor is walking, force-setting their position causes the walk to cancel.
+    // This matches the behavior observed in the original game.
+    actor->GetWalker()->StopWalk();
+
     // Set the position.
     actor->SetPosition(scenePosition->position);
 
