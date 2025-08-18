@@ -216,6 +216,14 @@ RegFunc0(ShowInventory, void, IMMEDIATE, REL_FUNC);
 
 shpvoid HideInventory()
 {
+    // If we get this request when inventory inspect is showing above the inventory, we should hide the inventory inspect first.
+    // This fixes a bug (even present in the original game) if you attempt to scan an item from the inventory inspect screen.
+    if(gLayerManager.IsLayerInStack("InventoryLayer") && gInventoryManager.IsInventoryInspectShowing())
+    {
+        gInventoryManager.InventoryUninspect();
+    }
+
+    // And also hide the inventory of course.
     gInventoryManager.HideInventory();
     return 0;
 }

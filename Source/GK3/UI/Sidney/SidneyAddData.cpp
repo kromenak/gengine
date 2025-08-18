@@ -84,7 +84,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
     if(mAddingData)
     {
         // Wait for player to close inventory.
-        if(!gInventoryManager.IsInventoryShowing() && !gActionManager.IsActionPlaying())
+        if(!gInventoryManager.IsInventoryShowing() && !gInventoryManager.IsInventoryInspectShowing() && !gActionManager.IsActionPlaying())
         {
             // Clear "using scanner" flag.
             gGameProgress.ClearFlag("UsingScanner");
