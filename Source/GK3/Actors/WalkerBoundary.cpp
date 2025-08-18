@@ -342,7 +342,11 @@ void WalkerBoundary::DrawUnwalkableAreas()
 
 void WalkerBoundary::AddWalker(Walker* walker)
 {
-    mWalkers.push_back(walker);
+    auto it = std::find(mWalkers.begin(), mWalkers.end(), walker);
+    if(it == mWalkers.end())
+    {
+        mWalkers.push_back(walker);
+    }
 }
 
 void WalkerBoundary::RemoveWalker(Walker * walker)
