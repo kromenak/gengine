@@ -1013,8 +1013,8 @@ int Walker::FindEarliestPathNodeInsideActiveTriggerRegion(Vector3& outEnterTrigg
     // By default, use -1 because it's possible NO path node is inside an active trigger.
     int earliestPathIndex = -1;
 
-    // This logic only applies to the Ego in the current scene.
-    if(mGKOwner == gSceneManager.GetScene()->GetEgo())
+    // This logic only applies to the Ego in the current scene when walking freely (not during an action).
+    if(mGKOwner == gSceneManager.GetScene()->GetEgo() && !gActionManager.IsActionPlaying())
     {
         // Iterate all triggers in the scene - this is often zero. Scenes rarely have trigger regions.
         for(auto& trigger : gSceneManager.GetScene()->GetSceneData()->GetTriggers())
