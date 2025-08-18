@@ -370,7 +370,17 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     mActiveInventoryItemButton = CreateButton(config, "currInv", mOptionBarRoot->GetOwner());
     mActiveInventoryItemButton->SetPressCallback([this](UIButton* button) {
         Hide();
-        gInventoryManager.InventoryInspect();
+
+        // This button usually shows the inventory inspect/closeup of the active inventory item.
+        // But it has an odd behavior if the closeup is already active: it closes it!
+        if(!gInventoryManager.IsInventoryInspectShowing())
+        {
+            gInventoryManager.InventoryInspect();
+        }
+        else
+        {
+            gInventoryManager.InventoryUninspect();
+        }
     });
 
     // Since the active inventory item may not be set when first starting the game, zero the size until an image is set.
