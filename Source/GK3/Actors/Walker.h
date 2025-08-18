@@ -67,7 +67,7 @@ private:
     // Turn speeds. When walking, turn faster when the next path node is very close - slower when farther away.
     // A faster speed is used for turning in place when not walking.
     static constexpr float kWalkTurnSpeedMin = Math::kPiOver2;
-    static constexpr float kWalkTurnSpeedMax = Math::k2Pi;
+    static constexpr float kWalkTurnSpeedMax = Math::k2Pi * 2;
     static constexpr float kTurnSpeed = Math::k2Pi;
 
     // CONFIG

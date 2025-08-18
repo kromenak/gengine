@@ -1195,7 +1195,15 @@ float Walker::GetWalkTurnSpeed(const Vector3& toNext)
 {
     const float kFastestTurnSpeedDist = 30.0f;
     const float kSlowestTurnSpeedDist = 100.0f;
-    float t = Math::Clamp((toNext.GetLength() - kFastestTurnSpeedDist) / (kSlowestTurnSpeedDist - kFastestTurnSpeedDist), 0.0f, 1.0f);
+
+    // The farther away we are from the next node, the slower we can turn.
+    float distT = Math::Clamp((toNext.GetLength() - kFastestTurnSpeedDist) / (kSlowestTurnSpeedDist - kFastestTurnSpeedDist), 0.0f, 1.0f);
+
+    // If we're facing the complete wrong way, turn faster than if you were already facing it.
+    float angleT = 1.0f - Math::Clamp(Math::Acos(Vector3::Dot(mGKOwner->GetForward(), Vector3::Normalize(toNext))) / Math::kPi, 0.0f, 1.0f);
+
+    // Use the minimum of the two.
+    float t = Math::Min(distT, angleT);
     return Interpolate::CubicOut(kWalkTurnSpeedMax, kWalkTurnSpeedMin, t);
 }
 
