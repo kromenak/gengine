@@ -450,6 +450,12 @@ void SidneySuspects::Hide()
     mRoot->SetActive(false);
 }
 
+void SidneySuspects::OpenFile(int fileId)
+{
+    mOpenedFileId = fileId;
+    ShowFile(mFiles->GetFile(mOpenedFileId));
+}
+
 void SidneySuspects::OnUpdate(float deltaTime)
 {
     if(!mRoot->IsActive()) { return; }

@@ -30,7 +30,7 @@ class SidneyAnalyze
 public:
     void Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTranslate* sidneyTranslate);
 
-    void Show();
+    void Show(int openFileId = -1);
     void Hide();
 
     void OnUpdate(float deltaTime);
@@ -96,6 +96,8 @@ private:
 
     // There's at least one time when a character enters input into a popup.
     SidneyFakeInputPopup* mSetTextPopup = nullptr;
+
+    void OpenFile(int fileId);
 
     void SetState(State state);
     void SetStateFromFile();

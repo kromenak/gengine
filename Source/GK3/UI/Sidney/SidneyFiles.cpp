@@ -306,7 +306,7 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
         mWindowRoot->GetComponent<UIImage>()->SetReceivesInput(true);
 
         // Set to correct size. Position is set when shown.
-        canvas->GetRectTransform()->SetSizeDelta(153.0f, 350.0f);
+        canvas->GetRectTransform()->SetSizeDelta(154.0f, 350.0f);
     }
 
     // Add close button.

@@ -6,6 +6,7 @@
 #include "LocationManager.h"
 #include "Scene.h"
 #include "SidneyButton.h"
+#include "SidneyFiles.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
 #include "UIImage.h"
@@ -100,7 +101,35 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         UIButton* filesButton = CreateMainButton(desktopBackground, "FILES", buttonPos);
         filesButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
-            mFiles.Show();
+            mFiles.Show([this](SidneyFile* selectedFile){
+
+                // When a file is clicked, try to direct to the most relevant area of Sidney, with that file opened.
+                // Images => go to analyze with that file opened.
+                // Text/Audio => go to translate with that file opened.
+                // Fingerprints/Plates => go to suspects with that file opened.
+                switch(selectedFile->type)
+                {
+                    case SidneyFileType::Image:
+                        mAnalyze.Show(selectedFile->id);
+                        break;
+
+                    case SidneyFileType::Text:
+                    case SidneyFileType::Audio:
+                        mTranslate.Show(selectedFile->id);
+                        break;
+
+                    case SidneyFileType::License:
+                    case SidneyFileType::Fingerprint:
+                        mSuspects.Show();
+                        mSuspects.OpenFile(selectedFile->id);
+                        break;
+
+                    case SidneyFileType::Shape:
+                    default:
+                        // Do nothing for anything else.
+                        break;
+                }
+            });
         });
 
         buttonPos += kButtonSpacing;

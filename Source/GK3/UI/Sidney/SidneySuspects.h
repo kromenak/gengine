@@ -28,6 +28,8 @@ public:
     void Show();
     void Hide();
 
+    void OpenFile(int fileId);
+
     void OnUpdate(float deltaTime);
 
     void OnPersist(PersistState& ps);

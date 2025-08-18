@@ -43,20 +43,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
 
             // Show the file selector.
             mSidneyFiles->Show([this](SidneyFile* selectedFile){
-
-                // Save ID of file that's now being analyzed.
-                mAnalyzeFileId = selectedFile->id;
-
-                // If the file has never been analyzed before, we show the pre-analyze UI.
-                // Otherwise, we can go to the appropriate state directly.
-                if(!selectedFile->hasBeenAnalyzed)
-                {
-                    SetState(SidneyAnalyze::State::PreAnalyze);
-                }
-                else
-                {
-                    SetStateFromFile();
-                }
+                OpenFile(selectedFile->id);
             });
         });
     }
@@ -190,13 +177,20 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
     Hide();
 }
 
-void SidneyAnalyze::Show()
+void SidneyAnalyze::Show(int openFileId)
 {
     mRoot->SetActive(true);
 
     // Make sure the state of the screen is up to date when entering.
     // This is especially important to restore the UI state after loading a save game.
-    SetState(mState);
+    if(openFileId == -1 || openFileId == mAnalyzeFileId)
+    {
+        SetState(mState);
+    }
+    else
+    {
+        OpenFile(openFileId);
+    }
 }
 
 void SidneyAnalyze::Hide()
@@ -229,6 +223,28 @@ void SidneyAnalyze::OnPersist(PersistState& ps)
     if(ps.GetFormatVersionNumber() < 3)
     {
         AnalyzeMap_FixOldSaveGames();
+    }
+}
+
+void SidneyAnalyze::OpenFile(int fileId)
+{
+    // Save ID of file that's now being analyzed.
+    mAnalyzeFileId = fileId;
+
+    // If the file has never been analyzed before, we show the pre-analyze UI.
+    // Otherwise, we can go to the appropriate state directly.
+    SidneyFile* file = mSidneyFiles->GetFile(mAnalyzeFileId);
+    if(file == nullptr)
+    {
+        SetState(State::Empty);
+    }
+    else if(!file->hasBeenAnalyzed)
+    {
+        SetState(State::PreAnalyze);
+    }
+    else
+    {
+        SetStateFromFile();
     }
 }
 
