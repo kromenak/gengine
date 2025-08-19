@@ -250,6 +250,9 @@ void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& l
     // Resize the dropdown background to encompass all buttons in the dropdown.
     dropdown.background->GetRectTransform()->SetSizeDeltaX(labelWidth - 2);
     dropdown.background->GetRectTransform()->SetSizeDeltaY(Math::Abs(dropdown.nextChoiceYPos + 1));
+
+    // Disable button until menu is shown.
+    button->SetActive(false);
 }
 
 void SidneyMenuBar::AddDropdownChoiceSeparator()
