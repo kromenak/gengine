@@ -697,7 +697,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                     }
 
                     UIImage* bulletImage = UI::CreateWidgetActor<UIImage>("BulletPoint", mWebPageScrollRect);
-                    bulletImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBULLET.BMP", AssetScope::Scene), true);
+                    bulletImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBULLET.BMP", AssetScope::Global), true);
                     bulletImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     bulletImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
                     mWebPageWidgets.push_back(bulletImage);
@@ -733,7 +733,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 {
                     // Create the image at the appropriate size.
                     UIImage* image = UI::CreateWidgetActor<UIImage>("Image", mWebPageScrollRect);
-                    image->SetTexture(gAssetManager.LoadTexture(element.attributes[0].value, AssetScope::Scene), true);
+                    image->SetTexture(gAssetManager.LoadTexture(element.attributes[0].value, AssetScope::Global), true);
                     image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     image->GetRectTransform()->SetAnchoredPosition(resultsPos);
                     mWebPageWidgets.push_back(image);
