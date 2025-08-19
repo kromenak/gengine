@@ -100,6 +100,8 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* filesButton = CreateMainButton(desktopBackground, "FILES", buttonPos);
         filesButton->SetPressCallback([this](UIButton* button){
+
+            // Show file selector, along with button SFX.
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
             mFiles.Show([this](SidneyFile* selectedFile){
 
@@ -129,6 +131,9 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
                         // Do nothing for anything else.
                         break;
                 }
+
+                // Plays another button SFX upon selecting a file.
+                gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
             });
         });
 
