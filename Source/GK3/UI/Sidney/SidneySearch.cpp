@@ -460,6 +460,9 @@ void SidneySearch::Show()
             ShowWebPage(mHistory[mHistoryIndex]);
         }
     }
+
+    // Make sure history menu is populated, in case we come back here after loading a save.
+    RefreshHistoryMenu();
 }
 
 void SidneySearch::Hide()
