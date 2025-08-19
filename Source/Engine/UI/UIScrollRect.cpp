@@ -248,17 +248,25 @@ void UIScrollRect::OnSliderValueChanged(float value)
         rt->SetAnchoredPosition(anchoredPosition);
     }
 
-    // Then we calculate a new offset based on the slider value.
-    mOffset.y = value * (contentHeight - scrollRectHeight);
-
-    // And then we APPLY the NEW offset to all the child items.
-    for(Transform* child : GetTransform()->GetChildren())
+    // But also, if the content is smaller than the scroll rect, no scrolling is needed - just set offset to zero.
+    if(contentHeight <= scrollRectHeight)
     {
-        if(child->GetOwner() == mScrollbarActor) { continue; }
+        mOffset.y = 0.0f;
+    }
+    else // content is bigger than scroll area
+    {
+        // Then we calculate a new offset based on the slider value.
+        mOffset.y = value * (contentHeight - scrollRectHeight);
 
-        RectTransform* rt = static_cast<RectTransform*>(child);
-        Vector2 anchoredPosition = rt->GetAnchoredPosition();
-        anchoredPosition += mOffset;
-        rt->SetAnchoredPosition(anchoredPosition);
+        // And then we APPLY the NEW offset to all the child items.
+        for(Transform* child : GetTransform()->GetChildren())
+        {
+            if(child->GetOwner() == mScrollbarActor) { continue; }
+
+            RectTransform* rt = static_cast<RectTransform*>(child);
+            Vector2 anchoredPosition = rt->GetAnchoredPosition();
+            anchoredPosition += mOffset;
+            rt->SetAnchoredPosition(anchoredPosition);
+        }
     }
 }
