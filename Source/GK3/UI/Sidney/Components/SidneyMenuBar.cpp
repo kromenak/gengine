@@ -295,4 +295,5 @@ void SidneyMenuBar::ClearDropdownChoices(size_t dropdownIndex)
         button->Destroy();
     }
     mDropdowns[dropdownIndex].options.clear();
+    mDropdowns[dropdownIndex].nextChoiceYPos = 0.0f;
 }
