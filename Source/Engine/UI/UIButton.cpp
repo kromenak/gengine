@@ -77,7 +77,7 @@ void UIButton::OnPointerEnter()
 {
     // If pointer was pressed down on a button, and it wasn't this button, ignore any pointer enters.
     // The pressed down button becomes "focused"/exclusive (so to speak) until the pointer is released, allowing selecting any button again.
-    if(sDownButton != nullptr && sDownButton != this) { return; }
+    if(sDownButton != nullptr && sDownButton != this && sDownButton->IsActiveAndEnabled()) { return; }
 
     // Record pointer over.
     mPointerOver = true;
