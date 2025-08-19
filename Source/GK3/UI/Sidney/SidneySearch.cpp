@@ -288,16 +288,20 @@ void SidneySearch::Init(Actor* parent)
         searchInputPanel->GetRectTransform()->SetAnchoredPosition(100.0f, -17.0f);
         searchInputPanel->GetRectTransform()->SetSizeDelta(320.0f, 15.0f);
 
-        mTextInput = searchInputPanel->GetOwner()->AddComponent<UITextInput>();
+        mTextInput = UI::CreateWidgetActor<UITextInput>("TextInput", searchInputPanel);
+        mTextInput->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        mTextInput->GetRectTransform()->SetAnchoredPosition(4.0f, 0.0f);
+        mTextInput->GetRectTransform()->SetSizeDelta(316.0f, 15.0f);
         mTextInput->SetFont(gAssetManager.LoadFont("F_TIMES.FON"));
         mTextInput->SetVerticalAlignment(VerticalAlignment::Bottom);
         mTextInput->SetText("");
+        mTextInput->SetMaxLength(35); // should be enough?
 
         // The user isn't allowed to unfocus this text input.
         mTextInput->AllowInputToChangeFocus(false);
 
         // Create text input field caret.
-        UIImage* caretImage = UI::CreateWidgetActor<UIImage>("Caret", searchInputPanel);
+        UIImage* caretImage = UI::CreateWidgetActor<UIImage>("Caret", mTextInput);
         caretImage->SetTexture(&Texture::White);
         caretImage->GetRectTransform()->SetAnchor(AnchorPreset::LeftStretch, false);
         caretImage->GetRectTransform()->SetPivot(0.0f, 0.0f);
