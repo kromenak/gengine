@@ -560,7 +560,7 @@ void SidneyTranslate::AskToAddMissingWord()
     // We translated to/from the right languages, but the translation is missing a word.
     // Show "sentence incomplete - do you want to add words?" popup.
     mPopup->ResetToDefaults();
-    mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("Subject") + "\n" + SidneyUtil::GetTranslateLocalizer().GetText("Question"));
+    mPopup->SetText("\n  " + SidneyUtil::GetTranslateLocalizer().GetText("Subject") + "\n\n  " + SidneyUtil::GetTranslateLocalizer().GetText("Question"));
     mPopup->SetTextAlignment(HorizontalAlignment::Left);
     mPopup->SetWindowPosition(Vector2(88.0f, 135.0f));
     mPopup->SetWindowSize(Vector2(280.0f, 120.0f));
