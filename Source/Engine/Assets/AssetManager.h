@@ -105,6 +105,7 @@ public:
     void UnloadAssets(AssetScope scope);
 
     // Querying Assets
+    template<typename T> T* GetOrLoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& id = "");
     template<typename T> const std::string_map_ci<T*>* GetLoadedAssets(const std::string& id = "");
 
 private:
@@ -170,6 +171,33 @@ private:
 };
 
 extern AssetManager gAssetManager;
+
+template<typename T>
+inline T* AssetManager::GetOrLoadAsset(const std::string& name, AssetScope assetScope, const std::string& assetCacheId)
+{
+    AssetCache<T>* assetCache = nullptr;
+    T* asset = nullptr;
+
+    // Attempt to retrieve an asset cache for this asset type.
+    AssetCacheBase* baseAssetCache = AssetCacheBase::GetAssetCache(T::StaticTypeId(), assetCacheId);
+    if(baseAssetCache != nullptr)
+    {
+        assetCache = dynamic_cast<AssetCache<T>*>(baseAssetCache);
+
+        // If the asset cache exists, try to retrieve the desired asset from the cache.
+        if(assetCache != nullptr)
+        {
+            asset = assetCache->Get(name);
+        }
+    }
+
+    // If asset is null, attempt to load it and put it in the asset cache (if any).
+    if(asset == nullptr)
+    {
+        asset = LoadAsset<T>(name, assetScope, assetCache);
+    }
+    return asset;
+}
 
 template<typename T>
 const std::string_map_ci<T*>* AssetManager::GetLoadedAssets(const std::string& id)

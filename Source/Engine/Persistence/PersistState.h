@@ -7,10 +7,13 @@
 #pragma once
 #include <cstdint>
 #include <set>
+#include <type_traits> // std::enable_if
+#include <utility> // std::declval
 
 #include <string>
 #include <unordered_map>
 
+#include "AssetManager.h"
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
 #include "StringUtil.h" // for string maps
@@ -20,11 +23,22 @@ class IniWriter;
 
 class Circle;
 class LineSegment;
+class Matrix4;
+class Quaternion;
 struct UIGrid;
 struct UIHexagram;
 struct UIRectangle;
+class Vector2;
+class Vector3;
 
 #define PERSIST_VAR(var) #var, var
+
+// These are C++ template "traits" that enable some fairly complex template metaprogramming shenanigans/black magic.
+// Basically, for a type T, this will evaluate to "true" if the type has an OnPersist(PersistState&) function and "false" if not.
+template <typename T, typename ArgType, typename = void>
+struct HasOnPersistFunction : std::false_type { };
+template <typename T, typename ArgType>
+struct HasOnPersistFunction<T, ArgType, std::void_t<decltype(std::declval<T>().OnPersist(std::declval<ArgType>()))>> : std::true_type { };
 
 enum class PersistMode : uint8_t
 {
@@ -43,6 +57,12 @@ class PersistState
 public:
     PersistState(const char* filePath, PersistFormat format, PersistMode mode);
     ~PersistState();
+
+    PersistState(PersistState& other) = delete;
+    PersistState& operator=(const PersistState& other) = delete;
+
+    PersistState(PersistState&& other) = default;
+    PersistState& operator=(PersistState&& other) = default;
 
     bool IsSaving() const { return mMode == PersistMode::Save; }
     bool IsLoading() const { return mMode == PersistMode::Load; }
@@ -70,7 +90,8 @@ public:
     void Xfer(const char* name, int32_t& value);
     void Xfer(const char* name, uint32_t& value);
 
-    //TODO: int64_t/uint64_t
+    void Xfer(const char* name, int64_t& value);
+    void Xfer(const char* name, uint64_t& value);
 
     // Floats
     void Xfer(const char* name, float& value);
@@ -79,6 +100,8 @@ public:
     // Math Types
     void Xfer(const char* name, Vector2& value);
     void Xfer(const char* name, Vector3& value);
+    void Xfer(const char* name, Quaternion& value);
+    void Xfer(const char* name, Matrix4& value);
 
     // Primitives
     void Xfer(const char* name, LineSegment& value);
@@ -105,10 +128,19 @@ public:
     }
 
     // Generic Fallback
-    template<typename T> void Xfer(const char* name, T& obj);
+    // The complex "enable_if" bit ensures that this function is only used for types T that have an OnPersist(PersistState&) member function.
+    template<typename T>
+    typename std::enable_if<HasOnPersistFunction<T, PersistState&>::value>::type Xfer(const char* name, T& obj)
+    {
+        obj.OnPersist(*this);
+    }
+
+    // This version is used if no OnPersist function is detected. Primarily meant for Assets right now!
+    template<typename T> void Xfer(const char* name, T*& asset);
 
     // Helpers
     BinaryReader* GetBinaryReader() const { return mBinaryReader; }
+    BinaryWriter* GetBinaryWriter() const { return mBinaryWriter; }
 
 private:
     PersistFormat mFormat = PersistFormat::Text;
@@ -142,7 +174,9 @@ inline void PersistState::Xfer(const char* name, std::vector<T>& vector, bool lo
             }
             else
             {
-                T value;
+                // The braces ensure "uniform initialization" - the value T is always initialized.
+                // Most important for pointers, so that an empty pointer is set to nullptr instead of garbage.
+                T value { };
                 Xfer("", value);
                 vector.push_back(value);
             }
@@ -155,14 +189,6 @@ inline void PersistState::Xfer(const char* name, std::vector<T>& vector, bool lo
         {
             Xfer("", entry);
         }
-    }
-    else if(mIniReader != nullptr)
-    {
-        //TODO
-    }
-    else if(mIniWriter != nullptr)
-    {
-        //TODO
     }
 }
 
@@ -190,14 +216,6 @@ inline void PersistState::Xfer(const char* name, std::set<T>& set)
             Xfer("", const_cast<T&>(entry));
         }
     }
-    else if(mIniReader != nullptr)
-    {
-        //TODO
-    }
-    else if(mIniWriter != nullptr)
-    {
-        //TODO
-    }
 }
 
 template<typename T>
@@ -223,14 +241,6 @@ inline void PersistState::Xfer(const char* name, std::unordered_map<std::string,
             mBinaryWriter->WriteMedString(entry.first);
             Xfer("", entry.second);
         }
-    }
-    else if(mIniReader != nullptr)
-    {
-        //TODO
-    }
-    else if(mIniWriter != nullptr)
-    {
-        //TODO
     }
 }
 
@@ -258,18 +268,21 @@ inline void PersistState::Xfer(const char* name, std::string_map_ci<T>& map)
             Xfer("", entry.second);
         }
     }
-    else if(mIniReader != nullptr)
-    {
-        //TODO
-    }
-    else if(mIniWriter != nullptr)
-    {
-        //TODO
-    }
 }
 
 template<typename T>
-inline void PersistState::Xfer(const char* name, T& obj)
+inline void PersistState::Xfer(const char* name, T*& asset)
 {
-    obj.OnPersist(*this);
+    std::string assetName = asset != nullptr ? asset->GetName() : "";
+    AssetScope assetScope = asset != nullptr ? asset->GetScope() : AssetScope::Global;
+
+    // Either read in or write out the asset name and scope.
+    Xfer("", assetName);
+    Xfer<AssetScope, int>("", assetScope);
+
+    // If loading, resolve the loaded name/scope to an actual asset, if at all possible.
+    if(IsLoading() && !assetName.empty())
+    {
+        asset = gAssetManager.GetOrLoadAsset<T>(assetName, assetScope);
+    }
 }

@@ -34,7 +34,6 @@
 #include "Tools.h"
 #include "UICanvas.h"
 #include "VerbManager.h"
-#include "VideoPlayer.h"
 #include "Window.h"
 
 GEngine* GEngine::sInstance = nullptr;

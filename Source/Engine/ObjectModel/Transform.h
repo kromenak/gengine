@@ -1,6 +1,4 @@
 //
-// Transform.h
-//
 // Clark Kromenaker
 //
 // Manages an actor's position, rotation, and scale

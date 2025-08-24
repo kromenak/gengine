@@ -205,6 +205,46 @@ void PersistState::Xfer(const char* name, uint32_t& value)
     }
 }
 
+void PersistState::Xfer(const char* name, int64_t& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value = mBinaryReader->ReadLong();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteLong(value);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, uint64_t& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value = mBinaryReader->ReadULong();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteULong(value);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
 void PersistState::Xfer(const char* name, float& value)
 {
     if(mBinaryReader != nullptr)
@@ -268,6 +308,51 @@ void PersistState::Xfer(const char* name, Vector3& value)
     else if(mIniWriter != nullptr)
     {
         //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, Quaternion& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value.x = mBinaryReader->ReadFloat();
+        value.y = mBinaryReader->ReadFloat();
+        value.z = mBinaryReader->ReadFloat();
+        value.w = mBinaryReader->ReadFloat();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value.x);
+        mBinaryWriter->WriteFloat(value.y);
+        mBinaryWriter->WriteFloat(value.z);
+        mBinaryWriter->WriteFloat(value.w);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, Matrix4& value)
+{
+    float* vals = value;
+    if(mBinaryReader != nullptr)
+    {
+        for(int i = 0; i < 16; ++i)
+        {
+            vals[i] = mBinaryReader->ReadFloat();
+        }
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        for(int i = 0; i < 16; ++i)
+        {
+            mBinaryWriter->WriteFloat(vals[i]);
+        }
     }
 }
 
