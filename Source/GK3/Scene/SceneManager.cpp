@@ -73,13 +73,14 @@ void SceneManager::UpdateLoading()
     }
 }
 
-void SceneManager::LoadScene(const std::string& name, std::function<void()> callback)
+void SceneManager::LoadScene(const std::string& name, const std::function<void()>& callback, bool callEnterOnSceneLoad)
 {
     mSceneToLoad = name;
     mSceneLoadedCallback = callback;
+    mCallEnterOnSceneLoad = callEnterOnSceneLoad;
 }
 
-void SceneManager::UnloadScene(std::function<void()> callback)
+void SceneManager::UnloadScene(const std::function<void()>& callback)
 {
     mUnloadScene = true;
     mSceneUnloadedCallback = callback;
@@ -97,9 +98,21 @@ void SceneManager::LoadSceneInternal()
         mScene->Load();
     });
 
-    // Once loading is done, init scene and away we go.
+    // Wait for background loading to complete.
     Loader::DoAfterLoading([this](){
+
+        // Init the scene.
+        // This is basically a continuation of the scene "Load", but with stuff to do on the main thread.
         mScene->Init();
+
+        // If desired (usually yes), call the scene "Enter" function.
+        // This acts like we just entered the scene from some other location. Usually the case, but not for loading save games.
+        if(mCallEnterOnSceneLoad)
+        {
+            mScene->Enter();
+        }
+
+        // Done loading.
         mSceneLoading = false;
 
         // Execute scene load callback, if any.

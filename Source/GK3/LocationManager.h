@@ -77,7 +77,8 @@ private:
     std::string mChangeLocationTo;
     std::function<void()> mChangeLocationCallback;
 
-    void ChangeLocationInternal(const std::string& location, std::function<void()> callback);
+    void ChangeLocationInternal(const std::string& location, const std::function<void()>& callback);
+    void LoadScene(const std::string& location, const std::function<void()>& callback);
 };
 
 extern LocationManager gLocationManager;

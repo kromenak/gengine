@@ -180,6 +180,7 @@ void Scene::Load()
         {
             BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
             if(actor == nullptr) { break; }
+            mPropsAndActors.push_back(actor);
             mBSPActors.push_back(actor);
 
             actor->SetNoun(modelDef->noun);
@@ -210,7 +211,7 @@ void Scene::Load()
                 // Otherwise, this hit test should be in the BSP.
                 BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
                 if(actor == nullptr) { break; }
-
+                mPropsAndActors.push_back(actor);
                 mBSPActors.push_back(actor);
                 mHitTestActors.push_back(actor);
 
@@ -257,9 +258,6 @@ void Scene::Load()
         actor->SetPosition(scenePosition->position);
         actor->SetRotation(scenePosition->heading.ToQuaternion());
     }
-
-    // Init construction system.
-    mConstruction.Init(this, mSceneData);
 }
 
 void Scene::Unload()
@@ -284,14 +282,12 @@ void Scene::Unload()
 
 void Scene::Init()
 {
+    // Init construction system.
+    mConstruction.Init(this, mSceneData);
+
     // Create status overlay actor.
     // Do this after setting location so it shows the correct location!
     mStatusOverlay = new StatusOverlay();
-
-    // Increment location counter after resolving scene data.
-    // Despite SIFs sometimes doing "zero-checks," other NVC and SHP scripts typically do "one-checks".
-    // E.g. run on "1st time enter" checks count == 1.
-    gLocationManager.IncLocationCount(mEgoName, mLocation, mTimeblock);
 
     // Set BSP to be rendered.
     gRenderer.SetBSP(mSceneData->GetBSP());
@@ -355,6 +351,14 @@ void Scene::Init()
 
     // If there's an "Init" SceneFunction for this Scene, execute it.
     SceneFunctions::Execute("Init");
+}
+
+void Scene::Enter()
+{
+    // Increment location counter after resolving scene data.
+    // Despite SIFs sometimes doing "zero-checks," other NVC and SHP scripts typically do "one-checks".
+    // E.g. run on "1st time enter" checks count == 1.
+    gLocationManager.IncLocationCount(mEgoName, mLocation, mTimeblock);
 
     // Check for and run "scene enter" actions.
     gActionManager.ExecuteAction("SCENE", "ENTER");
@@ -641,26 +645,6 @@ SceneCastResult Scene::RaycastAABBs(const Ray& ray, GKObject** ignore, int ignor
         }
     }
 
-    // Raycast against all BSP.
-    for(BSPActor* object : mBSPActors)
-    {
-        // Ignore inactive objects.
-        if(!object->IsActive()) { continue; }
-
-        // Completely ignore anything in the ignore list. It doesn't exist to us.
-        if(IsInIgnoreList(ignore, ignoreCount, object)) { continue; }
-
-        float t;
-        if(Intersect::TestRayAABB(ray, object->GetAABB(), t))
-        {
-            if(t < result.hitInfo.t)
-            {
-                result.hitObject = object;
-                result.hitInfo.t = t;
-            }
-        }
-    }
-
     if(result.hitObject != nullptr)
     {
         // If an object was hit, we should still check the BSP in general to see if some geometry is obscuring the object.
@@ -840,13 +824,6 @@ GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
             return object;
         }
     }
-    for(auto& object : mBSPActors)
-    {
-        if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
-        {
-            return object;
-        }
-    }
     return nullptr;
 }
 
@@ -865,13 +842,6 @@ GKProp* Scene::GetPropByModelName(const std::string& modelName) const
 GKObject* Scene::GetSceneObjectByNoun(const std::string& noun) const
 {
     for(auto& object : mPropsAndActors)
-    {
-        if(StringUtil::EqualsIgnoreCase(object->GetNoun(), noun))
-        {
-            return object;
-        }
-    }
-    for(auto& object : mBSPActors)
     {
         if(StringUtil::EqualsIgnoreCase(object->GetNoun(), noun))
         {

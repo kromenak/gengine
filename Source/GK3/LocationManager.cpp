@@ -332,7 +332,7 @@ void LocationManager::OnPersist(PersistState& ps)
     ps.Xfer(PERSIST_VAR(mActorLocations));
 }
 
-void LocationManager::ChangeLocationInternal(const std::string& location, std::function<void()> callback)
+void LocationManager::ChangeLocationInternal(const std::string& location, const std::function<void()>& callback)
 {
     // Show scene transitioner (except when transitioning from the Map screen).
     if(!StringUtil::EqualsIgnoreCase(mLocation, "map"))
@@ -352,11 +352,7 @@ void LocationManager::ChangeLocationInternal(const std::string& location, std::f
     //HACK: Fixes premature timeblock completion in 102P if last action performed is follow.
     if(gGK3UI.FollowingOnDrivingScreen())
     {
-        // Change scene and done.
-        gSceneManager.LoadScene(mChangeLocationTo, [callback](){
-            gGK3UI.HideSceneTransitioner();
-            if(callback != nullptr) { callback(); }
-        });
+        LoadScene(location, callback);
         return;
     }
 
@@ -390,11 +386,15 @@ void LocationManager::ChangeLocationInternal(const std::string& location, std::f
         }
         else
         {
-            // Otherwise, we can move ahead with changing the scene.
-            gSceneManager.LoadScene(location, [callback](){
-                gGK3UI.HideSceneTransitioner();
-                if(callback != nullptr) { callback(); }
-            });
+            LoadScene(location, callback);
         }
+    });
+}
+
+void LocationManager::LoadScene(const std::string& location, const std::function<void()>& callback)
+{
+    gSceneManager.LoadScene(location, [callback](){
+        gGK3UI.HideSceneTransitioner();
+        if(callback != nullptr) { callback(); }
     });
 }

@@ -59,6 +59,7 @@ public:
     bool IsLoaded() const { return mSceneData != nullptr; }
 
     void Init();
+    void Enter();
     void Update(float deltaTime);
 
     bool InitEgoPosition(const std::string& positionName);

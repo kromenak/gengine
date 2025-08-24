@@ -20,8 +20,8 @@ public:
     void Update(float deltaTime);
     void UpdateLoading();
 
-    void LoadScene(const std::string& name, std::function<void()> callback = nullptr);
-    void UnloadScene(std::function<void()> callback = nullptr);
+    void LoadScene(const std::string& name, const std::function<void()>& callback = nullptr, bool callEnterOnSceneLoad = true);
+    void UnloadScene(const std::function<void()>& callback = nullptr);
     bool IsSceneLoading() const { return mSceneLoading; }
 
     Scene* GetScene() const { return mScene; }
@@ -46,6 +46,10 @@ private:
     // Callbacks to execute when scene load/unload completes.
     std::function<void()> mSceneLoadedCallback = nullptr;
     std::function<void()> mSceneUnloadedCallback = nullptr;
+
+    // If true, the scene "Enter" function will be called after load.
+    // We usually want to do this, unless we are loading a save game.
+    bool mCallEnterOnSceneLoad = true;
 
     // A list of all actors that currently exist in the game.
     std::vector<Actor*> mActors;
