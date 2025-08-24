@@ -6,6 +6,7 @@
 #pragma once
 #include "Actor.h"
 
+class PersistState;
 class Texture;
 
 class Chessboard : public Actor
@@ -20,6 +21,8 @@ public:
     void HideCurrentTile();
     void CenterEgo();
     void BadLand();
+
+    void OnPersist(PersistState& ps);
 
 protected:
     void OnUpdate(float deltaTime) override;

@@ -11,11 +11,14 @@
 #include "Vector2.h"
 
 class GKActor;
+class PersistState;
 
 class Bridge : public Actor
 {
 public:
     Bridge();
+
+    void OnPersist(PersistState& ps);
 
 protected:
     void OnUpdate(float deltaTime) override;

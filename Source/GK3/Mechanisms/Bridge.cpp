@@ -9,6 +9,7 @@
 #include "GKActor.h"
 #include "GKObject.h"
 #include "InputManager.h"
+#include "PersistState.h"
 #include "SceneManager.h"
 
 namespace
@@ -57,6 +58,11 @@ Bridge::Bridge()
     SetTilePosition(6, 0, 8);
     SetTilePosition(7, 0, 9);
     SetTilePosition(8, 1, 10);
+}
+
+void Bridge::OnPersist(PersistState& ps)
+{
+    //TODO
 }
 
 void Bridge::OnUpdate(float deltaTime)

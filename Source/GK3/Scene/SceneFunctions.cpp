@@ -70,6 +70,14 @@ namespace
     // CS2
     LaserHead* cs2LaserHeads[5] = { 0 };
 
+    void CS2_OnPersist(PersistState& ps)
+    {
+        for(LaserHead* laserHead : cs2LaserHeads)
+        {
+            laserHead->OnPersist(ps);
+        }
+    }
+
     void CS2_Init(const std::function<void()>& callback)
     {
         // Find each head in the scene and add the LaserHead component to each.
@@ -82,6 +90,9 @@ namespace
                 cs2LaserHeads[i] = head->AddComponent<LaserHead>(i);
             }
         }
+
+        gSceneManager.GetScene()->AddPersistCallback(CS2_OnPersist);
+
         if(callback != nullptr) { callback(); }
     }
 
@@ -160,6 +171,12 @@ namespace
     GKObject* angelEdges[6] = { 0 }; // left-to-top, top-to-right, right-to-bottom, bottom-to-left, top-to-bottom, left-to-right
     int lastDotIndex = -1;
     bool saidInitialDialogue = false;
+
+    void CHU_OnPersist(PersistState& ps)
+    {
+        ps.Xfer(PERSIST_VAR(lastDotIndex));
+        ps.Xfer(PERSIST_VAR(saidInitialDialogue));
+    }
 
     void CHU_Erase(const std::function<void()>& callback)
     {
@@ -335,6 +352,8 @@ namespace
         }
 
         saidInitialDialogue = false;
+
+        gSceneManager.GetScene()->AddPersistCallback(CHU_OnPersist);
         if(callback != nullptr) { callback(); }
     }
 
@@ -405,9 +424,15 @@ namespace
     // TE1 has a giant chessboard puzzle. All the logic is encompassed in this Chessboard class.
     Chessboard* chessboard = nullptr;
 
+    void TE1_OnPersist(PersistState& ps)
+    {
+        chessboard->OnPersist(ps);
+    }
+
     void TE1_Init(const std::function<void()>& callback)
     {
         chessboard = new Chessboard();
+        gSceneManager.GetScene()->AddPersistCallback(TE1_OnPersist);
         if(callback != nullptr) { callback(); }
     }
 
@@ -462,9 +487,17 @@ namespace
 
 namespace
 {
+    Pendulum* pendulum = nullptr;
+
+    void TE3_OnPersist(PersistState& ps)
+    {
+        pendulum->OnPersist(ps);
+    }
+
     void TE3_Init(const std::function<void()>& callback)
     {
-        new Pendulum();
+        pendulum = new Pendulum();
+        gSceneManager.GetScene()->AddPersistCallback(TE3_OnPersist);
         if(callback != nullptr) { callback(); }
     }
 }

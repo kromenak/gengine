@@ -16,11 +16,14 @@
 class Animation;
 class Cursor;
 class GKObject;
+class PersistState;
 
 class Pendulum : public Actor
 {
 public:
     Pendulum();
+
+    void OnPersist(PersistState& ps);
 
 protected:
     void OnUpdate(float deltaTime) override;

@@ -166,6 +166,19 @@ void Chessboard::BadLand()
     OpenTrapdoor(row, col);
 }
 
+void Chessboard::OnPersist(PersistState& ps)
+{
+    for(int x = 0; x < 8; ++x)
+    {
+        for(int y = 0; y < 8; ++y)
+        {
+            ps.Xfer("", mLandedCounts[x][y]);
+        }
+    }
+
+    ps.Xfer(PERSIST_VAR(mSwordCount));
+}
+
 void Chessboard::OnUpdate(float deltaTime)
 {
     // The code below updates which tile the mouse is hovering, whether it's a valid move, and what animation to use when jumping to it.

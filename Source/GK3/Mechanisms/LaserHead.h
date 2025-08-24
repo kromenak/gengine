@@ -13,6 +13,7 @@
 #include <functional>
 
 class GKObject;
+class PersistState;
 
 class LaserHead : public Component
 {
@@ -25,6 +26,8 @@ public:
 
     void TurnLeft(const std::function<void()>& callback);
     void TurnRight(const std::function<void()>& callback);
+
+    void OnPersist(PersistState& ps);
 
 protected:
     void OnUpdate(float deltaTime) override;

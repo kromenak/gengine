@@ -11,6 +11,7 @@
 #include "InputManager.h"
 #include "Interpolate.h"
 #include "MeshRenderer.h"
+#include "PersistState.h"
 #include "SceneManager.h"
 #include "Timers.h"
 
@@ -95,6 +96,14 @@ Pendulum::Pendulum() : Actor("Pendulum Puzzle")
     // The floor is kind of weird in this level (only the center altar area).
     // To avoid some weirdness with the camera height-adjusting, ignore height for camera in this scene.
     gSceneManager.GetScene()->GetCamera()->SetIgnoreFloor(true);
+}
+
+void Pendulum::OnPersist(PersistState& ps)
+{
+    ps.Xfer<PendulumState, int>(PERSIST_VAR(mPendulumState));
+    ps.Xfer(PERSIST_VAR(mPlatformRotation));
+    ps.Xfer(PERSIST_VAR(mGabePlatformIndex));
+    ps.Xfer<GabeState, int>(PERSIST_VAR(mGabeState));
 }
 
 void Pendulum::OnUpdate(float deltaTime)

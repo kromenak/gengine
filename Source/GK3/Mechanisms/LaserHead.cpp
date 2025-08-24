@@ -100,6 +100,12 @@ void LaserHead::TurnRight(const std::function<void()>& callback)
     Turn(-1, callback);
 }
 
+void LaserHead::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mTurnIndex));
+    ps.Xfer(PERSIST_VAR(mTurnTimer));
+}
+
 void LaserHead::OnUpdate(float deltaTime)
 {
     // Turn the head if the timer has been set.
