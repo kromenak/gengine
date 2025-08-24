@@ -577,7 +577,7 @@ void BSP::RenderTranslucent()
 void BSP::OnPersist(PersistState& ps)
 {
     // The only mutable state in BSP is the surfaces.
-    ps.Xfer(PERSIST_VAR(mSurfaces));
+    ps.Xfer(PERSIST_VAR(mSurfaces), true);
 }
 
 uint32_t BSP::GetObjectIndex(const std::string& objectName) const
