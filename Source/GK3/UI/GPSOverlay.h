@@ -10,6 +10,7 @@
 
 class Font;
 struct IniSection;
+class PersistState;
 class Texture;
 class UIButton;
 class UIImage;
@@ -23,10 +24,15 @@ public:
     void Show();
     void Hide();
 
+    static void OnPersist(PersistState& ps);
+
 protected:
     void OnUpdate(float deltaTime) override;
 
 private:
+    // Tracks whether the GPS overlay ought to be open right now.
+    static bool sShowing;
+
     // The map shown on the GPS.
     UIImage* mMapImage = nullptr;
 

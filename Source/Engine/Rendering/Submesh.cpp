@@ -72,6 +72,17 @@ Vector3 Submesh::GetVertexPosition(int index) const
     return Vector3(mPositions[offset], mPositions[offset + 1], mPositions[offset + 2]);
 }
 
+void Submesh::SetVertexPosition(int index, const Vector3& position)
+{
+    if(mPositions != nullptr && index >= 0 && index < mVertexArray.GetVertexCount())
+    {
+        int offset = index * 3;
+        mPositions[offset] = position.x;
+        mPositions[offset + 1] = position.y;
+        mPositions[offset + 2] = position.z;
+    }
+}
+
 Vector3 Submesh::GetVertexNormal(int index) const
 {
     if(mNormals == nullptr) { return Vector3::Zero; }

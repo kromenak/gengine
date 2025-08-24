@@ -29,6 +29,7 @@ class GameCamera;
 class GKActor;
 class GKObject;
 class GKProp;
+class PersistState;
 class Ray;
 struct SceneModel;
 class SIF;
@@ -114,15 +115,18 @@ public:
     StatusOverlay* GetStatusOverlay() const { return mStatusOverlay; }
     SceneConstruction& GetConstruction() { return mConstruction; }
 
+    void OnPersist(PersistState& ps);
+    void AddPersistCallback(const std::function<void(PersistState&)>& callback) { mPersistCallbacks.push_back(callback); }
+
 private:
+    // Layer for the scene.
+    SceneLayer mLayer;
+
     // Location is 3-letter code (e.g. DIN).
     std::string mLocation;
 
     // Timeblock is day/time code (e.g. 110A).
     Timeblock mTimeblock;
-
-    // Layer for the scene.
-    SceneLayer mLayer;
 
     // Contains scene data references for the current location/timeblock.
     // If not null, means we're loaded!
@@ -137,14 +141,14 @@ private:
     // The soundtrack player for the scene.
     SoundtrackPlayer* mSoundtrackPlayer = nullptr;
 
-    // The game camera used to move around.
-    GameCamera* mCamera = nullptr;
-
     // The status overlay for the scene.
     StatusOverlay* mStatusOverlay = nullptr;
 
-    // All actors and props in one list.
-    // Sometimes, we want to treat these guys in a homogenous manner, since both have Models, can be interacted with, etc.
+    // The game camera used to move around.
+    GameCamera* mCamera = nullptr;
+
+    // All actors and props in one list. Includes GKProps, GKActors, and BSPActors.
+    // Sometimes, we want to treat these guys in a homogenous manner, since all have a common API in some cases.
     std::vector<GKObject*> mPropsAndActors;
 
     // Just "actors".
@@ -183,6 +187,10 @@ private:
 
     // If set, Ego won't walk when the floor is clicked - instead this callback will be called.
     std::function<void()> mWalkOverrideCallback = nullptr;
+
+    // During save/load, scene-specific objects can register to be included in the save/load code.
+    // For example, in the Chessboard scene, the Chessboard object registers a callback so it can save/load chessboard state as part of a save.
+    std::vector<std::function<void(PersistState&)>> mPersistCallbacks;
 
     void ApplyAmbientLightColorToActors();
     BSP* GetBSP() const;

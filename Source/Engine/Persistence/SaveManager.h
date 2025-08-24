@@ -10,6 +10,8 @@
 #include "Config.h" // Including SaveManager.h usually means you also need Config.h
 #include "PersistHeader.h"
 
+class PersistState;
+
 // Sound Preferences
 #define PREFS_SOUND "Sound"
     #define PREFS_AUDIO_ENABLED "Sound Enabled"
@@ -103,11 +105,14 @@ private:
     // Next number to use when making a save file.
     int mNextSaveNumber = 1;
 
+    // Loading a save game takes place over several seconds (mainly due to scene load being async).
+    // So we need to store the persist state until the scene loads and scene state can be restored.
+    PersistState* mLoadPersistState = nullptr;
+
     void RescanSaveDirectory();
 
     void SaveInternal(const std::string& saveDescription);
     void LoadInternal(const std::string& loadPath);
-    void LoadInternal_PostSceneLoad(const std::string& loadPath);
 
     void OnPersist(PersistState& ps);
 };

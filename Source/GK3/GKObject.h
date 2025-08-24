@@ -14,6 +14,7 @@
 
 class Color32;
 class MeshRenderer;
+class PersistState;
 class VertexAnimation;
 struct VertexAnimParams;
 
@@ -47,6 +48,8 @@ public:
     virtual AABB GetAABB() const { return AABB::FromCenterAndSize(GetPosition(), Vector3::One); }
 
     Vector3 GetAudioPosition() const;
+
+    virtual void OnPersist(PersistState& ps);
 
 private:
     // A noun is used to refer to the objects in NVC logic.

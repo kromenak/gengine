@@ -18,6 +18,7 @@ class Camera;
 class GKObject;
 class Model;
 class OptionBar;
+class PersistState;
 
 class GameCamera : public Actor
 {
@@ -58,6 +59,8 @@ public:
 
     void SaveFov();
     void RestoreFov();
+
+    void OnPersist(PersistState& ps);
 
 protected:
     void OnUpdate(float deltaTime) override;
@@ -149,7 +152,7 @@ private:
     //////////////////
     // GLIDING
     //////////////////
-    // If true, we are performing a glide operation/
+    // If true, we are performing a glide operation.
     bool mGliding = false;
 
     // Start glide position/rotation.

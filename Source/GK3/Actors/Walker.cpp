@@ -308,6 +308,16 @@ bool Walker::IsWalkAnimation(VertexAnimation* vertexAnim) const
     return false;
 }
 
+void Walker::OnPersist(PersistState& ps)
+{
+    // The walk anims may change mid-scene sometimes, so we need to save these.
+    // For example, when Grace uses the GPS, her walk animations are changed during that time.
+    ps.Xfer(PERSIST_VAR(mWalkStartAnim));
+    ps.Xfer(PERSIST_VAR(mWalkLoopAnim));
+    ps.Xfer(PERSIST_VAR(mWalkStartTurnLeftAnim));
+    ps.Xfer(PERSIST_VAR(mWalkStartTurnRightAnim));
+}
+
 void Walker::OnEnable()
 {
     // When enabled, add to walker boundary so pathfinding goes around us.

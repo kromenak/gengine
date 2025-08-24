@@ -17,6 +17,8 @@
 
 #include "Soundtrack.h"
 
+class PersistState;
+
 struct PlayingSoundtrack
 {
 public:
@@ -62,6 +64,8 @@ public:
     void Stop(Soundtrack* soundtrack, bool force = false);
     void Stop(const std::string& soundtrackName, bool force = false);
     void StopAll(bool force = false);
+
+    void OnPersist(PersistState& ps);
 
 protected:
     void OnUpdate(float deltaTime) override;

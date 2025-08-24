@@ -12,6 +12,7 @@
 
 #include "Material.h"
 #include "Mesh.h"
+#include "PersistState.h"
 #include "Plane.h"
 #include "Ray.h"
 #include "Collisions.h"
@@ -120,6 +121,17 @@ struct BSPSurface
     {
         return (flags & kShadowTextureFlag) != 0;
     }
+
+    void OnPersist(PersistState& ps)
+    {
+        // Persist any data that might change mid-scene.
+        // Textures sometimes change due to animations, visibility/interactivity/hittests as well.
+        ps.Xfer(PERSIST_VAR(texture));
+        ps.Xfer(PERSIST_VAR(visible));
+        ps.Xfer(PERSIST_VAR(interactive));
+        ps.Xfer(PERSIST_VAR(hitTest));
+        ps.Xfer(PERSIST_VAR(walkHitTest));
+    }
 };
 
 // Represents an amount of ambient light emitted from a BSP surface.
@@ -171,6 +183,8 @@ public:
     // Rendering
     void RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirection);
     void RenderTranslucent();
+
+    void OnPersist(PersistState& ps);
 
 private:
     // Identifies the root node in the node list.

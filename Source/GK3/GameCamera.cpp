@@ -15,6 +15,7 @@
 #include "Mesh.h"
 #include "Model.h"
 #include "OptionBar.h"
+#include "PersistState.h"
 #include "Ray.h"
 #include "SaveManager.h"
 #include "SceneManager.h"
@@ -169,6 +170,38 @@ void GameCamera::SaveFov()
 void GameCamera::RestoreFov()
 {
     mCamera->SetCameraFovRadians(mSavedCameraFOV);
+}
+
+void GameCamera::OnPersist(PersistState& ps)
+{
+    // Save/load camera position.
+    // (I don't want to put OnPersist functions in every class, especially non-GK3 ones, so I use this approach sometimes.)
+    Vector3 position = GetTransform()->GetPosition();
+    ps.Xfer(PERSIST_VAR(position));
+    GetTransform()->SetPosition(position);
+
+    // Save other camera state.
+    ps.Xfer(PERSIST_VAR(mForcedCinematicMode));
+    ps.Xfer(PERSIST_VAR(mSavedCameraFOV));
+    ps.Xfer(PERSIST_VAR(mSceneInteractEnabled));
+
+    ps.Xfer(PERSIST_VAR(mYaw));
+    ps.Xfer(PERSIST_VAR(mPitch));
+    ps.Xfer(PERSIST_VAR(mHeight));
+    ps.Xfer(PERSIST_VAR(mIgnoreFloor));
+
+    ps.Xfer(PERSIST_VAR(mBoundsEnabled));
+
+    ps.Xfer(PERSIST_VAR(mGliding));
+    ps.Xfer(PERSIST_VAR(mGlideStartPos));
+    ps.Xfer(PERSIST_VAR(mGlideStartRot));
+    ps.Xfer(PERSIST_VAR(mGlidePosition));
+    ps.Xfer(PERSIST_VAR(mGlideRotation));
+    ps.Xfer(PERSIST_VAR(mGlideTimer));
+
+    ps.Xfer(PERSIST_VAR(mInspectNoun));
+    ps.Xfer(PERSIST_VAR(mInspectStartPos));
+    ps.Xfer(PERSIST_VAR(mInspectStartYawPitch));
 }
 
 void GameCamera::OnUpdate(float deltaTime)

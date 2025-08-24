@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "MeshRenderer.h"
+#include "PersistState.h"
 #include "ReportManager.h"
 
 TYPEINFO_INIT(GKObject, Actor, 31)
@@ -56,4 +57,26 @@ Vector3 GKObject::GetAudioPosition() const
     {
         return GetWorldPosition();
     }
+}
+
+void GKObject::OnPersist(PersistState& ps)
+{
+    // Every GKObject needs its position/rotation/scale saved. These can change during the scene.
+    // I don't want to put OnPersist functions in non-GK3 classes, so that's why I get/set the transform values here.
+    Vector3 position = GetTransform()->GetPosition();
+    ps.Xfer(PERSIST_VAR(position));
+    GetTransform()->SetPosition(position);
+
+    Quaternion rotation = GetTransform()->GetRotation();
+    ps.Xfer(PERSIST_VAR(rotation));
+    GetTransform()->SetRotation(rotation);
+
+    Vector3 scale = GetTransform()->GetScale();
+    ps.Xfer(PERSIST_VAR(scale));
+    GetTransform()->SetScale(scale);
+
+    // Also, the active state is an important GKObject property.
+    bool active = IsActive();
+    ps.Xfer(PERSIST_VAR(active));
+    SetActive(active);
 }

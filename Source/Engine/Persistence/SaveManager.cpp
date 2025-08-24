@@ -346,6 +346,13 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
 
     // Persist the ENTIRE game...
     OnPersist(ps);
+
+    // And also persist scene data.
+    Scene* scene = gSceneManager.GetScene();
+    if(scene != nullptr)
+    {
+        scene->OnPersist(ps);
+    }
     printf("Saved to file %s.\n", savePath.c_str());
 
     // Update entry in save list.
@@ -377,54 +384,57 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
 
 void SaveManager::LoadInternal(const std::string& loadPath)
 {
-    //TODO: It might be valuable to create the PersistState *before* unloading the current scene (for verification its a valid save).
-    //TODO: To do that, due to scope, we'd have to dynamically allocate though!
+    mLoadPersistState = new PersistState(loadPath.c_str(), PersistFormat::Binary, PersistMode::Load);
+
+    // Read past save header.
+    SaveHeader saveHeader;
+    saveHeader.OnPersist(*mLoadPersistState);
+
+    // Store the save version number in the PersistState.
+    // This allows load code to detect which version of the save file this is to try to stay compatible.
+    mLoadPersistState->SetFormatVersionNumber(saveHeader.saveVersion);
+
+    // Read past persist header.
+    PersistHeader persistHeader;
+    persistHeader.OnPersist(*mLoadPersistState);
+
+    //TODO: If we can detect that the file is corrupt or not the right type or other nefarious things, early out.
 
     // Ok, looks like we will actually load this save!
     // Let's unload the current scene to start with a clean slate.
     gSceneManager.UnloadScene([this, loadPath](){
-        // Create the persistinator.
-        PersistState ps(loadPath.c_str(), PersistFormat::Binary, PersistMode::Load);
-
-        // Read past save header.
-        SaveHeader saveHeader;
-        saveHeader.OnPersist(ps);
-
-        // Read past persist header.
-        PersistHeader persistHeader;
-        persistHeader.OnPersist(ps);
-
-        //TODO: If we can detect that the file is corrupt or not the right type or other nefarious things, early out.
-
-        // Store the save version number in the PersistState.
-        // This allows load code to detect which version of the save file this is to try to stay compatible.
-        ps.SetFormatVersionNumber(saveHeader.saveVersion);
 
         // Load everything!
-        OnPersist(ps);
+        OnPersist(*mLoadPersistState);
 
         // If this save was made while changing timeblocks, we need to show the timeblock screen instead of going directly to the gameplay scene.
         if(gGameProgress.IsChangingTimeblock())
         {
-            gGameProgress.StartTimeblock(gGameProgress.GetTimeblock(), true, [this, loadPath](){
-                LoadInternal_PostSceneLoad(loadPath);
-            });
+            gGameProgress.StartTimeblock(gGameProgress.GetTimeblock(), true, nullptr);
+            printf("Loaded save file %s.\n", loadPath.c_str());
+            delete mLoadPersistState;
         }
         else
         {
             // Load the new scene directly in this case.
-            gSceneManager.LoadScene(gLocationManager.GetLocation(), [this, loadPath](){
-                LoadInternal_PostSceneLoad(loadPath);
-            });
+            gSceneManager.LoadScene(gLocationManager.GetLocation(), [this, loadPath]() {
+
+                // Restore the scene state using the save data.
+                gSceneManager.GetScene()->OnPersist(*mLoadPersistState);
+
+                // Save versions 1-3 did not store any scene state, so actor positions weren't stored in save data.
+                // These older save versions rely on Enter being called to ensure actors are positioned correctly.
+                if(mLoadPersistState->GetFormatVersionNumber() < 4)
+                {
+                    gSceneManager.GetScene()->Enter();
+                }
+
+                // Done with persist state - delete it.
+                delete mLoadPersistState;
+                printf("Loaded save file %s.\n", loadPath.c_str());
+            }, false);
         }
     });
-}
-
-void SaveManager::LoadInternal_PostSceneLoad(const std::string& loadPath)
-{
-    //TODO: Do we want to load any *scene* state (like positions or states of Actors)?
-    //TODO: The above solution works pretty well, but Actors will not necessarily be in the same locations or states in the newly loaded scene.
-    printf("Loaded save file %s.\n", loadPath.c_str());
 }
 
 void SaveManager::OnPersist(PersistState& ps)

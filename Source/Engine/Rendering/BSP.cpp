@@ -574,6 +574,12 @@ void BSP::RenderTranslucent()
     #endif
 }
 
+void BSP::OnPersist(PersistState& ps)
+{
+    // The only mutable state in BSP is the surfaces.
+    ps.Xfer(PERSIST_VAR(mSurfaces));
+}
+
 uint32_t BSP::GetObjectIndex(const std::string& objectName) const
 {
     // Even though there could be "size_t" elements in an array, the BSP file format only supports "uint32_t" elements.

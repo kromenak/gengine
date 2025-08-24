@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "Font.h"
 #include "GKActor.h"
+#include "GK3UI.h"
 #include "IniParser.h"
 #include "LocationManager.h"
 #include "SceneManager.h"
@@ -13,6 +14,8 @@
 #include "UILabel.h"
 #include "UIUtil.h"
 #include "Window.h"
+
+bool GPSOverlay::sShowing = false;
 
 GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
 {
@@ -85,6 +88,7 @@ GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
 void GPSOverlay::Show()
 {
     SetActive(true);
+    sShowing = true;
 
     // Figure out our current location.
     std::string location = gLocationManager.GetLocation();
@@ -118,6 +122,20 @@ void GPSOverlay::Hide()
     // But after a moment, we hide the device entirely.
     mPowerDelayTimer = kPowerDelay;
     mPoweringOn = false;
+
+    sShowing = false;
+}
+
+/*static*/ void GPSOverlay::OnPersist(PersistState& ps)
+{
+    // Save whether GPS is showing or not.
+    ps.Xfer(PERSIST_VAR(sShowing));
+
+    // If loading, and GPS should be showing, make sure it is shown.
+    if(ps.IsLoading() && sShowing)
+    {
+        gGK3UI.ShowGPSOverlay();
+    }
 }
 
 void GPSOverlay::OnUpdate(float deltaTime)

@@ -20,6 +20,7 @@ class GKActor;
 class GKObject;
 class GKProp;
 class Heading;
+class PersistState;
 class Texture;
 class VertexAnimation;
 class WalkerBoundary;
@@ -52,6 +53,8 @@ public:
     Vector3 GetDestination() const { return mPath.size() > 0 ? mPath.front() : Vector3::Zero; }
 
     bool IsWalkAnimation(VertexAnimation* vertexAnim) const;
+
+    void OnPersist(PersistState& ps);
 
 protected:
     void OnEnable() override;

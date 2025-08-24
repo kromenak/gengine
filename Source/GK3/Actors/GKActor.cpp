@@ -14,6 +14,7 @@
 #include "GKProp.h"
 #include "MeshRenderer.h"
 #include "Model.h"
+#include "PersistState.h"
 #include "SceneManager.h"
 #include "StringUtil.h"
 #include "VertexAnimation.h"
@@ -527,6 +528,42 @@ void GKActor::StopAnimation(VertexAnimation* anim)
 AABB GKActor::GetAABB() const
 {
     return mMeshRenderer->GetAABB();
+}
+
+void GKActor::OnPersist(PersistState& ps)
+{
+    GKObject::OnPersist(ps);
+
+    // Save/load fidgets being used and which one is active.
+    ps.Xfer(PERSIST_VAR(mIdleFidget));
+    ps.Xfer(PERSIST_VAR(mTalkFidget));
+    ps.Xfer(PERSIST_VAR(mListenFidget));
+    ps.Xfer<FidgetType, int>(PERSIST_VAR(mActiveFidget));
+
+    // Save/load shadow active state.
+    bool shadowActive = mShadowActor->IsActive();
+    ps.Xfer(PERSIST_VAR(shadowActive));
+    mShadowActor->SetActive(shadowActive);
+
+    // Persist walker state.
+    mWalker->OnPersist(ps);
+
+    // If loading, we need to potentially refresh state based on loaded data.
+    if(ps.IsLoading())
+    {
+        // Position/rotation/scale were loaded by the GKObject class.
+        // But we need to make sure our model's position/rotation match those values.
+        SetModelPositionToActorPosition();
+        SetModelRotationToActorRotation();
+
+        // Make sure these values are up-to-date, or else they may have stale values from the actor's init code.
+        // Remember, we are loading an actor's state after scene load/init code has already executed.
+        mStartVertexAnimPosition = GetPosition();
+        mStartVertexAnimRotation = GetRotation();
+
+        // Play the active fidget if it's been changed.
+        CheckUpdateActiveFidget(mActiveFidget);
+    }
 }
 
 void GKActor::OnActive()

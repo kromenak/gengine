@@ -37,6 +37,7 @@ public:
 
     unsigned int GetVertexCount() const { return mVertexArray.GetVertexCount(); }
     Vector3 GetVertexPosition(int index) const;
+    void SetVertexPosition(int index, const Vector3& position);
     Vector3 GetVertexNormal(int index) const;
     Vector2 GetVertexUV(int index) const;
 

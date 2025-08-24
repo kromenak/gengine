@@ -12,6 +12,7 @@ class GAS;
 class GasPlayer;
 class MeshRenderer;
 class Model;
+class PersistState;
 class SceneData;
 struct SceneModel;
 class VertexAnimator;
@@ -36,6 +37,8 @@ public:
     void StopAnimation(VertexAnimation* anim = nullptr) override;
     MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
     AABB GetAABB() const override;
+
+    void OnPersist(PersistState& ps) override;
 
 private:
     // The prop's mesh renderer.

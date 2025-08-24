@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "GKObject.h"
+#include "PersistState.h"
 #include "StringUtil.h"
 
 PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack, bool nonLooping) :
@@ -228,6 +229,31 @@ void SoundtrackPlayer::StopAll(bool force)
         playing.Stop(force);
     }
     mPlaying.clear();
+}
+
+void SoundtrackPlayer::OnPersist(PersistState& ps)
+{
+    // Get all currently playing soundtracks.
+    std::vector<Soundtrack*> soundtracks;
+    for(PlayingSoundtrack& playing : mPlaying)
+    {
+        soundtracks.push_back(playing.mSoundtrack);
+    }
+
+    // Either save or load the entire list of soundtracks.
+    ps.Xfer(PERSIST_VAR(soundtracks));
+
+    // If we're loading, start playing the loaded soundtracks.
+    // This DOES mean loaded games always play soundtracks from the beginning.
+    // As it turns out, this is also how the original game behaves.
+    if(ps.IsLoading())
+    {
+        StopAll(true);
+        for(Soundtrack* st : soundtracks)
+        {
+            Play(st);
+        }
+    }
 }
 
 void SoundtrackPlayer::OnUpdate(float deltaTime)

@@ -19,10 +19,12 @@
 #include "GK3UI.h"
 #include "GKActor.h"
 #include "GKProp.h"
+#include "GPSOverlay.h"
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "MeshRenderer.h"
 #include "Model.h"
+#include "PersistState.h"
 #include "Profiler.h"
 #include "Renderer.h"
 #include "ReportManager.h"
@@ -32,7 +34,6 @@
 #include "SoundtrackPlayer.h"
 #include "StatusOverlay.h"
 #include "StringUtil.h"
-#include "VideoPlayer.h"
 #include "Walker.h"
 #include "WalkerBoundary.h"
 
@@ -1137,6 +1138,86 @@ void Scene::ClearOverrideBSP()
 
     // Revert to rendering the original scene's BSP.
     gRenderer.SetBSP(mSceneData != nullptr ? mSceneData->GetBSP() : nullptr);
+}
+
+void Scene::OnPersist(PersistState& ps)
+{
+    // Scene data save/load was introduced in format version 4, so early out if this is older save data.
+    if(ps.GetFormatVersionNumber() < 4) { return; }
+
+    // DISCLAIMER & WARNING!
+    // This save/load code is very different from the original game (see PERSISTENCE.DOC).
+    // The original game used a very generalized save solution. I hoped to replicate it, but it was a very complex undertaking.
+    // Maybe someday that can happen, but for now, this save code is much more targeted. And our requirements are different from the original devs:
+    // 1) The original devs may have been developing a save system to be used by many future games. This one is only for GK3.
+    // 2) The original devs needed a save system that worked with a game under active development. This one is only for a final product.
+
+    // This code makes several assumptions:
+    // 1) Scene::Load and Scene::Init have already completed for the current scene.
+    // 2) Certain objects (camera, BSP, soundtrack player, etc) definitely exist in their initial states.
+    // 3) Particularly when loading: the exact same set of objects present at save time exist.
+    //    This is a big one! Any change to SIF or dynamically spawned objects will likely break the save in some way.
+
+    // Save/load the game camera. This includes camera position, pitch/yaw, and other state data.
+    mCamera->OnPersist(ps);
+
+    // Save/load playing soundtracks.
+    // This is most important for scenes that change their music mid-way through the scene (Montreaux's office for example).
+    mSoundtrackPlayer->OnPersist(ps);
+
+    // Save/load BSP state.
+    // Needed because BSP textures/visibility sometimes change during a scene.
+    mSceneData->GetBSP()->OnPersist(ps);
+    //TODO: Do we need to worry about override BSP?
+
+    // We don't care about 99% of overlays because the game doesn't let you save during them.
+    // One exception is the GPS. This ensures that the GPS is visible if you save when it is showing.
+    GPSOverlay::OnPersist(ps);
+
+    //TODO: Should we restore Sidney state, if you save inside Sidney?
+
+    // SAVE/LOAD GKOBJECTS
+    // Get object count.
+    uint64_t objectCount = mPropsAndActors.size();
+    ps.Xfer("GKObjectCount", objectCount);
+
+    // Iterate each scene object, one by one.
+    for(uint64_t i = 0; i < objectCount; ++i)
+    {
+        // Either save or load the scene object name.
+        std::string name = mPropsAndActors[i]->GetName();
+        ps.Xfer("GKObjectName", name);
+
+        // If we're saving, just save this actor's data out - easy!
+        if(ps.IsSaving())
+        {
+            mPropsAndActors[i]->OnPersist(ps);
+        }
+        else
+        {
+            // If loading, we need to find the object with the specified name first.
+            GKObject* object = GetSceneObjectByModelName(name);
+
+            // If we can't find the object, we're screwed!
+            // At the moment, there's no way to "skip past" an object in the save data stream. So we just have to early out with an error.
+            //TODO: Any way to recover here?
+            if(object == nullptr)
+            {
+                printf("Error when loading save data! Object %s doesn't exist in the scene.\n", name.c_str());
+                return;
+            }
+
+            // Load the object's state.
+            object->OnPersist(ps);
+        }
+    }
+
+    // Occasionally, special scene objects need to also save/load their state. They'll add a callback if so.
+    // Some examples: Church Angels, Montreaux Office Laser Heads, Chessboard, Pendulum, Invisible Bridge.
+    for(auto& callback : mPersistCallbacks)
+    {
+        callback(ps);
+    }
 }
 
 void Scene::ApplyAmbientLightColorToActors()

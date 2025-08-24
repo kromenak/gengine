@@ -18,6 +18,7 @@ class FaceController;
 class GAS;
 class GasPlayer;
 class Model;
+class PersistState;
 struct SceneActor;
 class SceneData;
 struct ScenePosition;
@@ -91,6 +92,8 @@ public:
     void SetForcedFacingDir(const Vector3& dir) { mForcedFacingDir = dir; }
 
     void SetShadowEnabled(bool enabled) { mShadowActor->SetActive(enabled); }
+
+    void OnPersist(PersistState& ps) override;
 
 protected:
     void OnActive() override;
