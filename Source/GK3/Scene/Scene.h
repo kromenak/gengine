@@ -192,6 +192,9 @@ private:
     // For example, in the Chessboard scene, the Chessboard object registers a callback so it can save/load chessboard state as part of a save.
     std::vector<std::function<void(PersistState&)>> mPersistCallbacks;
 
+    GKObject* CreateSceneModel(const SceneModel* sceneModel);
+    GKActor* CreateSceneActor(const SceneActor* sceneActor);
+
     void ApplyAmbientLightColorToActors();
     BSP* GetBSP() const;
     void ExecuteAction(const Action* action);

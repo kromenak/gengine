@@ -247,8 +247,10 @@ public:
     GeneralBlock FindCurrentGeneralBlock() const;
 
     const std::vector<ConditionalBlock<SceneActor>>& GetActorBlocks() const { return mActors; }
+    const SceneActor* FindActor(const std::string& modelName) const;
 
     const std::vector<ConditionalBlock<SceneModel>>& GetModelBlocks() const { return mModels; }
+    const SceneModel* FindModel(const std::string& modelName) const;
 
     const std::vector<ConditionalBlock<ScenePosition>>& GetPositionBlocks() const { return mPositions; }
 

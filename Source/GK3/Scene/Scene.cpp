@@ -142,30 +142,7 @@ void Scene::Load()
     {
         // NEVER spawn an ego who is not our current ego!
         if(actorDef->ego && actorDef != mEgoSceneActor) { continue; }
-
-        // Create actor.
-        GKActor* actor = new GKActor(actorDef);
-        mActors.push_back(actor);
-        mPropsAndActors.push_back(actor);
-
-        // If this is ego, save a reference to it.
-        if(actorDef->ego && actorDef == mEgoSceneActor)
-        {
-            mEgo = actor;
-        }
-
-        // Create DOR prop, if one exists for this actor.
-        // The DOR model assists with calculating an actor's facing direction, particularly while walking.
-        Model* walkerDorModel = gAssetManager.LoadModel("DOR_" + actor->GetMeshRenderer()->GetModelName());
-        if(walkerDorModel != nullptr)
-        {
-            GKProp* walkerDOR = new GKProp(walkerDorModel);
-            actor->SetModelFacingHelper(walkerDOR);
-            mPropsAndActors.push_back(walkerDOR);
-
-            // Disable DOR mesh renderer so you can't see the placeholder model.
-            walkerDOR->GetMeshRenderer()->SetEnabled(false);
-        }
+        CreateSceneActor(actorDef);
     }
 
     // Iterate over scene model data and prep the scene.
@@ -174,80 +151,7 @@ void Scene::Load()
     const std::vector<const SceneModel*>& sceneModelDatas = mSceneData->GetModels();
     for(auto& modelDef : sceneModelDatas)
     {
-        switch(modelDef->type)
-        {
-        // "Scene" type models are ones that are baked into the BSP geometry.
-        case SceneModel::Type::Scene:
-        {
-            BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
-            if(actor == nullptr) { break; }
-            mPropsAndActors.push_back(actor);
-            mBSPActors.push_back(actor);
-
-            actor->SetNoun(modelDef->noun);
-            actor->SetVerb(modelDef->verb);
-
-            // If it should be hidden by default, tell the BSP to hide it.
-            if(modelDef->hidden)
-            {
-                actor->SetActive(false);
-            }
-            break;
-        }
-
-        // "HitTest" type models should be hidden, but still interactive.
-        case SceneModel::Type::HitTest:
-        {
-            // if this is a skybox hit test, it requires special processing.
-            if(StringUtil::StartsWithIgnoreCase(modelDef->name, "skybox_"))
-            {
-                GKObject* obj = new GKObject();
-                obj->SetNoun(modelDef->noun);
-
-                uint8_t paletteIndex = static_cast<uint8_t>(StringUtil::ToInt(modelDef->name.substr(7)));
-                mSkyboxHitTests[paletteIndex] = obj;
-            }
-            else
-            {
-                // Otherwise, this hit test should be in the BSP.
-                BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
-                if(actor == nullptr) { break; }
-                mPropsAndActors.push_back(actor);
-                mBSPActors.push_back(actor);
-                mHitTestActors.push_back(actor);
-
-                actor->SetNoun(modelDef->noun);
-                actor->SetVerb(modelDef->verb);
-
-                mSceneData->GetBSP()->SetHitTest(modelDef->name, true);
-
-                // Hit test actors are never *visible* (unless you enable a debug option).
-                actor->SetVisible(false);
-
-                // However, if hidden flag is true, it also means the actor is not interactable.
-                if(modelDef->hidden)
-                {
-                    actor->SetInteractive(false);
-                }
-            }
-            break;
-        }
-
-        // "Prop" and "GasProp" models both render their own model geometry.
-        // Only difference for a "GasProp" is that it uses a provided Gas file too.
-        case SceneModel::Type::Prop:
-        case SceneModel::Type::GasProp:
-        {
-            GKProp* prop = new GKProp(*modelDef);
-            mProps.push_back(prop);
-            mPropsAndActors.push_back(prop);
-            break;
-        }
-
-        default:
-            std::cout << "Unaccounted for model type: " << (int)modelDef->type << std::endl;
-            break;
-        }
+        CreateSceneModel(modelDef);
     }
 
     // Create actors to represent positions in the scene.
@@ -1168,47 +1072,114 @@ void Scene::OnPersist(PersistState& ps)
     // Save/load BSP state.
     // Needed because BSP textures/visibility sometimes change during a scene.
     mSceneData->GetBSP()->OnPersist(ps);
-    //TODO: Do we need to worry about override BSP?
+    //TODO: Do we need to worry about override BSP? YES!
 
     // We don't care about 99% of overlays because the game doesn't let you save during them.
     // One exception is the GPS. This ensures that the GPS is visible if you save when it is showing.
     GPSOverlay::OnPersist(ps);
 
-    //TODO: Should we restore Sidney state, if you save inside Sidney?
+    //TODO: Should we restore Sidney state, if you save inside Sidney? YES!
+
+    // On rare occasions (Hexagram Puzzle), the scene Ego may change. So, we need to save this too.
+    std::string egoNoun = mEgo != nullptr ? mEgo->GetNoun() : "";
+    ps.Xfer(PERSIST_VAR(egoNoun));
+    if(ps.IsLoading())
+    {
+        mEgo = GetActorByNoun(egoNoun);
+    }
 
     // SAVE/LOAD GKOBJECTS
     // Get object count.
     uint64_t objectCount = mPropsAndActors.size();
-    ps.Xfer("GKObjectCount", objectCount);
+    ps.Xfer(PERSIST_VAR(objectCount));
 
     // Iterate each scene object, one by one.
     for(uint64_t i = 0; i < objectCount; ++i)
     {
-        // Either save or load the scene object name.
-        std::string name = mPropsAndActors[i]->GetName();
-        ps.Xfer("GKObjectName", name);
-
         // If we're saving, just save this actor's data out - easy!
         if(ps.IsSaving())
         {
+            // Save the object name.
+            std::string name = mPropsAndActors[i]->GetName();
+            ps.Xfer(PERSIST_VAR(name));
+            //printf("Save %i (%s)\n", static_cast<int>(i), name.c_str());
+
+            // Save the object type.
+            TypeId objType = mPropsAndActors[i]->GetTypeId();
+            ps.Xfer(PERSIST_VAR(objType));
+
+            // Before saving the object data, write out a placeholder int.
+            // We'll come back later and fill this in with the object size.
+            uint32_t objSizePos = ps.GetBinaryWriter()->GetPosition();
+            ps.GetBinaryWriter()->WriteUInt(0);
+            uint32_t objDataStartPos = ps.GetBinaryWriter()->GetPosition();
+
+            // Save the object.
             mPropsAndActors[i]->OnPersist(ps);
+
+            // Go back and fill in the object size.
+            uint32_t objDataEndPos = ps.GetBinaryWriter()->GetPosition();
+            ps.GetBinaryWriter()->Seek(objSizePos);
+            ps.GetBinaryWriter()->WriteInt(objDataEndPos - objDataStartPos);
+            ps.GetBinaryWriter()->Seek(objDataEndPos);
         }
         else
         {
+            // Read the object name.
+            std::string name;
+            ps.Xfer(PERSIST_VAR(name));
+            //printf("Load %i (%s)\n", static_cast<int>(i), name.c_str());
+
+            // Read the object type.
+            TypeId objType = INVALID_TYPE_ID;
+            ps.Xfer(PERSIST_VAR(objType));
+
+            // Read the object size.
+            uint32_t objSize = ps.GetBinaryReader()->ReadUInt();
+
             // If loading, we need to find the object with the specified name first.
             GKObject* object = GetSceneObjectByModelName(name);
 
-            // If we can't find the object, we're screwed!
-            // At the moment, there's no way to "skip past" an object in the save data stream. So we just have to early out with an error.
-            //TODO: Any way to recover here?
-            if(object == nullptr)
+            // If the object exists, but the type is different than what was saved, we have to skip it.
+            // This can happen sometimes, if an object switches from a dynamic prop to static BSP based on scene load conditions.
+            if(object != nullptr && object->GetTypeId() != objType)
             {
-                printf("Error when loading save data! Object %s doesn't exist in the scene.\n", name.c_str());
-                return;
+                printf("Type mismatch for object %s - skipping.\n", name.c_str());
+                ps.GetBinaryReader()->Skip(objSize);
             }
-
-            // Load the object's state.
-            object->OnPersist(ps);
+            else if(object == nullptr) // can't find the object - can maybe recover
+            {
+                // It's possible that this object was not loaded due to the current game state. A good example:
+                // 1) When you first meet Mosely, the kitchen door is spawned as a dynamic prop to support the cutscene (and the bsp version is hidden).
+                // 2) If you save, the dynamic kitchen door prop is in the save data, and the bsp version is hidden in the save data.
+                // 3) On load, since you already met Mosely, the dynamic door prop is not loaded. But the BSP version is also hidden. No kitchen door appears!
+                // To get around this, we should try to spawn objects present in the save data if we can't find them in the loaded scene.
+                const SceneModel* sceneModel = mSceneData->FindSceneModelForLoad(name);
+                if(sceneModel != nullptr)
+                {
+                    GKObject* newObj = CreateSceneModel(sceneModel);
+                    newObj->OnPersist(ps);
+                }
+                else
+                {
+                    const SceneActor* sceneActor = mSceneData->FindSceneActorForLoad(name);
+                    if(sceneActor != nullptr)
+                    {
+                        GKActor* newActor = CreateSceneActor(sceneActor);
+                        newActor->OnPersist(ps);
+                    }
+                    else
+                    {
+                        printf("Object %s doesn't exist in the scene and can't be spawned - skipping.\n", name.c_str());
+                        ps.GetBinaryReader()->Skip(objSize);
+                    }
+                }
+            }
+            else
+            {
+                // Load the object's state.
+                object->OnPersist(ps);
+            }
         }
     }
 
@@ -1218,6 +1189,114 @@ void Scene::OnPersist(PersistState& ps)
     {
         callback(ps);
     }
+}
+
+GKObject* Scene::CreateSceneModel(const SceneModel* sceneModel)
+{
+    switch(sceneModel->type)
+    {
+        // "Scene" type models are ones that are baked into the BSP geometry.
+        case SceneModel::Type::Scene:
+        {
+            BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(sceneModel->name);
+            if(actor == nullptr) { break; }
+            mPropsAndActors.push_back(actor);
+            mBSPActors.push_back(actor);
+
+            actor->SetNoun(sceneModel->noun);
+            actor->SetVerb(sceneModel->verb);
+
+            // If it should be hidden by default, tell the BSP to hide it.
+            if(sceneModel->hidden)
+            {
+                actor->SetActive(false);
+            }
+            return actor;
+        }
+
+        // "HitTest" type models should be hidden, but still interactive.
+        case SceneModel::Type::HitTest:
+        {
+            // if this is a skybox hit test, it requires special processing.
+            if(StringUtil::StartsWithIgnoreCase(sceneModel->name, "skybox_"))
+            {
+                GKObject* obj = new GKObject();
+                obj->SetNoun(sceneModel->noun);
+
+                uint8_t paletteIndex = static_cast<uint8_t>(StringUtil::ToInt(sceneModel->name.substr(7)));
+                mSkyboxHitTests[paletteIndex] = obj;
+                return obj;
+            }
+            else
+            {
+                // Otherwise, this hit test should be in the BSP.
+                BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(sceneModel->name);
+                if(actor == nullptr) { break; }
+                mPropsAndActors.push_back(actor);
+                mBSPActors.push_back(actor);
+                mHitTestActors.push_back(actor);
+
+                actor->SetNoun(sceneModel->noun);
+                actor->SetVerb(sceneModel->verb);
+
+                mSceneData->GetBSP()->SetHitTest(sceneModel->name, true);
+
+                // Hit test actors are never *visible* (unless you enable a debug option).
+                actor->SetVisible(false);
+
+                // However, if hidden flag is true, it also means the actor is not interactable.
+                if(sceneModel->hidden)
+                {
+                    actor->SetInteractive(false);
+                }
+                return actor;
+            }
+        }
+
+        // "Prop" and "GasProp" models both render their own model geometry.
+        // Only difference for a "GasProp" is that it uses a provided Gas file too.
+        case SceneModel::Type::Prop:
+        case SceneModel::Type::GasProp:
+        {
+            GKProp* prop = new GKProp(*sceneModel);
+            mProps.push_back(prop);
+            mPropsAndActors.push_back(prop);
+            return prop;
+        }
+
+        default:
+            std::cout << "Unaccounted for model type: " << (int)sceneModel->type << std::endl;
+            break;
+    }
+    return nullptr;
+}
+
+GKActor* Scene::CreateSceneActor(const SceneActor* sceneActor)
+{
+    // Create actor.
+    GKActor* actor = new GKActor(sceneActor);
+    mActors.push_back(actor);
+    mPropsAndActors.push_back(actor);
+
+    // If this is ego, save a reference to it.
+    if(sceneActor->ego && sceneActor == mEgoSceneActor)
+    {
+        mEgo = actor;
+    }
+
+    // Create DOR prop, if one exists for this actor.
+    // The DOR model assists with calculating an actor's facing direction, particularly while walking.
+    Model* walkerDorModel = gAssetManager.LoadModel("DOR_" + actor->GetMeshRenderer()->GetModelName());
+    if(walkerDorModel != nullptr)
+    {
+        GKProp* walkerDOR = new GKProp(walkerDorModel);
+        actor->SetModelFacingHelper(walkerDOR);
+        mPropsAndActors.push_back(walkerDOR);
+
+        // Disable DOR mesh renderer so you can't see the placeholder model.
+        walkerDOR->GetMeshRenderer()->SetEnabled(false);
+    }
+    return actor;
 }
 
 void Scene::ApplyAmbientLightColorToActors()

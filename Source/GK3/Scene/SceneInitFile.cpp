@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "IniParser.h"
+#include "Model.h"
 #include "SceneAsset.h"
 #include "SheepManager.h"
 #include "Skybox.h"
@@ -158,6 +159,36 @@ GeneralBlock SceneInitFile::FindCurrentGeneralBlock() const
 
     // Return the constructed/filled in block.
     return block;
+}
+
+const SceneActor* SceneInitFile::FindActor(const std::string& modelName) const
+{
+    for(auto& sceneActorBlock : mActors)
+    {
+        for(auto& sceneActor : sceneActorBlock.items)
+        {
+            if(StringUtil::EqualsIgnoreCase(sceneActor.model->GetNameNoExtension(), modelName))
+            {
+                return &sceneActor;
+            }
+        }
+    }
+    return nullptr;
+}
+
+const SceneModel* SceneInitFile::FindModel(const std::string& modelName) const
+{
+    for(auto& sceneModelBlock : mModels)
+    {
+        for(auto& sceneModel : sceneModelBlock.items)
+        {
+            if(StringUtil::EqualsIgnoreCase(sceneModel.name, modelName))
+            {
+                return &sceneModel;
+            }
+        }
+    }
+    return nullptr;
 }
 
 void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)

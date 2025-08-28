@@ -340,6 +340,34 @@ std::vector<const SceneConversation*> SceneData::GetConversationSettings(const s
     return settings;
 }
 
+const SceneModel* SceneData::FindSceneModelForLoad(const std::string& modelName)
+{
+    const SceneModel* sceneModel = nullptr;
+    if(mSpecificSIF != nullptr)
+    {
+        sceneModel = mSpecificSIF->FindModel(modelName);
+    }
+    if(sceneModel == nullptr && mGeneralSIF != nullptr)
+    {
+        sceneModel = mGeneralSIF->FindModel(modelName);
+    }
+    return sceneModel;
+}
+
+const SceneActor* SceneData::FindSceneActorForLoad(const std::string& modelName)
+{
+    const SceneActor* sceneActor = nullptr;
+    if(mSpecificSIF != nullptr)
+    {
+        sceneActor = mSpecificSIF->FindActor(modelName);
+    }
+    if(sceneActor == nullptr && mGeneralSIF != nullptr)
+    {
+        sceneActor = mGeneralSIF->FindActor(modelName);
+    }
+    return sceneActor;
+}
+
 void SceneData::AddActorBlocks(const std::vector<ConditionalBlock<SceneActor>>& actorBlocks)
 {
     for(auto& block : actorBlocks)

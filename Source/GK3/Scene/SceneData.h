@@ -77,6 +77,9 @@ public:
     // CONVERSATIONS
     std::vector<const SceneConversation*> GetConversationSettings(const std::string& conversationName) const;
 
+    const SceneModel* FindSceneModelForLoad(const std::string& modelName);
+    const SceneActor* FindSceneActorForLoad(const std::string& modelName);
+
 private:
     Timeblock mTimeblock;
 
