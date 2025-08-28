@@ -530,6 +530,12 @@ AABB GKActor::GetAABB() const
     return mMeshRenderer->GetAABB();
 }
 
+void GKActor::SetShadowEnabled(bool enabled)
+{
+    mShadowEnabled = enabled;
+    mShadowActor->SetActive(enabled);
+}
+
 void GKActor::OnPersist(PersistState& ps)
 {
     GKObject::OnPersist(ps);
@@ -540,10 +546,8 @@ void GKActor::OnPersist(PersistState& ps)
     ps.Xfer(PERSIST_VAR(mListenFidget));
     ps.Xfer<FidgetType, int>(PERSIST_VAR(mActiveFidget));
 
-    // Save/load shadow active state.
-    bool shadowActive = mShadowActor->IsActive();
-    ps.Xfer(PERSIST_VAR(shadowActive));
-    mShadowActor->SetActive(shadowActive);
+    // Save/load shadow enabled state.
+    ps.Xfer(PERSIST_VAR(mShadowEnabled));
 
     // Persist walker state.
     mWalker->OnPersist(ps);
@@ -551,6 +555,8 @@ void GKActor::OnPersist(PersistState& ps)
     // If loading, we need to potentially refresh state based on loaded data.
     if(ps.IsLoading())
     {
+        mShadowActor->SetActive(mShadowEnabled);
+
         // Position/rotation/scale were loaded by the GKObject class.
         // But we need to make sure our model's position/rotation match those values.
         SetModelPositionToActorPosition();
@@ -572,7 +578,7 @@ void GKActor::OnActive()
     mModelActor->SetActive(true);
 
     // Same with my shadow.
-    mShadowActor->SetActive(true);
+    mShadowActor->SetActive(mShadowEnabled);
 }
 
 void GKActor::OnInactive()

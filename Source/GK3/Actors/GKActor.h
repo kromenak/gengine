@@ -91,7 +91,7 @@ public:
     void SetModelFacingHelper(GKProp* helper) { mModelFacingHelper = helper; }
     void SetForcedFacingDir(const Vector3& dir) { mForcedFacingDir = dir; }
 
-    void SetShadowEnabled(bool enabled) { mShadowActor->SetActive(enabled); }
+    void SetShadowEnabled(bool enabled);
 
     void OnPersist(PersistState& ps) override;
 
@@ -114,6 +114,9 @@ private:
     const float kNoFloorValue = FLT_MAX;
     float mFloorHeight = kNoFloorValue;
     Texture* mFloorTexture = nullptr;
+
+    // Is this actor's shadow enabled?
+    bool mShadowEnabled = true;
 
     // The actor's face control.
     FaceController* mFaceController = nullptr;
