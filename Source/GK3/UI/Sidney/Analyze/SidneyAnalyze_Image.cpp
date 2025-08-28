@@ -288,7 +288,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
     {
         // Play analyze video.
         gActionManager.StartManualAction();
-        AnalyzeImage_PlayVideo("Parch1Geo.avi", mAnalyzeVideoImages[0], "GEOMPARCH1FINAL.BMP", [this](){
+        AnalyzeImage_PlayVideo("Parch1Geo.avi", mAnalyzeVideoImages[0], "GEOMPARCH1FINAL.BMP", Color32::Magenta, [this](){
             gActionManager.FinishManualAction();
 
             // Show a popup explaining the result.
@@ -308,7 +308,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
     {
         // Play analyze video.
         gActionManager.StartManualAction();
-        AnalyzeImage_PlayVideo("Parch2Geo.avi", mAnalyzeVideoImages[0], "GEOMPARCH2FINAL.BMP", [this](){
+        AnalyzeImage_PlayVideo("Parch2Geo.avi", mAnalyzeVideoImages[0], "GEOMPARCH2FINAL.BMP", Color32::Magenta, [this](){
             gActionManager.FinishManualAction();
 
             // Show a popup explaining the result.
@@ -336,7 +336,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
 
         // Play analyze video.
         gActionManager.StartManualAction();
-        AnalyzeImage_PlayVideo("Poussingeo.avi", mAnalyzeVideoImages[0], "GEOMPOUSSINFINAL.BMP", [this](){
+        AnalyzeImage_PlayVideo("Poussingeo.avi", mAnalyzeVideoImages[0], "GEOMPOUSSINFINAL.BMP", Color32::Magenta, [this](){
             gActionManager.FinishManualAction();
 
             // Show a popup explaining the result.
@@ -368,16 +368,14 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
 
         // Play initial video.
         gActionManager.StartManualAction();
-        AnalyzeImage_PlayVideo("TenierGeoA.avi", mAnalyzeVideoImages[0], "TENIERGEOA.BMP", [this](){
-            mAnalyzeVideoImages[0]->GetTexture()->SetTransparentColor(Color32(0, 255, 0));
+        AnalyzeImage_PlayVideo("TenierGeoA.avi", mAnalyzeVideoImages[0], "TENIERGEOA.BMP", Color32(0, 255, 0), [this](){
 
             // Says something about the result of the first video.
             ShowAnalyzeMessage("GeometryTenier2", Vector2(190.0f, -160.0f), HorizontalAlignment::Center, true);
             Timers::AddTimerSeconds(4.0f, [this](){
 
                 // Play another video.
-                AnalyzeImage_PlayVideo("TenierGeob.avi", mAnalyzeVideoImages[0], "TENIERGEOB.BMP", [this](){
-                    mAnalyzeVideoImages[0]->GetTexture()->SetTransparentColor(Color32(0, 255, 0));
+                AnalyzeImage_PlayVideo("TenierGeob.avi", mAnalyzeVideoImages[0], "TENIERGEOB.BMP", Color32(0, 255, 0), [this](){
 
                     // Says something about the result of the second video.
                     ShowAnalyzeMessage("GeometryTenier3", Vector2(190.0f, -160.0f), HorizontalAlignment::Center, true);
@@ -393,7 +391,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
                         Timers::AddTimerSeconds(4.0f, [this](){
 
                             // Final video.
-                            AnalyzeImage_PlayVideo("TenierGeoD.avi", mAnalyzeVideoImages[1], "GEOMTENNIERSFINAL.BMP", [this](){
+                            AnalyzeImage_PlayVideo("TenierGeoD.avi", mAnalyzeVideoImages[1], "GEOMTENNIERSFINAL.BMP", Color32::Magenta, [this](){
                                 gActionManager.FinishManualAction();
                                 ShowAnalyzeMessage("GeometryTenier5", Vector2(190.0f, -164.0f), HorizontalAlignment::Center);
 
@@ -424,7 +422,7 @@ void SidneyAnalyze::AnalyzeImage_OnRotateShapeButtonPressed()
     {
         // Play zoom in video.
         gActionManager.StartManualAction();
-        AnalyzeImage_PlayVideo("parch2zoom.avi", mAnalyzeVideoImages[2], "", [this](){
+        AnalyzeImage_PlayVideo("parch2zoom.avi", mAnalyzeVideoImages[2], "", Color32::Magenta, [this](){
             gActionManager.FinishManualAction();
 
             // Turn off video image once this video finishes.
@@ -454,7 +452,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
     {
         // Play zoom in video.
         gActionManager.StartManualAction();
-        AnalyzeImage_PlayVideo("poussinzoom.avi", mAnalyzeVideoImages[2], "", [this](){
+        AnalyzeImage_PlayVideo("poussinzoom.avi", mAnalyzeVideoImages[2], "", Color32::Magenta, [this](){
             gActionManager.FinishManualAction();
 
             // Turn off video image once this video finishes.
@@ -495,7 +493,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
     {
         // Play zoom in video.
         gActionManager.StartManualAction();
-        AnalyzeImage_PlayVideo("Tenierzoom.avi", mAnalyzeVideoImages[2], "", [this](){
+        AnalyzeImage_PlayVideo("Tenierzoom.avi", mAnalyzeVideoImages[2], "", Color32::Magenta, [this](){
             gActionManager.FinishManualAction();
 
             // Turn off video image once this video finishes.
@@ -544,7 +542,7 @@ void SidneyAnalyze::AnalyzeImage_ResetVideoImage(UIVideoImage* image)
     image->SetEnabled(false);
 }
 
-void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideoImage* videoImage, const std::string& finalTextureName, const std::function<void()>& finishCallback)
+void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideoImage* videoImage, const std::string& finalTextureName, Color32 finalTextureTransparentColor, const std::function<void()>& finishCallback)
 {
     // Make sure image is enabled.
     videoImage->SetEnabled(true);
@@ -554,7 +552,7 @@ void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideo
 
     // Play video on video image. The video uses a green chromakey background.
     Color32 transparentColor(3, 251, 3);
-    videoImage->Play(videoName, transparentColor, [videoImage, finalTextureName, finishCallback](){
+    videoImage->Play(videoName, transparentColor, [videoImage, finalTextureName, finalTextureTransparentColor, finishCallback](){
 
         // Manual action is done.
         gActionManager.FinishManualAction();
@@ -563,7 +561,7 @@ void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideo
         Texture* finalTexture = gAssetManager.LoadTexture(finalTextureName, AssetScope::Scene);
         if(finalTexture != nullptr)
         {
-            videoImage->SetTransparentColor(Color32::Magenta);
+            videoImage->SetTransparentColor(finalTextureTransparentColor);
             videoImage->SetTexture(finalTexture);
         }
 

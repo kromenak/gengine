@@ -4,6 +4,7 @@
 // UI for the analyze subscreen of Sidney.
 //
 #pragma once
+#include "Color32.h"
 #include "MapState.h"
 #include "SidneyMenuBar.h"
 #include "TextLayout.h" // HorizontalAlignment
@@ -124,7 +125,7 @@ private:
     void AnalyzeImage_OnZoomClarifyButtonPressed();
 
     void AnalyzeImage_ResetVideoImage(UIVideoImage* image);
-    void AnalyzeImage_PlayVideo(const std::string& videoName, UIVideoImage* image, const std::string& finalTextureName, const std::function<void()>& finishCallback);
+    void AnalyzeImage_PlayVideo(const std::string& videoName, UIVideoImage* image, const std::string& finalTextureName, Color32 finalTextureTransparentColor, const std::function<void()>& finishCallback);
 
     // ANALYZE TEXT
     Actor* mAnalyzeTextWindow = nullptr;
