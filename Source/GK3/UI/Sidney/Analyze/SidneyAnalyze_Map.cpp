@@ -317,7 +317,7 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
 
     // Sagitarius functions a bit differently from other LSR steps, in that you can try to do it at any time, and the game does give a response if it's the wrong time for it.
     // (I'm not sure if this was a bug in the original game, but let's mimic that behavior).
-    if(!sagitariusDone)
+    if(!didValidAnalyzeAction && !sagitariusDone)
     {
         didValidAnalyzeAction = AnalyzeMap_CheckSagitariusCompletion();
     }
