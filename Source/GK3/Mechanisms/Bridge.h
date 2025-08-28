@@ -56,21 +56,27 @@ private:
         // This is the tile's position on that grid, where (0, 0) is at bottom-right (near Gabe's spawn point).
         Vector2 gridPos;
 
-        // The tile's current state.
-        TileState state = TileState::Off;
-
-        // A timer for the current state.
-        float stateTimer = 0.0f;
-
         // Animations for glowing/glinting this tile.
         Animation* glintAnim = nullptr;
         Animation* glowAnim = nullptr;
+
+        // The tile's current state.
+        TileState state = TileState::Off;
+
+        // A timer for the current state (and how long the state is expected to last).
+        float stateTimer = 0.0f;
+        float stateDuration = 0.0f;
+
+        // Tracks anim sampling for glint/glow states.
+        int animFrame = -1;
     };
     static const int kTileCount = 9;
     Tile mTiles[kTileCount];
 
     // Reusable anim params, used for jump anims.
     AnimParams mJumpAnimParams;
+
+    bool AtPuzzleStart() const;
 
     void Die(bool duringJump);
     void ResetOnDeath();
@@ -81,6 +87,7 @@ private:
     void SleepTile(int index, float sleepTime);
     void StartTilePattern();
     void JumpToTile(int index);
+    void UpdateTiles(float deltaTime);
 
     void UpdateInteract();
 };

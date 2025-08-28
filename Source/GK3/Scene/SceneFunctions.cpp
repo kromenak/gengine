@@ -504,9 +504,17 @@ namespace
 
 namespace
 {
+    Bridge* bridge = nullptr;
+
+    void TE5_OnPersist(PersistState& ps)
+    {
+        bridge->OnPersist(ps);
+    }
+
     void TE5_Init(const std::function<void()>& callback)
     {
-        new Bridge();
+        bridge = new Bridge();
+        gSceneManager.GetScene()->AddPersistCallback(TE5_OnPersist);
         if(callback != nullptr) { callback(); }
     }
 }
