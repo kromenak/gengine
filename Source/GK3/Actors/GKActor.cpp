@@ -292,9 +292,8 @@ void GKActor::WalkToExact(const Vector3& position, const Heading& heading, const
 void GKActor::WalkToGas(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
 {
     // This version of the function is needed just to tell the walker if this walk request is coming from a GAS script or not!
-    InterruptFidget(false, [this, position, heading, finishCallback](){
-        mWalker->WalkToGas(position, heading, finishCallback);
-    });
+    // We also don't need to interrupt fidgets in this case, since the request is coming from the fidget GAS anyways.
+    mWalker->WalkToGas(position, heading, finishCallback);
 }
 
 void GKActor::WalkToSee(GKObject* target, const std::function<void()>& finishCallback)
