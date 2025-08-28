@@ -305,19 +305,34 @@ void GKActor::WalkToSee(GKObject* target, const std::function<void()>& finishCal
 
 void GKActor::WalkToAnimationStart(Animation* anim, const std::function<void()>& finishCallback)
 {
-    // Need a valid anim.
-    if(anim == nullptr) { return; }
-
     // GOAL: walk the actor to the initial position/rotation of this anim.
+    // Ideally this should result in a seamless transition from the walk into the animation - it actually works well most of the time!
+
+    // Need a valid anim.
+    if(anim == nullptr)
+    {
+        if(finishCallback != nullptr) { finishCallback(); }
+        return;
+    }
+
     // Retrieve vertex animation that matches this actor's model.
     // If no vertex anim exists, we can't walk to animation start! This is probably a developer error.
     VertexAnimNode* vertexAnimNode = anim->GetFirstVertexAnimationForModel(mMeshRenderer->GetModelName());
-    if(vertexAnimNode == nullptr) { return; }
+    if(vertexAnimNode == nullptr)
+    {
+        if(finishCallback != nullptr) { finishCallback(); }
+        return;
+    }
 
     // Sample position/pose on first frame of animation.
     // That gives our walk pos/rotation, BUT it is in the actor's local space.
     Vector3 walkPos = vertexAnimNode->vertexAnimation->SampleVertexPosition(0, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
     VertexAnimationTransformPose transformPose = vertexAnimNode->vertexAnimation->SampleTransformPose(0, mCharConfig->hipAxesMeshIndex);
+
+    // Also get hip, left shoe, and right shoe positions - all in local space.
+    Vector3 hipPos = transformPose.meshToLocalMatrix.GetTranslation();
+    Vector3 leftShoePos = vertexAnimNode->vertexAnimation->SampleTransformPose(0, mCharConfig->leftShoeAxesMeshIndex).meshToLocalMatrix.GetTranslation();
+    Vector3 rightShoePos = vertexAnimNode->vertexAnimation->SampleTransformPose(0, mCharConfig->rightShoeAxesMeshIndex).meshToLocalMatrix.GetTranslation();
 
     // If this is an absolute animation, the above position needs to be converted to world space.
     Matrix4 transformMatrix = transformPose.meshToLocalMatrix;
@@ -328,14 +343,47 @@ void GKActor::WalkToAnimationStart(Animation* anim, const std::function<void()>&
 
         Matrix4 localToWorldMatrix = Matrix4::MakeTranslate(animWorldPos) * Matrix4::MakeRotate(modelToActorRot);
         transformMatrix = localToWorldMatrix * transformMatrix;
+
+        hipPos = localToWorldMatrix.TransformPoint(hipPos);
+        leftShoePos = localToWorldMatrix.TransformPoint(leftShoePos);
+        rightShoePos = localToWorldMatrix.TransformPoint(rightShoePos);
     }
 
     // Calculate walk pos in world space.
     walkPos = transformMatrix.TransformPoint(walkPos);
     walkPos.y = GetPosition().y;
 
-    // Calculate rotation on first frame of animation - that's our heading.
-    Heading heading = Heading::FromQuaternion(transformMatrix.GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
+    // PROBLEM WITH ROTATIONS:
+    // Usually actor's face +Z, but their models face -Z. As a result, we'd usually calculate actor heading as "model rotation plus PI".
+    // BUT the game is inconsistent about this - in some cases, actors face +Z and the model also faces +Z.
+    // So...how can we detect this case? Vector math to the rescue!
+
+    // Imagine a triangle made up of shoe positions and hip position.
+    // Calculate the surface normal of the triangle. This is our facing direction.
+    Vector3 vec1 = rightShoePos - leftShoePos;
+    Vector3 vec2 = hipPos - leftShoePos;
+    Vector3 perp = Vector3::Cross(vec1, vec2);
+    perp.y = 0.0f;
+    Vector3 modelFacingDir = Vector3::Normalize(perp);
+
+    // In case you want to visualize that...
+    // The magenta line shows the model facing, the yellow shows the axis direction. Usually, they are close to opposite...but not always.
+    //Debug::DrawLine(leftShoePos, rightShoePos, Color32::Blue, 60.0f);
+    //Debug::DrawLine(leftShoePos, hipPos, Color32::Red, 60.0f);
+    //Debug::DrawLine(hipPos, hipPos + modelFacingDir * 10.0f, Color32::Magenta, 60.0f);
+    //Debug::DrawLine(hipPos, hipPos + transformMatrix.GetYAxis() * 10.0f, Color32::Yellow, 60.0);
+
+    // The vast majority of models have their model facing opposite the y-axis: we do "model rotation plus PI" in those cases.
+    // In some rare cases, the model facing is the y-axis: we do "just model rotation" in those cases.
+    Heading heading = Heading::None;
+    if(Vector3::Dot(transformMatrix.GetYAxis(), modelFacingDir) > 0)
+    {
+        heading = Heading::FromQuaternion(transformMatrix.GetRotation());
+    }
+    else
+    {
+        heading = Heading::FromQuaternion(transformMatrix.GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
+    }
 
     // Walk to that position/heading.
     InterruptFidget(false, [this, walkPos, heading, finishCallback](){
