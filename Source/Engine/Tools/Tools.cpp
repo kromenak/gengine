@@ -10,6 +10,7 @@
 #include "AssetsTool.h"
 #include "HierarchyTool.h"
 #include "MainMenuTool.h"
+#include "RaycastTool.h"
 #include "SettingsTool.h"
 
 namespace
@@ -28,6 +29,7 @@ namespace
     MainMenuTool mainMenu;
     HierarchyTool hierarchy;
     AssetsTool assets;
+    RaycastTool raycasts;
     SettingsTool settings;
 }
 
@@ -96,6 +98,7 @@ void Tools::Render()
         // Render specific tools based on whether they are active.
         hierarchy.Render(mainMenu.hierarchyToolActive);
         assets.Render(mainMenu.assetsToolActive);
+        raycasts.Render(mainMenu.raycastToolActive);
         settings.Render(mainMenu.settingsToolActive);
 
         // Optionally show demo window.

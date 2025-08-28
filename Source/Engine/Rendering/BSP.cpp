@@ -8,6 +8,7 @@
 #include "BSPActor.h"
 #include "BSPLightmap.h"
 #include "Debug.h"
+#include "RaycastTool.h"
 #include "ReportManager.h"
 #include "Shader.h"
 #include "StringUtil.h"
@@ -158,6 +159,9 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo, bool forWalk)
             RaycastHit hitInfo;
             if(RaycastPolygon(ray, &polygon, hitInfo))
             {
+                hitInfo.name = mObjectNames[surface.objectIndex];
+                RaycastTool::LogRaycastHit(hitInfo);
+
                 // Is it closer than any other polygon so far? Then it's our nearest hit.
                 if(hitInfo.t < outHitInfo.t)
                 {

@@ -75,6 +75,10 @@ void MainMenuTool::Render()
             {
                 assetsToolActive = !assetsToolActive;
             }
+            if(ImGui::MenuItem("Raycasts", nullptr, raycastToolActive))
+            {
+                raycastToolActive = !raycastToolActive;
+            }
             if(ImGui::MenuItem("Settings", nullptr, settingsToolActive))
             {
                 settingsToolActive = !settingsToolActive;

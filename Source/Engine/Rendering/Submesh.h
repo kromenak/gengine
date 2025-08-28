@@ -11,7 +11,6 @@
 #include "Vector3.h"
 #include "VertexArray.h"
 
-struct RaycastHit;
 class Ray;
 
 enum class RenderMode

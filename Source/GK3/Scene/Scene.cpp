@@ -26,6 +26,7 @@
 #include "Model.h"
 #include "PersistState.h"
 #include "Profiler.h"
+#include "RaycastTool.h"
 #include "Renderer.h"
 #include "ReportManager.h"
 #include "SceneFunctions.h"
@@ -287,6 +288,7 @@ void Scene::Enter()
 
 void Scene::Update(float deltaTime)
 {
+    RaycastTool::StartFrame();
     if(mPaused) { return; }
 
     //TEMP: for debug visualization of BSP ambient light sources.
@@ -428,6 +430,9 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
         MeshRenderer* meshRenderer = object->GetMeshRenderer();
         if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
         {
+            hitInfo.name = object->GetNoun();
+            RaycastTool::LogRaycastHit(hitInfo);
+
             // We did hit the 3D model, but is it closer than anything else we've hit thus far?
             if(hitInfo.t < result.hitInfo.t)
             {

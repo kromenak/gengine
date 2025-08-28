@@ -15,6 +15,7 @@ public:
     bool hierarchyToolActive = false;
     bool assetsToolActive = false;
     bool settingsToolActive = false;
+    bool raycastToolActive = false;
 
     void Render();
 };

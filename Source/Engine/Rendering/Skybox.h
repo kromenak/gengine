@@ -13,7 +13,6 @@
 
 class Mesh;
 class Ray;
-struct RaycastHit;
 class Texture;
 
 // To create a skybox, you must specify textures for each side.
