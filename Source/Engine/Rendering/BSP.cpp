@@ -221,7 +221,7 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
 
                     // If the color is transparent, this doesn't count as a hit - the ray "goes through" the transparent area.
                     // But if at all opaque, we count this as a hit.
-                    if(color.a > 0)
+                    if(color != Color32::Magenta)
                     {
                         return true;
                     }
