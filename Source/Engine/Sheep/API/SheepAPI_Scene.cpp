@@ -10,7 +10,6 @@
 #include "SceneManager.h"
 #include "SceneData.h"
 #include "SceneFunctions.h"
-#include "SceneGeometryData.h"
 #include "StringUtil.h"
 #include "WalkerBoundary.h"
 
@@ -25,10 +24,7 @@ RegFunc1(CallSceneFunction, void, string, WAITABLE, REL_FUNC);
 
 shpvoid SetScene(const std::string& sceneName)
 {
-    SceneGeometryData geometryData;
-    geometryData.Load(sceneName);
-    geometryData.GetBSP()->SetFloorObjectName(gSceneManager.GetScene()->GetSceneData()->GetFloorModelName());
-    gSceneManager.GetScene()->SetOverrideBSP(geometryData.GetBSP());
+    gSceneManager.GetScene()->OverrideSceneAsset(sceneName);
     return 0;
 }
 RegFunc1(SetScene, void, string, IMMEDIATE, REL_FUNC);
