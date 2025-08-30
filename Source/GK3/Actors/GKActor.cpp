@@ -581,6 +581,14 @@ void GKActor::SetShadowEnabled(bool enabled)
 
 void GKActor::OnPersist(PersistState& ps)
 {
+    // The scene is loaded/init'd per usual when loading a save game. This can cause GKActors to run their idle fidgets.
+    // When loading a game, to avoid fidget callbacks from interfering with load logic, stop and cancel all fidget anims before proceeding.
+    if(ps.IsLoading())
+    {
+        mGasPlayer->StopAndCancelAnims();
+    }
+
+    // Shared base class persist logic.
     GKObject::OnPersist(ps);
 
     // Save/load fidgets being used and which one is active.
@@ -599,11 +607,6 @@ void GKActor::OnPersist(PersistState& ps)
     if(ps.IsLoading())
     {
         mShadowActor->SetActive(mShadowEnabled);
-
-        // Position/rotation/scale were loaded by the GKObject class.
-        // But we need to make sure our model's position/rotation match those values.
-        SetModelPositionToActorPosition();
-        SetModelRotationToActorRotation();
 
         // Make sure these values are up-to-date, or else they may have stale values from the actor's init code.
         // Remember, we are loading an actor's state after scene load/init code has already executed.

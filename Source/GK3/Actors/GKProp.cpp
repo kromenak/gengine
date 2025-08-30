@@ -146,37 +146,6 @@ AABB GKProp::GetAABB() const
     return mMeshRenderer->GetAABB();
 }
 
-void GKProp::OnPersist(PersistState& ps)
-{
-    GKObject::OnPersist(ps);
-
-    // Prop meshes may change their position and vertex data during a scene due to animations.
-    // To restore a scene correctly, we need to save the mesh state as part of a save.
-    // An example: the desk drawer in Montreaux's Office: without this code, it will be closed every time you load a save in that scene.
-    MeshRenderer* meshRenderer = GetMeshRenderer();
-    if(meshRenderer != nullptr)
-    {
-        for(Mesh* mesh : meshRenderer->GetMeshes())
-        {
-            // Save the mesh's matrix, which tracks any local movement due to animations.
-            Matrix4& matrix = mesh->GetMeshToLocalMatrix();
-            ps.Xfer(PERSIST_VAR(matrix));
-
-            // Some animations may actually modify vertex positions, so we need to save/load those too.
-            for(Submesh* submesh : mesh->GetSubmeshes())
-            {
-                for(int i = 0; i < submesh->GetVertexCount(); ++i)
-                {
-                    Vector3 vertexPosition = submesh->GetVertexPosition(i);
-                    ps.Xfer(PERSIST_VAR(vertexPosition));
-                    submesh->SetVertexPosition(i, vertexPosition);
-                }
-                submesh->SetPositions(submesh->GetPositions());
-            }
-        }
-    }
-}
-
 void GKProp::OnVertexAnimationStop()
 {
     mGasPlayer->Resume();

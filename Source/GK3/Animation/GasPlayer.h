@@ -27,6 +27,7 @@ public:
     void Pause();
     void Resume();
     void Stop(const std::function<void()>& callback = nullptr);
+    void StopAndCancelAnims();
 
     void Interrupt(bool forTalk, const std::function<void()>& callback);
 

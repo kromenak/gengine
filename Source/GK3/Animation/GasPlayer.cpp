@@ -104,6 +104,19 @@ void GasPlayer::Stop(const std::function<void()>& callback)
     PerformCleanups(false, callback);
 }
 
+void GasPlayer::StopAndCancelAnims()
+{
+    mGas = nullptr;
+
+    if(mCurrentAnimation != nullptr)
+    {
+        gSceneManager.GetScene()->GetAnimator()->Stop(mCurrentAnimation, true);
+        mCurrentAnimation = nullptr;
+        mCurrentAnimationStillPlaying = false;
+        mCurrentAnimationDoneCallback = nullptr;
+    }
+}
+
 void GasPlayer::Interrupt(bool forTalk, const std::function<void()>& callback)
 {
     // Start a manual action. This makes the game non-interactive for a bit as the interruption occurs.

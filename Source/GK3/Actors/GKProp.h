@@ -38,8 +38,6 @@ public:
     MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
     AABB GetAABB() const override;
 
-    void OnPersist(PersistState& ps) override;
-
 private:
     // The prop's mesh renderer.
     MeshRenderer* mMeshRenderer = nullptr;
