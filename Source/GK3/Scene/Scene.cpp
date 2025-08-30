@@ -364,16 +364,25 @@ void Scene::SetCameraPosition(const std::string& cameraName)
 
 void Scene::SetCameraPositionForConversation(const std::string& conversationName, bool isInitial)
 {
-    // Get dialogue camera associated with this conversation, either initial or final.
-    const DialogueSceneCamera* camera = isInitial ?
-        mSceneData->GetInitialDialogueCameraForConversation(conversationName) :
-        mSceneData->GetFinalDialogueCameraForConversation(conversationName);
-    if(camera == nullptr) { return; }
+    // Get the dialogue camera associated with this conversation.
+    // If this is initial (e.g. entering the conversation), try to use an initial camera, but fall back on final camera if initial camera doesn't exist (matches original game).
+    const DialogueSceneCamera* camera = nullptr;
+    if(isInitial)
+    {
+        camera = mSceneData->GetInitialDialogueCameraForConversation(conversationName);
+    }
+    if(camera == nullptr)
+    {
+        camera = mSceneData->GetFinalDialogueCameraForConversation(conversationName);
+    }
 
     // Set camera if we found it.
-    mCamera->SetPosition(camera->position);
-    mCamera->SetAngle(camera->angle);
-    mCamera->GetCamera()->SetCameraFovDegrees(camera->fov);
+    if(camera != nullptr)
+    {
+        mCamera->SetPosition(camera->position);
+        mCamera->SetAngle(camera->angle);
+        mCamera->GetCamera()->SetCameraFovDegrees(camera->fov);
+    }
 }
 
 void Scene::GlideToCameraPosition(const std::string& cameraName, std::function<void()> finishCallback)
