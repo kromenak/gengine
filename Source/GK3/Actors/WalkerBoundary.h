@@ -12,6 +12,7 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
+class PersistState;
 class Texture;
 class Walker;
 
@@ -39,6 +40,8 @@ public:
 
     void AddWalker(Walker* walker);
     void RemoveWalker(Walker* walker);
+
+    void OnPersist(PersistState& ps);
 
 private:
     // The texture provides vital data about walkable areas.

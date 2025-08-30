@@ -5,6 +5,7 @@
 #include "Actor.h"
 #include "Debug.h"
 #include "GMath.h"
+#include "PersistState.h"
 #include "ResizableQueue.h"
 #include "Texture.h"
 #include "Walker.h"
@@ -356,6 +357,12 @@ void WalkerBoundary::RemoveWalker(Walker * walker)
     {
         mWalkers.erase(it);
     }
+}
+
+void WalkerBoundary::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mUnwalkableRegions));
+    ps.Xfer(PERSIST_VAR(mUnwalkableRects));
 }
 
 bool WalkerBoundary::IsWorldPosWalkable(const Vector3& worldPos) const

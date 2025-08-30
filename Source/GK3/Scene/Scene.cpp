@@ -1106,6 +1106,9 @@ void Scene::OnPersist(PersistState& ps)
     // Save/load any override scene name.
     ps.Xfer(PERSIST_VAR(mOverrideSceneName));
 
+    // Need to save/load walker boundary to remember changes to walkable regions that may occur during a scene.
+    mSceneData->GetWalkerBoundary()->OnPersist(ps);
+
     // We don't care about 99% of overlays because the game doesn't let you save during them.
     // One exception is the GPS. This ensures that the GPS is visible if you save when it is showing.
     GPSOverlay::OnPersist(ps);
