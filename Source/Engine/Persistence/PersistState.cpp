@@ -5,6 +5,7 @@
 
 #include "Circle.h"
 #include "LineSegment.h"
+#include "Rect.h"
 #include "UIGrids.h"
 #include "UIHexagrams.h"
 #include "UIRectangles.h"
@@ -378,14 +379,6 @@ void PersistState::Xfer(const char* name, LineSegment& value)
         mBinaryWriter->WriteFloat(value.end.y);
         mBinaryWriter->WriteFloat(value.end.z);
     }
-    else if(mIniReader != nullptr)
-    {
-        //TODO
-    }
-    else if(mIniWriter != nullptr)
-    {
-        //TODO
-    }
 }
 
 void PersistState::Xfer(const char* name, Circle& value)
@@ -402,13 +395,23 @@ void PersistState::Xfer(const char* name, Circle& value)
         mBinaryWriter->WriteFloat(value.center.y);
         mBinaryWriter->WriteFloat(value.radius);
     }
-    else if(mIniReader != nullptr)
+}
+
+void PersistState::Xfer(const char* name, Rect& value)
+{
+    if(mBinaryReader != nullptr)
     {
-        //TODO
+        value.x = mBinaryReader->ReadFloat();
+        value.y = mBinaryReader->ReadFloat();
+        value.width = mBinaryReader->ReadFloat();
+        value.height = mBinaryReader->ReadFloat();
     }
-    else if(mIniWriter != nullptr)
+    else if(mBinaryWriter != nullptr)
     {
-        //TODO
+        mBinaryWriter->WriteFloat(value.x);
+        mBinaryWriter->WriteFloat(value.y);
+        mBinaryWriter->WriteFloat(value.width);
+        mBinaryWriter->WriteFloat(value.height);
     }
 }
 

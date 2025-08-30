@@ -5,6 +5,7 @@
 // The "Xfer" functions are used to transfer the data.
 //
 #pragma once
+#include <bitset>
 #include <cstdint>
 #include <set>
 #include <type_traits> // std::enable_if
@@ -25,6 +26,7 @@ class Circle;
 class LineSegment;
 class Matrix4;
 class Quaternion;
+class Rect;
 struct UIGrid;
 struct UIHexagram;
 struct UIRectangle;
@@ -106,6 +108,7 @@ public:
     // Primitives
     void Xfer(const char* name, LineSegment& value);
     void Xfer(const char* name, Circle& value);
+    void Xfer(const char* name, Rect& value);
 
     // UI Primitives
     void Xfer(const char* name, UIRectangle& value);
@@ -115,8 +118,11 @@ public:
     // Collections
     template<typename T> void Xfer(const char* name, std::vector<T>& vector, bool loadInPlace = false);
     template<typename T> void Xfer(const char* name, std::set<T>& set);
+    template<typename T> void Xfer(const char* name, std::unordered_set<T>& set);
     template<typename T> void Xfer(const char* name, std::unordered_map<std::string, T>& map);
     template<typename T> void Xfer(const char* name, std::string_map_ci<T>& map);
+    template<int T> void Xfer(const char* name, std::bitset<T>& bitset);
+    template<typename T, typename U> void Xfer(const char* name, std::pair<T, U>& pair);
     void Xfer(const char* name, std::string_set_ci& set);
 
     // Conversion (Xfer T as U)
@@ -219,6 +225,32 @@ inline void PersistState::Xfer(const char* name, std::set<T>& set)
 }
 
 template<typename T>
+inline void PersistState::Xfer(const char* name, std::unordered_set<T>& set)
+{
+    if(mBinaryReader != nullptr)
+    {
+        set.clear();
+        uint64_t size = mBinaryReader->ReadULong();
+        for(uint64_t i = 0; i < size; ++i)
+        {
+            T value;
+            Xfer("", value);
+            set.insert(value);
+        }
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteULong(set.size());
+        for(auto& entry : set)
+        {
+            // A little tricky - iterating elements in a set is always const (changing set elements breaks the set).
+            // But we "know" that we are writing here, so not going to write the set, only read it. So, const cast to the rescue.
+            Xfer("", const_cast<T&>(entry));
+        }
+    }
+}
+
+template<typename T>
 inline void PersistState::Xfer(const char* name, std::unordered_map<std::string, T>& map)
 {
     if(mBinaryReader != nullptr)
@@ -270,6 +302,40 @@ inline void PersistState::Xfer(const char* name, std::string_map_ci<T>& map)
     }
 }
 
+template<int T>
+inline void PersistState::Xfer(const char* name, std::bitset<T>& bitset)
+{
+    if(T <= sizeof(unsigned long long))
+    {
+        if(mBinaryReader != nullptr)
+        {
+            bitset = std::bitset<T>(mBinaryReader->ReadULong());
+        }
+        else if(mBinaryWriter != nullptr)
+        {
+            mBinaryWriter->WriteULong(bitset.to_ullong());
+        }
+    }
+    else
+    {
+        if(mBinaryReader != nullptr)
+        {
+            bitset = std::bitset<T>(mBinaryReader->ReadString(T));
+        }
+        else if(mBinaryWriter != nullptr)
+        {
+            mBinaryWriter->WriteString(bitset.to_string());
+        }
+    }
+}
+
+template<typename T, typename U>
+inline void PersistState::Xfer(const char* name, std::pair<T, U>& pair)
+{
+    Xfer("", pair.first);
+    Xfer("", pair.second);
+}
+
 template<typename T>
 inline void PersistState::Xfer(const char* name, T*& asset)
 {
@@ -281,8 +347,15 @@ inline void PersistState::Xfer(const char* name, T*& asset)
     Xfer<AssetScope, int>("", assetScope);
 
     // If loading, resolve the loaded name/scope to an actual asset, if at all possible.
-    if(IsLoading() && !assetName.empty())
+    if(IsLoading())
     {
-        asset = gAssetManager.GetOrLoadAsset<T>(assetName, assetScope);
+        if(!assetName.empty())
+        {
+            asset = gAssetManager.GetOrLoadAsset<T>(assetName, assetScope);
+        }
+        else
+        {
+            asset = nullptr;
+        }
     }
 }
