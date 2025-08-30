@@ -103,8 +103,8 @@ public:
     void InspectObject(const std::string& noun, const SceneCamera* camera, const std::function<void()>& finishCallback);
     void UninspectObject(const std::function<void()>& finishCallback);
 
-    void SetOverrideBSP(BSP* bsp);
-    void ClearOverrideBSP();
+    void OverrideSceneAsset(const std::string& sceneAssetName, const std::string& floorModelName = "");
+    void ClearSceneAssetOverride();
 
     void SetWalkOverride(const std::function<void()>& callback) { mWalkOverrideCallback = callback; }
 
@@ -132,7 +132,8 @@ private:
     // If not null, means we're loaded!
     SceneData* mSceneData = nullptr;
 
-    // On rare occasions (binocs), the scene's BSP gets overridden with another scene's BSP.
+    // On rare occasions (binocs, scene lighting changes), the scene's BSP gets overridden with another scene's BSP.
+    std::string mOverrideSceneName;
     BSP* mOverrideBSP = nullptr;
 
     // The animation player for the scene.

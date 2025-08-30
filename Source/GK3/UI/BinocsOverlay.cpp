@@ -13,7 +13,6 @@
 #include "TextAsset.h"
 #include "Texture.h"
 #include "Scene.h"
-#include "SceneGeometryData.h"
 #include "SceneManager.h"
 #include "SheepManager.h"
 #include "UIButton.h"
@@ -416,10 +415,7 @@ void BinocsOverlay::OnZoomInButtonPressed()
     mZoomedOutCameraPos = mGameCamera->GetPosition();
 
     // Temporarily change the BSP used to that of the zoomed location.
-    SceneGeometryData geometryData;
-    geometryData.Load(mCurrentZoomLocation->sceneAssetName);
-    geometryData.GetBSP()->SetFloorObjectName(mCurrentZoomLocation->floorModelName);
-    gSceneManager.GetScene()->SetOverrideBSP(geometryData.GetBSP());
+    gSceneManager.GetScene()->OverrideSceneAsset(mCurrentZoomLocation->sceneAssetName, mCurrentZoomLocation->floorModelName);
 
     // Update the camera position and angle for this zoom location.
     mGameCamera->SetPosition(mCurrentZoomLocation->cameraPos);
@@ -459,7 +455,7 @@ void BinocsOverlay::OnZoomInButtonPressed()
 void BinocsOverlay::OnZoomOutButtonPressed()
 {
     // Go back to the normal scene BSP.
-    gSceneManager.GetScene()->ClearOverrideBSP();
+    gSceneManager.GetScene()->ClearSceneAssetOverride();
 
     // Set camera back to the zoomed out position and angle.
     mGameCamera->SetPosition(mZoomedOutCameraPos);

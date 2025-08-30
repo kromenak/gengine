@@ -16,8 +16,9 @@
 #include <string>
 #include <vector>
 
-#include "SceneInitFile.h"
 #include "SceneAsset.h"
+#include "SceneGeometryData.h"
+#include "SceneInitFile.h"
 #include "Timeblock.h"
 
 struct Action;
@@ -41,7 +42,7 @@ public:
 
     // SCENE SETTINGS
     const Timeblock& GetTimeblock() const { return mTimeblock; }
-    BSP* GetBSP() const { return mBSP; }
+    BSP* GetBSP() const { return mSceneGeometry.GetBSP(); }
     Skybox* GetSkybox() const { return mSkybox; }
     WalkerBoundary* GetWalkerBoundary() const { return mWalkerBoundary; }
     const std::string& GetFloorModelName() const { return mGeneralSettings.floorModelName; }
@@ -91,15 +92,8 @@ private:
     // The general block to be used by the scene.
     GeneralBlock mGeneralSettings;
 
-    // The scene asset. One *must* be defined, but really just so we can get the BSP data.
-    SceneAsset* mSceneAsset = nullptr;
-
-    // BSP model, retrieved from the Scene asset.
-    BSP* mBSP = nullptr;
-
-    // BSP lightmap, determined from the scene asset.
-    // The rule seems to be that the lightmap to use always has the same name as the scene asset.
-    BSPLightmap* mBSPLightmap = nullptr;
+    // The scene geometry - includes scene asset, BSP, BSP lightmap, and skybox.
+    SceneGeometryData mSceneGeometry;
 
     // The skybox the scene should use.
     // This can be defined in serveral spots. The priority is:

@@ -20,7 +20,7 @@ public:
     void Load(const std::string& sceneAssetName);
 
     BSP* GetBSP() const { return mBSP; }
-    Skybox* GetSkybox() const { return mSceneAsset->GetSkybox(); }
+    Skybox* GetSkybox() const { return mSceneAsset != nullptr ? mSceneAsset->GetSkybox() : nullptr; }
 
 private:
     // The scene asset. One *must* be defined, but really just so we can get the BSP data.

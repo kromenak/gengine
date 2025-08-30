@@ -177,7 +177,7 @@ void Scene::Unload()
         mSoundtrackPlayer->Stop(soundtrack, true);
     }
 
-    // Clear scene assets used in renderer/
+    // Clear scene assets used in renderer.
     gRenderer.SetBSP(nullptr);
     gRenderer.SetSkybox(nullptr);
 
@@ -1020,33 +1020,49 @@ void Scene::UninspectObject(const std::function<void()>& finishCallback)
     mCamera->Uninspect(finishCallback);
 }
 
-void Scene::SetOverrideBSP(BSP* bsp)
+void Scene::OverrideSceneAsset(const std::string& sceneAssetName, const std::string& floorModelName)
 {
-    // Store override BSP.
-    mOverrideBSP = bsp;
+    // Save the override scene asset name.
+    mOverrideSceneName = sceneAssetName;
 
-    // Change BSP rendered by renderer.
-    gRenderer.SetBSP(bsp);
+    // Load scene geometry based on asset name.
+    SceneGeometryData geometryData;
+    geometryData.Load(sceneAssetName);
 
-    // In some cases, the override BSP is a different variant of the current scene, but with the same hit tests present (e.g. CEM in Day 1, 6PM).
-    // In those cases, we need to re-enable the hit tests in the new scene, or else certain scene interactions may not work.
+    // If there's BSP, use it!
+    mOverrideBSP = geometryData.GetBSP();
     if(mOverrideBSP != nullptr)
     {
+        // Make sure floor model name is set correctly.
+        // This is important so walkers know what to consider floor height, and for clicking to walk.
+        if(!floorModelName.empty())
+        {
+            mOverrideBSP->SetFloorObjectName(floorModelName);
+        }
+        else
+        {
+            mOverrideBSP->SetFloorObjectName(mSceneData->GetFloorModelName());
+        }
+
+        // In some cases, the BSP is a different variant of the current scene, but with the same hit tests present (e.g. CEM in Day 1, 6PM).
+        // In those cases, we need to re-enable the hit tests in the new scene, or else certain scene interactions may not work.
         for(BSPActor* hitTest : mHitTestActors)
         {
             mOverrideBSP->SetVisible(hitTest->GetName(), false);
             mOverrideBSP->SetHitTest(hitTest->GetName(), true);
         }
+
+        // Use this BSP to render instead.
+        gRenderer.SetBSP(mOverrideBSP);
     }
 }
 
-void Scene::ClearOverrideBSP()
+void Scene::ClearSceneAssetOverride()
 {
-    // Clear override BSP.
+    // Clear the overridden scene name and revert back to the original scene data's BSP.
+    mOverrideSceneName.clear();
     mOverrideBSP = nullptr;
-
-    // Revert to rendering the original scene's BSP.
-    gRenderer.SetBSP(mSceneData != nullptr ? mSceneData->GetBSP() : nullptr);
+    gRenderer.SetBSP(mSceneData->GetBSP());
 }
 
 void Scene::OnPersist(PersistState& ps)
@@ -1077,7 +1093,9 @@ void Scene::OnPersist(PersistState& ps)
     // Save/load BSP state.
     // Needed because BSP textures/visibility sometimes change during a scene.
     mSceneData->GetBSP()->OnPersist(ps);
-    //TODO: Do we need to worry about override BSP? YES!
+
+    // Save/load any override scene name.
+    ps.Xfer(PERSIST_VAR(mOverrideSceneName));
 
     // We don't care about 99% of overlays because the game doesn't let you save during them.
     // One exception is the GPS. This ensures that the GPS is visible if you save when it is showing.
@@ -1193,6 +1211,16 @@ void Scene::OnPersist(PersistState& ps)
     for(auto& callback : mPersistCallbacks)
     {
         callback(ps);
+    }
+
+    // If loading, do a final step to set any override scene.
+    // The overridden BSP inherits certain scene hittest object properties, so we want to do this AFTER all scene objects have been loaded.
+    if(ps.IsLoading())
+    {
+        if(!mOverrideSceneName.empty())
+        {
+            OverrideSceneAsset(mOverrideSceneName);
+        }
     }
 }
 
