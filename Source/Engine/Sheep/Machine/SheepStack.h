@@ -8,6 +8,8 @@
 
 #include "SheepValue.h"
 
+class PersistState;
+
 struct SheepStack
 {
 public:
@@ -23,6 +25,8 @@ public:
 
     int Size() const { return mStackSize; }
     void Clear() { mStackSize = 0; }
+
+    void OnPersist(PersistState& ps);
 
 private:
     static const int kMaxStackSize = 1024;

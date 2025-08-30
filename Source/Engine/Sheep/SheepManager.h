@@ -8,6 +8,8 @@
 #include "SheepCompiler.h"
 #include "SheepVM.h"
 
+class PersistState;
+
 class SheepManager
 {
 public:
@@ -33,6 +35,8 @@ public:
     SheepThread* GetCurrentThread() const { return mVirtualMachine.GetCurrentThread(); }
     bool IsAnyThreadRunning() const { return mVirtualMachine.IsAnyThreadRunning(); }
     bool IsThreadRunning(SheepThreadId threadId) const { return mVirtualMachine.IsThreadRunning(threadId); }
+
+    void OnPersist(PersistState& ps);
 
 private:
     // Executes binary bytecode sheep scripts.

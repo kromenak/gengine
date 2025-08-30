@@ -14,6 +14,7 @@
 #include "SheepValue.h"
 #include "Value.h"
 
+class PersistState;
 class SheepScript;
 struct SysFuncImport;
 
@@ -136,6 +137,8 @@ public:
     bool IsAnyThreadRunning() const;
     bool IsThreadRunning(SheepThreadId id) const;
 
+    void OnPersist(PersistState& ps);
+
 private:
     // Each time we execute a Sheepscript, we assign the execution thread a unique ID.
     // This stores what the next ID should be.
@@ -162,6 +165,7 @@ private:
 
     Value CallSysFunc(SheepThread* thread, SysFuncImport* sysImport);
 
+    SheepThread* CreateThread(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag);
     SheepThread* StartExecution(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag);
     void ContinueExecution(SheepThread* thread);
 };

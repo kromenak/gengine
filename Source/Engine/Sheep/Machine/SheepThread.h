@@ -57,6 +57,9 @@ struct SheepThread
     // Before exiting the wait block, all waited upon functions must complete.
     bool mInWaitBlock = false;
 
+    // Purely to support save/load code - the code offset of the last "BeginWait" instruction.
+    int mWaitBlockCodeOffset = 0;
+
     // A tag allows executing threads to be identified/categorized/grouped. Currently used to stop a set of threads prematurely.
     // Tags are inherited - if a thread starts another thread, that "child" thread gets the same tag.
     // (this is similar to the "owning layer" in the original game, but a bit more generalized)

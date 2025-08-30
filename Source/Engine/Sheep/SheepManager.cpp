@@ -1,6 +1,7 @@
 #include "SheepManager.h"
 
 #include "LayerManager.h"
+#include "PersistState.h"
 #include "StringUtil.h"
 
 SheepManager gSheepManager;
@@ -64,4 +65,13 @@ bool SheepManager::Evaluate(SheepScript* script, int n, int v)
 
     // Otherwise, do it "for real."
     return mVirtualMachine.Evaluate(script, n, v);
+}
+
+void SheepManager::OnPersist(PersistState& ps)
+{
+    // This was added in save version 4, so only do it in that case.
+    if(ps.GetFormatVersionNumber() >= 4)
+    {
+        mVirtualMachine.OnPersist(ps);
+    }
 }

@@ -13,6 +13,7 @@
 #include "ProgressBar.h"
 #include "Renderer.h"
 #include "SceneManager.h"
+#include "SheepManager.h"
 #include "Sidney.h"
 #include "StringUtil.h"
 #include "SystemUtil.h"
@@ -352,6 +353,9 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     if(scene != nullptr)
     {
         scene->OnPersist(ps);
+
+        // Save running sheep scripts.
+        gSheepManager.OnPersist(ps);
     }
     printf("Saved to file %s.\n", savePath.c_str());
 
@@ -421,6 +425,10 @@ void SaveManager::LoadInternal(const std::string& loadPath)
 
                 // Restore the scene state using the save data.
                 gSceneManager.GetScene()->OnPersist(*mLoadPersistState);
+
+                // Load running sheep scripts.
+                // Do this after scene load, since many running sheeps depend on a scene being loaded.
+                gSheepManager.OnPersist(*mLoadPersistState);
 
                 // Save versions 1-3 did not store any scene state, so actor positions weren't stored in save data.
                 // These older save versions rely on Enter being called to ensure actors are positioned correctly.

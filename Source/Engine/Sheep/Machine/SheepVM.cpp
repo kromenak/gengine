@@ -4,6 +4,7 @@
 
 #include "BinaryReader.h"
 #include "GMath.h"
+#include "PersistState.h"
 #include "ReportManager.h"
 #include "SheepScript.h"
 #include "SheepSysFunc.h"
@@ -208,6 +209,93 @@ bool SheepVM::IsThreadRunning(SheepThreadId id) const
     return false;
 }
 
+void SheepVM::OnPersist(PersistState& ps)
+{
+    // This can be a bit difficult to reason about if you aren't familiar with the Sheep VM.
+    // Usually, when someone saves a game, there are NO sheep threads running.
+    // Sheep threads are mainly used during cutscenes, UNLESS there is some background scene logic using them.
+    // In those cases, the thread will ALWAYS be blocked here!
+    //  Since SheepVM runs on a single thread, if THIS code is running, the threads MUST be blocked.
+
+    // Calculate how many running & blocked threads exist - save/load that count.
+    int runningThreadCount = 0;
+    if(ps.IsSaving())
+    {
+        for(SheepThread* thread : mSheepThreads)
+        {
+            if(thread->mRunning && thread->mBlocked)
+            {
+                printf("Sheep thread %s is running and blocked\n", thread->GetName().c_str());
+                ++runningThreadCount;
+            }
+        }
+    }
+    ps.Xfer(PERSIST_VAR(runningThreadCount));
+
+    // If saving, iterate each running & blocked thread, saving out its state.
+    // If loading, load each running & blocked thread in turn and start it executing.
+    if(ps.IsSaving())
+    {
+        for(SheepThread* thread : mSheepThreads)
+        {
+            if(thread->mRunning && thread->mBlocked)
+            {
+                // We need the following to successfully restart a script on load:
+                // 1) The SheepScript asset that was running.
+                // 2) The code offset of the start of the current wait block. We restart execution from here.
+                // 3) The name of the function being executed (somewhat optional, but for completeness).
+                // 4) The tag for the thread (so it stops at the appropriate time).
+                // 5) The stack of values.
+                SheepScript* script = thread->mContext->mSheepScript;
+                ps.Xfer(PERSIST_VAR(script));
+
+                int codeOffset = thread->mWaitBlockCodeOffset;
+                ps.Xfer(PERSIST_VAR(codeOffset));
+
+                std::string functionName = thread->mFunctionName;
+                ps.Xfer(PERSIST_VAR(functionName));
+
+                std::string tag = thread->mTag;
+                ps.Xfer(PERSIST_VAR(tag));
+
+                thread->mStack.OnPersist(ps);
+            }
+        }
+    }
+    else
+    {
+        for(int i = 0; i < runningThreadCount; ++i)
+        {
+            // Load in all the data that was saved previously.
+            SheepScript* script = nullptr;
+            ps.Xfer(PERSIST_VAR(script));
+
+            int codeOffset = 0;
+            ps.Xfer(PERSIST_VAR(codeOffset));
+
+            std::string functionName;
+            ps.Xfer(PERSIST_VAR(functionName));
+
+            std::string tag;
+            ps.Xfer(PERSIST_VAR(tag));
+
+            // Create a thread with this script/tag/function-name at the desired code offset.
+            SheepThread* thread = CreateThread(GetInstance(script), codeOffset, functionName, nullptr, tag);
+
+            // Restore the thread's stack.
+            thread->mStack.OnPersist(ps);
+
+            // We're recreating a thread that was already running, so set running to true.
+            // NOTEABLY, we do not set blocked/inWaitBlock to true -
+            // we've loaded AT THE START of a wait block, so the thread is about to enter a wait block and set these.
+            thread->mRunning = true;
+
+            // Continue the thread's execution.
+            ContinueExecution(thread);
+        }
+    }
+}
+
 SheepInstance* SheepVM::GetInstance(SheepScript* script)
 {
     // Don't create without a valid script.
@@ -410,18 +498,8 @@ Value SheepVM::CallSysFunc(SheepThread* thread, SysFuncImport* sysImport)
     return v;
 }
 
-SheepThread* SheepVM::StartExecution(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
+SheepThread* SheepVM::CreateThread(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
 {
-    // A valid execution context is required.
-    if(instance == nullptr)
-    {
-        if(finishCallback != nullptr)
-        {
-            finishCallback();
-        }
-        return nullptr;
-    }
-
     // Create a sheep thread to perform the execution.
     SheepThread* thread = GetIdleThread();
     thread->mContext = instance;
@@ -441,6 +519,23 @@ SheepThread* SheepVM::StartExecution(SheepInstance* instance, int bytecodeOffset
 
     // The thread is using this execution context.
     instance->mReferenceCount++;
+    return thread;
+}
+
+SheepThread* SheepVM::StartExecution(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
+{
+    // A valid execution context is required.
+    if(instance == nullptr)
+    {
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        return nullptr;
+    }
+
+    // Create a sheep thread to perform the execution.
+    SheepThread* thread = CreateThread(instance, bytecodeOffset, functionName, finishCallback, tag);
 
     // Start the thread of execution.
     ContinueExecution(thread);
@@ -641,6 +736,7 @@ void SheepVM::ContinueExecution(SheepThread* thread)
                 std::cout << "BeginWait" << std::endl;
                 #endif
                 thread->mInWaitBlock = true;
+                thread->mWaitBlockCodeOffset = reader.GetPosition() - 1;
                 break;
             }
             case SheepInstruction::EndWait:
