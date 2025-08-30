@@ -116,6 +116,13 @@ void Pendulum::OnPersist(PersistState& ps)
         {
             mGabeState = GabeState::OnPlatform;
         }
+
+        // The constructor starts Gabe's idle animation. But if Gabe's in a situation where that's not needed after loading, it can conflict.
+        // For example, if Gabe's on the altar, he has a specific idle GAS he's using, so we want to cancel the one we set.
+        if(mGabeState != GabeState::InEntryway && mGabeState != GabeState::OnPlatform)
+        {
+            gSceneManager.GetScene()->GetAnimator()->Stop(mIdleAnim, true);
+        }
     }
 }
 
