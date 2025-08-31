@@ -48,7 +48,8 @@ namespace
     }
 }
 
-TimeblockScreen::TimeblockScreen() : Actor("TimeblockScreen", TransformType::RectTransform)
+TimeblockScreen::TimeblockScreen() : Actor("TimeblockScreen", TransformType::RectTransform),
+    mLayer("TimeblockLayer")
 {
     UI::AddCanvas(this, 20, Color32::Black);
 
@@ -84,6 +85,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, bool loading
     mCallback = callback;
 
     // Show the screen.
+    gLayerManager.PushLayer(&mLayer);
     SetActive(true);
 
     // Load background image for this timeblock.
@@ -149,6 +151,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, bool loading
 void TimeblockScreen::Hide()
 {
     if(!IsActive()) { return; }
+    gLayerManager.PopLayer(&mLayer);
     SetActive(false);
 
     // If leaving this screen to the MAP location, make sure the driving screen is showing!
@@ -161,6 +164,10 @@ void TimeblockScreen::Hide()
 
 void TimeblockScreen::OnUpdate(float deltaTime)
 {
+    // Other screens (like save/load screen) can appear above this one.
+    // Don't update this screen unless there's no screen above us.
+    if(!gLayerManager.IsTopLayer(&mLayer)) { return; }
+
     // Shortcut key for pressing continue button.
     if(mContinueButton->IsEnabled() && (mWaitForNoInput.IsKeyLeadingEdge(SDL_SCANCODE_C) || mWaitForNoInput.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE)))
     {

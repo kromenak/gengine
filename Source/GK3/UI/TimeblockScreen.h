@@ -8,6 +8,7 @@
 
 #include <functional>
 
+#include "LayerManager.h"
 #include "WaitForNoInput.h"
 
 class Sequence;
@@ -27,6 +28,8 @@ protected:
     void OnUpdate(float deltaTime) override;
 
 private:
+    Layer mLayer;
+
     // The background image changes depending on the current timeblock.
     UIImage* mBackgroundImage = nullptr;
 
