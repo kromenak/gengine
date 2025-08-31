@@ -53,6 +53,16 @@ GameCamera::GameCamera() : Actor("Camera")
 
     // Create option bar.
     mOptionBar = new OptionBar();
+
+    // When the game camera's present, don't let the video player skip videos.
+    // Instead, our action skip logic will skip videos.
+    gGK3UI.GetVideoPlayer()->AllowSkip(false);
+}
+
+GameCamera::~GameCamera()
+{
+    // When no game camera is present, the only way to skip videos is if the video player handles it.
+    gGK3UI.GetVideoPlayer()->AllowSkip(true);
 }
 
 void GameCamera::RemoveBounds(Model* model)
@@ -321,7 +331,11 @@ void GameCamera::OnUpdate(float deltaTime)
             {
                 mOptionBar->Hide();
             }
-            else
+            else if(gGK3UI.GetVideoPlayer()->IsPlaying())
+            {
+                gGK3UI.GetVideoPlayer()->Stop();
+            }
+            else if(!gActionManager.IsSkippingCurrentAction())
             {
                 gSceneManager.GetScene()->SkipCurrentAction();
             }

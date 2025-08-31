@@ -7,6 +7,8 @@
 #include <functional>
 #include <string>
 
+#include "VideoPlayer.h"
+
 class BinocsOverlay;
 class CaptionsOverlay;
 class ConfirmPopup;
@@ -72,10 +74,7 @@ public:
     void ShowGPSOverlay();
     void HideGPSOverlay();
 
-    void PlayVideo(const std::string& videoName, bool fullscreen, bool autoclose, const std::function<void()>& callback);
-    bool IsVideoPlaying() const;
-    void StopVideo();
-    void HideVideoPlayer();
+    VideoPlayer* GetVideoPlayer();
 
     bool IsAnyKeyPressedOutsideTextInputAndConsole();
     bool CanExitScreen(const Layer& layer);

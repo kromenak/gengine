@@ -51,7 +51,7 @@ namespace VideoHelper
         }
 
         // Play video.
-        gGK3UI.PlayVideo(filename, fullscreen, autoclose, [videoName, callback](){
+        gGK3UI.GetVideoPlayer()->Play(filename, fullscreen, autoclose, [videoName, callback](){
 
             // If the video ends naturally, any associated captions will also end naturally.
             // But in case of skipping the video, be sure to stop captions prematurely as well.
@@ -73,7 +73,7 @@ namespace VideoHelper
         });
 
         // If video is playing, attempt to play associated captions.
-        if(gGK3UI.IsVideoPlaying())
+        if(gGK3UI.GetVideoPlayer()->IsPlaying())
         {
             Animation* captionsAnim = gAssetManager.LoadYak(Path::GetFileNameNoExtension(videoName), AssetScope::Scene);
             if(captionsAnim != nullptr)

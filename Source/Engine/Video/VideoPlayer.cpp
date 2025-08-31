@@ -50,6 +50,10 @@ void VideoPlayer::Show()
 
 void VideoPlayer::Hide()
 {
+    // If we're hiding, there's no need to continue video playback.
+    // If video is still playing (Hide called without Stop), stop it here.
+    mVideoImage->Stop();
+
     // Pop layer and set inactive.
     if(IsActive())
     {
@@ -138,7 +142,7 @@ void VideoPlayer::OnUpdate(float deltaTime)
     }
 
     // Pressing escape stops the video.
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    if(mAllowSkip && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
     {
         Stop();
     }

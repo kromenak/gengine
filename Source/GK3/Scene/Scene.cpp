@@ -688,12 +688,6 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 
 void Scene::SkipCurrentAction()
 {
-    if(gGK3UI.IsVideoPlaying())
-    {
-        gGK3UI.StopVideo();
-        return;
-    }
-
     // If an action is playing, this should skip the action.
     if(gActionManager.IsActionPlaying() && !gActionManager.IsSkippingCurrentAction())
     {

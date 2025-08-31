@@ -342,36 +342,14 @@ void GK3UI::HideGPSOverlay()
     }
 }
 
-void GK3UI::PlayVideo(const std::string& videoName, bool fullscreen, bool autoclose, const std::function<void()>& callback)
+VideoPlayer* GK3UI::GetVideoPlayer()
 {
     if(mVideoPlayer == nullptr)
     {
         mVideoPlayer = new VideoPlayer();
         mVideoPlayer->SetIsDestroyOnLoad(false);
     }
-    mVideoPlayer->Play(videoName, fullscreen, autoclose, callback);
-}
-
-bool GK3UI::IsVideoPlaying() const
-{
-    return mVideoPlayer != nullptr && mVideoPlayer->IsPlaying();
-}
-
-void GK3UI::StopVideo()
-{
-    if(mVideoPlayer != nullptr)
-    {
-        mVideoPlayer->Stop();
-    }
-}
-
-void GK3UI::HideVideoPlayer()
-{
-    if(mVideoPlayer != nullptr)
-    {
-        mVideoPlayer->Stop();
-        mVideoPlayer->Hide();
-    }
+    return mVideoPlayer;
 }
 
 bool GK3UI::IsAnyKeyPressedOutsideTextInputAndConsole()

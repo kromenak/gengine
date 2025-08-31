@@ -29,6 +29,8 @@ public:
 
     bool IsPlaying() const;
 
+    void AllowSkip(bool allow) { mAllowSkip = allow; }
+
 protected:
     void OnUpdate(float deltaTime) override;
 
@@ -70,6 +72,9 @@ private:
 
     // Callback that is fired when video playback stops (either due to EOF or skip).
     std::function<void()> mStopCallback = nullptr;
+
+    // If true, pressing ESC will skip the movie.
+    bool mAllowSkip = true;
 
     void RefreshUI();
 };

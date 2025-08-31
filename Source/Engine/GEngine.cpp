@@ -315,13 +315,13 @@ void GEngine::OnPersist(PersistState& ps)
 void GEngine::ShowOpeningMovies()
 {
     // Play opening movie.
-    gGK3UI.PlayVideo("Sierra.avi", true, true, [this](){
+    gGK3UI.GetVideoPlayer()->Play("Sierra.avi", true, true, [this](){
 
         // On first launch of game, show the intro movie before the title screen.
         // Otherwise, go straight to the title screen.
         if(gSaveManager.GetRunCount() <= 1)
         {
-            gGK3UI.PlayVideo("intro.bik", true, true, [this](){
+            gGK3UI.GetVideoPlayer()->Play("intro.bik", true, true, [this](){
                 ShowTitleScreen();
             });
         }
@@ -551,7 +551,7 @@ void GEngine::ProcessInput()
     }
 
     // Quick quit for dev purposes.
-    if(gInputManager.IsKeyPressed(SDL_SCANCODE_F4))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F4))
     {
         Quit();
     }

@@ -74,7 +74,7 @@ TitleScreen::TitleScreen() : Actor("TitleScreen", TransformType::RectTransform)
     UIButton* introButton = CreateButton(mBackgroundImage, "TITLE_INTRO");
     introButton->SetTooltipText("titleintro");
     introButton->SetPressCallback([](UIButton* button) {
-        gGK3UI.PlayVideo("intro.bik", true, true, nullptr);
+        gGK3UI.GetVideoPlayer()->Play("intro.bik", true, true, nullptr);
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
     });
     if(GEngine::Instance()->IsDemoMode())

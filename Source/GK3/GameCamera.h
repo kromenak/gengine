@@ -30,6 +30,7 @@ public:
     static bool AreCinematicsEnabled();
 
     GameCamera();
+    ~GameCamera();
 
     void AddBounds(Model* model) { mBoundsModels.push_back(model); }
     void RemoveBounds(Model* model);
