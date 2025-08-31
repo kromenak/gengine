@@ -50,13 +50,13 @@ public:
     // Action Execution
     bool ExecuteAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback = nullptr, bool log = true);
+    bool ExecuteBackgroundAction(const std::string& noun, const std::string& verb);
     void ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteCustomAction(const std::string& noun, const std::string& verb, const std::string& caseLabel,
                              const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteDialogueAction(const std::string& licensePlate, int lineCount = 1, std::function<void(const Action*)> finishCallback = nullptr);
 
-    void QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
     void WaitForActionsToComplete(const std::function<void()>& callback);
 
     void StartManualAction() { ++mManualActionCounter; }
@@ -150,6 +150,10 @@ private:
     // The action that is currently playing/executing. Only one action may execute at a time.
     const Action* mCurrentAction = nullptr;
 
+    // If true, the current action was initiated by direct user action.
+    // Otherwise, it was triggered by code or "in the background."
+    bool mCurrentActionIsUserInitiated = true;
+
     // In addition to playing actual actions, we can also record "manual" actions that the game is performing.
     // This allows most of the game to behave as though we're waiting on an action, even though it might not actually be happening through the Action system.
     int mManualActionCounter = 0;
@@ -159,15 +163,6 @@ private:
 
     // What frame the current action started on.
     uint32_t mCurrentActionStartFrame = 0;
-
-    // In rare cases, we may need to queue actions to execute when the current one is finished.
-    // Primary use case is executing actions on a timer - if timer expires DURING another action, we need to wait until that one finishes!
-    struct ActionAndCallback
-    {
-        const Action* action = nullptr;
-        std::function<void(const Action*)> callback = nullptr;
-    };
-    std::vector<ActionAndCallback> mActionQueue;
 
     // We also sometimes want to execute a callback when all actions (current or queued) have finished.
     std::vector<std::function<void()>> mAllActionsFinishedCallbacks;
@@ -204,6 +199,7 @@ private:
     void OnActionBarCanceled();
 
     // Called when an action finishes executing.
+    void ExecuteActionInternal(const Action* action, std::function<void(const Action*)> finishCallback, bool userInitiated, bool log);
     void OnActionExecuteFinished();
 
     void SendAllActionsFinishedCallbacks();

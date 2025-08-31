@@ -263,9 +263,9 @@ void GameCamera::OnUpdate(float deltaTime)
     {
         if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
         {
-            if(gActionManager.IsActionBarShowing() && gActionManager.GetActionBar()->Dismiss())
+            if(gActionManager.IsActionBarShowing() && gActionManager.GetActionBar()->CanDismiss())
             {
-                // Do nothing in this case - we just dismissed the action bar.
+                gActionManager.GetActionBar()->Dismiss();
             }
             else if(mOptionBar->CanShow())
             {
@@ -323,9 +323,9 @@ void GameCamera::OnUpdate(float deltaTime)
             // If the action bar is showing, this will cancel the action bar.
             // Or if the option bar is showing, this will hide the option bar.
             // Otherwise, it will skip the current action.
-            if(gActionManager.IsActionBarShowing() && gActionManager.GetActionBar()->Dismiss())
+            if(gActionManager.IsActionBarShowing() && gActionManager.GetActionBar()->CanDismiss())
             {
-                // Do nothing in this case - we just dismissed the action bar.
+                gActionManager.GetActionBar()->Dismiss();
             }
             else if(mOptionBar->IsActive())
             {

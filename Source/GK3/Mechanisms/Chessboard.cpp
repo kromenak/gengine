@@ -382,7 +382,7 @@ void Chessboard::OnUpdate(float deltaTime)
                 }
 
                 // Execute the scene jump action, which will either send you to safety or illicit an "it's too far away" response.
-                gActionManager.ExecuteAction(gActionManager.GetAction("SCENE", "JUMP"));
+                gActionManager.ExecuteAction("SCENE", "JUMP");
             }
         }
     }

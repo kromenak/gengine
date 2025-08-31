@@ -152,7 +152,7 @@ bool ActionManager::ExecuteAction(const std::string& noun, const std::string& ve
     Action* action = GetHighestPriorityAction(noun, verb, VerbType::Normal);
 
     // Execute the action. This handles the null case internally.
-    ExecuteAction(action, finishCallback);
+    ExecuteActionInternal(action, finishCallback, true, true);
 
     // Return true if we actually played an action, false if not.
     return action != nullptr;
@@ -160,61 +160,19 @@ bool ActionManager::ExecuteAction(const std::string& noun, const std::string& ve
 
 void ActionManager::ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback, bool log)
 {
-    // Early out if action is null.
-    if(action == nullptr)
-    {
-        if(finishCallback != nullptr)
-        {
-            finishCallback(action);
-        }
-        return;
-    }
+    ExecuteActionInternal(action, finishCallback, true, log);
+}
 
-    // We should only execute one action at a time.
-    if(mCurrentAction != nullptr)
-    {
-        gReportManager.Log("Actions", StringUtil::Format("Skipping NVC %s - another action is in progress", action->ToString().c_str()));
-        return;
-    }
-    mCurrentAction = action;
-    mCurrentActionFinishCallback = finishCallback;
-
-    // Log it!
-    // This is conditional b/c scene actions are actually logged earlier (before the approach finishes).
-    if(log)
-    {
-        gReportManager.Log("Actions", StringUtil::Format("Playing NVC %s", action->ToString().c_str()));
-    }
-
-    // Increment action ID.
-    ++mActionId;
-
-    // Remember current camera FOV.
-    gSceneManager.GetScene()->GetCamera()->SaveFov();
-
-    // Save frame this action was started on.
-    mCurrentActionStartFrame = GEngine::Instance()->GetFrameNumber();
-
-    // Sometimes, an action can start that the user doesn't initiate (e.g. due to a timer expiring).
-    // In those cases, the action bar should close if it was still up.
-    HideActionBar(false);
-
-    // If no script is associated with the action, that might be an error...
-    // But for now, we'll just treat it as action is immediately over.
-    if(action->script.script != nullptr)
-    {
-        // Execute action in Sheep system, call finished function when done.
-        gSheepManager.Execute(action->script.script, std::bind(&ActionManager::OnActionExecuteFinished, this), "SceneLayer");
-    }
-    else
-    {
-        //TODO: Log?
-        OnActionExecuteFinished();
-    }
+bool ActionManager::ExecuteBackgroundAction(const std::string& noun, const std::string& verb)
+{
+    Action* action = GetHighestPriorityAction(noun, verb, VerbType::Normal);
+    ExecuteActionInternal(action, nullptr, false, true);
+    return action != nullptr;
 }
 
 void ActionManager::ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback)
 {
+    // Calls a specific function on a specific Sheepscript.
     ExecuteSheepAction("wait CallSheep(\"" + sheepName + "\", \"" + functionName + "\")", finishCallback);
 }
 
@@ -256,32 +214,12 @@ void ActionManager::ExecuteCustomAction(const std::string& noun, const std::stri
     mCustomAction.script.script = gSheepManager.Compile("ActionSheep", "{ " + sheepScriptText + " }");
 
     // Use normal action flow from here.
-    ExecuteAction(&mCustomAction, finishCallback);
+    ExecuteActionInternal(&mCustomAction, finishCallback, true, true);
 }
 
 void ActionManager::ExecuteDialogueAction(const std::string& licensePlate, int lineCount, std::function<void(const Action*)> finishCallback)
 {
     ExecuteSheepAction(StringUtil::Format("wait StartDialogue(\"%s\", %d)", licensePlate.c_str(), lineCount), finishCallback);
-}
-
-void ActionManager::QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback)
-{
-    // For this noun/verb pair, find the best Action to use in the current scenario.
-    Action* action = GetHighestPriorityAction(noun, verb, VerbType::Normal);
-    if(action == nullptr) { return; }
-
-    // If no action is playing, we can just play it right now.
-    if(mCurrentAction == nullptr)
-    {
-        ExecuteAction(action, finishCallback);
-        return;
-    }
-
-    // Otherwise, queue action to play after.
-    ActionAndCallback entry;
-    entry.action = action;
-    entry.callback = finishCallback;
-    mActionQueue.push_back(entry);
 }
 
 void ActionManager::WaitForActionsToComplete(const std::function<void()>& callback)
@@ -1000,6 +938,58 @@ void ActionManager::OnActionBarCanceled()
     ExecuteSheepAction("GLB_ALL", "CodeCallEndConv$", nullptr);
 }
 
+void ActionManager::ExecuteActionInternal(const Action* action, std::function<void(const Action*)> finishCallback, bool userInitiated, bool log)
+{
+    // Early out if action is null.
+    if(action == nullptr)
+    {
+        if(finishCallback != nullptr)
+        {
+            finishCallback(action);
+        }
+        return;
+    }
+
+    // We should only execute one action at a time.
+    if(mCurrentAction != nullptr)
+    {
+        gReportManager.Log("Actions", StringUtil::Format("Skipping NVC %s - another action is in progress", action->ToString().c_str()));
+        return;
+    }
+    mCurrentAction = action;
+    mCurrentActionFinishCallback = finishCallback;
+    mCurrentActionIsUserInitiated = userInitiated;
+
+    // Log it!
+    // This is conditional b/c scene actions are actually logged earlier (before the approach finishes).
+    if(log)
+    {
+        gReportManager.Log("Actions", StringUtil::Format("Playing NVC %s", action->ToString().c_str()));
+    }
+
+    // Increment action ID.
+    ++mActionId;
+
+    // Remember current camera FOV.
+    gSceneManager.GetScene()->GetCamera()->SaveFov();
+
+    // Save frame this action was started on.
+    mCurrentActionStartFrame = GEngine::Instance()->GetFrameNumber();
+
+    // If no script is associated with the action, that might be an error...
+    // But for now, we'll just treat it as action is immediately over.
+    if(action->script.script != nullptr)
+    {
+        // Execute action in Sheep system, call finished function when done.
+        // Note that the finish callback *could* be called immediately, if the script doesn't yield/wait and finishes immediately.
+        gSheepManager.Execute(action->script.script, std::bind(&ActionManager::OnActionExecuteFinished, this), "SceneLayer");
+    }
+    else
+    {
+        OnActionExecuteFinished();
+    }
+}
+
 void ActionManager::OnActionExecuteFinished()
 {
     // This function should only be called if an action is playing.
@@ -1037,50 +1027,45 @@ void ActionManager::OnActionExecuteFinished()
         callback(mLastAction);
     }
 
-    // When a "talk" action ends, try to show the topic bar.
-    if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "TALK"))
+    // If this was a user-initiated action, see if we need to do anything after the action is over.
+    if(mCurrentActionIsUserInitiated)
     {
-        ShowTopicBar(mLastAction->noun, nullptr, true);
-    }
-    else if(!mLastAction->talkTo.empty())
-    {
-        const Action* talkAction = GetAction(mLastAction->talkTo, "TALK");
-        if(talkAction != nullptr && HasTopicsLeft(mLastAction->talkTo))
-        {
-            ExecuteAction(talkAction);
-        }
-        else
-        {
-            ShowTopicBar(mLastAction->talkTo, nullptr, true);
-        }
-    }
-    else if(gVerbManager.IsTopic(mLastAction->verb))
-    {
-        ShowTopicBar(mLastAction->noun, nullptr, false);
-    }
-    else if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "Z_CHAT")) // chatting always seems to end the current convo/action bar.
-    {
-        OnActionBarCanceled();
-    }
-    else if(gDialogueManager.InConversation()) // *seems* necessary to end conversations started during cutscenes (ex: Gabe/Mosely scene in Dining Room)
-    {
-        if(!mLastAction->talkTo.empty())
-        {
-            ShowTopicBar(mLastAction->talkTo, nullptr, true);
-        }
-        else
+        // When a "talk" action ends, try to show the topic bar.
+        if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "TALK"))
         {
             ShowTopicBar(mLastAction->noun, nullptr, true);
         }
-    }
-    else if(mCurrentAction == nullptr && !mActionQueue.empty())
-    {
-        // Retrieve front item, but remove it BEFORE executing.
-        ActionAndCallback front = mActionQueue.front();
-        mActionQueue.erase(mActionQueue.begin());
-
-        // Execute the action.
-        ExecuteAction(front.action, front.callback);
+        else if(!mLastAction->talkTo.empty())
+        {
+            const Action* talkAction = GetAction(mLastAction->talkTo, "TALK");
+            if(talkAction != nullptr && HasTopicsLeft(mLastAction->talkTo))
+            {
+                ExecuteAction(talkAction);
+            }
+            else
+            {
+                ShowTopicBar(mLastAction->talkTo, nullptr, true);
+            }
+        }
+        else if(gVerbManager.IsTopic(mLastAction->verb))
+        {
+            ShowTopicBar(mLastAction->noun, nullptr, false);
+        }
+        else if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "Z_CHAT")) // chatting always seems to end the current convo/action bar.
+        {
+            OnActionBarCanceled();
+        }
+        else if(gDialogueManager.InConversation()) // *seems* necessary to end conversations started during cutscenes (ex: Gabe/Mosely scene in Dining Room)
+        {
+            if(!mLastAction->talkTo.empty())
+            {
+                ShowTopicBar(mLastAction->talkTo, nullptr, true);
+            }
+            else
+            {
+                ShowTopicBar(mLastAction->noun, nullptr, true);
+            }
+        }
     }
 
     // If this action completed and didn't trigger any other action, we can send the "all actions finished" callbacks.

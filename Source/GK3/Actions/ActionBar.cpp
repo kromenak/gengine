@@ -329,15 +329,13 @@ void ActionBar::RemoveVerb(const std::string& verb)
     }
 }
 
-bool ActionBar::Dismiss()
+void ActionBar::Dismiss()
 {
     // Dismiss is similar to hide/cancel, but it's disallowed in some cases.
     if(mAllowDismiss)
     {
         OnCancelButtonPressed();
-        return true;
     }
-    return false;
 }
 
 void ActionBar::OnUpdate(float deltaTime)
@@ -349,6 +347,13 @@ void ActionBar::OnUpdate(float deltaTime)
         if(gGK3UI.IsAnyKeyPressedOutsideTextInputAndConsole() && !gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
         {
             Dismiss();
+        }
+
+        // If an action is playing, and the action bar is dismissable, hide the bar without calling cancel callback.
+        // This can happen if action bar is up, but then a timer or other background script causes an action/cutscene to execute.
+        if(gActionManager.IsActionPlaying() && mAllowDismiss)
+        {
+            Hide(false);
         }
     }
 }

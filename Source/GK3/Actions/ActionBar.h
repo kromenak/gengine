@@ -41,8 +41,10 @@ public:
     void RemoveVerb(const std::string& verb);
 
     void SetAllowCancel(bool allowCancel) { mAllowCancel = allowCancel; }
+
     void SetAllowDismiss(bool allowDismiss) { mAllowDismiss = allowDismiss; }
-    bool Dismiss();
+    bool CanDismiss() const { return mAllowDismiss; }
+    void Dismiss();
 
 protected:
     void OnUpdate(float deltaTime) override;

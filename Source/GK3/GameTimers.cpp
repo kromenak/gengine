@@ -36,7 +36,7 @@ void GameTimers::Update(float deltaTime)
         // If another action is already playing, we wait until it is finished before executing this one (and removing it from the list).
         if(mGameTimers[i].secondsRemaining <= 0.0f && !gActionManager.IsActionPlaying())
         {
-            gActionManager.ExecuteAction(mGameTimers[i].noun, mGameTimers[i].verb);
+            gActionManager.ExecuteBackgroundAction(mGameTimers[i].noun, mGameTimers[i].verb);
             mGameTimers.erase(mGameTimers.begin() + i);
         }
     }
@@ -47,7 +47,7 @@ void GameTimers::Set(const std::string& noun, const std::string& verb, float sec
     // If seconds are zero or less (this does happen from time to time), just execute action immediately and return.
     if(seconds <= 0.0f && !gActionManager.IsActionPlaying())
     {
-        gActionManager.ExecuteAction(noun, verb);
+        gActionManager.ExecuteBackgroundAction(noun, verb);
         return;
     }
 
