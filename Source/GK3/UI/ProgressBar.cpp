@@ -71,7 +71,17 @@ void ProgressBar::Show(Type type)
 void ProgressBar::Hide()
 {
     SetActive(false);
-    gLayerManager.PopLayer(&mLayer);
+
+    // The progress bar is a bit unique in that other layers may be added to the layer stack after it.
+    // For example, during a save game load, the scene layer will get added on top of this layer.
+    if(gLayerManager.IsTopLayer(&mLayer))
+    {
+        gLayerManager.PopLayer(&mLayer);
+    }
+    else if(gLayerManager.IsLayerInStack(&mLayer))
+    {
+        gLayerManager.RemoveLayer(mLayer);
+    }
 }
 
 void ProgressBar::SetProgress(float fraction)

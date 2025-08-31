@@ -23,6 +23,9 @@ public:
     void PushLayer(Layer* layer);
     void PopLayer(Layer* expectedLayer = nullptr);
 
+    // Remove from middle of stack.
+    void RemoveLayer(const Layer& layer);
+
     // Query layer state.
     bool IsTopLayer(const Layer* layer) const;
     bool IsTopLayer(const std::string& name) const;

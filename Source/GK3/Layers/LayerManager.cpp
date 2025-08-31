@@ -61,6 +61,19 @@ void LayerManager::PopLayer(Layer* expectedLayer)
     }
 }
 
+void LayerManager::RemoveLayer(const Layer& layer)
+{
+    auto it = std::find(mLayerStack.begin(), mLayerStack.end(), &layer);
+    if(it != mLayerStack.end())
+    {
+        mLayerStack.erase(it);
+    }
+    else
+    {
+        std::cout << "Layer " << layer.GetName() << " did not exist in the layer stack!" << std::endl;
+    }
+}
+
 bool LayerManager::IsTopLayer(const Layer* layer) const
 {
     return !mLayerStack.empty() && mLayerStack.back() == layer;
