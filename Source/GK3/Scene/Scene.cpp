@@ -652,11 +652,11 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
     }
 
     // No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
-    gActionManager.ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
-    ActionBar* actionBar = gActionManager.GetActionBar();
+    gActionManager.ShowActionBar(interacted->GetNoun(), true, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 
     // Add INSPECT/UNINSPECT if not present.
     bool alreadyInspecting = StringUtil::EqualsIgnoreCase(interacted->GetNoun(), mCamera->GetInspectNoun());
+    ActionBar* actionBar = gActionManager.GetActionBar();
     if(alreadyInspecting)
     {
         if(!actionBar->HasVerb("INSPECT_UNDO"))

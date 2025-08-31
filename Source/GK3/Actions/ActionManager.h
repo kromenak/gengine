@@ -73,8 +73,8 @@ public:
     std::string& GetVerb(int verbEnum);
 
     // Action Bar
-    void ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback);
-    void ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback = nullptr, bool centerOnPointer = true);
+    void ShowActionBar(const std::string& noun, bool centerOnPointer, std::function<void(const Action*)> selectCallback);
+    void ShowTopicBar(const std::string& noun, bool centerOnPointer, std::function<void(const Action*)> selectCallback);
     bool IsActionBarShowing() const;
     ActionBar* GetActionBar() const { return mActionBar; }
     void HideActionBar(bool cancel) const;

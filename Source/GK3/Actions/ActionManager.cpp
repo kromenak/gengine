@@ -535,13 +535,13 @@ std::string& ActionManager::GetVerb(int verbEnum)
     return mVerbs[Math::Clamp(verbEnum, 0, (int)mVerbs.size() - 1)];
 }
 
-void ActionManager::ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
+void ActionManager::ShowActionBar(const std::string& noun, bool centerOnPointer, std::function<void(const Action*)> selectCallback)
 {
     std::vector<const Action*> actions = GetActions(noun, VerbType::Normal);
-    mActionBar->Show(noun, VerbType::Normal, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
+    mActionBar->Show(noun, VerbType::Normal, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this), centerOnPointer);
 }
 
-void ActionManager::ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback, bool centerOnPointer)
+void ActionManager::ShowTopicBar(const std::string& noun, bool centerOnPointer, std::function<void(const Action*)> selectCallback)
 {
     // See if we have any more topics to discuss with this noun (person).
     // If not, we will pre-emptively cancel the bar and return.
@@ -1033,7 +1033,7 @@ void ActionManager::OnActionExecuteFinished()
         // When a "talk" action ends, try to show the topic bar.
         if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "TALK"))
         {
-            ShowTopicBar(mLastAction->noun, nullptr, true);
+            ShowTopicBar(mLastAction->noun, false, nullptr);
         }
         else if(!mLastAction->talkTo.empty())
         {
@@ -1044,12 +1044,12 @@ void ActionManager::OnActionExecuteFinished()
             }
             else
             {
-                ShowTopicBar(mLastAction->talkTo, nullptr, true);
+                ShowTopicBar(mLastAction->talkTo, false, nullptr);
             }
         }
         else if(gVerbManager.IsTopic(mLastAction->verb))
         {
-            ShowTopicBar(mLastAction->noun, nullptr, false);
+            ShowTopicBar(mLastAction->noun, false, nullptr);
         }
         else if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "Z_CHAT")) // chatting always seems to end the current convo/action bar.
         {
@@ -1059,11 +1059,11 @@ void ActionManager::OnActionExecuteFinished()
         {
             if(!mLastAction->talkTo.empty())
             {
-                ShowTopicBar(mLastAction->talkTo, nullptr, true);
+                ShowTopicBar(mLastAction->talkTo, false, nullptr);
             }
             else
             {
-                ShowTopicBar(mLastAction->noun, nullptr, true);
+                ShowTopicBar(mLastAction->noun, false, nullptr);
             }
         }
     }

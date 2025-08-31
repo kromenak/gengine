@@ -27,9 +27,8 @@ public:
 
     void Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions,
               std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback,
-              bool centerOnPointer = true);
+              bool centerOnPointer = false);
     void Hide(bool cancel);
-
     bool IsShowing() const;
 
     bool HasVerb(const std::string& verb) const;
@@ -84,7 +83,9 @@ private:
 
     UIButton* AddButton(int index, const VerbIcon& buttonIcon, const std::string& verb);
     void RefreshButtonLayout();
+
     void CenterOnPointer();
+    void KeepOnScreen();
 
     void OnCancelButtonPressed();
 };

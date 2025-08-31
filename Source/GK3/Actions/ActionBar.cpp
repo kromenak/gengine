@@ -216,6 +216,20 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
     {
         CenterOnPointer();
     }
+    else
+    {
+        // Rarely, the action bar may show, be told NOT to center on pointer, and still be in it's default lower-left corner position.
+        // In this case, force the bar to show centered on-screen, which looks nicer for a default position.
+        // (One known case: launch game, load save game on 303P timeblock screen. The first action bar shown doesn't center on pointer.)
+        if(mButtonHolder->GetAnchoredPosition() == Vector2::Zero)
+        {
+            mButtonHolder->SetAnchoredPosition(Window::GetSize() * 0.5f);
+        }
+
+        // If bar shows in same spot as previous, it may have more buttons and can extend off-screen.
+        // This ensures we stay on screen at least!
+        KeepOnScreen();
+    }
 
     // It's showing now!
     mButtonHolder->GetOwner()->SetActive(true);
@@ -301,7 +315,7 @@ void ActionBar::AddVerbAtIndex(const std::string& verb, int index, const std::fu
 
     // Refresh button positions and move bar to pointer.
     RefreshButtonLayout();
-    CenterOnPointer();
+    KeepOnScreen();
 }
 
 void ActionBar::SetVerbEnabled(const std::string& verb, bool enabled)
@@ -325,7 +339,7 @@ void ActionBar::RemoveVerb(const std::string& verb)
 
         mButtons.erase(mButtons.begin() + index);
         RefreshButtonLayout();
-        CenterOnPointer();
+        KeepOnScreen();
     }
 }
 
@@ -422,6 +436,12 @@ void ActionBar::CenterOnPointer()
     // Position action bar at mouse position.
     mButtonHolder->SetAnchoredPosition(GetTransform()->GetWorldToLocalMatrix().TransformPoint(gInputManager.GetMousePosition()));
 
+    // Make sure it's still on-screen.
+    KeepOnScreen();
+}
+
+void ActionBar::KeepOnScreen()
+{
     // Moving the button holder may put it offscreen, if the pointer is near the screen edge.
     // So, move it back on-screen in that case.
     mButtonHolder->MoveInsideRect(Window::GetRect());

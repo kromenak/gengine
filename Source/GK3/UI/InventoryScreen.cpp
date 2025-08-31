@@ -260,7 +260,7 @@ void InventoryScreen::OnUpdate(float deltaTime)
 void InventoryScreen::OnItemClicked(UIButton* button, const std::string& itemName)
 {
     // Show the action bar for this noun.
-    gActionManager.ShowActionBar(itemName, nullptr);
+    gActionManager.ShowActionBar(itemName, true, nullptr);
 
     // We want to add a "pickup" verb, which means to make the item the active inventory item.
     // This should go after the "LOOK" verb, but if there's no "LOOK" verb, it'll go at the beginning.

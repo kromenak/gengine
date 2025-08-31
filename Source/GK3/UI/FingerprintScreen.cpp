@@ -799,7 +799,7 @@ void FingerprintScreen::OnCollectWilkesDirtyGlass()
         gActionManager.ExecuteSheepAction("wait StartDialogue(\"1EK0259291\", 1)", [this](const Action* action){
 
             // Weirdly, the noun for this choice in the NVC is "Crow"...
-            gActionManager.ShowTopicBar("Crow", [this](const Action* action){
+            gActionManager.ShowTopicBar("Crow", false, [this](const Action* action){
 
                 // If chose Wilkes...you were right! And you actually get the points for guessing this correctly (or being observant earlier in the timeblock).
                 if(StringUtil::EqualsIgnoreCase(action->verb, "T_WILKES"))
@@ -872,7 +872,7 @@ void FingerprintScreen::OnCollectBuchelliDirtyGlass()
         gActionManager.ExecuteSheepAction("wait StartDialogue(\"1EK0259291\", 1)", [this](const Action* action){
 
             // Weirdly, the noun for this choice in the NVC is "Dagger"...
-            gActionManager.ShowTopicBar("Dagger", [this](const Action* action){
+            gActionManager.ShowTopicBar("Dagger", false, [this](const Action* action){
 
                 // If chose Buchelli...you were right!
                 // There are actually no points for this, but you will get points when you take Wilkes' print next.

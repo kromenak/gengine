@@ -166,7 +166,7 @@ void InventoryInspectScreen::OnClicked(const std::string& noun)
     }
 
     // Show the action bar for this noun.
-    gActionManager.ShowActionBar(noun, [this, noun](const Action* action){
+    gActionManager.ShowActionBar(noun, true, [this, noun](const Action* action){
 
         // Perform the action.
         gActionManager.ExecuteAction(action, [this, noun](const Action* action){
