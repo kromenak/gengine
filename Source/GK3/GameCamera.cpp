@@ -267,7 +267,7 @@ void GameCamera::OnUpdate(float deltaTime)
             {
                 gActionManager.GetActionBar()->Dismiss();
             }
-            else if(mOptionBar->CanShow())
+            else if(mOptionBar->CanShow() && !gActionManager.IsActionBarShowing())
             {
                 mOptionBar->Show();
             }
