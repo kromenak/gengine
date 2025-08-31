@@ -9,7 +9,6 @@
 #include "SoundtrackPlayer.h"
 #include "Timeblock.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UIUtil.h"
 
@@ -142,6 +141,9 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, bool loading
             stp->StopAll();
         }
     }
+
+    // Don't allow shortcut keys until no input is detected.
+    mWaitForNoInput.Reset();
 }
 
 void TimeblockScreen::Hide()
@@ -157,50 +159,16 @@ void TimeblockScreen::Hide()
     }
 }
 
-//int timeblockIndex = 0;
 void TimeblockScreen::OnUpdate(float deltaTime)
 {
-    /*
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RIGHTBRACKET))
-    {
-        timeblockIndex = Math::Clamp(timeblockIndex + 1, 0, 16);
-        Show(timeblockTextPositions[timeblockIndex].first);
-    }
-    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_LEFTBRACKET))
-    {
-        timeblockIndex = Math::Clamp(timeblockIndex - 1, 0, 16);
-        Show(timeblockTextPositions[timeblockIndex].first);
-    }
-
-    Vector2 anchoredPos = mTextImage->GetRectTransform()->GetAnchoredPosition();
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
-    {
-        anchoredPos.y++;
-    }
-    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
-    {
-        anchoredPos.y--;
-    }
-    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RIGHT))
-    {
-        anchoredPos.x++;
-    }
-    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_LEFT))
-    {
-        anchoredPos.x--;
-    }
-    mTextImage->GetRectTransform()->SetAnchoredPosition(anchoredPos);
-    //std::cout << mBackgroundImage->GetRectTransform()->GetSize() << ", " << mTextImage->GetRectTransform()->GetSize() << ", " << anchoredPos << std::endl;
-    */
-
     // Shortcut key for pressing continue button.
-    if(mContinueButton->IsEnabled() && (gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_C) || gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE)))
+    if(mContinueButton->IsEnabled() && (mWaitForNoInput.IsKeyLeadingEdge(SDL_SCANCODE_C) || mWaitForNoInput.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE)))
     {
         mContinueButton->AnimatePress();
     }
 
     // Pressing "s" is a shortcut for the save button.
-    if(mSaveButton->IsEnabled() && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_S))
+    if(mSaveButton->IsEnabled() && mWaitForNoInput.IsKeyLeadingEdge(SDL_SCANCODE_S))
     {
         mSaveButton->AnimatePress();
     }

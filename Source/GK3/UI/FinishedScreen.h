@@ -6,6 +6,8 @@
 #pragma once
 #include "Actor.h"
 
+#include "WaitForNoInput.h"
+
 class UICanvas;
 class UIImage;
 
@@ -26,12 +28,8 @@ private:
     // The main thing on this screen is a big image.
     UIImage* mBackgroundImage = nullptr;
 
-    // To avoid accidentally dismissing the screen (and quitting the game) right when the screen shows...
-    // Wait a short amount of time before checking for inputs to quit the game.
-    const float mInputDelayDuration = 2.0f;
-    float mInputDelayTimer = 0.0f;
-
-    bool mWaitingForNoInput = false;
+    // Helper to only dismiss this screen after no inputs are detected.
+    WaitForNoInput mWaitForNoInput;
 
     void RefreshUIScaling();
 };

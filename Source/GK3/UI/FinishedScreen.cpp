@@ -3,7 +3,6 @@
 #include "AssetManager.h"
 #include "GEngine.h"
 #include "GKPrefs.h"
-#include "InputManager.h"
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UIUtil.h"
@@ -22,24 +21,14 @@ FinishedScreen::FinishedScreen() : Actor(TransformType::RectTransform)
 void FinishedScreen::Show()
 {
     SetActive(true);
-    mWaitingForNoInput = true;
+    mWaitForNoInput.Reset();
     RefreshUIScaling();
 }
 
 void FinishedScreen::OnUpdate(float deltaTime)
 {
-    // Make sure the player is not pushing any keys - ensure they have released any inputs from BEFORE entering this screen.
-    if(mWaitingForNoInput && gInputManager.IsAnyKeyPressed())
-    {
-        return;
-    }
-    mWaitingForNoInput = false;
-
     // The finished screen stays up until any input is received while on the finished screen.
-    if(gInputManager.IsAnyKeyPressed() ||
-       gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Left) ||
-       gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Right) ||
-       gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Middle))
+    if(mWaitForNoInput.IsAnyKeyLeadingEdge() || mWaitForNoInput.IsAnyMouseButtonLeadingEdge())
     {
         // This one actually is a direct quit call - no quit popup in this instance.
         GEngine::Instance()->Quit();

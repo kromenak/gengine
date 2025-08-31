@@ -8,6 +8,8 @@
 
 #include <functional>
 
+#include "WaitForNoInput.h"
+
 class Sequence;
 class Timeblock;
 class UIButton;
@@ -45,4 +47,7 @@ private:
 
     // A callback to execute when the screen is done showing.
     std::function<void()> mCallback;
+
+    // Helper for dealing with shortcut keys correctly.
+    WaitForNoInput mWaitForNoInput;
 };

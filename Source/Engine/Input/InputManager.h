@@ -39,6 +39,9 @@ public:
     bool IsMouseButtonPressed(MouseButton button) const { return (mMouseButtonState & SDL_BUTTON(static_cast<int>(button))); }
     bool IsMouseButtonTrailingEdge(MouseButton button) const;
 
+    bool IsAnyMouseButtonLeadingEdge() const;
+    bool IsAnyMouseButtonPressed() const;
+
     Vector2 GetMousePosition() { return mMousePosition; }
     Vector2 GetMouseDelta() { return mMousePositionDelta; }
 
@@ -136,4 +139,18 @@ inline bool InputManager::IsMouseButtonTrailingEdge(MouseButton button) const
     bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
     bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
     return !pressedThisFrame && pressedLastFrame;
+}
+
+inline bool InputManager::IsAnyMouseButtonLeadingEdge() const
+{
+    return IsMouseButtonLeadingEdge(MouseButton::Left) ||
+        IsMouseButtonLeadingEdge(MouseButton::Right) ||
+        IsMouseButtonLeadingEdge(MouseButton::Middle);
+}
+
+inline bool InputManager::IsAnyMouseButtonPressed() const
+{
+    return IsMouseButtonPressed(MouseButton::Left) ||
+        IsMouseButtonPressed(MouseButton::Right) ||
+        IsMouseButtonPressed(MouseButton::Middle);
 }
