@@ -522,14 +522,20 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 
 std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
 {
-    // If an extension already exists, accept it and assume the caller knows what they're doing.
-    if(Path::HasExtension(assetName))
+    // If a three-letter extension already exists, accept it and assume the caller knows what they're doing.
+    // Only for 3-letter extensions! GK3 actually includes periods in a few asset names, but never with a three letter ending.
+    int lastIndex = assetName.size() - 1;
+    if(lastIndex > 3 && assetName[lastIndex - 3] == '.')
     {
         return assetName;
     }
 
-    // No extension, so apply the expected extension.
-    return Path::SetExtension(assetName, expectedExtension);
+    // No three-letter extension, add the expected extension if missing.
+    if(!Path::HasExtension(assetName, expectedExtension))
+    {
+        return assetName + expectedExtension;
+    }
+    return assetName;
 }
 
 template<typename T>
