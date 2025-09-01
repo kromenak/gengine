@@ -217,20 +217,11 @@ void UILabel::GenerateMesh()
     // Create arrays to hold vertex positions and UVs.
     int positionSize = vertexCount * 3;
     int uvSize = vertexCount * 2;
-    int colorSize = vertexCount * 4;
     int indexSize = (int)charCount * 6;
 
     float* positions = new float[positionSize];
     float* uvs = new float[uvSize];
-    float* colors = new float[colorSize];
     unsigned short* indexes = new unsigned short[indexSize];
-
-    // Need color to pass as vertex color for text mesh.
-    Color32 fontColor = Color32::White;
-    float colorR = (float)fontColor.r / 255.0f;
-    float colorG = (float)fontColor.g / 255.0f;
-    float colorB = (float)fontColor.b / 255.0f;
-    float colorA = (float)fontColor.a / 255.0f;
 
     int charIndex = 0;
     const std::vector<TextLayout::CharInfo>& charInfos = mTextLayout.GetChars();
@@ -279,11 +270,6 @@ void UILabel::GenerateMesh()
         uvs[charIndex * 8] = glyph.topLeftUvCoord.x;
         uvs[charIndex * 8 + 1] = topUVy;
 
-        colors[charIndex * 16] = colorR;
-        colors[charIndex * 16 + 1] = colorG;
-        colors[charIndex * 16 + 2] = colorB;
-        colors[charIndex * 16 + 3] = colorA;
-
         // Top-Right
         positions[charIndex * 12 + 3] = rightX;
         positions[charIndex * 12 + 4] = topY;
@@ -291,11 +277,6 @@ void UILabel::GenerateMesh()
 
         uvs[charIndex * 8 + 2] = glyph.topRightUvCoord.x;
         uvs[charIndex * 8 + 3] = topUVy;
-
-        colors[charIndex * 16 + 4] = colorR;
-        colors[charIndex * 16 + 5] = colorG;
-        colors[charIndex * 16 + 6] = colorB;
-        colors[charIndex * 16 + 7] = colorA;
 
         // Bottom-Left
         positions[charIndex * 12 + 6] = leftX;
@@ -305,11 +286,6 @@ void UILabel::GenerateMesh()
         uvs[charIndex * 8 + 4] = glyph.bottomLeftUvCoord.x;
         uvs[charIndex * 8 + 5] = botUVy;
 
-        colors[charIndex * 16 + 8] = colorR;
-        colors[charIndex * 16 + 9] = colorG;
-        colors[charIndex * 16 + 10] = colorB;
-        colors[charIndex * 16 + 11] = colorA;
-
         // Bottom-Right
         positions[charIndex * 12 + 9] = rightX;
         positions[charIndex * 12 + 10] = bottomY;
@@ -317,11 +293,6 @@ void UILabel::GenerateMesh()
 
         uvs[charIndex * 8 + 6] = glyph.bottomRightUvCoord.x;
         uvs[charIndex * 8 + 7] = botUVy;
-
-        colors[charIndex * 16 + 12] = colorR;
-        colors[charIndex * 16 + 13] = colorG;
-        colors[charIndex * 16 + 14] = colorB;
-        colors[charIndex * 16 + 15] = colorA;
 
         // Indexes for this quad will be (0, 1, 2) & (2, 3, 4)
         indexes[charIndex * 6] = charIndex * 4;
@@ -338,7 +309,6 @@ void UILabel::GenerateMesh()
     meshDefinition.SetVertexLayout(VertexLayout::Packed);
 
     meshDefinition.AddVertexData(VertexAttribute::Position, positions);
-    meshDefinition.AddVertexData(VertexAttribute::Color, colors);
     meshDefinition.AddVertexData(VertexAttribute::UV1, uvs);
 
     meshDefinition.SetIndexData(indexSize, indexes);
