@@ -28,8 +28,6 @@ UIImage::UIImage(Actor* owner) : UIWidget(owner)
 
 void UIImage::Render()
 {
-    if(!IsActiveAndEnabled()) { return; }
-
     // Activate material and set world transform.
     mMaterial.Activate(GetWorldTransformWithSizeForRendering());
 

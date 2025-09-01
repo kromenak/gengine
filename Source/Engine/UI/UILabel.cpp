@@ -27,8 +27,6 @@ UILabel::~UILabel()
 
 void UILabel::Render()
 {
-    if(!IsActiveAndEnabled()) { return; }
-
     // Generate the mesh, if needed.
     GenerateMesh();
 

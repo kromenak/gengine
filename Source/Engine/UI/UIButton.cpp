@@ -31,8 +31,6 @@ UIButton::UIButton(Actor* owner) : UIWidget(owner)
 
 void UIButton::Render()
 {
-    if(!IsActiveAndEnabled()) { return; }
-
     // Update the texture to use.
     UpdateMaterial();
 

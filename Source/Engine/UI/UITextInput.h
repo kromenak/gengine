@@ -14,6 +14,8 @@ class UITextInput : public UILabel
 public:
     UITextInput(Actor* owner);
 
+    void Render() override;
+
     void Focus();
     void Unfocus();
     bool IsFocused() const { return mFocused; }

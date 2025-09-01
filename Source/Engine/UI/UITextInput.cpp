@@ -13,6 +13,17 @@ UITextInput::UITextInput(Actor* owner) : UILabel(owner)
     mTextInput.SetExcludeChar(0, '`');
 }
 
+void UITextInput::Render()
+{
+    // Make sure the caret is positioned correctly.
+    // This requires generating the mesh beforehand, or else the text layout positions will be wrong.
+    GenerateMesh();
+    UpdateCaretPosition();
+
+    // Render per usual.
+    UILabel::Render();
+}
+
 void UITextInput::Focus()
 {
     // If we are going from unfocused to focused...
@@ -60,20 +71,12 @@ void UITextInput::Clear()
 {
     mTextInput.SetText("");
     SetText("");
-    //TODO: Reset caret position
 }
 
 void UITextInput::SetCaret(UIWidget* caret)
 {
     // Save caret.
     mCaret = caret;
-
-    // Generate mesh, so we know the positions of the text.
-    //TODO: This is kind of a hack, we should make sure the UILabel updates its text layout when text is set rather than only on render maybe?
-    GenerateMesh();
-
-    // Position the caret in the correct spot relative to the text.
-    UpdateCaretPosition();
 }
 
 void UITextInput::OnDisable()
