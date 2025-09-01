@@ -63,6 +63,9 @@ void InventoryInspectScreen::Show(const std::string& itemName)
     // Save item name.
     mInspectItemName = itemName;
 
+    // Keep track of whether this is an item in our inventory or not.
+    mInspectingItemFromInventory = gInventoryManager.HasInventoryItem(itemName);
+
     // If we're viewing LSR, we have to do some special stuff.
     if(IsLSR())
     {
@@ -171,12 +174,12 @@ void InventoryInspectScreen::OnClicked(const std::string& noun)
         // Perform the action.
         gActionManager.ExecuteAction(action, [this, noun](const Action* action){
 
-            // After the action completes, check if we still have the inventory item shown.
+            // If we interacted with an item from our inventory, and it's not in our inventory after, hide this screen.
             // In some rare cases (ex: eating a candy), the item no longer exists, so we should close this screen.
             if(StringUtil::EqualsIgnoreCase(noun, mInspectItemName))
             {
                 bool isInInventory = gLayerManager.IsLayerInStack("InventoryLayer");
-                if(isInInventory && !gInventoryManager.HasInventoryItem(mInspectItemName))
+                if(isInInventory && mInspectingItemFromInventory && !gInventoryManager.HasInventoryItem(mInspectItemName))
                 {
                     Hide();
                 }

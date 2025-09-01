@@ -39,6 +39,9 @@ private:
     // The name of the item currently being inspected.
     std::string mInspectItemName;
 
+    // If true, we are inspecting an item that is in our inventory.
+    bool mInspectingItemFromInventory = true;
+
     // For LSR in particular, we need additional buttons.
     UIButton* mLSRButtons[3] = { nullptr };
 
