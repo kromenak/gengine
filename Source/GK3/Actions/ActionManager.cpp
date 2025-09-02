@@ -545,11 +545,19 @@ void ActionManager::ShowTopicBar(const std::string& noun, bool centerOnPointer, 
 {
     // See if we have any more topics to discuss with this noun (person).
     // If not, we will pre-emptively cancel the bar and return.
-    auto actions = GetActions(noun, VerbType::Topic);
-    if(actions.size() == 0)
+    std::vector<const Action*> actions = GetActions(noun, VerbType::Topic);
+    if(actions.empty())
     {
         OnActionBarCanceled();
         return;
+    }
+
+    // Rarely, a custom "CANCEL" action exists for this noun (person). One example is talking with Mosely at Devil's Armchair.
+    // This applies to normal action bars, but it also applies to topic bars too.
+    const Action* cancelAction = GetAction(noun, "CANCEL");
+    if(cancelAction != nullptr)
+    {
+        actions.push_back(cancelAction);
     }
 
     // Show topics.
@@ -603,7 +611,8 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
                 "T_HANDSHAKE_B",
                 "T_HANDSHAKE_C",
                 "T_HANDSHAKE_D",
-                "T_HANDSHAKE_E"
+                "T_HANDSHAKE_E",
+                "T_DEAD_GUYS_X"
             };
             if(sIgnoreImplicitTopicCount.find(verb) == sIgnoreImplicitTopicCount.end())
             {

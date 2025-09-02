@@ -79,7 +79,8 @@ void VerbManager::Init()
                 {
                     map = &mInventoryItems;
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic"))
+                else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic") ||
+                        StringUtil::EqualsIgnoreCase(keyValuePair.value, "RecurringTopic"))
                         //StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
                 {
                     map = &mTopics;
