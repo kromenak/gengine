@@ -198,6 +198,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
             if(cancelAction != nullptr)
             {
                 gActionManager.ExecuteAction(cancelAction);
+                Hide(false); // want to hide the action bar, but don't do normal cancel behavior, since we have this special cancel action!
             }
             else
             {
