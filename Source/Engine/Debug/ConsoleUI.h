@@ -66,6 +66,7 @@ private:
 
     void Refresh();
     void RefreshMaxScrollbackLineCount();
+    void SetTextInputToCurrentHistoryItem();
 
     float CalcInputFieldHeight() const;
 };

@@ -334,47 +334,24 @@ void ConsoleUI::OnUpdate(float deltaTime)
         {
             if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
             {
-                size_t historyLength = gConsole.GetCommandHistoryLength();
-                if(historyLength > 0)
+                // Increment command history index if it is in-bounds.
+                // First time this happens will go from -1 to 0, which is OK!
+                int commandHistoryLength = gConsole.GetCommandHistoryLength();
+                if(mCommandHistoryIndex < commandHistoryLength - 1)
                 {
-                    // Increment command history index if it is in-bounds.
-                    // First time this happens will go from -1 to 0, which is OK!
-                    if(mCommandHistoryIndex < static_cast<int>(historyLength - 1))
-                    {
-                        ++mCommandHistoryIndex;
-                    }
-
-                    // Commands in history are earliest to most recent.
-                    // So, when we push "up", we want to go to the next most recent item.
-                    // Have to invert our index to get that.
-                    int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
-
-                    // This changes the text... TODO: Better API for this?
-                    mTextInput->Unfocus();
-                    mTextInput->SetText(gConsole.GetCommandFromHistory(commandIndex));
-                    mTextInput->Focus();
+                    ++mCommandHistoryIndex;
                 }
+                SetTextInputToCurrentHistoryItem();
             }
             else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
             {
-                size_t historyLength = gConsole.GetCommandHistoryLength();
-                if(historyLength > 0)
+                // If current history index is above zero, decrement.
+                // Note that we can't decrement back to -1, per GK3 behavior.
+                if(mCommandHistoryIndex > 0)
                 {
-                    // If current history index is above zero, decrement.
-                    // Note that we can't decrement back to -1, per GK3 behavior.
-                    if(mCommandHistoryIndex > 0)
-                    {
-                        --mCommandHistoryIndex;
-                    }
-
-                    // As above, need to invert the index.
-                    int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
-
-                    // This changes the text... TODO: Better API for this?
-                    mTextInput->Unfocus();
-                    mTextInput->SetText(gConsole.GetCommandFromHistory(commandIndex));
-                    mTextInput->Focus();
+                    --mCommandHistoryIndex;
                 }
+                SetTextInputToCurrentHistoryItem();
             }
         }
     }
@@ -422,6 +399,27 @@ void ConsoleUI::RefreshMaxScrollbackLineCount()
     availableHeight -= kPaddingAboveScrollback;
     availableHeight -= CalcInputFieldHeight();
     mMaxScrollbackLineCount = static_cast<int>(availableHeight / (mScrollbackBuffer->GetFont()->GetGlyphHeight() + 1));
+}
+
+void ConsoleUI::SetTextInputToCurrentHistoryItem()
+{
+    // Change text to desired history index.
+    if(mCommandHistoryIndex >= 0)
+    {
+        // Commands in history are earliest to most recent.
+        // So, when we push "up", we want to go to the next most recent item.
+        // Have to invert our index to get that.
+        int commandIndex = (gConsole.GetCommandHistoryLength() - 1) - mCommandHistoryIndex;
+
+        // If the index is valid, change the text.
+        if(commandIndex >= 0)
+        {
+            // This changes the text... TODO: Better API for this?
+            mTextInput->Unfocus();
+            mTextInput->SetText(gConsole.GetCommandFromHistory(commandIndex));
+            mTextInput->Focus();
+        }
+    }
 }
 
 float ConsoleUI::CalcInputFieldHeight() const
