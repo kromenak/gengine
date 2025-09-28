@@ -97,17 +97,16 @@ void AssetManager::Init()
 
     // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
     {
-        std::string dataFolder = "Data";
-
         // The original game only ever shipped with one language per SKU, so there was no way to change the language after install.
         // But we would like to support that maybe, for both official and unofficial translations.
         // To support OFFICIAL translations, we'll use Data folders with a suffix equal to the language prefix (e.g. DataF for French, DataG for German).
         if(Localizer::GetLanguagePrefix()[0] != 'E')
         {
-            dataFolder += Localizer::GetLanguagePrefix();
+            mSearchPaths.push_back("Data" + Localizer::GetLanguagePrefix());
         }
 
-        mSearchPaths.push_back(dataFolder);
+        // Lowest priority is the normal "Data" folder.
+        mSearchPaths.push_back("Data");
     }
 }
 
