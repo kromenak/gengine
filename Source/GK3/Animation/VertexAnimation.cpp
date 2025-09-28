@@ -182,6 +182,72 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
     return invalidPose;
 }
 
+VertexAnimationAABBPose VertexAnimation::SampleAABBPose(int frame, int meshIndex)
+{
+    // Make sure we're in bounds.
+    if(meshIndex >= 0 && meshIndex < mAABBPoses.size() && mAABBPoses[meshIndex] != nullptr)
+    {
+        // Retrieve pose corresponding to the desired frame.
+        VertexAnimationPose* pose = mAABBPoses[meshIndex]->GetForFrame(frame);
+        if(pose != nullptr)
+        {
+            return *static_cast<VertexAnimationAABBPose*>(pose);
+        }
+    }
+
+    // Error case: just return something invalid.
+    VertexAnimationAABBPose invalidPose;
+    invalidPose.frameNumber = -1;
+    return invalidPose;
+}
+
+VertexAnimationAABBPose VertexAnimation::SampleAABBPose(float time, int framesPerSecond, int meshIndex)
+{
+    // Make sure we're in bounds.
+    if(meshIndex >= 0 && meshIndex < mAABBPoses.size() && mAABBPoses[meshIndex] != nullptr)
+    {
+        // Caller may pass in a global time that extends beyond the local time of this particular animation.
+        // Desire here is for the animation to "loop", so we calculate how many seconds in we are.
+        float duration = GetDuration(framesPerSecond);
+        float localTime = time;
+        if(localTime > duration)
+        {
+            localTime = Math::Mod(time, duration);
+        }
+
+        // Retrieve current/next poses based on the desired time.
+        VertexAnimationPose* current;
+        VertexAnimationPose* next;
+        float t;
+        mAABBPoses[meshIndex]->GetForTime(localTime, framesPerSecond, current, next, t);
+
+        // We at least need a valid current pose.
+        if(current != nullptr)
+        {
+            return *static_cast<VertexAnimationAABBPose*>(current);
+
+            /*
+            // If no next pose, we can just use the current pose directly.
+            if(next == nullptr)
+            {
+                return *static_cast<VertexAnimationAABBPose*>(current);
+            }
+
+            // Finally, create a pose with lerp/slerp that is interpolated between the two poses.
+            VertexAnimationAABBPose pose;
+            pose.meshToLocalMatrix = Matrix4::Lerp(static_cast<VertexAnimationTransformPose*>(current)->meshToLocalMatrix,
+                                                   static_cast<VertexAnimationTransformPose*>(next)->meshToLocalMatrix, t);
+            return pose;
+            */
+        }
+    }
+
+    // Error case: just return something invalid.
+    VertexAnimationAABBPose invalidPose;
+    invalidPose.frameNumber = -1;
+    return invalidPose;
+}
+
 VertexAnimationVertexPose VertexAnimation::SampleVertexPose(int frame, int meshIndex, int submeshIndex)
 {
     // Find the first vertex pose defined for this mesh/submesh.
@@ -398,6 +464,7 @@ void VertexAnimation::ParseFromData(uint8_t* data, uint32_t dataLength)
     // Read in data for each keyframe.
     std::unordered_map<int, VertexAnimationVertexPose*> lastVertexPoseLookup;
     std::unordered_map<int, VertexAnimationTransformPose*> lastTransformPoseLookup;
+    std::unordered_map<int, VertexAnimationAABBPose*> lastAABBPoseLookup;
     for(int i = 0; i < mFrameCount; i++)
     {
         #ifdef DEBUG_OUTPUT
@@ -655,15 +722,27 @@ void VertexAnimation::ParseFromData(uint8_t* data, uint32_t dataLength)
                     assert(blockByteCount == 24);
                     byteCount -= blockByteCount + 4;
 
+                    VertexAnimationAABBPose* aabbPose = new VertexAnimationAABBPose();
+                    aabbPose->frameNumber = i;
+                    if(i == 0)
+                    {
+                        mAABBPoses.push_back(aabbPose);
+                        lastAABBPoseLookup[meshIndex] = aabbPose;
+                    }
+                    else
+                    {
+                        lastAABBPoseLookup[meshIndex]->next = aabbPose;
+                        lastAABBPoseLookup[meshIndex] = aabbPose;
+                    }
+
                     // Assign min/max data.
-                    #ifdef DEBUG_OUTPUT
                     Vector3 min = reader.ReadVector3();
                     Vector3 max = reader.ReadVector3();
+                    aabbPose->aabb = AABB(min, max);
+
+                    #ifdef DEBUG_OUTPUT
                     std::cout << "        Min: " << min << std::endl;
                     std::cout << "        Max: " << max << std::endl;
-                    #else
-                    reader.ReadVector3();
-                    reader.ReadVector3();
                     #endif
                 }
                 else

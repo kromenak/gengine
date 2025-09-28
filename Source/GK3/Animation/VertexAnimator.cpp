@@ -125,6 +125,12 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, int frame)
         {
             meshes[i]->SetMeshToLocalMatrix(transformSample.meshToLocalMatrix);
         }
+
+        VertexAnimationAABBPose aabbPose = animation->SampleAABBPose(frame, i);
+        if(aabbPose.frameNumber >= 0)
+        {
+            meshes[i]->SetAABB(aabbPose.aabb);
+        }
     }
 }
 
@@ -149,6 +155,12 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
         if(transformSample.frameNumber >= 0)
         {
             meshes[i]->SetMeshToLocalMatrix(transformSample.meshToLocalMatrix);
+        }
+
+        VertexAnimationAABBPose aabbPose = animation->SampleAABBPose(time, mCurrentParams.framesPerSecond, i);
+        if(aabbPose.frameNumber >= 0)
+        {
+            meshes[i]->SetAABB(aabbPose.aabb);
         }
     }
 }

@@ -12,6 +12,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "AABB.h"
 #include "Matrix4.h"
 #include "Vector3.h"
 
@@ -35,6 +36,11 @@ struct VertexAnimationTransformPose : public VertexAnimationPose
     Matrix4 meshToLocalMatrix;
 };
 
+struct VertexAnimationAABBPose : public VertexAnimationPose
+{
+    AABB aabb;
+};
+
 class VertexAnimation : public Asset
 {
     TYPEINFO_SUB(VertexAnimation, Asset);
@@ -47,6 +53,9 @@ public:
     // Queries transform (position, rotation, scale) for a mesh at a frame/time.
     VertexAnimationTransformPose SampleTransformPose(int frame, int meshIndex);
     VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);
+
+    VertexAnimationAABBPose SampleAABBPose(int frame, int meshIndex);
+    VertexAnimationAABBPose SampleAABBPose(float time, int framesPerSecond, int meshIndex);
 
     // Queries ALL vertices for a submesh at a frame/time.
     VertexAnimationVertexPose SampleVertexPose(int frame, int meshIndex, int submeshIndex);
@@ -77,6 +86,8 @@ private:
     // Each element of array is the FIRST transform poses for each mesh index.
     // Subsequent poses for the mesh are stored in the "next" of the first pose.
     std::vector<VertexAnimationTransformPose*> mTransformPoses;
+
+    std::vector<VertexAnimationAABBPose*> mAABBPoses;
 
     void ParseFromData(uint8_t* data, uint32_t dataLength);
 
