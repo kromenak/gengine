@@ -46,6 +46,7 @@ public:
     };
     void StartFidget(FidgetType type);
     void StopFidget(const std::function<void()>& callback = nullptr);
+    FidgetType GetCurrentFidgetType() const { return mActiveFidget; }
 
     void SetIdleFidget(GAS* fidget);
     void SetTalkFidget(GAS* fidget);

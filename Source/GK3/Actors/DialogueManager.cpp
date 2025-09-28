@@ -65,6 +65,13 @@ void DialogueManager::TriggerDialogueCue()
     // If we've done all the lines of dialogue we're interested in...
     if(mRemainingDialogueLines <= 0)
     {
+        // If doing a dialogue that isn't using fidgets, clear the speaker before continuing.
+        // This ensures that the speaker doesn't revert to doing listen fidgets due to logic that may execute in SetSpeaker for the next speaker.
+        if(!mDialogueUsesFidgets)
+        {
+            mSpeaker.clear();
+        }
+
         // Call finish callback.
         CallDialogueFinishedCallback();
         return;
@@ -105,7 +112,7 @@ void DialogueManager::SetSpeaker(const std::string& noun)
         if(playListenFidget)
         {
             GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(mSpeaker);
-            if(actor != nullptr)
+            if(actor != nullptr && actor->GetCurrentFidgetType() == GKActor::FidgetType::Talk)
             {
                 actor->StartFidget(GKActor::FidgetType::Listen);
             }
@@ -137,7 +144,7 @@ void DialogueManager::SetSpeaker(const std::string& noun)
         if(playTalkFidget)
         {
             GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(mSpeaker);
-            if(actor != nullptr)
+            if(actor != nullptr && actor->GetCurrentFidgetType() == GKActor::FidgetType::Listen)
             {
                 actor->StartFidget(GKActor::FidgetType::Talk);
             }
@@ -214,17 +221,14 @@ void DialogueManager::SetConversation(const std::string& conversation, const std
 
                 // Start in listen fidget, unless it's null in which case fall back on talk fidget.
                 // If both are null, actor just keeps doing the idle fidget I guess.
+                GKActor::FidgetType fidgetType = GKActor::FidgetType::Idle;
                 if(settings->listenGas != nullptr)
                 {
-                    actor->StartFidget(GKActor::FidgetType::Listen);
+                    fidgetType = GKActor::FidgetType::Listen;
                 }
                 else if(settings->talkGas != nullptr)
                 {
-                    actor->StartFidget(GKActor::FidgetType::Talk);
-                }
-                else
-                {
-                    actor->StartFidget(GKActor::FidgetType::Idle);
+                    fidgetType = GKActor::FidgetType::Talk;
                 }
 
                 // Decrement because we finished one "interrupt" anims.
@@ -235,13 +239,16 @@ void DialogueManager::SetConversation(const std::string& conversation, const std
                 {
                     // Enter anims are pretty straightforward - just add a wait, play it, and decrement a wait when done.
                     ++mConversationAnimWaitCount;
-                    gSceneManager.GetScene()->GetAnimator()->Start(settings->enterAnim, [this](){
+                    gSceneManager.GetScene()->GetAnimator()->Start(settings->enterAnim, [this, actor, fidgetType](){
+                        actor->StartFidget(fidgetType);
                         --mConversationAnimWaitCount;
                         CheckConversationAnimFinishCallback();
                     });
                 }
                 else
                 {
+                    actor->StartFidget(fidgetType);
+
                     // See if we're done entering the conversation.
                     CheckConversationAnimFinishCallback();
                 }
@@ -280,24 +287,35 @@ void DialogueManager::EndConversation(const std::function<void()>& finishCallbac
     std::vector<const SceneConversation*> conversationSettings = gSceneManager.GetScene()->GetSceneData()->GetConversationSettings(mConversation);
     for(auto& settings : conversationSettings)
     {
+        GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(settings->actorName);
+
         // Play exit anim.
         if(settings->exitAnim != nullptr)
         {
             ++mConversationAnimWaitCount;
-            gSceneManager.GetScene()->GetAnimator()->Start(settings->exitAnim, [this](){
+            gSceneManager.GetScene()->GetAnimator()->Start(settings->exitAnim, [this, actor](){
+                if(actor != nullptr)
+                {
+                    actor->StartFidget(GKActor::FidgetType::Idle);
+                }
+
                 --mConversationAnimWaitCount;
                 CheckConversationAnimFinishCallback();
             });
+        }
+        else
+        {
+            if(actor != nullptr)
+            {
+                actor->StartFidget(GKActor::FidgetType::Idle);
+            }
         }
 
         // Have the actor go back to their idle fidget.
         // We don't know all participants in a conversation - that data isn't stored in SIF or anything :P
         // But if we have a conversation setting for an actor, at least we know that.
-        GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(settings->actorName);
-        if(actor != nullptr)
-        {
-            actor->StartFidget(GKActor::FidgetType::Idle);
-        }
+
+
     }
 
     // Revert any fidgets that were set when entering the conversation.
