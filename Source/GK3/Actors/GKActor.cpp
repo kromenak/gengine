@@ -506,6 +506,7 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
     // Start the animation.
     // Note that this will sample the first frame of the animation, updating the model's positions/rotations.
     mVertexAnimator->Start(animParams);
+    //printf("%s start animation %s\n", GetName().c_str(), animParams.vertexAnimation->GetName().c_str());
 
     // For absolute anims, position model exactly as specified.
     if(animParams.absolute)
@@ -708,7 +709,6 @@ Vector3 GKActor::GetModelFacingDirection() const
     // There are a few different ways to possibly calculate the model's facing direction.
     // The method used may differ from Actor to Actor or be based on the current state of the Actor.
     Vector3 facingDir = Vector3::UnitZ;
-
     if(mModelFacingHelper != nullptr)
     {
         // The facing helper is an arrow/triangle. Get it's three points in world space.
@@ -799,7 +799,7 @@ Vector3 GKActor::GetModelFacingDirection() const
             // Get the hip axis, convert y-axis to a facing direction.
             // Remember, models are facing down negative z-axis, so need to negate the axis we get back here.
             Matrix4 hipMeshToWorldMatrix = mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix();
-            if(StringUtil::EqualsIgnoreCase(GetName(), "EM2"))
+            if(StringUtil::EqualsIgnoreCase(GetName(), "EM2") || StringUtil::EqualsIgnoreCase(GetName(), "MO2"))
             {
                 facingDir = hipMeshToWorldMatrix.GetYAxis();
             }
@@ -913,6 +913,14 @@ void GKActor::SyncActorToModelPositionAndRotation()
 
         // Rotate desired direction and amount.
         GetTransform()->Rotate(Vector3::UnitY, angleRadians);
+
+        /*
+        float angleDegrees = Math::ToDegrees(angleRadians);
+        if(!Math::IsZero(angleDegrees))
+        {
+            printf("%s rotated by %f degrees\n", GetName().c_str(), angleDegrees);
+        }
+        */
     }
 }
 
