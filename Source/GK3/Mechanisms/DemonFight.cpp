@@ -2,7 +2,9 @@
 
 #include "GameProgress.h"
 #include "GKActor.h"
+#include "Heading.h"
 #include "SceneManager.h"
+#include "Walker.h"
 
 DemonFight::DemonFight() : Actor("DemonFightHelper")
 {
@@ -14,6 +16,13 @@ DemonFight::DemonFight() : Actor("DemonFightHelper")
             gGameProgress.SetFlag("Te6ClickedOnFloor");
         }
     });
+
+    // Also, the Demon can't walk skip, as that messes up the timing of this fight.
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun("Asmodeus");
+    if(actor != nullptr)
+    {
+        actor->GetWalker()->SetAllowSkip(false);
+    }
 }
 
 void DemonFight::OnLateUpdate(float deltaTime)

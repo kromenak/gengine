@@ -44,6 +44,7 @@ public:
 
     void WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const Heading& exitHeading, const std::function<void()>& finishCallback);
 
+    void SetAllowSkip(bool allow) { mAllowWalkSkip = allow; }
     void SkipToEnd(bool alsoSkipWalkEndAnim = false);
     void StopWalk();
 
@@ -134,6 +135,10 @@ private:
 
     // If true, need to continue walk anim during next update loop.
     bool mNeedContinueWalkAnim = false;
+
+    // If true, actor is allowed to skip walks during action skip. Otherwise, the whole walk must be simulated.
+    // Only use case is the demon in the final fight so far.
+    bool mAllowWalkSkip = true;
 
     // REGION SUPPORT
     // A callback for exiting a region.
