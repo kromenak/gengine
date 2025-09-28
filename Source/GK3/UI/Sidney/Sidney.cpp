@@ -240,12 +240,20 @@ void Sidney::Show()
 
 void Sidney::Hide()
 {
-    // It's possible to exit Sidney with the file window still up. If so, close it so it's not open when Sidney is next opened.
-    mFiles.HideAllFileWindows();
-
     // Hide Sidney UI.
     if(!IsActive()) { return; }
     SetActive(false);
+
+    // It's possible to exit Sidney with the file window still up. If so, close it so it's not open when Sidney is next opened.
+    mFiles.HideAllFileWindows();
+
+    // Make sure all subscreens are hidden.
+    mSearch.Hide();
+    mEmail.Hide();
+    mAnalyze.Hide();
+    mTranslate.Hide();
+    mMakeId.Hide();
+    mSuspects.Hide();
 
     // Whenever you exit Sidney, no matter where you are in the game, you warp to R25.
     // This makes sense under the assumption that you only access Sidney in R25 anyway!
