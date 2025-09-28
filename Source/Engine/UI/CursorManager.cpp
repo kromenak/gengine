@@ -41,7 +41,6 @@ void CursorManager::Update(float deltaTime)
 
 void CursorManager::UseDefaultCursor(int priority)
 {
-    // The default cursor has low priority - only use it if nothing of higher priority is specified.
     SetDesiredCursor(mDefaultCursor, priority);
 }
 

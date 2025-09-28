@@ -11,7 +11,6 @@ class CursorManager
 {
 public:
     void Init();
-
     void Update(float deltaTime);
 
     void UseDefaultCursor(int priority = 0);

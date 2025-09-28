@@ -671,13 +671,14 @@ void GameCamera::SceneUpdateInteract(float deltaTime)
             }
 
             // Set cursor appropriately.
+            // Use a greater-than-zero priority so that any call to "UseDefaultCursor" elsewhere doesn't override this.
             if(customCursor != nullptr)
             {
-                gCursorManager.UseCustomCursor(customCursor);
+                gCursorManager.UseCustomCursor(customCursor, 1);
             }
             else
             {
-                gCursorManager.UseHighlightCursor();
+                gCursorManager.UseHighlightCursor(1);
             }
             mLastHoveredNoun = hovering->GetNoun();
         }
