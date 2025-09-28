@@ -364,7 +364,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
         }
 
         // Says "analyzing..."
-        ShowAnalyzeMessage("GeometryTenier1", Vector2(190.0f, -160.0f), HorizontalAlignment::Center);
+        ShowAnalyzeMessage("GeometryTenier1", Vector2(190.0f, -160.0f), HorizontalAlignment::Center, true);
 
         // Play initial video.
         gActionManager.StartManualAction();
