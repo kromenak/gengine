@@ -1427,7 +1427,8 @@ void Scene::ExecuteAction(const Action* action)
 
                 // We also want "turn to" behavior if already at the walk pos.
                 Heading walkHeading = Heading::None;
-                if((mEgo->GetPosition() - objPos).GetLengthSq() < 50.0f * 50.0f)
+                float distSq = (mEgo->GetPosition() - objPos).GetLengthSq();
+                if(distSq < 60.0f * 60.0f)
                 {
                     walkPos = mEgo->GetPosition();
                     walkHeading = Heading::FromDirection(objPos - mEgo->GetPosition());
