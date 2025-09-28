@@ -94,33 +94,13 @@ void Bridge::OnUpdate(float deltaTime)
         }
     }
 
-    /*
-    // While in the puzzle, update sleeping tiles so that they reappear after some time has passed.
-    bool inPuzzle = mGabeTileIndex >= 0 || atPuzzleStart;
-    if(inPuzzle)
+    // When landing from a jump, lerp Gabe towards the center of tile he's on.
+    // Without this, Gabe "snaps" to the tile center, which can look a bit jarring.
+    if(mLanding)
     {
-        for(int i = 0; i < kTileCount; ++i)
-        {
-            // Update each tile's state timer.
-            if(mTiles[i].stateTimer > 0.0f)
-            {
-                mTiles[i].stateTimer -= deltaTime;
-                if(mTiles[i].stateTimer <= 0.0f)
-                {
-                    // Once timer expires, if sleeping, show tile glint.
-                    // Don't do this when Gabe isn't on the board (except for first tile), so they disappear when he is not in the puzzle.
-                    if(mTiles[i].state == TileState::Sleeping)
-                    {
-                        if(i == 0 || mGabeTileIndex >= 0)
-                        {
-                            GlintTile(i);
-                        }
-                    }
-                }
-            }
-        }
+        //TODO: Using deltaTime here is a bit of a HACK - more correct would be to use a timer with duration of the land anim perhaps?
+        mGabeActor->SetPosition(Vector3::Lerp(mGabeActor->GetPosition(), mJumpToPosition, deltaTime));
     }
-    */
 
     UpdateTiles(deltaTime);
 
@@ -180,26 +160,6 @@ void Bridge::GlintTile(int index)
         mTiles[index].stateTimer = 0.0f;
         mTiles[index].stateDuration = mTiles[index].glintAnim->GetDuration();
         mTiles[index].animFrame = -1;
-
-
-        /*
-        // Make sure no longer doing glow anim.
-        gSceneManager.GetScene()->GetAnimator()->Stop(mTiles[index].glowAnim, true);
-
-        // Show tile in Glinting state.
-        mTiles[index].tileActor->SetActive(true);
-        mTiles[index].state = TileState::Glinting;
-
-        // Play glint animation.
-        gSceneManager.GetScene()->GetAnimator()->Start(mTiles[index].glintAnim, [this, index](){
-
-            // After glinting, sleep for a bit. Unless we are jumping to this tile - in that case, let it stay in the glint state!
-            if(mJumpTileIndex != index)
-            {
-                SleepTile(index, 2.0f);
-            }
-        });
-        */
     }
 }
 
@@ -211,28 +171,6 @@ void Bridge::GlowTile(int index)
         mTiles[index].stateTimer = 0.0f;
         mTiles[index].stateDuration = mTiles[index].glowAnim->GetDuration();
         mTiles[index].animFrame = -1;
-
-        /*
-        // Make sure no longer doing glint anim.
-        gSceneManager.GetScene()->GetAnimator()->Stop(mTiles[index].glintAnim, true);
-
-        // Show tile in Glowing state.
-        mTiles[index].tileActor->SetActive(true);
-        mTiles[index].state = TileState::Glowing;
-
-        // Play glowing animation.
-        gSceneManager.GetScene()->GetAnimator()->Start(mTiles[index].glowAnim, [this, index](){
-
-            // After glowing, sleep for a bit.
-            SleepTile(index, 2.0f);
-
-            // If Gabe is still standing on this platform when it finishes glowing, he unfortunately MUST DIE!
-            if(!mJumping && mGabeTileIndex == index)
-            {
-                Die(false);
-            }
-        });
-        */
     }
 }
 
@@ -293,6 +231,7 @@ void Bridge::JumpToTile(int index)
     // Move the "to" position up just a bit so Gabe's boots aren't embedded inside the tile.
     const float kTileHeight = 2.0f;
     toWorldPosition.y += kTileHeight;
+    mJumpToPosition = toWorldPosition;
 
     // First, figure out if we need to turn to face the next tile.
     if(mGabeTileIndex == -1)
@@ -456,8 +395,7 @@ void Bridge::JumpToTile(int index)
                 StartTilePattern();
             }
 
-            // Position Gabe directly on the tile.
-            mGabeActor->SetPosition(toWorldPosition);
+            // Gabe's tile has changed.
             mGabeTileIndex = index;
             mJumpTileIndex = -1;
 
@@ -466,6 +404,7 @@ void Bridge::JumpToTile(int index)
 
             // Play land animation.
             mJumpAnimParams.animation = landAnim;
+            mLanding = true;
             gSceneManager.GetScene()->GetAnimator()->Start(mJumpAnimParams, [this, turnBackAnim](){
 
                 // Turn back to looking straight ahead.
@@ -474,10 +413,12 @@ void Bridge::JumpToTile(int index)
 
                     // Done jumping.
                     mJumping = false;
+                    mLanding = false;
 
                     // Force Gabe to look straight ahead.
                     // After jumping a bunch, a bit of drift can start to appear without this.
                     mGabeActor->SetHeading(Heading::FromDegrees(0.0f));
+                    mGabeActor->SetPosition(mJumpToPosition);
 
                     // If jumped to tile 10 (the end of the puzzle), play the end of puzzle cutscene.
                     if(mGabeTileIndex == 10)

@@ -36,8 +36,14 @@ private:
     // True if a jump is being performed.
     bool mJumping = false;
 
+    // True if landing from a jump.
+    bool mLanding = false;
+
     // During a jump, index of the tile being jumped to.
     int mJumpTileIndex = -1;
+
+    // The world position being jumped to - used to slightly lerp position when landing.
+    Vector3 mJumpToPosition;
 
     // A tile in the bridge puzzle.
     enum class TileState
