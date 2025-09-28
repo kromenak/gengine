@@ -416,7 +416,7 @@ void Walker::OnUpdate(float deltaTime)
                 // So, force-set it to something reasonable!
                 if(mWalkToSeeTarget != nullptr)
                 {
-                    Vector3 dir = mWalkToSeeTarget->GetPosition() - mGKOwner->GetPosition();
+                    Vector3 dir = mWalkToSeeTarget->GetAABB().GetCenter() - mGKOwner->GetPosition();
                     dir.y = 0.0f;
                     mTurnToFaceDir = Vector3::Normalize(dir);
                 }
