@@ -28,6 +28,9 @@ namespace
     const float kHoverPointDist = 4.0f;
     const float kHoverPointDistSq = kHoverPointDist * kHoverPointDist;
 
+    // Position of Rennes-les-Chateau in zoomed-in map coordinates.
+    const Vector2 kRLCPoint(267.0f, 953.0f);
+
     // Points required for Pisces (in zoomed in map coordinates).
     const Vector2 kPiscesCoustaussaPoint(404.0f, 1095.0f);
     const Vector2 kPiscesBezuPoint(301.0f, 386.0f);
@@ -527,7 +530,6 @@ void SidneyAnalyze::AnalyzeMap_SetPointStatusText(const std::string& baseMessage
 void SidneyAnalyze::AnalyzeMap_CheckAquariusCompletion()
 {
     // Player must place two points near enough to these points and press "Analyze" to pass Aquarius.
-    const Vector2 kRLCPoint(267.0f, 953.0f);
     const Vector2 kCDBPoint(652.0f, 1061.0f);
     const Vector2 kSunLineEndPoint(1336.0f, 1247.0f);
 
@@ -600,6 +602,15 @@ void SidneyAnalyze::AnalyzeMap_CheckPiscesCompletion()
                 mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kPiscesCoustaussaPoint));
                 mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kPiscesBezuPoint));
                 mMap.zoomedOut.lockedPoints->Add(mMap.ToZoomedOutPoint(kPiscesBugarachPoint));
+
+                // As part of Pisces, the player *may* have also places a point on RLC again.
+                // If so, we can get rid of it now, to keep the map a bit cleaner.
+                Vector2 rlcPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kRLCPoint);
+                if(rlcPoint != Vector2::Zero)
+                {
+                    mMap.zoomedIn.points->Remove(rlcPoint);
+                    mMap.zoomedOut.points->Remove(mMap.ToZoomedOutPoint(rlcPoint));
+                }
 
                 // Put locked circle on zoomed out map.
                 mMap.zoomedOut.circles->Clear();
