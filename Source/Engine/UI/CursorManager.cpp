@@ -20,7 +20,7 @@ void CursorManager::Update(float deltaTime)
     if(mDesiredCursor != nullptr)
     {
         // If the desired cursor differs from the active cursor (or animation mode is different), change active cursor.
-        if(mDesiredCursor != mActiveCursor || mDesiredCursorAnimate != mActiveCursor->IsAnimating())
+        if(mActiveCursor == nullptr || mDesiredCursor != mActiveCursor || mDesiredCursorAnimate != mActiveCursor->IsAnimating())
         {
             mActiveCursor = mDesiredCursor;
             mActiveCursor->Activate(mDesiredCursorAnimate);

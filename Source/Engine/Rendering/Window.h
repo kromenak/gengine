@@ -23,6 +23,13 @@ namespace Window
         uint32_t height = 0;
     };
 
+    enum class Mode
+    {
+        Windowed,               // Game is in a floating window on the desktop.
+        FullscreenExclusive,    // Game is fullscreen, in exclusive mode.
+        FullscreenDesktop       // Game is fullscreen, but just as a window at the desired fullscreen size.
+    };
+
     void Create(const char* title);
     void Create(const char* title, int x, int y, int w, int h, Uint32 flags);
     void Destroy();
@@ -33,6 +40,7 @@ namespace Window
     void SetFullscreen(bool fullscreen);
     bool IsFullscreen();
     void ToggleFullscreen();
+    Mode GetFullscreenMode();
 
     // Resolution & Size
     const std::vector<Resolution>& GetResolutions();

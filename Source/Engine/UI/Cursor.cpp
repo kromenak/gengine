@@ -120,8 +120,8 @@ void Cursor::Load(uint8_t* data, uint32_t dataLength)
     // In this case, when the source surface is blitted to the destination surface, magenta will be treated as transparent.
     if(texture->GetBytesPerPixel() < 4)
     {
-        Uint32 colorkey = SDL_MapRGB(srcSurface->format, 255, 0, 255); // Magenta
-        SDL_SetColorKey(srcSurface, SDL_TRUE, colorkey);
+        Uint32 key = SDL_MapRGB(srcSurface->format, 255, 0, 255); // Magenta
+        SDL_SetColorKey(srcSurface, SDL_TRUE, key);
     }
 
     // Create cursors for each frame.
@@ -147,7 +147,7 @@ void Cursor::Load(uint8_t* data, uint32_t dataLength)
         }
 
         // Use destination surface to create cursor.
-        SDL_Cursor* cursor = SDL_CreateColorCursor(dstSurface, (int)hotspot.x, (int)hotspot.y);
+        SDL_Cursor* cursor = SDL_CreateColorCursor(dstSurface, static_cast<int>(hotspot.x), static_cast<int>(hotspot.y));
         if(cursor == nullptr)
         {
             printf("Create cursor %s failed: couldn't create cursor frame %i (%s).\n", mName.c_str(), i, SDL_GetError());
@@ -159,7 +159,7 @@ void Cursor::Load(uint8_t* data, uint32_t dataLength)
 void Cursor::Activate(bool animate)
 {
     // Set to first frame.
-    if(mCursorFrames.size() > 0)
+    if(!mCursorFrames.empty())
     {
         SDL_SetCursor(mCursorFrames[0]);
     }

@@ -467,6 +467,14 @@ void GEngine::ProcessInput()
                     if((modState & KMOD_ALT) != 0)
                     {
                         Window::ToggleFullscreen();
+
+                        // On some platforms (Linux for one), it's likely that the OS doesn't TRULY enter "exclusive fullscreen" mode.
+                        // Instead, it just emulates the fullscreen request by making a fullscreen desktop window.
+                        // In this case, we need to also change the game's resolution, or else we'll have a tiny game in a big window.
+                        if(Window::GetFullscreenMode() != Window::Mode::FullscreenExclusive)
+                        {
+                            gRenderer.ChangeResolution(Window::GetResolution());
+                        }
                     }
                 }
 

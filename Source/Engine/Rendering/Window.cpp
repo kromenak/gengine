@@ -66,14 +66,35 @@ namespace Window
             // Particularly on Linux, the display mode enumeration may not be exhaustive.
             if(!fullscreen)
             {
-                Resolution res = { 640, 480 };
-                resolutions[ResolutionHash(res)] = res;
+                // Query the desktop display mode, so we know the max resolution we should offer.
+                // This may not be 100% correct, but it seems reasonable you wouldn't want a window larger than your desktop?
+                SDL_DisplayMode desktopDisplayMode;
+                SDL_GetDesktopDisplayMode(i, &desktopDisplayMode);
 
-                res = { 800, 600 };
-                resolutions[ResolutionHash(res)] = res;
+                // Authored list of common resolutions.
+                static Resolution sCommonResolutions[] = {
+                    { 640, 480 },
+                    { 800, 600 },
+                    { 1024, 768 },
+                    { 1366, 768 },
+                    { 1440, 900 },
+                    { 1600, 900 },
+                    { 1920, 1080 },
+                    { 1920, 1200 },
+                    { 2560, 1440 },
+                    { 2560, 1600 },
+                    { 3440, 1440 },
+                    { 3840, 2160 }
+                };
 
-                res = { 1024, 768 };
-                resolutions[ResolutionHash(res)] = res;
+                // Add each common resolution, as long as it fits within desktop resolution.
+                for(auto& res : sCommonResolutions)
+                {
+                    if(res.width <= desktopDisplayMode.w && res.height <= desktopDisplayMode.h)
+                    {
+                        resolutions[ResolutionHash(res)] = res;
+                    }
+                }
             }
 
             // Convert resolutions map into a list.
@@ -276,12 +297,31 @@ void Window::SetFullscreen(bool fullscreen)
 
 bool Window::IsFullscreen()
 {
+    // Returns "true" for both "fullscreen exclusive" AND "fullscreen desktop".
     return (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
 }
 
 void Window::ToggleFullscreen()
 {
     SetFullscreen(!IsFullscreen());
+}
+
+Window::Mode Window::GetFullscreenMode()
+{
+    Uint32 flags = SDL_GetWindowFlags(window);
+    bool isFullscreen = (flags & SDL_WINDOW_FULLSCREEN) != 0;
+    bool isFullscreenDesktop = (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0;
+
+    // Exclusive fullscreen reports as fullscreen, but not fullscreen desktop.
+    if(isFullscreen && !isFullscreenDesktop)
+    {
+        return Mode::FullscreenExclusive;
+    }
+    if(isFullscreen)
+    {
+        return Mode::FullscreenDesktop;
+    }
+    return Mode::Windowed;
 }
 
 const std::vector<Window::Resolution>& Window::GetResolutions()
@@ -301,8 +341,7 @@ void Window::SetResolution(const Resolution& resolution)
     int height = static_cast<int>(resolution.height);
 
     // The way we set the window size depends on whether we're fullscreen or not.
-    bool isFullscreen = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
-    if(isFullscreen)
+    if(IsFullscreen())
     {
         // In fullscreen, we've got to use a resolution supported by the monitor.
         // Grab the display index the game is currently presenting on.
