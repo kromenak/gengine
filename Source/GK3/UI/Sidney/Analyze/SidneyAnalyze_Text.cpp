@@ -126,7 +126,8 @@ void SidneyAnalyze::AnalyzeText_OnAnagramParserPressed()
             mAnalyzeTextWindow->SetActive(true);
         });
 
-        // Not 100% sure if this flag is important for anything, but it is set at this point.
+        // Indicates that we've at least started to solve the anagram puzzle.
+        // Only relevant as it informs progress on Ophiuchus, and changes some of Grace's VO.
         gGameProgress.SetFlag("StartArcadiaAnagram");
     }
     else
