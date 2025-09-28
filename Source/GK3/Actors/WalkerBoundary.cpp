@@ -563,7 +563,7 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
     }
 
     // Regardless of whether a resize occurred, we need to reset the working variables in each node.
-    memset(&nodes[0], 0, sizeof(nodes[0]) * nodes.size());
+    memset(reinterpret_cast<void*>(nodes.data()), 0, sizeof(nodes[0]) * nodes.size());
 
     // Make sure open set is empty.
     openSet.Clear();

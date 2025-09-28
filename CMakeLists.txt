@@ -9,9 +9,9 @@ project(gengine VERSION 0.4.0
                 DESCRIPTION "Gabriel Knight 3 game engine"
                 LANGUAGES C CXX)
 
-# Build for C++14, standard required, no extensions.
+# Build for C++17, standard required, no extensions.
 # Using global "set" so that all targets use the same rules.
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

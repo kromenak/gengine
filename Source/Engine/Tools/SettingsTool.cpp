@@ -14,7 +14,7 @@ namespace
         if(ImGui::IsItemHovered())
         {
             ImGui::BeginTooltip();
-            ImGui::Text(text);
+            ImGui::Text("%s", text);
             ImGui::EndTooltip();
         }
     }
