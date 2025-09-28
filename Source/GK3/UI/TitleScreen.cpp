@@ -75,7 +75,10 @@ TitleScreen::TitleScreen() : Actor("TitleScreen", TransformType::RectTransform)
     introButton->SetTooltipText("titleintro");
     introButton->SetPressCallback([](UIButton* button) {
         gGK3UI.GetVideoPlayer()->Play("intro.bik", true, true, nullptr);
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+
+        // The original game plays an SFX here, but I think it sounds better without it.
+        // The first few seconds of the intro movie overlap with it.
+        //gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
     });
     if(GEngine::Instance()->IsDemoMode())
     {
