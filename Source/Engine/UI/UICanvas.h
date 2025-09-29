@@ -40,7 +40,6 @@ public:
     bool IsMasked() const { return mMasked; }
 
     void SetAutoScale(bool autoScale) { mAutoScale = autoScale; }
-    void SetAutoScaleBias(int32_t bias) { mAutoScaleBias = bias; }
     float GetScaleFactor() const;
 
     RectTransform* GetRectTransform() const { return mRectTransform; }
@@ -71,10 +70,6 @@ private:
 
     // If true, and this is a root canvas, the canvas will be automatically scaled up at higher resolutions.
     bool mAutoScale = true;
-
-    // When canvas is autoscaled, the scale amount will be offset by this amount.
-    // Useful if certain UIs look better at larger/smaller scale, even at a higher resolution.
-    int32_t mAutoScaleBias = 0;
 
     // Track the last calculated scale factor and window height. Just helps to avoid dirtying transforms every frame.
     float mLastScaleFactor = 0.0f;

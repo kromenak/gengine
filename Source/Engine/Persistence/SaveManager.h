@@ -49,6 +49,7 @@ class PersistState;
     #define PREFS_SCALE_UI_AT_HIGH_RESOLUTIONS "Scale UIs at High Resolutions"
     #define PREFS_SCALE_UI_MINIMUM_HEIGHT "Scale UIs Minimum Resolution Height"
     #define PREFS_PIXEL_PERFECT_UI_SCALING "Pixel Perfect UI Scaling"
+    #define PREFS_UI_SCALING_BIAS "UI Scaling Bias"
 
 struct SaveSummary
 {

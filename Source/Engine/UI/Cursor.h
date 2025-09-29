@@ -63,7 +63,7 @@ private:
     // For animated cursors, the current frame index.
     float mFrameIndex = 0.0f;
 
-    void RecreateCursorFramesIfNeeded();
+    bool RecreateCursorFramesIfNeeded();
     void CreateCursorFrames(float scaleFactor);
     void FreeCursorFrames();
 };

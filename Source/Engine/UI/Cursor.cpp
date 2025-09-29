@@ -106,7 +106,10 @@ void Cursor::Activate(bool animate)
 void Cursor::Update(float deltaTime)
 {
     // See if this cursor needs its frames recreated (due to scale factor change).
-    RecreateCursorFramesIfNeeded();
+    if(RecreateCursorFramesIfNeeded())
+    {
+        SDL_SetCursor(mCursorFrames[static_cast<int>(mFrameIndex)]);
+    }
 
     // Only need to update if there are multiple frames to animate.
     if(!mAnimate || mCursorFrames.size() < 2) { return; }
@@ -122,13 +125,15 @@ void Cursor::Update(float deltaTime)
     SDL_SetCursor(mCursorFrames[static_cast<int>(mFrameIndex)]);
 }
 
-void Cursor::RecreateCursorFramesIfNeeded()
+bool Cursor::RecreateCursorFramesIfNeeded()
 {
-    float scaleFactor = UI::GetScaleFactor(Prefs::GetMinimumScaleUIHeight(), Prefs::UsePixelPerfectUIScaling());
+    float scaleFactor = UI::GetScaleFactor(Prefs::GetMinimumScaleUIHeight(), Prefs::UsePixelPerfectUIScaling(), Prefs::GetUIScalingBias());
     if(!Math::AreEqual(mScaleFactor, scaleFactor))
     {
         CreateCursorFrames(scaleFactor);
+        return true;
     }
+    return false;
 }
 
 void Cursor::CreateCursorFrames(float scaleFactor)

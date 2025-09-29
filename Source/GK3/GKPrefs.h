@@ -27,4 +27,9 @@ namespace Prefs
     {
         return gSaveManager.GetPrefs()->GetBool(PREFS_UI, PREFS_PIXEL_PERFECT_UI_SCALING, true);
     }
+
+    inline float GetUIScalingBias()
+    {
+        return gSaveManager.GetPrefs()->GetFloat(PREFS_UI, PREFS_UI_SCALING_BIAS, 0.0f);
+    }
 }

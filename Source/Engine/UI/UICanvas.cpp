@@ -114,7 +114,6 @@ TYPEINFO_INIT(UICanvas, Component, 14)
 {
     TYPEINFO_VAR(UICanvas, VariableType::Int, mDrawOrder);
     TYPEINFO_VAR(UICanvas, VariableType::Bool, mAutoScale);
-    TYPEINFO_VAR(UICanvas, VariableType::Int, mAutoScaleBias);
 }
 
 UICanvas::UICanvas(Actor* owner) : Component(owner)
@@ -226,7 +225,7 @@ float UICanvas::GetScaleFactor() const
     float scaleFactor = 1.0f;
     if(mAutoScale && Prefs::ScaleUIAtHighResolutions())
     {
-        scaleFactor = UI::GetScaleFactor(Prefs::GetMinimumScaleUIHeight(), Prefs::UsePixelPerfectUIScaling(), mAutoScaleBias);
+        scaleFactor = UI::GetScaleFactor(Prefs::GetMinimumScaleUIHeight(), Prefs::UsePixelPerfectUIScaling(), Prefs::GetUIScalingBias());
     }
     return scaleFactor;
 }
