@@ -95,6 +95,23 @@ bool GEngine::Initialize()
         // Official localized versions of the game also came with a Barn called "override.brn". This barn contains assets that override ordinary assets.
         // Try to load this, but since it's optional, it shouldn't show an error message.
         gAssetManager.LoadBarn("override.brn", BarnSearchPriority::High);
+
+        // Also check if any other Barns are specified in the INI file to load.
+        Config* config = gAssetManager.LoadConfig("GK3.ini");
+        if(config != nullptr)
+        {
+            std::string customBarns = config->GetString("Custom Barns", "");
+            if(!customBarns.empty())
+            {
+                // Multiple paths are separated by semicolons.
+                std::vector<std::string> customBarnNames = StringUtil::Split(customBarns, ';');
+                for(auto& barnName : customBarnNames)
+                {
+                    printf("Load barn %s\n", barnName.c_str());
+                    gAssetManager.LoadBarn(barnName, BarnSearchPriority::High);
+                }
+            }
+        }
     }
 
     // Init tools.

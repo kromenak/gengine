@@ -72,7 +72,7 @@ void AssetManager::Init()
     mShaderCache.Init();
 
     // Load GK3.ini from the root directory so we can bootstrap asset search paths.
-    mSearchPaths.push_back("");
+    mSearchPaths.emplace_back("");
     Config* config = LoadConfig("GK3.ini");
     mSearchPaths.clear();
 
@@ -92,7 +92,7 @@ void AssetManager::Init()
 
     // Add hard-coded default paths *after* any custom paths specified in .INI file.
     // Assets: loose files that aren't packed into a BRN.
-    mSearchPaths.push_back("Assets");
+    mSearchPaths.emplace_back("Assets");
     //TODO: I think we could crawl the Assets folder to automatically add subfolders. Might be nice for better organization of those assets.
 
     // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
@@ -106,8 +106,11 @@ void AssetManager::Init()
         }
 
         // Lowest priority is the normal "Data" folder.
-        mSearchPaths.push_back("Data");
+        mSearchPaths.emplace_back("Data");
     }
+
+    // Also allow searching the root directory for assets moving forward, but at the lowest priority.
+    mSearchPaths.emplace_back("");
 }
 
 void AssetManager::Shutdown()
