@@ -111,12 +111,14 @@ if(MSVC)
         /wd4711 # function was automatically inlined
         /wd4774 # snprintf format not literal (the only spot this occurs seems tricky to fix)
         /wd4820 # padding added
+        /wd4866 # left-to-right order can't be guaranteed
         /wd5026 # move constructor implicitly deleted
         /wd5027 # move assignment operator implicitly deleted
         /wd5039 # pointer to potentially throwing extern c function (triggered by fmod)
         /wd5045 # warns when scenario when Spectre mitigation would be applied to code if /QSpectre flag is set
         /wd5219 # implicit conversion from x to y (triggered by everything)
         /wd5245 # unreferenced function with internal linkage has been removed
+        /wd5262 # implicit fallthrough, missing break statement
         /wd5267 # implicit copy constructor is deprecated with user-provided destructor
     )
 else() # GCC/Clang
