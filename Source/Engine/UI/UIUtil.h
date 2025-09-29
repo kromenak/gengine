@@ -31,4 +31,6 @@ namespace UI
     UICanvas* AddCanvas(Actor* actor, int canvasOrder, const Color32& color = Color32::Clear);
     UICanvas* CreateCanvas(const std::string& name, Actor* parent, int canvasOrder, const Color32& color = Color32::Clear);
     UICanvas* CreateCanvas(const std::string& name, Component* parent, int canvasOrder, const Color32& color = Color32::Clear);
+
+    float GetScaleFactor(float minimumUIScaleHeight, bool usePixelPerfectScaling, float bias = 0.0f);
 }

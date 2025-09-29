@@ -5,6 +5,7 @@
 #include "GKPrefs.h"
 #include "InputManager.h"
 #include "Rect.h"
+#include "UIUtil.h"
 #include "UIWidget.h"
 #include "Window.h"
 
@@ -215,7 +216,7 @@ void UICanvas::RemoveWidget(UIWidget* widget)
 
         // We also need to immediately UpdateInput so the sMouseOverWidget updates to whatever else might be under the mouse at this moment.
         // If we don't do this, there's a chance a scene item can be clicked when a UI widget was supposed to block it.
-        UICanvas::UpdateMouseInput();
+        UpdateMouseInput();
     }
 }
 
@@ -225,25 +226,7 @@ float UICanvas::GetScaleFactor() const
     float scaleFactor = 1.0f;
     if(mAutoScale && Prefs::ScaleUIAtHighResolutions())
     {
-        // Also only autoscale if above the minimum window height set globally.
-        if(Window::GetHeight() >= Prefs::GetMinimumScaleUIHeight())
-        {
-            // Calculate how much to scale up the canvas based on the resolution.
-            // GK3 UI was authored at 640x480 resolution - that's the lowest supported playable window size.
-            // The amount to scale up is how much taller our resolution is than 480 pixels.
-            const float kReferenceHeight = 480.0f;
-            scaleFactor = Math::Max(Window::GetHeight() / kReferenceHeight, 1.0f);
-
-            // To avoid artifacts from rendering UI images/glyphs across pixel boundaries, we only want integer scale factors.
-            // This can be a bit limiting, but I haven't found another way to avoid artifacting yet.
-            if(Prefs::UsePixelPerfectUIScaling())
-            {
-                scaleFactor = Math::Floor(scaleFactor);
-            }
-
-            // Add any additional offset that was manually specified for this canvas.
-            scaleFactor = Math::Max(scaleFactor + mAutoScaleBias, 1.0f);
-        }
+        scaleFactor = UI::GetScaleFactor(Prefs::GetMinimumScaleUIHeight(), Prefs::UsePixelPerfectUIScaling(), mAutoScaleBias);
     }
     return scaleFactor;
 }

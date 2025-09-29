@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "UICanvas.h"
 #include "UIImage.h"
+#include "Window.h"
 
 UICanvas* UI::AddCanvas(Actor* actor, int canvasOrder, const Color32& color)
 {
@@ -47,4 +48,33 @@ UICanvas* UI::CreateCanvas(const std::string& name, Actor* parent, int canvasOrd
 UICanvas* UI::CreateCanvas(const std::string& name, Component* parent, int canvasOrder, const Color32& color)
 {
     return CreateCanvas(name, parent != nullptr ? parent->GetOwner() : nullptr, canvasOrder, color);
+}
+
+float UI::GetScaleFactor(float minimumUIScaleHeight, bool usePixelPerfectScaling, float bias)
+{
+    // Scale factor can be used by UIs to decide whether to scale up an asset that was authored for a lower resolution.
+    // For example, a scale factor of 2 indicates that the asset should be rendered at 2x its authored size.
+
+    // Only increase scale factor if above the minimum window height set globally.
+    float scaleFactor = 1.0f;
+    if(Window::GetHeight() >= minimumUIScaleHeight)
+    {
+        // Calculate how much to scale up based on the resolution.
+        // GK3 UI was authored at 640x480 resolution - that's the lowest supported playable window size.
+        // The amount to scale up is how much taller our resolution is than 480 pixels.
+        constexpr float kReferenceHeight = 480.0f;
+        scaleFactor = Math::Max(Window::GetHeight() / kReferenceHeight, 1.0f);
+
+        // Whatever we calculated, the caller may want to nudge that value up or down in certain cases.
+        // For example, maybe we're at 2x scale factor, but a particular UI looks better at one lower scale factor.
+        scaleFactor = Math::Max(scaleFactor + bias, 1.0f);
+
+        // To avoid artifacts from rendering UI images/glyphs across pixel boundaries, we only want integer scale factors.
+        // This can be a bit limiting, but I haven't found another way to avoid artifacting yet.
+        if(usePixelPerfectScaling)
+        {
+            scaleFactor = Math::Floor(scaleFactor);
+        }
+    }
+    return scaleFactor;
 }

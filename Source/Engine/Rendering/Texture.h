@@ -68,7 +68,7 @@ public:
     Texture(uint32_t width, uint32_t height, Color32 color, Format format = Format::RGBA);
     Texture(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     Texture(BinaryReader& reader);
-    ~Texture();
+    ~Texture() override;
 
     void Load(uint8_t* data, uint32_t dataLength);
 
