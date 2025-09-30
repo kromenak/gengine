@@ -134,7 +134,7 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(int frame, int
     }
 
     // Error case: just return something invalid.
-    VertexAnimationTransformPose invalidPose;
+    VertexAnimationTransformPose invalidPose { };
     invalidPose.frameNumber = -1;
     return invalidPose;
 }
@@ -177,7 +177,7 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
     }
 
     // Error case: just return something invalid.
-    VertexAnimationTransformPose invalidPose;
+    VertexAnimationTransformPose invalidPose { };
     invalidPose.frameNumber = -1;
     return invalidPose;
 }

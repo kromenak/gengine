@@ -196,6 +196,9 @@ void SidneyAnalyze::Show(int openFileId)
 void SidneyAnalyze::Hide()
 {
     mRoot->SetActive(false);
+
+    // Make sure the file selector hides when leaving this screen, if it was showing.
+    mSidneyFiles->HideAllFileWindows();
 }
 
 void SidneyAnalyze::OnUpdate(float deltaTime)
