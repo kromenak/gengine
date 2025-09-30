@@ -1,5 +1,5 @@
 # Gabriel Knight 3: Blood of the Sacred, Blood of the Damned
-This is a full rewrite of the Gabriel Knight 3 engine. It uses the same assets and data files as the original game, but the underlying engine is completely rewritten to be cross-platform and support modern systems.
+This is a full rewrite of the game engine for Gabriel Knight 3: Blood of the Sacred, Blood of the Damned. It uses the same assets and data files as the original game, but the underlying engine is completely rewritten to be cross-platform and support modern systems.
 
 ## Data Files
 When you first run the game, you will get an error message about missing data files. In order to play the game, you will need the data files - purchase a copy of GK3 (available on Steam or GOG) to get them. The data files are all the files in the `Data` directory after installing the game (`brn` asset bundles and `bik`/`avi` video files).
@@ -26,6 +26,9 @@ If you're uncomfortable running unsigned programs on your Mac, you can alternati
 
 ### Linux Performance Issues
 If the game exhibits poor performance on your Linux system, ensure that you've installed the latest drivers for your graphics card. The default driver provided out-of-the-box by Linux is likely not very effective for 3D rendering. In my testing, the default driver was only able to achieve 15-20 FPS. After installing the latest NVIDIA driver, I was able to achieve 60 FPS consistently.
+
+### Linux Screen Tearing
+If you encounter screen tearing (particularly when running the game in fullscreen mode), you may need to adjust your system's graphics settings. For NVIDIA graphics, you can enable "Force Full Composition Pipeline" in the NVIDA Settings program. For AMD graphics, you can enable a setting called "TearFree."
 
 ## Credits
 The project relies heavily on the past work of the team at Sierra who devised and built GK3 back in the mid 90s. They deserve the majority of the credit here.
