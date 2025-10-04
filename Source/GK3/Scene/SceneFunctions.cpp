@@ -51,6 +51,23 @@ namespace
 
 namespace
 {
+    void MS3_Init(const std::function<void()>& callback)
+    {
+        // This fixes a bug that could soft lock the game when eavesdropping on Lady Howard & Estelle during Day 1, 10AM.
+        // The eavesdrop cutscene code has an infinite loop, waiting for the TE6Topics flag to be cleared.
+        //
+        // This flag is meant to indicate when LH & E are playing a "turn to face museum display" animation.
+        // Problem is, if you exit the scene during that animation, this flag is never cleared. Eavesdropping after that will soft lock.
+        //
+        // This bug occurs in the original game! To fix, the scene enter NVC/SHP should clear this flag.
+        // But since I can't modify the game's data files, I will have to clear it via code.
+        gGameProgress.ClearFlag("TE6Topics");
+        if(callback != nullptr) { callback(); }
+    }
+}
+
+namespace
+{
     // CSE
     void CSE_Init(const std::function<void()>& callback)
     {
@@ -536,6 +553,9 @@ void SceneFunctions::Execute(const std::string& functionName, const std::functio
     {
         // LBY
         sSceneFunctions["lby-init"] = LBY_Init;
+
+        // MS3
+        sSceneFunctions["ms3-init"] = MS3_Init;
 
         // CD1
         sSceneFunctions["cd1-init"] = CD1_Init;
