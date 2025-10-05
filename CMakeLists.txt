@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.17)
 set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "")
 
 # Define G-Engine project.
-project(gengine VERSION 0.4.0
+project(gengine VERSION 0.5.0
                 DESCRIPTION "Gabriel Knight 3 game engine"
                 LANGUAGES C CXX)
 
