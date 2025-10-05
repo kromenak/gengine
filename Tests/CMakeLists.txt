@@ -57,6 +57,7 @@ target_sources(tests PRIVATE
 
     ../Source/Engine/Primitives/AABB.cpp
     ../Source/Engine/Primitives/Collisions.cpp
+    ../Source/Engine/Primitives/Frustum.cpp
     ../Source/Engine/Primitives/Line.cpp
     ../Source/Engine/Primitives/LineSegment.cpp
     ../Source/Engine/Primitives/Plane.cpp
