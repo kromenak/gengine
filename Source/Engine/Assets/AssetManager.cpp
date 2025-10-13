@@ -373,6 +373,21 @@ TextAsset* AssetManager::LoadText(const std::string& name, AssetScope scope)
     return LoadAsset<TextAsset>(name, scope, &mTextAssetCache, false);
 }
 
+TextAsset* AssetManager::LoadLocalizedText(const std::string& name, AssetScope scope)
+{
+    TextAsset* textFile = LoadText(Localizer::GetLanguagePrefix() + name, scope);
+    if(textFile == nullptr)
+    {
+        printf("Failed to load %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), name.c_str(), name.c_str());
+        textFile = LoadText("E" + name, scope);
+        if(textFile == nullptr)
+        {
+            printf("Failed to load localized text %s!\n", name.c_str());
+        }
+    }
+    return textFile;
+}
+
 Config* AssetManager::LoadConfig(const std::string& name)
 {
     return LoadAsset<Config>(SanitizeAssetName(name, ".CFG"), AssetScope::Global, &mConfigCache);

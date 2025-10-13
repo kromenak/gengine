@@ -95,6 +95,7 @@ public:
     Font* LoadFont(const std::string& name, AssetScope scope = AssetScope::Global);
 
     TextAsset* LoadText(const std::string& name, AssetScope scope = AssetScope::Global);
+    TextAsset* LoadLocalizedText(const std::string& name, AssetScope scope = AssetScope::Global);
     Config* LoadConfig(const std::string& name);
 
     Shader* GetShader(const std::string& id);

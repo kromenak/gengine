@@ -286,7 +286,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
     // Read in email data.
     {
-        TextAsset* textFile = gAssetManager.LoadText(Localizer::GetLanguagePrefix() + "SIDNEYEMAIL.TXT");
+        TextAsset* textFile = gAssetManager.LoadLocalizedText("SIDNEYEMAIL.TXT");
         IniParser parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 

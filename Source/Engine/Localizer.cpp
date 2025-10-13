@@ -37,24 +37,14 @@ Localizer::Localizer(const std::string& fileName, const std::string& sectionName
 
 void Localizer::Load(const std::string& fileName, const std::string& sectionName)
 {
-    // We assume the passed in filename does not have the language prefix attached yet.
-    // Add the language prefix based on current game options.
-    std::string localeFileName = GetLanguagePrefix() + fileName;
-
     // GK3 translations are stored in INI files with various sections.
     // Sometimes, we don't care about the sections - we just load the entire file into a single localizer.
     // However, sometimes sections have duplicate keys - in that case, it's better to treat each section as its own localizer.
-    // NOTE: SIDNEY.TXT and SIDNEYEMAIL.TXT are always prefixed with en E even in other languages
-    TextAsset* textFile = gAssetManager.LoadText(GetLanguagePrefix() + fileName, AssetScope::Manual);
+    // NOTE: SIDNEY.TXT and SIDNEYEMAIL.TXT are always prefixed with an E even in other languages
+    TextAsset* textFile = gAssetManager.LoadLocalizedText(fileName, AssetScope::Manual);
     if(textFile == nullptr)
     {
-        printf("Failed to load %s%s - falling back on English (E%s).\n", GetLanguagePrefix().c_str(), fileName.c_str(), fileName.c_str());
-        textFile = gAssetManager.LoadText("E" + fileName, AssetScope::Manual);
-        if(textFile == nullptr)
-        {
-            printf("Failed to load localization text file %s! No localized text will be loaded.\n", fileName.c_str());
-            return;
-        }
+        return;
     }
 
     // Parse as INI file.
