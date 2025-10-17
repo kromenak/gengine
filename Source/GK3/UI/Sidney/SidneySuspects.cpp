@@ -727,6 +727,16 @@ void SidneySuspects::OnUnlinkToSuspectPressed()
     if(mOpenedSuspectIndex < 0) { return; }
     SuspectInfo& info = mSuspectInfos[mOpenedSuspectIndex];
 
+    // Must have a selected linked file. If none, an error popup is displayed.
+    if(info.selectedLinkedFileIndex < 0)
+    {
+        mPopup->ResetToDefaults();
+        mPopup->SetTextAlignment(HorizontalAlignment::Center);
+        mPopup->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("NoLinks"));
+        mPopup->ShowOneButton();
+        return;
+    }
+
     // Which file do we want to unlink? Depends on which is selected (NOT which is opened).
     int selectedFileId = info.linkedFileIds[info.selectedLinkedFileIndex];
 
