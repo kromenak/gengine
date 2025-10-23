@@ -31,6 +31,8 @@ shpvoid CallGlobalSheep(const std::string& sheepFileName, const std::string& fun
 
 shpvoid CallIndexedSheep(const std::string& sheepFileName, int sheepIndex, const std::string& functionName); // DEV, WAIT
 
+shpvoid CompileSheep(const std::string& sheepFileName);
+
 shpvoid SetGlobalSheep();
 shpvoid SetTopSheep();
 

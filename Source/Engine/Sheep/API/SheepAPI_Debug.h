@@ -16,18 +16,21 @@ shpvoid BindDebugKey(const std::string& keyName, const std::string& sheepCommand
 shpvoid UnbindDebugKey(const std::string& keyName);
 
 shpvoid DumpFile(const std::string& filename);
-shpvoid DumpLockedObjects();
-shpvoid DumpMemoryUsage();
 shpvoid DumpPathFileMap();
 shpvoid DumpUsedPaths();
 shpvoid DumpUsedFiles();
 shpvoid DumpLayerStack(); // DEV
 shpvoid DumpBuildInfo(); // DEV
+shpvoid DumpActionManager(); // DEV
+shpvoid DumpUIStates(); // DEV
 
 shpvoid ReportMemoryUsage();
 shpvoid ReportSurfaceMemoryUsage();
 
+shpvoid DebugBreak(); // DEV
 shpvoid ThrowException(); // DEV
+shpvoid Death();
+shpvoid Death2();
 
 // CONSOLE
 shpvoid OpenConsole();
@@ -61,9 +64,6 @@ std::string CreatePositionGizmoX(float heading, float x, float y, float z); // D
 shpvoid ShowPositionGizmo(const std::string& positionName); // DEV
 shpvoid HidePositionGizmo(const std::string& positionName); // DEV
 
-shpvoid ShowAmbientMapGizmo(); // DEV
-shpvoid HideAmbientMapGizmo(); // DEV
-
 shpvoid ShowWalkerBoundaryGizmo(); // DEV
 shpvoid HideWalkerBoundaryGizmo(); // DEV
 
@@ -80,3 +80,5 @@ shpvoid TextInspectPositionGizmoX(const std::string& positionName, int xPercent,
 shpvoid ViewportInspectCameraGizmo(const std::string& cameraName); // DEV
 shpvoid ViewportInspectCameraGizmoX(const std::string& cameraName, int xPercent,
                                     int yPercent, int widthPercent, int heightPercent); // DEV
+
+// MISC

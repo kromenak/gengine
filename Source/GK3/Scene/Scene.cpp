@@ -1083,8 +1083,9 @@ void Scene::OnPersist(PersistState& ps)
     // This code makes several assumptions:
     // 1) Scene::Load and Scene::Init have already completed for the current scene.
     // 2) Certain objects (camera, BSP, soundtrack player, etc) definitely exist in their initial states.
-    // 3) Particularly when loading: the exact same set of objects present at save time exist.
-    //    This is a big one! Any change to SIF or dynamically spawned objects will likely break the save in some way.
+
+    // This code is not particularly resilient, though it does try to guard against objects not being present on load that were in the save file.
+    // Over time, additional guards and error handling may need to be added.
 
     // Save/load the game camera. This includes camera position, pitch/yaw, and other state data.
     mCamera->OnPersist(ps);

@@ -22,6 +22,7 @@ shpvoid SetNextEgo(); // DEV
 shpvoid SetPrevEgo(); // DEV
 
 // POSITIONS
+void AddPosition(const std::string& positionSpec);
 shpvoid DumpPosition(const std::string& positionName); // DEV
 shpvoid DumpPositions(); // DEV
 
@@ -35,9 +36,11 @@ std::string GetIndexedPosition(int index); // DEV
 int GetPositionCount(); // DEV
 
 // ACTORS
+void AddActor(const std::string& actorSpec);
 int DoesActorExist(const std::string& actorName);
 
 // MODELS
+void AddModel(const std::string& modelSpec);
 int DoesModelExist(const std::string& modelName);
 shpvoid DumpModelNames(); // DEV
 

@@ -17,6 +17,10 @@ shpvoid ContinueDialogue(int numLines); // WAIT
 shpvoid ContinueDialogueNoFidgets(int numLines); // WAIT
 
 shpvoid SetDefaultDialogueCamera(const std::string& cameraName);
+shpvoid ClearDefaultDialogueCamera();
+
+shpvoid SetDialogueCameras();
+shpvoid ClearDialogueCameras();
 
 shpvoid SetConversation(const std::string& conversationName); // WAIT
 shpvoid EndConversation(); // WAIT

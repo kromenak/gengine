@@ -5,6 +5,7 @@
 #include "GKActor.h"
 #include "GKProp.h"
 #include "ReportManager.h"
+#include "SceneInitFile.h"
 #include "SceneManager.h"
 
 using namespace std;

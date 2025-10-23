@@ -44,6 +44,10 @@ shpvoid ClearRegion(const std::string& actorName, int regionId, float destAccura
 shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, const std::string& cont,
                     const std::string& startTurnLeft, const std::string& startTurnRight);
 
+// SHOES
+shpvoid ChangeShoes(const std::string& actorName, const std::string& shoeType);
+shpvoid ClownShoes(const std::string& actorName);
+shpvoid NormalShoes(const std::string& actorName);
 
 // TURNS & LOOK-ATS
 shpvoid TurnHead(const std::string& actorName, int percentX, int percentY, int durationMs); // WAIT
@@ -90,6 +94,7 @@ shpvoid DisableModelShadow(const std::string& modelName);
 shpvoid SetModelShadowTexture(const std::string& modelName, const std::string& textureName);
 shpvoid ClearModelShadowTexture(const std::string& modelName);
 shpvoid DumpModel(const std::string& modelName); // DEV
+shpvoid BuildModelLodKeys(const std::string& modelName, float dist, float error, int numLevels); // DEV
 
 // PROPS
 shpvoid SetPropGas(const std::string& modelName, const std::string& gasName);

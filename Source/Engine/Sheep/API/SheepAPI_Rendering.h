@@ -12,6 +12,11 @@ shpvoid DisableIncrementalRendering(); // DEV
 float GetGamma(); // DEV
 shpvoid SetGamma(float gamma); // DEV
 
+shpvoid Enable2xLighting();
+shpvoid Disable2xLighting();
+float GetLight2xMax();
+void SetLight2xMax(float max);
+
 shpvoid SetRenderFlat(); // DEV
 shpvoid SetRenderFull(); // DEV
 shpvoid SetRenderShaded(); // DEV

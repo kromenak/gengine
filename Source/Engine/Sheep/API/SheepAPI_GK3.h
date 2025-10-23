@@ -25,5 +25,6 @@ shpvoid TurnLSRPageLeft();
 shpvoid TurnLSRPageRight();
 
 shpvoid ShowDeathLayer();
+shpvoid HideDeathLayer();
 
 shpvoid FinishedScreen();

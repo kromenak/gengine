@@ -132,7 +132,6 @@ shpvoid DisableCameraBoundaries()
 }
 RegFunc0(DisableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
 
-
 shpvoid CameraBoundaryBlockModel(const std::string& modelName)
 {
     GKObject* object = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);

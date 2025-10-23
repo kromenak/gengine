@@ -196,14 +196,7 @@ RegFunc1(SetEgoActiveInvItem, void, string, IMMEDIATE, REL_FUNC);
 int IsActiveInvItem(const std::string& itemName)
 {
     std::string activeItem = gInventoryManager.GetActiveInventoryItem(Scene::GetEgoName());
-    if(StringUtil::EqualsIgnoreCase(activeItem, itemName))
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
+    return StringUtil::EqualsIgnoreCase(activeItem, itemName) ? 1 : 0;
 }
 RegFunc1(IsActiveInvItem, int, string, IMMEDIATE, REL_FUNC);
 
