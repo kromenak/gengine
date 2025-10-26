@@ -76,8 +76,9 @@ public:
     GKActor* GetEgo() const { return mEgo; }
     void SetEgo(const std::string& actorName);
 
-    BSPActor* GetHitTestObjectByModelName(const std::string& modelName) const;
     GKObject* GetSceneObjectByModelName(const std::string& modelName) const;
+    BSPActor* GetBSPActorByModelName(const std::string& modelName) const;
+    BSPActor* GetHitTestByModelName(const std::string& modelName) const;
     GKProp* GetPropByModelName(const std::string& modelName) const;
 
     GKObject* GetSceneObjectByNoun(const std::string& noun) const;
@@ -148,21 +149,21 @@ private:
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
 
-    // All actors and props in one list. Includes GKProps, GKActors, and BSPActors.
-    // Sometimes, we want to treat these guys in a homogenous manner, since all have a common API in some cases.
-    std::vector<GKObject*> mPropsAndActors;
+    // Contains ALL GKObject-derived objects spawned into the current scene.
+    // That includes: GKActors, GKProps, and all BSPActors (including hit tests). EVERYTHING!
+    std::vector<GKObject*> mAllGKObjects;
 
-    // Just "actors".
+    // All the GKActors spawned into the scene - basically all human or animal objects.
     std::vector<GKActor*> mActors;
 
-    // Just "props".
+    // All the GKProps spawned into the scene - usually simple objects that can animate or move.
     std::vector<GKProp*> mProps;
 
-    // Actors in the BSP.
+    // All BSPActors (including hit tests). Similar to props, but baked into BSP geometry, so can't animate at all.
     std::vector<BSPActor*> mBSPActors;
 
-    // Actors that are marked as hit test models.
-    std::vector<BSPActor*> mHitTestActors;
+    // Only BSPActors that are hit tests. These are invisible, but still interactive.
+    std::vector<BSPActor*> mHitTests;
 
     // The skyboxes can also have hit tests, but they use a different system!
     // In this case, a palette index is mapped to a simple object with a noun.

@@ -426,7 +426,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
 {
     // First, iterate all Props and Actors to find the closest one that was hit by the ray and meets our criteria (if any).
     SceneCastResult result;
-    for(GKObject* object : mPropsAndActors)
+    for(GKObject* object : mAllGKObjects)
     {
         // Ignore inactive objects.
         if(!object->IsActive()) { continue; }
@@ -544,7 +544,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
 SceneCastResult Scene::RaycastAABBs(const Ray& ray, GKObject** ignore, int ignoreCount) const
 {
     SceneCastResult result;
-    for(GKObject* object : mPropsAndActors)
+    for(GKObject* object : mAllGKObjects)
     {
         // Ignore inactive objects.
         if(!object->IsActive()) { continue; }
@@ -716,9 +716,9 @@ void Scene::SetEgo(const std::string& actorName)
     }
 }
 
-BSPActor* Scene::GetHitTestObjectByModelName(const std::string& modelName) const
+GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 {
-    for(auto& object : mHitTestActors)
+    for(auto& object : mAllGKObjects)
     {
         if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
         {
@@ -728,13 +728,25 @@ BSPActor* Scene::GetHitTestObjectByModelName(const std::string& modelName) const
     return nullptr;
 }
 
-GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
+BSPActor* Scene::GetBSPActorByModelName(const std::string& modelName) const
 {
-    for(auto& object : mPropsAndActors)
+    for(auto& bspActor : mBSPActors)
     {
-        if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
+        if(StringUtil::EqualsIgnoreCase(bspActor->GetName(), modelName))
         {
-            return object;
+            return bspActor;
+        }
+    }
+    return nullptr;
+}
+
+BSPActor* Scene::GetHitTestByModelName(const std::string& modelName) const
+{
+    for(auto& hitTest : mHitTests)
+    {
+        if(StringUtil::EqualsIgnoreCase(hitTest->GetName(), modelName))
+        {
+            return hitTest;
         }
     }
     return nullptr;
@@ -754,7 +766,7 @@ GKProp* Scene::GetPropByModelName(const std::string& modelName) const
 
 GKObject* Scene::GetSceneObjectByNoun(const std::string& noun) const
 {
-    for(auto& object : mPropsAndActors)
+    for(auto& object : mAllGKObjects)
     {
         if(StringUtil::EqualsIgnoreCase(object->GetNoun(), noun))
         {
@@ -826,20 +838,19 @@ void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* text
 void Scene::SetSceneModelVisibility(const std::string& modelName, bool visible)
 {
     // If there's a BSPActor for this model, set visibility through that API.
-    GKObject* obj = GetSceneObjectByModelName(modelName);
-    if(obj != nullptr && obj->IsA<BSPActor>())
+    BSPActor* bspActor = GetBSPActorByModelName(modelName);
+    if(bspActor != nullptr)
     {
-        // If this is a hit test, we just need to toggle visibility on.
-        // For BSPActors that aren't hit tests, this should activate the entire thing.
-        //TODO: Review diff between BSPActor and HitTests...this can probably be simpler.
-        BSPActor* bspActor = static_cast<BSPActor*>(obj);
-        if(GetHitTestObjectByModelName(modelName) == nullptr)
+        // This function's effect is inconsistent between normal scene models and hit test models.
+        if(bspActor->IsHitTest())
         {
-            bspActor->SetActive(visible);
+            // For hit tests, visibility is disabled, but interactivity is unaffected (use EnableHitTest/DisableHitTest for that).
+            bspActor->SetVisible(visible);
         }
         else
         {
-            bspActor->SetVisible(visible);
+            // For normal scene models, both visibility and interactivity are disabled. So we can set the whole active flag.
+            bspActor->SetActive(visible);
         }
     }
     else
@@ -896,7 +907,7 @@ void Scene::SetPaused(bool paused)
     }
 
     // Pause/unpause all objects in the scene by disabling updates.
-    for(auto& object : mPropsAndActors)
+    for(auto& object : mAllGKObjects)
     {
         object->SetUpdateEnabled(!paused);
     }
@@ -1049,7 +1060,7 @@ void Scene::OverrideSceneAsset(const std::string& sceneAssetName, const std::str
 
         // In some cases, the BSP is a different variant of the current scene, but with the same hit tests present (e.g. CEM in Day 1, 6PM).
         // In those cases, we need to re-enable the hit tests in the new scene, or else certain scene interactions may not work.
-        for(BSPActor* hitTest : mHitTestActors)
+        for(BSPActor* hitTest : mHitTests)
         {
             mOverrideBSP->SetVisible(hitTest->GetName(), false);
             mOverrideBSP->SetHitTest(hitTest->GetName(), true);
@@ -1120,7 +1131,7 @@ void Scene::OnPersist(PersistState& ps)
 
     // SAVE/LOAD GKOBJECTS
     // Get object count.
-    uint64_t objectCount = mPropsAndActors.size();
+    uint64_t objectCount = mAllGKObjects.size();
     ps.Xfer(PERSIST_VAR(objectCount));
 
     // Iterate each scene object, one by one.
@@ -1130,12 +1141,12 @@ void Scene::OnPersist(PersistState& ps)
         if(ps.IsSaving())
         {
             // Save the object name.
-            std::string name = mPropsAndActors[i]->GetName();
+            std::string name = mAllGKObjects[i]->GetName();
             ps.Xfer(PERSIST_VAR(name));
             //printf("Save %i (%s)\n", static_cast<int>(i), name.c_str());
 
             // Save the object type.
-            TypeId objType = mPropsAndActors[i]->GetTypeId();
+            TypeId objType = mAllGKObjects[i]->GetTypeId();
             ps.Xfer(PERSIST_VAR(objType));
 
             // Before saving the object data, write out a placeholder int.
@@ -1145,7 +1156,7 @@ void Scene::OnPersist(PersistState& ps)
             uint32_t objDataStartPos = ps.GetBinaryWriter()->GetPosition();
 
             // Save the object.
-            mPropsAndActors[i]->OnPersist(ps);
+            mAllGKObjects[i]->OnPersist(ps);
 
             // Go back and fill in the object size.
             uint32_t objDataEndPos = ps.GetBinaryWriter()->GetPosition();
@@ -1240,13 +1251,16 @@ GKObject* Scene::CreateSceneModel(const SceneModel* sceneModel)
         {
             BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(sceneModel->name);
             if(actor == nullptr) { break; }
-            mPropsAndActors.push_back(actor);
+
+            // This should be a member of all props/actors and BSP actors.
+            mAllGKObjects.push_back(actor);
             mBSPActors.push_back(actor);
 
+            // Set noun and verb based on model spec.
             actor->SetNoun(sceneModel->noun);
             actor->SetVerb(sceneModel->verb);
 
-            // If it should be hidden by default, tell the BSP to hide it.
+            // If it should be hidden by default, set inactive so that all visibility/interactivity is disabled.
             if(sceneModel->hidden)
             {
                 actor->SetActive(false);
@@ -1257,7 +1271,7 @@ GKObject* Scene::CreateSceneModel(const SceneModel* sceneModel)
         // "HitTest" type models should be hidden, but still interactive.
         case SceneModel::Type::HitTest:
         {
-            // if this is a skybox hit test, it requires special processing.
+            // If this is a skybox hit test, it requires special processing.
             if(StringUtil::StartsWithIgnoreCase(sceneModel->name, "skybox_"))
             {
                 GKObject* obj = new GKObject();
@@ -1267,19 +1281,22 @@ GKObject* Scene::CreateSceneModel(const SceneModel* sceneModel)
                 mSkyboxHitTests[paletteIndex] = obj;
                 return obj;
             }
-            else
+            else // Otherwise, this hit test should be in the BSP.
             {
-                // Otherwise, this hit test should be in the BSP.
                 BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(sceneModel->name);
                 if(actor == nullptr) { break; }
-                mPropsAndActors.push_back(actor);
-                mBSPActors.push_back(actor);
-                mHitTestActors.push_back(actor);
 
+                // This is a member of all props/actors, BSP actors, and hit test actors!
+                mAllGKObjects.push_back(actor);
+                mBSPActors.push_back(actor);
+                mHitTests.push_back(actor);
+
+                // Set noun/verb based on model spec.
                 actor->SetNoun(sceneModel->noun);
                 actor->SetVerb(sceneModel->verb);
 
-                mSceneData->GetBSP()->SetHitTest(sceneModel->name, true);
+                // Mark this object as a hit test (rather than a normal BSP-based scene model).
+                actor->SetHitTest(true);
 
                 // Hit test actors are never *visible* (unless you enable a debug option).
                 actor->SetVisible(false);
@@ -1299,8 +1316,8 @@ GKObject* Scene::CreateSceneModel(const SceneModel* sceneModel)
         case SceneModel::Type::GasProp:
         {
             GKProp* prop = new GKProp(*sceneModel);
+            mAllGKObjects.push_back(prop);
             mProps.push_back(prop);
-            mPropsAndActors.push_back(prop);
             return prop;
         }
 
@@ -1315,8 +1332,8 @@ GKActor* Scene::CreateSceneActor(const SceneActor* sceneActor)
 {
     // Create actor.
     GKActor* actor = new GKActor(sceneActor);
+    mAllGKObjects.push_back(actor);
     mActors.push_back(actor);
-    mPropsAndActors.push_back(actor);
 
     // If this is ego, save a reference to it.
     if(sceneActor->ego && sceneActor == mEgoSceneActor)
@@ -1331,7 +1348,9 @@ GKActor* Scene::CreateSceneActor(const SceneActor* sceneActor)
     {
         GKProp* walkerDOR = new GKProp(walkerDorModel);
         actor->SetModelFacingHelper(walkerDOR);
-        mPropsAndActors.push_back(walkerDOR);
+
+        // Should this be in the mProps list? Going to say no for now...
+        mAllGKObjects.push_back(walkerDOR);
 
         // Disable DOR mesh renderer so you can't see the placeholder model.
         walkerDOR->GetMeshRenderer()->SetEnabled(false);

@@ -266,7 +266,7 @@ RegFunc1(HideSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EnableHitTestModel(const std::string& modelName)
 {
-    BSPActor* hitTestActor = gSceneManager.GetScene()->GetHitTestObjectByModelName(modelName);
+    BSPActor* hitTestActor = gSceneManager.GetScene()->GetHitTestByModelName(modelName);
     if(hitTestActor != nullptr)
     {
         hitTestActor->SetInteractive(true);
@@ -277,7 +277,7 @@ RegFunc1(EnableHitTestModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DisableHitTestModel(const std::string& modelName)
 {
-    BSPActor* hitTestActor = gSceneManager.GetScene()->GetHitTestObjectByModelName(modelName);
+    BSPActor* hitTestActor = gSceneManager.GetScene()->GetHitTestByModelName(modelName);
     if(hitTestActor != nullptr)
     {
         hitTestActor->SetInteractive(false);

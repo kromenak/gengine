@@ -80,59 +80,64 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
         return nullptr;
     }
 
-    // OK, we found it! Create the actor.
-    BSPActor* actor = new BSPActor(this, objectName);
-
-    // Iterate this BSP object's data to generate an AABB and facing direction for the actor.
-    bool firstPoint = true;
-    AABB aabb;
-    Vector3 cumulativeFacingDir = Vector3::Zero;
-    int polygonCount = 0;
-    for(size_t surfaceIndex = 0; surfaceIndex < mSurfaces.size(); surfaceIndex++)
+    // Find all surfaces/polygons for this object.
+    std::vector<BSPSurface*> surfaces;
+    std::vector<BSPPolygon*> polygons;
+    for(size_t surfaceIndex = 0; surfaceIndex < mSurfaces.size(); ++surfaceIndex)
     {
         if(mSurfaces[surfaceIndex].objectIndex == objectIndex)
         {
-            actor->AddSurface(&mSurfaces[surfaceIndex]);
+            surfaces.push_back(&mSurfaces[surfaceIndex]);
 
-            for(size_t polygonIndex = 0; polygonIndex < mPolygons.size(); polygonIndex++)
+            for(size_t polygonIndex = 0; polygonIndex < mPolygons.size(); ++polygonIndex)
             {
                 if(mPolygons[polygonIndex].surfaceIndex == surfaceIndex)
                 {
-                    ++polygonCount;
-                    actor->AddPolygon(&mPolygons[polygonIndex]);
-
-                    int start = mPolygons[polygonIndex].vertexIndexOffset;
-                    int end = start + mPolygons[polygonIndex].vertexIndexCount;
-                    for(int k = start; k < end; k++)
-                    {
-                        if(firstPoint)
-                        {
-                            aabb = AABB(mVertices[mVertexIndices[k]], mVertices[mVertexIndices[k]]);
-                            firstPoint = false;
-                        }
-                        else
-                        {
-                            aabb.GrowToContain(mVertices[mVertexIndices[k]]);
-                        }
-                    }
-
-                    // If there are enough vertices, calculate a facing direction for this polygon.
-                    // Add it to the cumulative facing direction so we can calculate an average later.
-                    if(mPolygons[polygonIndex].vertexIndexCount > 2)
-                    {
-                        cumulativeFacingDir += Triangle::GetNormal(mVertices[mVertexIndices[start]], mVertices[mVertexIndices[start + 1]], mVertices[mVertexIndices[start + 2]]);
-                    }
+                    polygons.push_back(&mPolygons[polygonIndex]);
                 }
             }
         }
     }
+
+    // Based on object polygons, calculate an AABB and a facing direction for the object.
+    AABB aabb;
+    Vector3 cumulativeFacingDir = Vector3::Zero;
+    if(!polygons.empty())
+    {
+        // Create initial AABB using the first vertex of the first polygon.
+        int firstVertexIndexOffset = polygons[0]->vertexIndexOffset;
+        aabb = AABB(mVertices[mVertexIndices[firstVertexIndexOffset]], mVertices[mVertexIndices[firstVertexIndexOffset]]);
+
+        // Iterate to continue populating the AABB and calculating the average facing direction.
+        for(BSPPolygon* polygon : polygons)
+        {
+            int start = polygon->vertexIndexOffset;
+            int end = start + polygon->vertexIndexCount;
+            for(int k = start; k < end; k++)
+            {
+                aabb.GrowToContain(mVertices[mVertexIndices[k]]);
+            }
+
+            // If there are enough vertices, calculate a facing direction for this polygon.
+            // Add it to the cumulative facing direction so we can calculate an average later.
+            if(polygon->vertexIndexCount > 2)
+            {
+                cumulativeFacingDir += Triangle::GetNormal(mVertices[mVertexIndices[start]], mVertices[mVertexIndices[start + 1]], mVertices[mVertexIndices[start + 2]]);
+            }
+        }
+    }
+
+    // Create the actor from the set of surfaces/polygons.
+    BSPActor* actor = new BSPActor(this, objectName, surfaces, polygons);
+
+    // Assign AABB.
     actor->SetAABB(aabb);
 
     // Set the actor's rotation based on the average facing direction of the polygons.
     // This isn't perfect, but it does give a good result particularly for boxy objects (posters, paintings, panels, etc).
-    if(cumulativeFacingDir != Vector3::Zero && polygonCount > 0)
+    if(cumulativeFacingDir != Vector3::Zero && !polygons.empty())
     {
-        actor->SetHeading(Heading::FromDirection(cumulativeFacingDir / polygonCount));
+        actor->SetHeading(Heading::FromDirection(cumulativeFacingDir / polygons.size()));
         //Debug::DrawLine(aabb.GetCenter(), aabb.GetCenter() + actor->GetForward() * 10.0f, Color32::Magenta, 30.0f);
     }
 
@@ -398,7 +403,7 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
                     for(int k = start; k < end; k++)
                     {
                         pos += mVertices[mVertexIndices[k]];
-                        vertexCount++;
+                        ++vertexCount;
                     }
                 }
             }
