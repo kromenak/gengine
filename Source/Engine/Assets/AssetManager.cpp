@@ -234,11 +234,6 @@ Audio* AssetManager::LoadAudio(const std::string& name, AssetScope scope)
     return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mAudioCache, false);
 }
 
-Audio* AssetManager::LoadAudioAsync(const std::string& name, AssetScope scope)
-{
-    return LoadAssetAsync<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mAudioCache, false);
-}
-
 Soundtrack* AssetManager::LoadSoundtrack(const std::string& name, AssetScope scope)
 {
     return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), scope, &mSoundtrackCache);
@@ -257,11 +252,6 @@ Model* AssetManager::LoadModel(const std::string& name, AssetScope scope)
 Texture* AssetManager::LoadTexture(const std::string& name, AssetScope scope)
 {
     return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mTextureCache);
-}
-
-Texture* AssetManager::LoadTextureAsync(const std::string& name, AssetScope scope)
-{
-    return LoadAssetAsync<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mTextureCache);
 }
 
 Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scope)
@@ -355,11 +345,6 @@ SheepScript* AssetManager::LoadSheep(const std::string& name, AssetScope scope)
 Cursor* AssetManager::LoadCursor(const std::string& name, AssetScope scope)
 {
     return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), scope, &mCursorCache);
-}
-
-Cursor* AssetManager::LoadCursorAsync(const std::string& name, AssetScope scope)
-{
-    return LoadAssetAsync<Cursor>(SanitizeAssetName(name, ".CUR"), scope, &mCursorCache);
 }
 
 Font* AssetManager::LoadFont(const std::string& name, AssetScope scope)
@@ -601,76 +586,21 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, Asset
     return asset;
 }
 
-template<typename T>
-T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, AssetCache<T>* cache, bool deleteBuffer, std::function<void(T*)> callback)
+template<class T>
+void AssetManager::UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>* cache)
 {
-    #if defined(PLATFORM_LINUX)
-    //TEMP(?): Linux doesn't like this multithreading code, and I don't really blame it!
-    //TODO: Revisit async asset loading - probably need to wrap caches in mutexes I'd think? Or some other issue?
-    T* asset = LoadAsset<T>(assetName, scope, cache, deleteBuffer);
-    if(callback != nullptr) { callback(asset); }
-    return asset;
-    #else
-    // If already present in cache, return existing asset right away.
-    if(cache != nullptr && scope != AssetScope::Manual)
+    // Remove from cache.
+    if(cache != nullptr)
     {
-        T* cachedAsset = cache->Get(assetName);
-        if(cachedAsset != nullptr)
+        auto it = cache->find(asset->GetName());
+        if(it != cache->end())
         {
-            // One caveat: if the cached asset has a narrower scope than what's being requested, we must PROMOTE the scope.
-            // For example, a cached asset with SCENE scope being requested at GLOBAL scope must convert to GLOBAL scope.
-            if(cachedAsset->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
-            {
-                cachedAsset->SetScope(AssetScope::Global);
-            }
-            return cachedAsset;
+            cache->erase(it);
         }
     }
-    //printf("Loading asset %s\n", assetName.c_str());
 
-    // Create asset from asset buffer.
-    std::string upperName = StringUtil::ToUpperCopy(assetName);
-    T* asset = new T(upperName, scope);
-
-    // Add entry in cache, if we have a cache.
-    //TODO: This inserts the asset into the cache *even if* it is not a valid asset (CreateAssetBuffer returns nullptr).
-    //TODO: Ideally, we shouldn't do this - I guess we need to check if it exists before creating it???
-    if(asset != nullptr && cache != nullptr && scope != AssetScope::Manual)
-    {
-        cache->Set(assetName, asset);
-    }
-
-    // Load in background.
-    Loader::AddLoadingTask();
-    ThreadPool::AddTask([this, deleteBuffer](void* arg){
-        T* asset = static_cast<T*>(arg);
-        //printf("Loading asset: %s\n", asset->GetName().c_str());
-
-        // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
-        uint32_t bufferSize = 0;
-        uint8_t* buffer = CreateAssetBuffer(asset->GetName(), bufferSize);
-        if(buffer == nullptr) { return; }
-
-        // Ok, now we can load the asset's data.
-        asset->Load(buffer, bufferSize);
-
-        // Delete the buffer after use (or it'll leak).
-        if(deleteBuffer)
-        {
-            delete[] buffer;
-        }
-    }, asset, [asset, callback](){
-        //printf("Loaded asset: %s\n", asset->GetName().c_str());
-        if(callback != nullptr)
-        {
-            callback(asset);
-        }
-        Loader::RemoveLoadingTask();
-    });
-
-    // Return the created asset.
-    return asset;
-    #endif
+    // Delete asset.
+    delete asset;
 }
 
 uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize)
@@ -695,19 +625,3 @@ uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t&
     return nullptr;
 }
 
-template<class T>
-void AssetManager::UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>* cache)
-{
-    // Remove from cache.
-    if(cache != nullptr)
-    {
-        auto it = cache->find(asset->GetName());
-        if(it != cache->end())
-        {
-            cache->erase(it);
-        }
-    }
-
-    // Delete asset.
-    delete asset;
-}

@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "IniParser.h"
+#include "Loader.h"
 #include "TextAsset.h"
 #include "Texture.h"
 
@@ -19,100 +20,102 @@ VerbManager gVerbManager;
 
 void VerbManager::Init()
 {
-    // Get VERBS text file.
-    TextAsset* text = gAssetManager.LoadText("VERBS.TXT", AssetScope::Manual);
+    Loader::Load([this](){
+        // Get VERBS text file.
+        TextAsset* text = gAssetManager.LoadText("VERBS.TXT", AssetScope::Manual);
 
-    // Pass that along to INI parser, since it is plain text and in INI format.
-    IniParser parser(text->GetText(), text->GetTextLength());
-    parser.ParseAll();
+        // Pass that along to INI parser, since it is plain text and in INI format.
+        IniParser parser(text->GetText(), text->GetTextLength());
+        parser.ParseAll();
 
-    // Everything is contained within the "VERBS" section.
-    // There's only one section in the whole file.
-    IniSection section = parser.GetSection("VERBS");
+        // Everything is contained within the "VERBS" section.
+        // There's only one section in the whole file.
+        IniSection section = parser.GetSection("VERBS");
 
-    // Each line is a single button icon declaration.
-    // Format is: KEYWORD, up=, down=, hover=, disable=, type
-    for(auto& line : section.lines)
-    {
-        IniKeyValue& entry = line.entries.front();
-
-        // These values will be filled in with remaining entry keys.
-        Texture* upTexture = nullptr;
-        Texture* downTexture = nullptr;
-        Texture* hoverTexture = nullptr;
-        Texture* disableTexture = nullptr;
-        Cursor* cursor = nullptr;
-
-        // By default, the type of each button is a verb.
-        // However, if the keyword "inventory" or "topic" are used, the button is put in those maps instead.
-        // This is why I bother using a pointer to a map here!
-        std::string_map_ci<VerbIcon>* map = &mVerbs;
-
-        // The remaining values are all optional.
-        // If a value isn't present, the above defaults are used.
-        for(size_t i = 1; i < line.entries.size(); ++i)
+        // Each line is a single button icon declaration.
+        // Format is: KEYWORD, up=, down=, hover=, disable=, type
+        for(auto& line : section.lines)
         {
-            IniKeyValue& keyValuePair = line.entries[i];
-            if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "up"))
+            IniKeyValue& entry = line.entries.front();
+
+            // These values will be filled in with remaining entry keys.
+            Texture* upTexture = nullptr;
+            Texture* downTexture = nullptr;
+            Texture* hoverTexture = nullptr;
+            Texture* disableTexture = nullptr;
+            Cursor* cursor = nullptr;
+
+            // By default, the type of each button is a verb.
+            // However, if the keyword "inventory" or "topic" are used, the button is put in those maps instead.
+            // This is why I bother using a pointer to a map here!
+            std::string_map_ci<VerbIcon>* map = &mVerbs;
+
+            // The remaining values are all optional.
+            // If a value isn't present, the above defaults are used.
+            for(size_t i = 1; i < line.entries.size(); ++i)
             {
-                upTexture = gAssetManager.LoadTextureAsync(keyValuePair.value);
-            }
-            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "down"))
-            {
-                downTexture = gAssetManager.LoadTextureAsync(keyValuePair.value);
-            }
-            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "hover"))
-            {
-                hoverTexture = gAssetManager.LoadTextureAsync(keyValuePair.value);
-            }
-            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "disable"))
-            {
-                disableTexture = gAssetManager.LoadTextureAsync(keyValuePair.value);
-            }
-            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "cursor"))
-            {
-                cursor = gAssetManager.LoadCursorAsync(keyValuePair.value);
-            }
-            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "type"))
-            {
-                if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "inventory"))
+                IniKeyValue& keyValuePair = line.entries[i];
+                if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "up"))
                 {
-                    map = &mInventoryItems;
+                    upTexture = gAssetManager.LoadTexture(keyValuePair.value);
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic") ||
-                        StringUtil::EqualsIgnoreCase(keyValuePair.value, "RecurringTopic"))
-                        //StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
+                else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "down"))
                 {
-                    map = &mTopics;
+                    downTexture = gAssetManager.LoadTexture(keyValuePair.value);
                 }
+                else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "hover"))
+                {
+                    hoverTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "disable"))
+                {
+                    disableTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "cursor"))
+                {
+                    cursor = gAssetManager.LoadCursor(keyValuePair.value);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "type"))
+                {
+                    if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "inventory"))
+                    {
+                        map = &mInventoryItems;
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic") ||
+                            StringUtil::EqualsIgnoreCase(keyValuePair.value, "RecurringTopic"))
+                            //StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
+                    {
+                        map = &mTopics;
+                    }
+                }
+            }
+
+            // As long as any texture was set, we'll save this one.
+            if(upTexture != nullptr || downTexture != nullptr ||
+               hoverTexture != nullptr || disableTexture != nullptr || cursor != nullptr)
+            {
+                VerbIcon verbIcon;
+                verbIcon.upTexture = upTexture;
+                verbIcon.downTexture = downTexture;
+                verbIcon.hoverTexture = hoverTexture;
+                verbIcon.disableTexture = disableTexture;
+                verbIcon.cursor = cursor;
+
+                // Save one of these as the default icon.
+                // "Question mark" seems like as good as any!
+                if(StringUtil::EqualsIgnoreCase(entry.key, "QUESTION"))
+                {
+                    mDefaultIcon = verbIcon;
+                }
+
+                // Insert mapping from keyword to the button icons.
+                map->insert({ entry.key, verbIcon });
             }
         }
 
-        // As long as any texture was set, we'll save this one.
-        if(upTexture != nullptr || downTexture != nullptr ||
-           hoverTexture != nullptr || disableTexture != nullptr || cursor != nullptr)
-        {
-            VerbIcon verbIcon;
-            verbIcon.upTexture = upTexture;
-            verbIcon.downTexture = downTexture;
-            verbIcon.hoverTexture = hoverTexture;
-            verbIcon.disableTexture = disableTexture;
-            verbIcon.cursor = cursor;
-
-            // Save one of these as the default icon.
-            // "Question mark" seems like as good as any!
-            if(StringUtil::EqualsIgnoreCase(entry.key, "QUESTION"))
-            {
-                mDefaultIcon = verbIcon;
-            }
-
-            // Insert mapping from keyword to the button icons.
-            map->insert({ entry.key, verbIcon });
-        }
-    }
-
-    // Done with this asset.
-    delete text;
+        // Done with this asset.
+        delete text;
+    });
 }
 
 VerbIcon& VerbManager::GetInventoryIcon(const std::string& noun)

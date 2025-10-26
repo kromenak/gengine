@@ -33,12 +33,12 @@ public:
     AssetScope GetScope() const { return mScope; }
 
 protected:
-    // You should not be able to create an instance of this class - only subclasses are allowed.
-    explicit Asset(const std::string& name, AssetScope scope);
-
     // Asset's name, typically including an extension.
     std::string mName;
 
     // Asset's scope.
     AssetScope mScope = AssetScope::Global;
+
+    // You should not be able to create an instance of this class - only subclasses are allowed.
+    explicit Asset(const std::string& name, AssetScope scope);
 };

@@ -12,12 +12,12 @@ AssetCacheBase* AssetCacheBase::GetAssetCache(TypeId typeId)
     return nullptr;
 }
 
-AssetCacheBase* AssetCacheBase::GetAssetCache(TypeId typeId, const std::string& extension)
+AssetCacheBase* AssetCacheBase::GetAssetCache(TypeId typeId, const std::string& id)
 {
     AssetCacheBase* assetCache = GetAssetCache(typeId);
     while(assetCache != nullptr)
     {
-        if(StringUtil::EqualsIgnoreCase(assetCache->mId, extension))
+        if(StringUtil::EqualsIgnoreCase(assetCache->mId, id))
         {
             return assetCache;
         }

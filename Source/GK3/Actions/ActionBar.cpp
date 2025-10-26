@@ -60,11 +60,6 @@ ActionBar::ActionBar() : Actor("ActionBar", TransformType::RectTransform)
     mButtonHolder->SetAnchorMax(Vector2::Zero);
     mButtonHolder->SetPivot(0.5f, 0.5f);
 
-    // To have button holder appear in correct spot, we need the holder to be the right height.
-    // So, just use one of the buttons to get a valid height.
-    VerbIcon& cancelVerbIcon = gVerbManager.GetVerbIcon("CANCEL");
-    mButtonHolder->SetSizeDelta(cancelVerbIcon.GetWidth(), cancelVerbIcon.GetWidth());
-
     // Hide by default.
     Hide(false);
 }
@@ -430,6 +425,12 @@ void ActionBar::RefreshButtonLayout()
 
     // Update the button holder to match the size of all buttons.
     mButtonHolder->SetSizeDeltaX(xPos);
+
+    // Update button holder height.
+    if(!mButtons.empty())
+    {
+        mButtonHolder->SetSizeDeltaY(mButtons[0].button->GetRectTransform()->GetSizeDelta().y);
+    }
 }
 
 void ActionBar::CenterOnPointer()

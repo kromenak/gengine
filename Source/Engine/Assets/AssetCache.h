@@ -21,7 +21,7 @@ public:
     static std::unordered_map<TypeId, AssetCacheBase*> sAssetCachesByType;
 
     static AssetCacheBase* GetAssetCache(TypeId typeId);
-    static AssetCacheBase* GetAssetCache(TypeId typeId, const std::string& extension);
+    static AssetCacheBase* GetAssetCache(TypeId typeId, const std::string& id);
 
     virtual ~AssetCacheBase() = default;
 

@@ -4,7 +4,6 @@
 // Manages loading and caching of assets.
 //
 #pragma once
-#include <functional>
 #include <initializer_list>
 #include <string>
 #include <vector>
@@ -65,15 +64,12 @@ public:
 
     // Loading (or Getting) Assets
     Audio* LoadAudio(const std::string& name, AssetScope scope = AssetScope::Global);
-    Audio* LoadAudioAsync(const std::string& name, AssetScope scope = AssetScope::Global);
     Soundtrack* LoadSoundtrack(const std::string& name, AssetScope scope = AssetScope::Global);
     Animation* LoadYak(const std::string& name, AssetScope scope = AssetScope::Global);
 
     Model* LoadModel(const std::string& name, AssetScope scope = AssetScope::Global);
     Texture* LoadTexture(const std::string& name, AssetScope scope = AssetScope::Global);
-    Texture* LoadTextureAsync(const std::string& name, AssetScope scope = AssetScope::Global);
     Texture* LoadSceneTexture(const std::string& name, AssetScope scope = AssetScope::Global);
-    const std::string_map_ci<Texture*>& GetLoadedTextures() const { return mTextureCache.cache; }
 
     GAS* LoadGAS(const std::string& name, AssetScope scope = AssetScope::Global);
     Animation* LoadAnimation(const std::string& name, AssetScope scope = AssetScope::Global);
@@ -91,7 +87,6 @@ public:
     SheepScript* LoadSheep(const std::string& name, AssetScope scope = AssetScope::Global);
 
     Cursor* LoadCursor(const std::string& name, AssetScope scope = AssetScope::Global);
-    Cursor* LoadCursorAsync(const std::string& name, AssetScope scope = AssetScope::Global);
     Font* LoadFont(const std::string& name, AssetScope scope = AssetScope::Global);
 
     TextAsset* LoadText(const std::string& name, AssetScope scope = AssetScope::Global);
@@ -159,16 +154,9 @@ private:
 
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
 
-    // Two ways to load an asset:
-    // The first uses a single constructor (name, data, size).
-    // The second uses a constructor (name) and a separate load function (data, size).
-    // The latter is necessary if two assets can potentially attempt to load one another (circular dependency).
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache, bool deleteBuffer = true);
-    template<typename T> T* LoadAssetAsync(const std::string& name, AssetScope scope, AssetCache<T>* cache, bool deleteBuffer = true, std::function<void(T*)> callback = nullptr);
-
-    uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
-
     template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>* cache = nullptr);
+    uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
 };
 
 extern AssetManager gAssetManager;
