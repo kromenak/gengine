@@ -1,27 +1,4 @@
 #include "AssetCache.h"
 
-std::unordered_map<TypeId, AssetCacheBase*> AssetCacheBase::sAssetCachesByType;
-
-AssetCacheBase* AssetCacheBase::GetAssetCache(TypeId typeId)
-{
-    auto it = sAssetCachesByType.find(typeId);
-    if(it != sAssetCachesByType.end())
-    {
-        return it->second;
-    }
-    return nullptr;
-}
-
-AssetCacheBase* AssetCacheBase::GetAssetCache(TypeId typeId, const std::string& id)
-{
-    AssetCacheBase* assetCache = GetAssetCache(typeId);
-    while(assetCache != nullptr)
-    {
-        if(StringUtil::EqualsIgnoreCase(assetCache->mId, id))
-        {
-            return assetCache;
-        }
-        assetCache = assetCache->next;
-    }
-    return nullptr;
-}
+std::unordered_map<TypeId, std::vector<IAssetCache*>> IAssetCache::sAssetCachesByType;
+std::mutex IAssetCache::sMutex;

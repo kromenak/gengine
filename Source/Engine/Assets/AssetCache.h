@@ -1,107 +1,111 @@
 //
 // Clark Kromenaker
 //
-// An asset cache keeps track of which assets have already been loaded, so we avoid loading them multiple times.
-// The cache is also useful for iterating all assets to perform some operation (e.g. unload based on a conditon).
-// It also supports debug/optimization efforts by providing a way to see all assets of a type that are loaded.
+// An asset cache tracks assets already loaded into memory. We can reuse them instead of loading multiple copies.
+// It also provides a list of loaded assets by type, which can be useful for profiling, optimizing, and debugging.
 //
 #pragma once
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 #include "Asset.h"      // AssetScope
 #include "StringUtil.h" // string_map_ci
 #include "TypeId.h"
 
-// This base class is needed to overcome some limitations of a generic type.
-class AssetCacheBase
+// Problem: we want to track all the asset caches that exist in a static list, but templatized classes can't be put in a list (for different types of T).
+// To get around this, we can have a base class (essentially just an interface) that CAN be stored in a list in a homogenous fashion.
+
+// We want to track a map of all known asset caches. But since AssetCache is templated, we can't!
+// To get around this, we utilize an empty base class (essentially an interface) that CAN be put in a map as a pointer.
+class IAssetCache
 {
 public:
     // Tracks all known asset caches in existence, keyed by asset type.
-    static std::unordered_map<TypeId, AssetCacheBase*> sAssetCachesByType;
+    static std::unordered_map<TypeId, std::vector<IAssetCache*>> sAssetCachesByType;
+    static std::mutex sMutex;
 
-    static AssetCacheBase* GetAssetCache(TypeId typeId);
-    static AssetCacheBase* GetAssetCache(TypeId typeId, const std::string& id);
-
-    virtual ~AssetCacheBase() = default;
-
-protected:
-    // An identifier for this asset cache.
-    // Useful when multiple caches store the same asset type, but for different purposes.
-    std::string mId;
-
-    // A single type is allowed to have multiple asset caches.
-    // When multiple asset caches are registered for the same type, a linked list is formed so they can be easily iterated.
-    AssetCacheBase* next = nullptr;
-
-    // Can't create this class directly - must use AssetCache<T>.
-    AssetCacheBase() = default;
-    AssetCacheBase(const std::string& id) : mId(id) { }
+    virtual ~IAssetCache() = default;
+    virtual const std::string& GetId() = 0;
+    virtual void UnloadAssets(AssetScope scope) = 0;
 };
 
 template<typename T>
-class AssetCache : public AssetCacheBase
+class AssetCache : public IAssetCache
 {
 public:
-    // The cache itself, keyed by asset name.
-    std::string_map_ci<T*> cache;
-
-    AssetCache(const std::string& id = "") : AssetCacheBase(id)
+    static AssetCache<T>* Get(const std::string& id = "")
     {
-        //TODO: I'd love to move the "Init" code in here, but we have an order-of-initialization problem.
-        //TODO: Since AssetManager is global, it may initialize before all class types have initialized. Bummer.
-        //TODO: Fixable, but requires some large refactors.
-    }
+        // This code could run on multiple threads, so we should guard reads/writes to the static collection.
+        std::lock_guard<std::mutex> lock(sMutex);
 
-    void Init()
-    {
-        // Either add the first of this cache, or add to existing one's "next" link.
-        auto it = sAssetCachesByType.find(T::StaticTypeId());
-        if(it == sAssetCachesByType.end())
+        // Get all asset caches that exist for this type.
+        // This creates a new list if the type is not yet in the map.
+        std::vector<IAssetCache*>& assetCachesForType = sAssetCachesByType[T::StaticTypeId()];
+
+        // If none yet exist, ensure that the first one is always a default cache with an empty ID.
+        if(assetCachesForType.empty())
         {
-            sAssetCachesByType[T::StaticTypeId()] = this;
+            assetCachesForType.push_back(new AssetCache<T>());
         }
-        else
+
+        // Find the asset cache that matches the passed in ID.
+        for(IAssetCache* assetCache : assetCachesForType)
         {
-            next = it->second;
-            it->second = this;
+            if(StringUtil::EqualsIgnoreCase(assetCache->GetId(), id))
+            {
+                return static_cast<AssetCache<T>*>(assetCache);
+            }
         }
+
+        // If none matches, we should create a new one with the desired ID.
+        AssetCache<T>* newCache = new AssetCache<T>(id);
+        assetCachesForType.push_back(newCache);
+        return newCache;
     }
 
-    T* Get(const std::string& name)
+    explicit AssetCache(const std::string& id = "") :
+        mId(id)
     {
-        std::lock_guard<std::mutex> lock(mutex);
-        auto it = cache.find(name);
-        return it != cache.end() ? it->second : nullptr;
+
     }
 
-    void Set(const std::string& name, T* asset)
+    const std::string& GetId() override { return mId; }
+
+    T* GetAsset(const std::string& name)
     {
-        std::lock_guard<std::mutex> lock(mutex);
-        cache[name] = asset;
+        std::lock_guard<std::mutex> lock(mAssetsMutex);
+        auto it = mAssets.find(name);
+        return it != mAssets.end() ? it->second : nullptr;
     }
 
-    void Unload(AssetScope scope = AssetScope::Global)
+    void SetAsset(const std::string& name, T* asset)
     {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::lock_guard<std::mutex> lock(mAssetsMutex);
+        mAssets[name] = asset;
+    }
+
+    void UnloadAssets(AssetScope scope) override
+    {
+        std::lock_guard<std::mutex> lock(mAssetsMutex);
         if(scope == AssetScope::Global)
         {
             // When unloading at global scope, we're really deleting everything and clearing the entire cache.
-            for(auto& entry : cache)
+            for(auto& entry : mAssets)
             {
                 delete entry.second;
             }
-            cache.clear();
+            mAssets.clear();
         }
         else
         {
             // Otherwise, we are picking and choosing what we want to get rid of.
-            for(auto it = cache.begin(); it != cache.end();)
+            for(auto it = mAssets.begin(); it != mAssets.end();)
             {
                 if((*it).second->GetScope() == scope)
                 {
                     delete (*it).second;
-                    it = cache.erase(it);
+                    it = mAssets.erase(it);
                 }
                 else
                 {
@@ -111,8 +115,17 @@ public:
         }
     }
 
+    const std::string_map_ci<T*>& GetAssets() const { return mAssets; }
+
 private:
+    // An identifier for this asset cache.
+    // Useful when multiple caches store the same asset type, but for different purposes.
+    std::string mId;
+
+    // The assets themselves, keyed by name.
+    std::string_map_ci<T*> mAssets;
+
     // A mutex is required when modifying the cache, since we allow loading assets on any thread.
     // We don't want multiple threads modifying the cache at the same time.
-    std::mutex mutex;
+    std::mutex mAssetsMutex;
 };

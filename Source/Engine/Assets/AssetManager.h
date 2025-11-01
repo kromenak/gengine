@@ -101,8 +101,8 @@ public:
     void UnloadAssets(AssetScope scope);
 
     // Querying Assets
-    template<typename T> T* GetOrLoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& id = "");
-    template<typename T> const std::string_map_ci<T*>* GetLoadedAssets(const std::string& id = "");
+    template<typename T> T* GetOrLoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
+    template<typename T> const std::string_map_ci<T*>* GetLoadedAssets(const std::string& assetCacheId = "");
 
 private:
     // A list of paths to search for assets.
@@ -117,37 +117,6 @@ private:
     // This just helps us be a bit more efficient (e.g. don't bother searching High priority if no high priority Barns even exist).
     BarnSearchPriority mHighestBarnSearchPriority = BarnSearchPriority::Low;
 
-    // A list of loaded assets, so we can just return existing assets if already loaded.
-    AssetCache<Audio> mAudioCache;
-    AssetCache<Soundtrack> mSoundtrackCache;
-    AssetCache<Animation> mYakCache { "yak" };
-
-    AssetCache<Model> mModelCache;
-    AssetCache<Texture> mTextureCache;
-
-    AssetCache<Animation> mAnimationCache { "anm" };
-    AssetCache<Animation> mMomAnimationCache { "mom" };
-    AssetCache<Sequence> mSequenceCache;
-    AssetCache<VertexAnimation> mVertexAnimationCache;
-    AssetCache<GAS> mGasCache;
-
-    AssetCache<SceneInitFile> mSifCache;
-    AssetCache<SceneAsset> mSceneAssetCache;
-    AssetCache<NVC> mNvcCache;
-
-    AssetCache<BSP> mBspCache;
-    AssetCache<BSPLightmap> mBspLightmapCache;
-
-    AssetCache<SheepScript> mSheepCache;
-
-    AssetCache<Cursor> mCursorCache;
-    AssetCache<Font> mFontCache;
-
-    AssetCache<TextAsset> mTextAssetCache;
-    AssetCache<Config> mConfigCache;
-
-    AssetCache<Shader> mShaderCache;
-
     // Retrieve a barn bundle by name, or by contained asset.
     BarnFile* GetBarn(const std::string& barnName);
     BarnFile* GetBarnContainingAsset(const std::string& assetName);
@@ -155,50 +124,34 @@ private:
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
 
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache, bool deleteBuffer = true);
-    template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>* cache = nullptr);
     uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
 };
 
 extern AssetManager gAssetManager;
 
 template<typename T>
-inline T* AssetManager::GetOrLoadAsset(const std::string& name, AssetScope assetScope, const std::string& assetCacheId)
+T* AssetManager::GetOrLoadAsset(const std::string& name, AssetScope scope, const std::string& assetCacheId)
 {
-    AssetCache<T>* assetCache = nullptr;
     T* asset = nullptr;
 
-    // Attempt to retrieve an asset cache for this asset type.
-    AssetCacheBase* baseAssetCache = AssetCacheBase::GetAssetCache(T::StaticTypeId(), assetCacheId);
-    if(baseAssetCache != nullptr)
+    // Attempt to retrieve asset from cache.
+    AssetCache<T>* assetCache = AssetCache<T>::Get(assetCacheId);
+    if(assetCache != nullptr && scope != AssetScope::Manual)
     {
-        assetCache = dynamic_cast<AssetCache<T>*>(baseAssetCache);
-
-        // If the asset cache exists, try to retrieve the desired asset from the cache.
-        if(assetCache != nullptr)
-        {
-            asset = assetCache->Get(name);
-        }
+        asset = assetCache->GetAsset(name);
     }
 
-    // If asset is null, attempt to load it and put it in the asset cache (if any).
+    // If asset is null, attempt to load it and put it in the asset cache.
     if(asset == nullptr)
     {
-        asset = LoadAsset<T>(name, assetScope, assetCache);
+        asset = LoadAsset<T>(name, scope, assetCache);
     }
     return asset;
 }
 
 template<typename T>
-const std::string_map_ci<T*>* AssetManager::GetLoadedAssets(const std::string& id)
+const std::string_map_ci<T*>* AssetManager::GetLoadedAssets(const std::string& assetCacheId)
 {
-    AssetCacheBase* baseAssetCache = AssetCacheBase::GetAssetCache(T::StaticTypeId(), id);
-    if(baseAssetCache != nullptr)
-    {
-        AssetCache<T>* assetCache = dynamic_cast<AssetCache<T>*>(baseAssetCache);
-        if(assetCache != nullptr)
-        {
-            return &assetCache->cache;
-        }
-    }
-    return nullptr;
+    AssetCache<T>* assetCache = AssetCache<T>::Get(assetCacheId);
+    return assetCache != nullptr ? &assetCache->GetAssets() : nullptr;
 }

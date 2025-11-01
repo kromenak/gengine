@@ -216,7 +216,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         return nullptr;
     }
 
-     // Make sure this asset actually exists within this barn file, and it isn't a pointer to another barn file.
+    // Make sure this asset actually exists within this barn file, and it isn't a pointer to another barn file.
     if(asset->IsPointer())
     {
         std::cout << "Can't create asset buffer for " << asset->name << " - it is an asset pointer!" << std::endl;
