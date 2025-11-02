@@ -173,7 +173,7 @@ void GKActor::Init(const SceneData& sceneData)
         Animation* initAnim = mActorDef->initAnim;
         if(StringUtil::EqualsIgnoreCase(GetName(), "MAD") && StringUtil::StartsWithIgnoreCase(initAnim->GetName(), "MADSITGNRIC"))
         {
-            initAnim = gAssetManager.LoadAnimation("MadDinFig01", AssetScope::Scene);
+            initAnim = gAssetManager.LoadAsset<Animation>("MadDinFig01", AssetScope::Scene);
         }
 
         // Sample the init anim.

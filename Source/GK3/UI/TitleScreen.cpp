@@ -1,6 +1,7 @@
 #include "TitleScreen.h"
 
 #include "AssetManager.h"
+#include "Audio.h"
 #include "GEngine.h"
 #include "GK3UI.h"
 #include "GKPrefs.h"
@@ -19,10 +20,10 @@ namespace
         UIButton* button = UI::CreateWidgetActor<UIButton>(buttonId, parent);
 
         // Set textures.
-        button->SetUpTexture(gAssetManager.LoadTexture(buttonId + "_U.BMP"));
-        button->SetDownTexture(gAssetManager.LoadTexture(buttonId + "_D.BMP"));
-        button->SetHoverTexture(gAssetManager.LoadTexture(buttonId + "_H.BMP"));
-        button->SetDisabledTexture(gAssetManager.LoadTexture(buttonId + "_X.BMP"));
+        button->SetUpTexture(gAssetManager.LoadAsset<Texture>(buttonId + "_U.BMP"));
+        button->SetDownTexture(gAssetManager.LoadAsset<Texture>(buttonId + "_D.BMP"));
+        button->SetHoverTexture(gAssetManager.LoadAsset<Texture>(buttonId + "_H.BMP"));
+        button->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(buttonId + "_X.BMP"));
 
         // Anchor to bottom-right and position based off that.
         button->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
@@ -36,7 +37,7 @@ TitleScreen::TitleScreen() : Actor("TitleScreen", TransformType::RectTransform)
 
     // Add title screen image.
     mBackgroundImage = UI::CreateWidgetActor<UIImage>("Background", this);
-    mBackgroundImage->SetTexture(gAssetManager.LoadTexture("TITLE.BMP"), true);
+    mBackgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>("TITLE.BMP"), true);
 
     // Add "quit" button.
     UIButton* quitButton = CreateButton(mBackgroundImage, "TITLE_QUIT");
@@ -52,7 +53,7 @@ TitleScreen::TitleScreen() : Actor("TitleScreen", TransformType::RectTransform)
     restoreButton->SetTooltipText("titlerestore");
     restoreButton->SetPressCallback([](UIButton* button){
         gGK3UI.ShowLoadScreen();
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+        gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDBUTN-1.WAV"));
     });
     if(GEngine::Instance()->IsDemoMode())
     {
@@ -66,7 +67,7 @@ TitleScreen::TitleScreen() : Actor("TitleScreen", TransformType::RectTransform)
     playButton->SetPressCallback([this](UIButton* button){
         Hide();
         GEngine::Instance()->StartGame();
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+        gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDBUTN-1.WAV"));
     });
     mPlayButton = playButton;
 
@@ -78,7 +79,7 @@ TitleScreen::TitleScreen() : Actor("TitleScreen", TransformType::RectTransform)
 
         // The original game plays an SFX here, but I think it sounds better without it.
         // The first few seconds of the intro movie overlap with it.
-        //gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+        //gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDBUTN-1.WAV"));
     });
     if(GEngine::Instance()->IsDemoMode())
     {
@@ -100,7 +101,7 @@ void TitleScreen::Show()
     {
         soundtrackPlayer = AddComponent<SoundtrackPlayer>();
     }
-    soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("TITLETHEME.STK"));
+    soundtrackPlayer->Play(gAssetManager.LoadAsset<Soundtrack>("TITLETHEME.STK"));
 }
 
 void TitleScreen::Hide()

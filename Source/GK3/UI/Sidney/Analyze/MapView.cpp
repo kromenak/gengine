@@ -63,21 +63,21 @@ void MapView::Init(Actor* parent, bool zoomedIn)
         // Create big background image at full size.
         // Note that only a portion is visible due to the parent's canvas masking.
         mapImage = UI::CreateWidgetActor<UIImage>("MapImage", mapCanvas);
-        mapImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBIGMAP.BMP"), true);
+        mapImage->SetTexture(gAssetManager.LoadAsset<Texture>("SIDNEYBIGMAP.BMP"), true);
         mapImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
 
         // Add "the site" text.
         // Do this before shapes/grids, since it should draw under those things.
         {
             siteText[0] = UI::CreateWidgetActor<UIImage>("SiteText1", mapImage);
-            siteText[0]->SetTexture(gAssetManager.LoadTexture("MAPLG_THE.BMP"), true);
+            siteText[0]->SetTexture(gAssetManager.LoadAsset<Texture>("MAPLG_THE.BMP"), true);
             siteText[0]->SetColor(Color32(255, 255, 255, 128));
             siteText[0]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             siteText[0]->GetRectTransform()->SetAnchoredPosition(804.0f, 1045.0f);
             siteText[0]->SetEnabled(false);
 
             siteText[1] = UI::CreateWidgetActor<UIImage>("SiteText2", mapImage);
-            siteText[1]->SetTexture(gAssetManager.LoadTexture("MAPLG_SITE.BMP"), true);
+            siteText[1]->SetTexture(gAssetManager.LoadAsset<Texture>("MAPLG_SITE.BMP"), true);
             siteText[1]->SetColor(Color32(255, 255, 255, 128));
             siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             siteText[1]->GetRectTransform()->SetAnchoredPosition(777.0f, 989.0f);
@@ -88,7 +88,7 @@ void MapView::Init(Actor* parent, bool zoomedIn)
         // Again, before shapes/grids so they appear above it.
         {
             serpentImage = UI::CreateWidgetActor<UIImage>("Serpent", mapImage);
-            serpentImage->SetTexture(gAssetManager.LoadTexture("SERPENT.BMP"), true);
+            serpentImage->SetTexture(gAssetManager.LoadAsset<Texture>("SERPENT.BMP"), true);
             serpentImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             serpentImage->GetRectTransform()->SetAnchoredPosition(724.0f, 1159.0f);
             serpentImage->SetEnabled(false);
@@ -103,19 +103,19 @@ void MapView::Init(Actor* parent, bool zoomedIn)
         // For the zoomed out map, the whole map image is visible at all times.
         // So rather than making the map a child of the canvas, it can just be a component on the same actor.
         mapImage = button->GetOwner()->AddComponent<UIImage>();
-        mapImage->SetTexture(gAssetManager.LoadTexture("SIDNEYLITTLEMAP.BMP"), true);
+        mapImage->SetTexture(gAssetManager.LoadAsset<Texture>("SIDNEYLITTLEMAP.BMP"), true);
 
         // Add "the site" text.
         // Do this before shapes/grids, since it should draw under those things.
         {
             siteText[0] = UI::CreateWidgetActor<UIImage>("SiteText1", mapImage);
-            siteText[0]->SetTexture(gAssetManager.LoadTexture("MAPSM_THE.BMP"), true);
+            siteText[0]->SetTexture(gAssetManager.LoadAsset<Texture>("MAPSM_THE.BMP"), true);
             siteText[0]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             siteText[0]->GetRectTransform()->SetAnchoredPosition(198.0f, 257.0f);
             siteText[0]->SetEnabled(false);
 
             siteText[1] = UI::CreateWidgetActor<UIImage>("SiteText2", mapImage);
-            siteText[1]->SetTexture(gAssetManager.LoadTexture("MAPSM_SITE.BMP"), true);
+            siteText[1]->SetTexture(gAssetManager.LoadAsset<Texture>("MAPSM_SITE.BMP"), true);
             siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             siteText[1]->GetRectTransform()->SetAnchoredPosition(191.0f, 242.0f);
             siteText[1]->SetEnabled(false);
@@ -125,7 +125,7 @@ void MapView::Init(Actor* parent, bool zoomedIn)
         // Again, before shapes/grids so they appear above it.
         {
             serpentImage = UI::CreateWidgetActor<UIImage>("Serpent", mapImage);
-            serpentImage->SetTexture(gAssetManager.LoadTexture("SERPLITMAP.BMP"), true);
+            serpentImage->SetTexture(gAssetManager.LoadAsset<Texture>("SERPLITMAP.BMP"), true);
             serpentImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             serpentImage->GetRectTransform()->SetAnchoredPosition(178.0f, 290.0f);
             serpentImage->SetEnabled(false);

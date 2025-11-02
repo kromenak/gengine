@@ -1,7 +1,9 @@
 #include "SheepAPI_Actors.h"
 
+#include "Animation.h"
 #include "AssetManager.h"
 #include "FaceController.h"
+#include "GAS.h"
 #include "GKActor.h"
 #include "GKProp.h"
 #include "ReportManager.h"
@@ -167,7 +169,7 @@ shpvoid SetIdleGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = gAssetManager.LoadGAS(gasName, AssetScope::Scene);
+    GAS* fidget = gAssetManager.LoadAsset<GAS>(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
         gReportManager.Log("Error", "Attempted to load an invalid fidget file: " + gasName);
@@ -196,7 +198,7 @@ shpvoid SetListenGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = gAssetManager.LoadGAS(gasName, AssetScope::Scene);
+    GAS* fidget = gAssetManager.LoadAsset<GAS>(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
         gReportManager.Log("Error", "Attempted to load an invalid fidget file: " + gasName);
@@ -225,7 +227,7 @@ shpvoid SetTalkGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = gAssetManager.LoadGAS(gasName, AssetScope::Scene);
+    GAS* fidget = gAssetManager.LoadAsset<GAS>(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
         gReportManager.Log("Error", "Attempted to load an invalid fidget file: " + gasName);
@@ -336,8 +338,8 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     }
 
     // Load start/loop anims. Neither is optional.
-    Animation* startAnim = gAssetManager.LoadAnimation(start, AssetScope::Scene);
-    Animation* loopAnim = gAssetManager.LoadAnimation(cont, AssetScope::Scene);
+    Animation* startAnim = gAssetManager.LoadAsset<Animation>(start, AssetScope::Scene);
+    Animation* loopAnim = gAssetManager.LoadAsset<Animation>(cont, AssetScope::Scene);
     if(startAnim == nullptr || loopAnim == nullptr)
     {
         ExecError();
@@ -348,7 +350,7 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     Animation* startTurnLeftAnim = nullptr;
     if(!startTurnLeft.empty())
     {
-        startTurnLeftAnim = gAssetManager.LoadAnimation(startTurnLeft, AssetScope::Scene);
+        startTurnLeftAnim = gAssetManager.LoadAsset<Animation>(startTurnLeft, AssetScope::Scene);
         if(startTurnLeftAnim == nullptr)
         {
             ExecError();
@@ -358,7 +360,7 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     Animation* startTurnRightAnim = nullptr;
     if(!startTurnRight.empty())
     {
-        startTurnRightAnim  = gAssetManager.LoadAnimation(startTurnRight, AssetScope::Scene);
+        startTurnRightAnim  = gAssetManager.LoadAsset<Animation>(startTurnRight, AssetScope::Scene);
         if(startTurnRightAnim == nullptr)
         {
             ExecError();

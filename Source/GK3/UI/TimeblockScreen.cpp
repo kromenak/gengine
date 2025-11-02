@@ -1,6 +1,7 @@
 #include "TimeblockScreen.h"
 
 #include "AssetManager.h"
+#include "Audio.h"
 #include "GK3UI.h"
 #include "InputManager.h"
 #include "LocationManager.h"
@@ -8,6 +9,7 @@
 #include "Sequence.h"
 #include "SoundtrackPlayer.h"
 #include "Timeblock.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UIUtil.h"
@@ -40,10 +42,10 @@ namespace
     UIButton* CreateButton(Actor* parent, const std::string& buttonId)
     {
         UIButton* button = UI::CreateWidgetActor<UIButton>(buttonId, parent);
-        button->SetUpTexture(gAssetManager.LoadTexture(buttonId + "_U.BMP"));
-        button->SetDownTexture(gAssetManager.LoadTexture(buttonId + "_D.BMP"));
-        button->SetHoverTexture(gAssetManager.LoadTexture(buttonId + "_H.BMP"));
-        button->SetDisabledTexture(gAssetManager.LoadTexture(buttonId + "_X.BMP"));
+        button->SetUpTexture(gAssetManager.LoadAsset<Texture>(buttonId + "_U.BMP"));
+        button->SetDownTexture(gAssetManager.LoadAsset<Texture>(buttonId + "_D.BMP"));
+        button->SetHoverTexture(gAssetManager.LoadAsset<Texture>(buttonId + "_H.BMP"));
+        button->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(buttonId + "_X.BMP"));
         return button;
     }
 }
@@ -90,7 +92,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, bool loading
 
     // Load background image for this timeblock.
     std::string timeblockString = timeblock.ToString();
-    mBackgroundImage->SetTexture(gAssetManager.LoadTexture("TBT" + timeblockString + ".BMP"), true);
+    mBackgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>("TBT" + timeblockString + ".BMP"), true);
 
     // Position the text image. This is unfortunately not consistent for every timeblock!
     mTextImage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
@@ -103,7 +105,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, bool loading
     }
 
     // Load sequence containing animation.
-    mAnimSequence = gAssetManager.LoadSequence("D" + timeblockString, AssetScope::Scene);
+    mAnimSequence = gAssetManager.LoadAsset<Sequence>("D" + timeblockString, AssetScope::Scene);
     mTextImage->SetEnabled(mAnimSequence != nullptr);
     mAnimTimer = 0.0f;
 
@@ -126,7 +128,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, bool loading
     // Play "tick tock" sound effect (when not loading a save).
     if(!loadingSave)
     {
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
+        gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("CLOCKTIMEBLOCK.WAV"));
     }
 
     // Hide buttons if this screen is on a timer.

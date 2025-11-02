@@ -5,6 +5,7 @@
 #include "AssetManager.h"
 #include "IniParser.h"
 #include "StringUtil.h"
+#include "Texture.h"
 
 TYPEINFO_INIT(Sequence, Asset, GENERATE_TYPE_ID)
 {
@@ -29,7 +30,7 @@ void Sequence::Load(AssetData& data)
                 std::vector<std::string> textureNames = StringUtil::Split(keyValuePair.value, ',');
                 for(auto& texName : textureNames)
                 {
-                    mTextures.push_back(gAssetManager.LoadTexture(texName, GetScope()));
+                    mTextures.push_back(gAssetManager.LoadAsset<Texture>(texName, GetScope()));
                 }
             }
         }

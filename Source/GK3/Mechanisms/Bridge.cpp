@@ -43,10 +43,10 @@ Bridge::Bridge()
         mTiles[i].tileActor = gSceneManager.GetScene()->GetSceneObjectByModelName(tileModelName);
 
         glintAnimName[9] = '1' + i;
-        mTiles[i].glintAnim = gAssetManager.LoadAnimation(glintAnimName, AssetScope::Scene);
+        mTiles[i].glintAnim = gAssetManager.LoadAsset<Animation>(glintAnimName, AssetScope::Scene);
 
         glowAnimName[8] = '1' + i;
-        mTiles[i].glowAnim = gAssetManager.LoadAnimation(glowAnimName, AssetScope::Scene);
+        mTiles[i].glowAnim = gAssetManager.LoadAsset<Animation>(glowAnimName, AssetScope::Scene);
     }
 
     // Layout the tiles.
@@ -206,7 +206,7 @@ void Bridge::JumpToTile(int index)
     // What we'll do here is figure out which turn/jump/land anims to use depending on where we are, and where we need to jump to.
     Animation* turnAnim = nullptr;
     Animation* jumpAnim = nullptr;
-    Animation* landAnim = gAssetManager.LoadAnimation("GABTE5STAND", AssetScope::Scene);
+    Animation* landAnim = gAssetManager.LoadAsset<Animation>("GABTE5STAND", AssetScope::Scene);
     Animation* turnBackAnim = nullptr;
 
     // Figure out what grid pos is being jumped to.
@@ -240,7 +240,7 @@ void Bridge::JumpToTile(int index)
         if(index != 0) { return; }
 
         // In this case, the jump anim is hardcoded, and no turns are needed.
-        jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP01SQ", AssetScope::Scene);
+        jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP01SQ", AssetScope::Scene);
 
         // Gabe's heading also immediately snaps to look straight ahead.
         mGabeActor->SetHeading(Heading::FromDegrees(0.0f));
@@ -256,7 +256,7 @@ void Bridge::JumpToTile(int index)
     }
     else if(mGabeTileIndex == 9 && index == 10) // this means you are about to finish the puzzle
     {
-        jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP01SQ", AssetScope::Scene);
+        jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP01SQ", AssetScope::Scene);
     }
     else if(mGabeTileIndex >= 0 && mGabeTileIndex < kTileCount) // normal jump in middle of puzzle
     {
@@ -269,16 +269,16 @@ void Bridge::JumpToTile(int index)
         if(jumpDir.x == 0 && jumpDir.y > 0) // jump forward
         {
             jumpAnim = jumpDir.y > 1 ?
-                gAssetManager.LoadAnimation("GABTE5JUMP02SQ", AssetScope::Scene) :
-                gAssetManager.LoadAnimation("GABTE5JUMP01SQ", AssetScope::Scene);
+                gAssetManager.LoadAsset<Animation>("GABTE5JUMP02SQ", AssetScope::Scene) :
+                gAssetManager.LoadAsset<Animation>("GABTE5JUMP01SQ", AssetScope::Scene);
         }
         else if(jumpDir.x == 0 && jumpDir.y < 0) // jump backward
         {
-            turnAnim = gAssetManager.LoadAnimation("GABTE1TURNC180", AssetScope::Scene);
+            turnAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNC180", AssetScope::Scene);
             jumpAnim = jumpDir.y < -1 ?
-                gAssetManager.LoadAnimation("GABTE5JUMP02SQ", AssetScope::Scene) :
-                gAssetManager.LoadAnimation("GABTE5JUMP01SQ", AssetScope::Scene);
-            turnBackAnim = gAssetManager.LoadAnimation("GABTE1TURNCC180", AssetScope::Scene);
+                gAssetManager.LoadAsset<Animation>("GABTE5JUMP02SQ", AssetScope::Scene) :
+                gAssetManager.LoadAsset<Animation>("GABTE5JUMP01SQ", AssetScope::Scene);
+            turnBackAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNCC180", AssetScope::Scene);
         }
         else if(jumpDir.y == 0)
         {
@@ -290,78 +290,78 @@ void Bridge::JumpToTile(int index)
         {
             if(jumpDir.x > 0 && jumpDir.y > 0) // forward right
             {
-                turnAnim = gAssetManager.LoadAnimation("GABTE1TURNC45", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP01SQ", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GABTE1TURNCC45", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNC45", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP01SQ", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNCC45", AssetScope::Scene);
             }
             else if(jumpDir.x > 0 && jumpDir.y < 0) // back right
             {
-                turnAnim = gAssetManager.LoadAnimation("GABTE1TURNC135", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP01SQ", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GABTE1TURNCC135", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNC135", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP01SQ", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNCC135", AssetScope::Scene);
             }
             else if(jumpDir.x < 0 && jumpDir.y < 0) // back left
             {
-                turnAnim = gAssetManager.LoadAnimation("GABTE1TURNCC135", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP01SQ", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GABTE1TURNC135", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNCC135", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP01SQ", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNC135", AssetScope::Scene);
             }
             else if(jumpDir.x < 0 && jumpDir.y > 0) // forward left
             {
-                turnAnim = gAssetManager.LoadAnimation("GABTE1TURNCC45", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP01SQ", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GABTE1TURNC45", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNCC45", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP01SQ", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GABTE1TURNC45", AssetScope::Scene);
             }
         }
         else if(jumpDir.x != 0 && jumpDir.y != 0 && Math::Abs(jumpDir.x) + Math::Abs(jumpDir.y) == 3) // L-shaped knight movement
         {
             if(jumpDir.x == 1 && jumpDir.y == 2) // forward-right
             {
-                turnAnim = gAssetManager.LoadAnimation("GabTe1TurnC26", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP26KNIGHT", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GabTe1TurnCC26", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnC26", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP26KNIGHT", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnCC26", AssetScope::Scene);
             }
             else if(jumpDir.x == -1 && jumpDir.y == 2) // forward-left
             {
-                turnAnim = gAssetManager.LoadAnimation("GabTe1TurnCC26", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP26KNIGHT", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GabTe1TurnC26", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnCC26", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP26KNIGHT", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnC26", AssetScope::Scene);
             }
             else if(jumpDir.x == 1 && jumpDir.y == -2) // backward-right
             {
-                turnAnim = gAssetManager.LoadAnimation("GabTe1TurnC153", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP26KNIGHT", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GabTe1TurnCC153", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnC153", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP26KNIGHT", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnCC153", AssetScope::Scene);
             }
             else if(jumpDir.x == -1 && jumpDir.y == -2) // backward-left
             {
-                turnAnim = gAssetManager.LoadAnimation("GabTe1TurnCC153", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP26KNIGHT", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GabTe1TurnC153", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnCC153", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP26KNIGHT", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnC153", AssetScope::Scene);
             }
             else if(jumpDir.x == 2 && jumpDir.y == 1) // right-forward
             {
-                turnAnim = gAssetManager.LoadAnimation("GabTe1TurnC63", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP26KNIGHT", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GabTe1TurnCC63", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnC63", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP26KNIGHT", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnCC63", AssetScope::Scene);
             }
             else if(jumpDir.x == 2 && jumpDir.y == -1) // right-backward
             {
-                turnAnim = gAssetManager.LoadAnimation("GabTe1TurnC116", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP26KNIGHT", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GabTe1TurnCC116", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnC116", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP26KNIGHT", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnCC116", AssetScope::Scene);
             }
             else if(jumpDir.x == -2 && jumpDir.y == 1) // left-forward
             {
-                turnAnim = gAssetManager.LoadAnimation("GabTe1TurnCC63", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP26KNIGHT", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GabTe1TurnC63", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnCC63", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP26KNIGHT", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnC63", AssetScope::Scene);
             }
             else if(jumpDir.x == -2 && jumpDir.y == -1) // left-backward
             {
-                turnAnim = gAssetManager.LoadAnimation("GabTe1TurnCC116", AssetScope::Scene);
-                jumpAnim = gAssetManager.LoadAnimation("GABTE5JUMP26KNIGHT", AssetScope::Scene);
-                turnBackAnim = gAssetManager.LoadAnimation("GabTe1TurnC116", AssetScope::Scene);
+                turnAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnCC116", AssetScope::Scene);
+                jumpAnim = gAssetManager.LoadAsset<Animation>("GABTE5JUMP26KNIGHT", AssetScope::Scene);
+                turnBackAnim = gAssetManager.LoadAsset<Animation>("GabTe1TurnC116", AssetScope::Scene);
             }
         }
         else // attempted an invalid move

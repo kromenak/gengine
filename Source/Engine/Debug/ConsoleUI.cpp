@@ -30,11 +30,11 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
     backgroundImage->SetRenderMode(UIImage::RenderMode::Tiled);
     if(mini)
     {
-        backgroundImage->SetTexture(gAssetManager.LoadTexture("MINISNAKY.BMP"));
+        backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>("MINISNAKY.BMP"));
     }
     else
     {
-        backgroundImage->SetTexture(gAssetManager.LoadTexture("SNAKY.BMP"));
+        backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>("SNAKY.BMP"));
     }
 
     // Mini and full consoles have different anchoring properties.
@@ -68,7 +68,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
             mScrollbackTransform->SetAnchoredPosition(0.0f, -kPaddingAboveScrollback);
 
             mScrollbackBuffer = scrollbackActor->AddComponent<UITextBuffer>();
-            mScrollbackBuffer->SetFont(gAssetManager.LoadFont("F_CONSOLE_DISPLAY"));
+            mScrollbackBuffer->SetFont(gAssetManager.LoadAsset<Font>("F_CONSOLE_DISPLAY"));
         }
 
         // Add horizontal rule for full console.
@@ -89,7 +89,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 
         // Create text input field.
         {
-            Font* font = gAssetManager.LoadFont("F_CONSOLE_COMMAND");
+            Font* font = gAssetManager.LoadAsset<Font>("F_CONSOLE_COMMAND");
 
             Actor* textInputActor = new Actor("Input", TransformType::RectTransform);
             RectTransform* textInputRT = textInputActor->GetComponent<RectTransform>();
@@ -134,8 +134,8 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 
             mConsoleToggleImage = imageActor->AddComponent<UIImage>();
 
-            Texture* texture = gAssetManager.LoadTexture("CAIN.BMP");
-            Texture* textureAlpha = gAssetManager.LoadTexture("CAIN_ALPHA.BMP");
+            Texture* texture = gAssetManager.LoadAsset<Texture>("CAIN.BMP");
+            Texture* textureAlpha = gAssetManager.LoadAsset<Texture>("CAIN_ALPHA.BMP");
             texture->ApplyAlphaChannel(*textureAlpha);
             mConsoleToggleImage->SetTexture(texture, true);
 

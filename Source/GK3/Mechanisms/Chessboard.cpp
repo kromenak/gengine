@@ -1,14 +1,17 @@
 #include "Chessboard.h"
 
 #include "ActionManager.h"
+#include "Animation.h"
 #include "Animator.h"
 #include "AssetManager.h"
+#include "Audio.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GKActor.h"
 #include "GKObject.h"
 #include "InputManager.h"
 #include "SceneManager.h"
+#include "Texture.h"
 #include "Timers.h"
 
 Chessboard::Chessboard() : Actor("Chessboard")
@@ -67,7 +70,7 @@ void Chessboard::Reset(bool swordsGlow)
     mSwordCount = 0;
 
     // Make sure goal door is closed again, if it was opened and we then died.
-    Animation* doorOpenAnim = gAssetManager.LoadAnimation("Te1GoDoor", AssetScope::Scene);
+    Animation* doorOpenAnim = gAssetManager.LoadAsset<Animation>("Te1GoDoor", AssetScope::Scene);
     gSceneManager.GetScene()->GetAnimator()->Sample(doorOpenAnim, 0);
 }
 
@@ -108,7 +111,7 @@ void Chessboard::Landed()
     if(mLandedCounts[row][col] == 1 && SetSwordGlow(row, col, false))
     {
         // Play "sword off" SFX.
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("TE1SWORDOFF.WAV", AssetScope::Scene));
+        gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("TE1SWORDOFF.WAV", AssetScope::Scene));
 
         // Increment swords landed on.
         // Once we land on 16, we've got all the swords, which may finish the puzzle.
@@ -417,10 +420,10 @@ bool Chessboard::SetSwordGlow(int row, int col, bool glow)
     // If any is not loaded, load them now!
     if(unlitSwordWhite == nullptr)
     {
-        unlitSwordWhite = gAssetManager.LoadTexture("TE1SWORDW.BMP", AssetScope::Scene);
-        unlitSwordBlack = gAssetManager.LoadTexture("TE1SWORDB.BMP", AssetScope::Scene);
-        litSwordWhite = gAssetManager.LoadTexture("TE1SWORDW_GLOW.BMP", AssetScope::Scene);
-        litSwordBlack = gAssetManager.LoadTexture("TE1SWORDB_GLOW.BMP", AssetScope::Scene);
+        unlitSwordWhite = gAssetManager.LoadAsset<Texture>("TE1SWORDW.BMP", AssetScope::Scene);
+        unlitSwordBlack = gAssetManager.LoadAsset<Texture>("TE1SWORDB.BMP", AssetScope::Scene);
+        litSwordWhite = gAssetManager.LoadAsset<Texture>("TE1SWORDW_GLOW.BMP", AssetScope::Scene);
+        litSwordBlack = gAssetManager.LoadAsset<Texture>("TE1SWORDB_GLOW.BMP", AssetScope::Scene);
     }
 
     if(IsWhiteSwordTile(row, col))
@@ -440,7 +443,7 @@ void Chessboard::OpenTrapdoor(int row, int col)
 {
     // Disable the graphic and play a sound effect.
     SetTileVisible(row, col, false);
-    gAudioManager.PlaySFX(gAssetManager.LoadAudio("TE1TRAPDOOROPEN.WAV", AssetScope::Scene));
+    gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("TE1TRAPDOOROPEN.WAV", AssetScope::Scene));
 }
 
 const std::string& Chessboard::GetTileModelName(int row, int col)

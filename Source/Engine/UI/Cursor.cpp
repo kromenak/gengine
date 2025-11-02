@@ -26,7 +26,7 @@ Cursor::~Cursor()
 void Cursor::Load(AssetData& data)
 {
     // Texture used is always the same as the name of the cursor.
-    mTexture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());
+    mTexture = gAssetManager.LoadAsset<Texture>(GetNameNoExtension(), GetScope());
     if(mTexture == nullptr)
     {
         printf("Create cursor %s failed: couldn't load texture.\n", mName.c_str());

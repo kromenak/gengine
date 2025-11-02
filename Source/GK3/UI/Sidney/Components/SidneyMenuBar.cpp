@@ -4,8 +4,11 @@
 
 #include "Actor.h"
 #include "AssetManager.h"
+#include "Audio.h"
+#include "Font.h"
 #include "Random.h"
 #include "SidneyButton.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -15,11 +18,11 @@
 void SidneyMenuBar::Init(Actor* parent, const std::string& label)
 {
     // Cache frequently used assets.
-    mDropdownFont = gAssetManager.LoadFont("SID_EMB_10.FON");
-    mDropdownDisabledFont = gAssetManager.LoadFont("SID_NO_EMB_10.FON");
+    mDropdownFont = gAssetManager.LoadAsset<Font>("SID_EMB_10.FON");
+    mDropdownDisabledFont = gAssetManager.LoadAsset<Font>("SID_NO_EMB_10.FON");
 
-    mDropdownArrowTexture = gAssetManager.LoadTexture("S_DWNARW.BMP");
-    mDropdownDisabledArrowTexture = gAssetManager.LoadTexture("S_DWNARW_NOEMB.BMP");
+    mDropdownArrowTexture = gAssetManager.LoadAsset<Texture>("S_DWNARW.BMP");
+    mDropdownDisabledArrowTexture = gAssetManager.LoadAsset<Texture>("S_DWNARW_NOEMB.BMP");
 
     // The menu bar is on its own canvas to ensure it draws over everything on the current Sidney screen.
     UICanvas* menuBarCanvas = UI::CreateCanvas("MenuBar", parent, 3);
@@ -27,7 +30,7 @@ void SidneyMenuBar::Init(Actor* parent, const std::string& label)
     // Bar that stretches across entire screen.
     {
         UIImage* menuBarImage = UI::CreateWidgetActor<UIImage>("MenuBarImage", menuBarCanvas);
-        menuBarImage->SetTexture(gAssetManager.LoadTexture("S_BAR_STRETCH.BMP"), true);
+        menuBarImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BAR_STRETCH.BMP"), true);
         menuBarImage->SetRenderMode(UIImage::RenderMode::Tiled);
         menuBarImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         menuBarImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
@@ -40,7 +43,7 @@ void SidneyMenuBar::Init(Actor* parent, const std::string& label)
     // Bar that extends from top-right, used to give enough height for the screen name label.
     {
         UIImage* menuBarTopImage = UI::CreateWidgetActor<UIImage>("MenuBarTop", menuBarCanvas);
-        menuBarTopImage->SetTexture(gAssetManager.LoadTexture("S_BAR_TOPSTRIP_LR.BMP"), true);
+        menuBarTopImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BAR_TOPSTRIP_LR.BMP"), true);
         menuBarTopImage->SetRenderMode(UIImage::RenderMode::Tiled);
         menuBarTopImage->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
         menuBarTopImage->GetRectTransform()->SetAnchoredPosition(0.0f, -16.0f);
@@ -48,7 +51,7 @@ void SidneyMenuBar::Init(Actor* parent, const std::string& label)
         // Triangle bit that slopes downward.
         {
             UIImage* menuBarAngleImage = UI::CreateWidgetActor<UIImage>("MenuBarTopAngle", menuBarTopImage);
-            menuBarAngleImage->SetTexture(gAssetManager.LoadTexture("S_BAR_TOPANGLE_LR.BMP"), true);
+            menuBarAngleImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BAR_TOPANGLE_LR.BMP"), true);
             menuBarAngleImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             menuBarAngleImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
             menuBarAngleImage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
@@ -57,7 +60,7 @@ void SidneyMenuBar::Init(Actor* parent, const std::string& label)
         // Screen name label.
         {
             UILabel* screenNameLabel = UI::CreateWidgetActor<UILabel>("ScreenName", menuBarTopImage);
-            screenNameLabel->SetFont(gAssetManager.LoadFont("SID_EMB_18.FON"));
+            screenNameLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_EMB_18.FON"));
             screenNameLabel->SetText(label);
             screenNameLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
             screenNameLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -184,7 +187,7 @@ void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& l
     SidneyButton* button = new SidneyButton("Choice_" + label, dropdown.rootButton->GetOwner());
     button->SetText(label);
     button->SetTextAlignment(HorizontalAlignment::Left);
-    button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+    button->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"), gAssetManager.LoadAsset<Font>("SID_PDN_10_UL.FON"));
 
     // Figure out desired width/height of this button.
     // It should have a minimum size, but be bigger to fit its text, but also match any bigger item defined previously.
@@ -228,7 +231,7 @@ void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& l
     // But the sound seems consistent for the entire duration of the game's run.
     // My best guess is they randomly choose at startup and stay that way?
     int randomSfxIndex = Random::Range(1, 6);
-    button->SetPressAudio(gAssetManager.LoadAudio("SIDBUTTON" + std::to_string(randomSfxIndex) + ".WAV"));
+    button->SetPressAudio(gAssetManager.LoadAsset<Audio>("SIDBUTTON" + std::to_string(randomSfxIndex) + ".WAV"));
 
     // Position button in the list.
     button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);

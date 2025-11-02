@@ -352,7 +352,7 @@ void PlaySoundtrackAnimNode::Play(AnimationState* animState)
     SoundtrackPlayer* soundtrackPlayer = scene->GetSoundtrackPlayer();
     if(soundtrackPlayer == nullptr) { return; }
 
-    Soundtrack* soundtrack = gAssetManager.LoadSoundtrack(soundtrackName, AssetScope::Scene);
+    Soundtrack* soundtrack = gAssetManager.LoadAsset<Soundtrack>(soundtrackName, AssetScope::Scene);
     if(soundtrack == nullptr) { return; }
     soundtrackPlayer->Play(soundtrack, nonLooping);
 }
@@ -403,7 +403,7 @@ void FaceTexAnimNode::Play(AnimationState* animState)
     if(actor != nullptr)
     {
         // In this case, the texture name is what it is.
-        Texture* texture = gAssetManager.LoadTexture(textureName, animState->params.animation->GetScope());
+        Texture* texture = gAssetManager.LoadAsset<Texture>(textureName, animState->params.animation->GetScope());
         if(texture != nullptr)
         {
             actor->GetFaceController()->Set(faceElement, texture);
@@ -438,7 +438,7 @@ void LipSyncAnimNode::Play(AnimationState* animState)
     if(actor != nullptr)
     {
         // The mouth texture name is based on the current face config for the character.
-        Texture* mouthTexture = gAssetManager.LoadTexture(actor->GetConfig()->faceConfig->identifier + "_" + mouthTextureName, animState->params.animation->GetScope());
+        Texture* mouthTexture = gAssetManager.LoadAsset<Texture>(actor->GetConfig()->faceConfig->identifier + "_" + mouthTextureName, animState->params.animation->GetScope());
         if(mouthTexture != nullptr)
         {
             actor->GetFaceController()->SetMouth(mouthTexture);

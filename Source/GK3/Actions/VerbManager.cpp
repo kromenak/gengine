@@ -1,6 +1,7 @@
 #include "VerbManager.h"
 
 #include "AssetManager.h"
+#include "Cursor.h"
 #include "IniParser.h"
 #include "Loader.h"
 #include "TextAsset.h"
@@ -22,7 +23,7 @@ void VerbManager::Init()
 {
     Loader::Load([this](){
         // Get VERBS text file.
-        TextAsset* text = gAssetManager.LoadText("VERBS.TXT", AssetScope::Manual);
+        TextAsset* text = gAssetManager.LoadAsset<TextAsset>("VERBS.TXT", AssetScope::Manual);
 
         // Pass that along to INI parser, since it is plain text and in INI format.
         IniParser parser(text->GetText(), text->GetTextLength());
@@ -57,23 +58,23 @@ void VerbManager::Init()
                 IniKeyValue& keyValuePair = line.entries[i];
                 if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "up"))
                 {
-                    upTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                    upTexture = gAssetManager.LoadAsset<Texture>(keyValuePair.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "down"))
                 {
-                    downTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                    downTexture = gAssetManager.LoadAsset<Texture>(keyValuePair.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "hover"))
                 {
-                    hoverTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                    hoverTexture = gAssetManager.LoadAsset<Texture>(keyValuePair.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "disable"))
                 {
-                    disableTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                    disableTexture = gAssetManager.LoadAsset<Texture>(keyValuePair.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "cursor"))
                 {
-                    cursor = gAssetManager.LoadCursor(keyValuePair.value);
+                    cursor = gAssetManager.LoadAsset<Cursor>(keyValuePair.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "type"))
                 {

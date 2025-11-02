@@ -102,7 +102,7 @@ struct SidneyFile
         if(texture == nullptr || StringUtil::StartsWithIgnoreCase(texture->GetName(), "Undefined"))
         {
             // Some files don't have an inventory item - just fall back on a generic file icon.
-            texture = gAssetManager.LoadTexture("SIDFILE_9.BMP");
+            texture = gAssetManager.LoadAsset<Texture>("SIDFILE_9.BMP");
         }
         return texture;
     }

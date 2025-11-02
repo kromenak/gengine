@@ -29,7 +29,7 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
 
     // Add base binocs image with cutout center.
     mCutoutImage = UI::CreateWidgetActor<UIImage>("Mask", this);
-    mCutoutImage->SetTexture(gAssetManager.LoadTexture("BINOCMASK.BMP"), true);
+    mCutoutImage->SetTexture(gAssetManager.LoadAsset<Texture>("BINOCMASK.BMP"), true);
     mCutoutImage->SetReceivesInput(true);
 
     // Depending on your resolution, there can be a lot of scene visible outside the binocs image.
@@ -65,36 +65,36 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
 
     // Add arrow control image at bottom-center.
     mArrowButtonsBacking = UI::CreateWidgetActor<UIImage>("Arrows", mCutoutImage);
-    mArrowButtonsBacking->SetTexture(gAssetManager.LoadTexture("BINOCBTNAREA.BMP"), true);
+    mArrowButtonsBacking->SetTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNAREA.BMP"), true);
     mArrowButtonsBacking->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
     mArrowButtonsBacking->GetRectTransform()->SetAnchoredPosition(0.0f, 19.0f);
 
     // Add buttons for each arrow direction.
     {
         mUpButton = UI::CreateWidgetActor<UIButton>("UpButton", mArrowButtonsBacking);
-        mUpButton->SetUpTexture(gAssetManager.LoadTexture("BINOCBTNUPU.BMP"));
-        mUpButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNUPD.BMP"));
+        mUpButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNUPU.BMP"));
+        mUpButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNUPD.BMP"));
         mUpButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mUpButton->GetRectTransform()->SetAnchoredPosition(44.0f, 67.0f);
     }
     {
         mDownButton = UI::CreateWidgetActor<UIButton>("DownButton", mArrowButtonsBacking);
-        mDownButton->SetUpTexture(gAssetManager.LoadTexture("BINOCBTNDOWNU.BMP"));
-        mDownButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNDOWND.BMP"));
+        mDownButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNDOWNU.BMP"));
+        mDownButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNDOWND.BMP"));
         mDownButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mDownButton->GetRectTransform()->SetAnchoredPosition(44.0f, 3.0f);
     }
     {
         mRightButton = UI::CreateWidgetActor<UIButton>("RightButton", mArrowButtonsBacking);
-        mRightButton->SetUpTexture(gAssetManager.LoadTexture("BINOCBTNRIGHTU.BMP"));
-        mRightButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNRIGHTD.BMP"));
+        mRightButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNRIGHTU.BMP"));
+        mRightButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNRIGHTD.BMP"));
         mRightButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mRightButton->GetRectTransform()->SetAnchoredPosition(65.0f, 46.0f);
     }
     {
         mLeftButton = UI::CreateWidgetActor<UIButton>("LeftButton", mArrowButtonsBacking);
-        mLeftButton->SetUpTexture(gAssetManager.LoadTexture("BINOCBTNLEFTU.BMP"));
-        mLeftButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNLEFTD.BMP"));
+        mLeftButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNLEFTU.BMP"));
+        mLeftButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNLEFTD.BMP"));
         mLeftButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mLeftButton->GetRectTransform()->SetAnchoredPosition(2.0f, 46.0f);
     }
@@ -102,10 +102,10 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
     // Add exit button.
     {
         UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", mCutoutImage);
-        exitButton->SetUpTexture(gAssetManager.LoadTexture("BINOCBTNEXITU.BMP"));
-        exitButton->SetHoverTexture(gAssetManager.LoadTexture("BINOCBTNEXITHOV.BMP"));
-        exitButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNEXITD.BMP"));
-        exitButton->SetDisabledTexture(gAssetManager.LoadTexture("BINOCBTNEXITDIS.BMP"));
+        exitButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNEXITU.BMP"));
+        exitButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNEXITHOV.BMP"));
+        exitButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNEXITD.BMP"));
+        exitButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNEXITDIS.BMP"));
         exitButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         exitButton->GetRectTransform()->SetAnchoredPosition(95.0f, -389.0f);
         exitButton->SetPressCallback([this](UIButton* button){
@@ -117,10 +117,10 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
     // Add zoom 50x and 5x buttons.
     {
         UIButton* zoomInButton = UI::CreateWidgetActor<UIButton>("ZoomInButton", mCutoutImage);
-        zoomInButton->SetUpTexture(gAssetManager.LoadTexture("BINOCBTNZOOMINU.BMP"));
-        zoomInButton->SetHoverTexture(gAssetManager.LoadTexture("BINOCBTNZOOMINHOV.BMP"));
-        zoomInButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNZOOMIND.BMP"));
-        zoomInButton->SetDisabledTexture(gAssetManager.LoadTexture("BINOCBTNZOOMINDIS.BMP"));
+        zoomInButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNZOOMINU.BMP"));
+        zoomInButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNZOOMINHOV.BMP"));
+        zoomInButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNZOOMIND.BMP"));
+        zoomInButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNZOOMINDIS.BMP"));
         zoomInButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         zoomInButton->GetRectTransform()->SetAnchoredPosition(399.0f, -389.0f);
         zoomInButton->SetPressCallback([this](UIButton* button){
@@ -130,10 +130,10 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
     }
     {
         UIButton* zoomOutButton = UI::CreateWidgetActor<UIButton>("ZoomOutButton", mCutoutImage);
-        zoomOutButton->SetUpTexture(gAssetManager.LoadTexture("BINOCBTNZOOMOUTU.BMP"));
-        zoomOutButton->SetHoverTexture(gAssetManager.LoadTexture("BINOCBTNZOOMOUTHOV.BMP"));
-        zoomOutButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNZOOMOUTD.BMP"));
-        zoomOutButton->SetDisabledTexture(gAssetManager.LoadTexture("BINOCBTNZOOMOUTDIS.BMP"));
+        zoomOutButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNZOOMOUTU.BMP"));
+        zoomOutButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNZOOMOUTHOV.BMP"));
+        zoomOutButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNZOOMOUTD.BMP"));
+        zoomOutButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("BINOCBTNZOOMOUTDIS.BMP"));
         zoomOutButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         zoomOutButton->GetRectTransform()->SetAnchoredPosition(399.0f, -389.0f);
         zoomOutButton->SetPressCallback([this](UIButton* button){
@@ -144,7 +144,7 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
 
     // Read in Binocs use case data.
     {
-        TextAsset* textAsset = gAssetManager.LoadText("BINOCS.TXT", AssetScope::Manual);
+        TextAsset* textAsset = gAssetManager.LoadAsset<TextAsset>("BINOCS.TXT", AssetScope::Manual);
         IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
@@ -237,7 +237,7 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
     }
 
     // Load binocs sheep script.
-    mBinocsScript = gAssetManager.LoadSheep("BINOCS.SHP");
+    mBinocsScript = gAssetManager.LoadAsset<SheepScript>("BINOCS.SHP");
 
     // Hide by default.
     SetActive(false);

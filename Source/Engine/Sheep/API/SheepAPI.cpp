@@ -39,7 +39,7 @@ RegFunc1(Call, void, string, WAITABLE, REL_FUNC);
 shpvoid CallDefaultSheep(const std::string& fileName)
 {
     // Load script and just execute first function in that script.
-    SheepScript* script = gAssetManager.LoadSheep(fileName, AssetScope::Scene);
+    SheepScript* script = gAssetManager.LoadAsset<SheepScript>(fileName, AssetScope::Scene);
     if(script != nullptr)
     {
         // This new Sheep inherits the tag of the calling Sheep.
@@ -51,7 +51,7 @@ RegFunc1(CallDefaultSheep, void, string, WAITABLE, REL_FUNC);
 
 shpvoid CallSheep(const std::string& fileName, const std::string& functionName)
 {
-    SheepScript* script = gAssetManager.LoadSheep(fileName, AssetScope::Scene);
+    SheepScript* script = gAssetManager.LoadAsset<SheepScript>(fileName, AssetScope::Scene);
     if(script == nullptr)
     {
         gReportManager.Log("Error", StringUtil::Format("Error: unable to find sheep file `%s`", fileName.c_str()));
@@ -101,7 +101,7 @@ RegFunc1(CallGlobal, void, string, WAITABLE, REL_FUNC);
 
 shpvoid CallGlobalSheep(const std::string& sheepFileName, const std::string& functionName)
 {
-    SheepScript* script = gAssetManager.LoadSheep(sheepFileName, AssetScope::Scene);
+    SheepScript* script = gAssetManager.LoadAsset<SheepScript>(sheepFileName, AssetScope::Scene);
     if(script == nullptr)
     {
         ExecError();

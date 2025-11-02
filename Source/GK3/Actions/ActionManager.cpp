@@ -65,7 +65,7 @@ void ActionManager::Init()
 void ActionManager::AddActionSet(const std::string& assetName)
 {
     // Read in the asset.
-    NVC* actionSet = gAssetManager.LoadNVC(assetName, AssetScope::Scene);
+    NVC* actionSet = gAssetManager.LoadAsset<NVC>(assetName, AssetScope::Scene);
     if(actionSet == nullptr) { return; }
 
     // Log that we're parsing this NVC.

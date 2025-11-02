@@ -16,8 +16,8 @@ UIScrollRect::UIScrollRect(Actor* parent) : Actor("ScrollRect", TransformType::R
 
     // Some size calculations depend on the width/height of the up/down button textures (the ones that appear on the ends of the scrollbar).
     // So, get those textures now.
-    Texture* upTexture = gAssetManager.LoadTexture("S_SLIDER_UPARROW.BMP");
-    Texture* downTexture = gAssetManager.LoadTexture("S_SLIDER_DWNARROW.BMP");
+    Texture* upTexture = gAssetManager.LoadAsset<Texture>("S_SLIDER_UPARROW.BMP");
+    Texture* downTexture = gAssetManager.LoadAsset<Texture>("S_SLIDER_DWNARROW.BMP");
 
     // Add a child actor that contains all scrollbar widgets.
     // This is useful so that we can easily exclude the scrollbar widgets from content size calculations.

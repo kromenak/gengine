@@ -4,6 +4,7 @@
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "CaptionsOverlay.h"
+#include "Font.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GEngine.h"
@@ -16,6 +17,7 @@
 #include "LocationManager.h"
 #include "Renderer.h"
 #include "TextAsset.h"
+#include "Texture.h"
 #include "Tools.h"
 #include "UIButton.h"
 #include "UIDrag.h"
@@ -45,25 +47,25 @@ namespace
             auto it = config.find(buttonId + "SpriteUp");
             if(it != config.end())
             {
-                button->SetUpTexture(gAssetManager.LoadTexture(it->second.value));
+                button->SetUpTexture(gAssetManager.LoadAsset<Texture>(it->second.value));
             }
 
             it = config.find(buttonId + "SpriteDown");
             if(it != config.end())
             {
-                button->SetDownTexture(gAssetManager.LoadTexture(it->second.value));
+                button->SetDownTexture(gAssetManager.LoadAsset<Texture>(it->second.value));
             }
 
             it = config.find(buttonId + "SpriteDis");
             if(it != config.end())
             {
-                button->SetDisabledTexture(gAssetManager.LoadTexture(it->second.value));
+                button->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(it->second.value));
             }
 
             it = config.find(buttonId + "SpriteHov");
             if(it != config.end())
             {
-                button->SetHoverTexture(gAssetManager.LoadTexture(it->second.value));
+                button->SetHoverTexture(gAssetManager.LoadAsset<Texture>(it->second.value));
             }
         }
         return button;
@@ -81,9 +83,9 @@ namespace
 
         toggle->SetTooltipText("tb_" + toggleId);
 
-        toggle->SetOnTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDown"].value));
-        toggle->SetOffTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteUp"].value));
-        toggle->SetDisabledTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDis"].value));
+        toggle->SetOnTexture(gAssetManager.LoadAsset<Texture>(config[toggleId + "SpriteDown"].value));
+        toggle->SetOffTexture(gAssetManager.LoadAsset<Texture>(config[toggleId + "SpriteUp"].value));
+        toggle->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(config[toggleId + "SpriteDis"].value));
         return toggle;
     }
 
@@ -103,7 +105,7 @@ namespace
 
         // Add handle image.
         UIImage* handleImage = UI::CreateWidgetActor<UIImage>("Handle", slider);
-        handleImage->SetTexture(gAssetManager.LoadTexture("RC_SO_SLIDER"), true);
+        handleImage->SetTexture(gAssetManager.LoadAsset<Texture>("RC_SO_SLIDER"), true);
         slider->SetHandleActor(handleImage->GetOwner());
 
         // Set slider's vertical size to be exactly equal to handle size.
@@ -121,7 +123,7 @@ namespace
 OptionBar::OptionBar() : Actor("OptionBar", TransformType::RectTransform)
 {
     // Load layout text file, parse to key/value map, and then delete it.
-    TextAsset* optionBarText = gAssetManager.LoadText("RC_LAYOUT.TXT", AssetScope::Manual);
+    TextAsset* optionBarText = gAssetManager.LoadAsset<TextAsset>("RC_LAYOUT.TXT", AssetScope::Manual);
 
     IniParser parser(optionBarText->GetText(), optionBarText->GetTextLength());
     parser.SetMultipleKeyValuePairsPerLine(false);
@@ -140,9 +142,9 @@ OptionBar::OptionBar() : Actor("OptionBar", TransformType::RectTransform)
     // Create "more options" button. These are options that weren't included in the original game.
     mMoreOptionsButton = UI::CreateWidgetActor<UIButton>("MoreOptions", this);
     mMoreOptionsButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
-    mMoreOptionsButton->SetUpTexture(gAssetManager.LoadTexture("I_OPERATE_STD.BMP"));
-    mMoreOptionsButton->SetHoverTexture(gAssetManager.LoadTexture("I_OPERATE_HOV.BMP"));
-    mMoreOptionsButton->SetDownTexture(gAssetManager.LoadTexture("I_OPERATE_DWN.BMP"));
+    mMoreOptionsButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("I_OPERATE_STD.BMP"));
+    mMoreOptionsButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("I_OPERATE_HOV.BMP"));
+    mMoreOptionsButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("I_OPERATE_DWN.BMP"));
     mMoreOptionsButton->SetTooltipText("tb_optAdvanced");
     mMoreOptionsButton->SetPressCallback([](UIButton* button){
         Tools::ShowSettings();
@@ -302,7 +304,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
 {
     // Add background image.
     UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("Window", this);
-    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["backSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>(config["backSprite"].value), true);
     mOptionBarRoot = backgroundImage->GetRectTransform();
     mOptionBarRoot->SetAnchor(AnchorPreset::BottomLeft);
 
@@ -312,7 +314,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     drag->SetUseHighlightCursor(false); // but don't highlight cursor when hovering it
 
     // Load font.
-    Font* font = gAssetManager.LoadFont(config["statusFont"].value);
+    Font* font = gAssetManager.LoadAsset<Font>(config["statusFont"].value);
 
     // Add score text.
     mScoreLabel = UI::CreateWidgetActor<UILabel>("ScoreLabel", mOptionBarRoot);
@@ -464,7 +466,7 @@ void OptionBar::CreateCamerasSection(std::unordered_map<std::string, IniKeyValue
 {
     // Add background image.
     UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("CamerasSection", mOptionBarRoot);
-    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["camBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>(config["camBackSprite"].value), true);
     mCamerasSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
@@ -477,7 +479,7 @@ void OptionBar::CreateOptionsSection(std::unordered_map<std::string, IniKeyValue
 {
     // Add background image.
     UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("OptionsSection", mOptionBarRoot);
-    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["optBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>(config["optBackSprite"].value), true);
     mOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
@@ -525,7 +527,7 @@ void OptionBar::CreateAdvancedOptionsSection(std::unordered_map<std::string, Ini
 {
     // Add background image.
     UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("AdvOptionsSection", mOptionsSection);
-    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["advOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>(config["advOptBackSprite"].value), true);
     mAdvancedOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
@@ -555,7 +557,7 @@ void OptionBar::CreateSoundOptionsSection(std::unordered_map<std::string, IniKey
 {
     // Add background image.
     UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("SoundOptions", mAdvancedOptionsSection);
-    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["soundOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>(config["soundOptBackSprite"].value), true);
     mSoundOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
@@ -624,7 +626,7 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
 {
     // Add background image.
     UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("GraphicsOptions", mAdvancedOptionsSection);
-    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["graphicsOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>(config["graphicsOptBackSprite"].value), true);
     mGraphicOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
@@ -638,8 +640,8 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
 
     // Create "incremental rendering" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* incRenderingText = CreateButton(config, "graphOptIncrementalText", mGraphicOptionsSection, false);
-    incRenderingText->SetUpTexture(gAssetManager.LoadTexture(config["graphOptIncrementalEnabled"].value));
-    incRenderingText->SetDisabledTexture(gAssetManager.LoadTexture(config["graphOptIncrementalDisabled"].value));
+    incRenderingText->SetUpTexture(gAssetManager.LoadAsset<Texture>(config["graphOptIncrementalEnabled"].value));
+    incRenderingText->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(config["graphOptIncrementalDisabled"].value));
     incRenderingText->SetReceivesInput(false);
 
     // Create "incremental rendering" toggle.
@@ -695,7 +697,7 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
 {
     // Add background image.
     UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("AdvancedGraphicSection", mGraphicOptionsSection);
-    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["advGraphOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptBackSprite"].value), true);
     mAdvancedGraphicOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
@@ -708,8 +710,8 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
 
     // Create "mipmap" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* mipmapText = CreateButton(config, "advGraphOptMipMapText", mAdvancedGraphicOptionsSection, false);
-    mipmapText->SetUpTexture(gAssetManager.LoadTexture(config["advGraphOptMipMapEnabled"].value));
-    mipmapText->SetDisabledTexture(gAssetManager.LoadTexture(config["advGraphOptMipMapDisabled"].value));
+    mipmapText->SetUpTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptMipMapEnabled"].value));
+    mipmapText->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptMipMapDisabled"].value));
     mipmapText->SetReceivesInput(false);
 
     // Create "mipmap" toggle.
@@ -720,8 +722,8 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
 
     // Create "animation interpolation" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* animInterpText = CreateButton(config, "advGraphOptInterpolationText", mAdvancedGraphicOptionsSection, false);
-    animInterpText->SetUpTexture(gAssetManager.LoadTexture(config["advGraphOptInterpolationEnabled"].value));
-    animInterpText->SetDisabledTexture(gAssetManager.LoadTexture(config["advGraphOptInterpolationDisabled"].value));
+    animInterpText->SetUpTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptInterpolationEnabled"].value));
+    animInterpText->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptInterpolationDisabled"].value));
     animInterpText->SetReceivesInput(false);
 
     // Create "animation interpolation" toggle.
@@ -732,8 +734,8 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
 
     // Create "trilinear filtering" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* filteringText = CreateButton(config, "advGraphOptFilteringText", mAdvancedGraphicOptionsSection, false);
-    filteringText->SetUpTexture(gAssetManager.LoadTexture(config["advGraphOptFilteringEnabled"].value));
-    filteringText->SetDisabledTexture(gAssetManager.LoadTexture(config["advGraphOptFilteringDisabled"].value));
+    filteringText->SetUpTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptFilteringEnabled"].value));
+    filteringText->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptFilteringDisabled"].value));
     filteringText->SetReceivesInput(false);
 
     // Create "trilinear filtering" toggle.
@@ -744,8 +746,8 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
 
     // Create "lod" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* lodText = CreateButton(config, "advGraphOptLODText", mAdvancedGraphicOptionsSection, false);
-    lodText->SetUpTexture(gAssetManager.LoadTexture(config["advGraphOptLODEnabled"].value));
-    lodText->SetDisabledTexture(gAssetManager.LoadTexture(config["advGraphOptLODDisabled"].value));
+    lodText->SetUpTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptLODEnabled"].value));
+    lodText->SetDisabledTexture(gAssetManager.LoadAsset<Texture>(config["advGraphOptLODDisabled"].value));
     lodText->SetReceivesInput(false);
 
     //TODO: LOD Slider
@@ -755,7 +757,7 @@ void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyV
 {
     // Add background image.
     UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("GameOptionsSection", mAdvancedOptionsSection);
-    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["gameOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>(config["gameOptBackSprite"].value), true);
     mGameOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.

@@ -36,7 +36,7 @@ CaptionsOverlay::CaptionsOverlay() : Actor("CaptionsOverlay", TransformType::Rec
     UI::AddCanvas(this, 16);
 
     // Load font data.
-    TextAsset* fontColors = gAssetManager.LoadText("FONTCOLOR.TXT", AssetScope::Manual);
+    TextAsset* fontColors = gAssetManager.LoadAsset<TextAsset>("FONTCOLOR.TXT", AssetScope::Manual);
     {
         IniParser parser(fontColors->GetText(), fontColors->GetTextLength());
         parser.ParseAll();
@@ -48,11 +48,11 @@ CaptionsOverlay::CaptionsOverlay() : Actor("CaptionsOverlay", TransformType::Rec
             {
                 if(StringUtil::EqualsIgnoreCase(entry.key, "NOTLISTED"))
                 {
-                    mDefaultFont = gAssetManager.LoadFont("F_" + entry.value);
+                    mDefaultFont = gAssetManager.LoadAsset<Font>("F_" + entry.value);
                 }
                 else
                 {
-                    mSpeakerToFont[entry.key] = gAssetManager.LoadFont("F_" + entry.value);
+                    mSpeakerToFont[entry.key] = gAssetManager.LoadAsset<Font>("F_" + entry.value);
                 }
             }
         }

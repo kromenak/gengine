@@ -2,12 +2,12 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "InputManager.h"
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "StringUtil.h"
-#include "UICanvas.h"
 #include "UILabel.h"
 #include "UIUtil.h"
 
@@ -18,7 +18,7 @@ StatusOverlay::StatusOverlay() : Actor("StatusOverlay", TransformType::RectTrans
 
     // Create status text actor at top of screen.
     mStatusLabel = UI::CreateWidgetActor<UILabel>("Label", this);
-    mStatusLabel->SetFont(gAssetManager.LoadFont("F_STATUS_FADE"));
+    mStatusLabel->SetFont(gAssetManager.LoadAsset<Font>("F_STATUS_FADE"));
     mStatusLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
     // Status text is anchored to top of screen with pivot at top-center.

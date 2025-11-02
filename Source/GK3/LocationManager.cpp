@@ -18,7 +18,7 @@ LocationManager gLocationManager;
 void LocationManager::Init()
 {
     // Parse as INI file.
-    TextAsset* textFile = gAssetManager.LoadText("Locations.txt", AssetScope::Manual);
+    TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("Locations.txt", AssetScope::Manual);
     IniParser parser(textFile->GetText(), textFile->GetTextLength());
     parser.ParseAll();
 
@@ -357,7 +357,7 @@ void LocationManager::ChangeLocationInternal(const std::string& location, const 
     }
 
     // Check for timeblock completion.
-    gSheepManager.Execute(gAssetManager.LoadSheep("Timeblocks.shp"), "CheckTimeblockComplete$", [this, location, callback, sameLocation](){
+    gSheepManager.Execute(gAssetManager.LoadAsset<SheepScript>("Timeblocks.shp"), "CheckTimeblockComplete$", [this, location, callback, sameLocation](){
 
         // See whether a timeblock change is occurring.
         // If so, we should early out - the timeblock change logic handles any location and time change.

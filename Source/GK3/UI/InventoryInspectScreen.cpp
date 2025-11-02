@@ -38,10 +38,10 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
     // Do this AFTER creating closeup image, so the exit button renders above it.
     {
         UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", this);
-        exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
-        exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
-        exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
-        exitButton->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
+        exitButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("EXITN.BMP"));
+        exitButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("EXITD.BMP"));
+        exitButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("EXITHOV.BMP"));
+        exitButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("EXITDIS.BMP"));
         exitButton->SetPressCallback([this](UIButton* button){
             Hide();
         });
@@ -225,7 +225,7 @@ bool InventoryInspectScreen::IsLSR() const
 void InventoryInspectScreen::InitLSR()
 {
     // Set main image based on current page of LSR.
-    mCloseupImage->SetUpTexture(gAssetManager.LoadTexture("LSR_PG" + std::to_string(mLSRPage) + "_BASE.BMP"));
+    mCloseupImage->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG" + std::to_string(mLSRPage) + "_BASE.BMP"));
 
     // Closeup image doesn't have a press callback in this case. You have to click on the individual sections.
     mCloseupImage->SetPressCallback(nullptr);
@@ -241,11 +241,11 @@ void InventoryInspectScreen::InitLSR()
         mLSRButtons[0]->GetRectTransform()->SetAnchoredPosition(150.0f, 188.0f);
         if(finishedAquarius)
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG1_AQU_FIN.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG1_AQU_FIN.BMP"));
         }
         else
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG1_AQU_LIT.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG1_AQU_LIT.BMP"));
         }
         mLSRButtons[0]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_AQUARIUS");
@@ -261,11 +261,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedAquarius && !finishedPisces) // In-Progress
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG1_PIS_LIT.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG1_PIS_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG1_PIS_FIN.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG1_PIS_FIN.BMP"));
         }
         mLSRButtons[1]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_PISCES");
@@ -290,11 +290,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedPisces && !finishedAries) // In-Progress
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG2_ARI_LIT.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG2_ARI_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG2_ARI_FIN.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG2_ARI_FIN.BMP"));
         }
         mLSRButtons[0]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_ARIES");
@@ -310,11 +310,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedAries && !finishedTaurus) // In-Progress
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG2_TAU_LIT.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG2_TAU_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG2_TAU_FIN.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG2_TAU_FIN.BMP"));
         }
         mLSRButtons[1]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_TAURUS");
@@ -340,11 +340,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedTaurus && !finishedGemini) // In-Progress
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG3_GEM_LIT.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG3_GEM_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG3_GEM_FIN.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG3_GEM_FIN.BMP"));
         }
         mLSRButtons[0]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_GEMINI");
@@ -361,11 +361,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if((finishedTaurus && !finishedGemini) || (finishedGemini && !finishedCancer)) // In-Progress
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG3_CAN_LIT.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG3_CAN_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG3_CAN_FIN.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG3_CAN_FIN.BMP"));
         }
         mLSRButtons[1]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_CANCER");
@@ -381,11 +381,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedCancer && !finishedLeo) // In-Progress
         {
-            mLSRButtons[2]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG3_LEO_LIT.BMP"));
+            mLSRButtons[2]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG3_LEO_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[2]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG3_LEO_FIN.BMP"));
+            mLSRButtons[2]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG3_LEO_FIN.BMP"));
         }
         mLSRButtons[2]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_LEO");
@@ -407,11 +407,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedLeo && !finishedVirgo) // In-Progress
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG4_VIR_LIT.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG4_VIR_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG4_VIR_FIN.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG4_VIR_FIN.BMP"));
         }
         mLSRButtons[0]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_VIRGO");
@@ -427,11 +427,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedVirgo && !finishedLibra) // In-Progress
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG4_LIB_LIT.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG4_LIB_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG4_LIB_FIN.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG4_LIB_FIN.BMP"));
         }
         mLSRButtons[1]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_LIBRA");
@@ -456,11 +456,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedLibra && !finishedScorpio) // In-Progress
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG5_SCO_LIT.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG5_SCO_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG5_SCO_FIN.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG5_SCO_FIN.BMP"));
         }
         mLSRButtons[0]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_SCORPIO");
@@ -476,11 +476,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedScorpio && !finishedOphiuchus) // In-Progress
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG5_OPH_LIT.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG5_OPH_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG5_OPH_FIN.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG5_OPH_FIN.BMP"));
         }
         mLSRButtons[1]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_OPHIUCHUS");
@@ -505,11 +505,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedOphiuchus && !finishedSagittarius) // In-Progress
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG6_SAG_LIT.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG6_SAG_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG6_SAG_FIN.BMP"));
+            mLSRButtons[0]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG6_SAG_FIN.BMP"));
         }
         mLSRButtons[0]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_SAGITTARIUS");
@@ -525,11 +525,11 @@ void InventoryInspectScreen::InitLSR()
         }
         else if(finishedSagittarius && !finishedCapricorn) // In-Progress
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG6_CAP_LIT.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG6_CAP_LIT.BMP"));
         }
         else // Finished
         {
-            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG6_CAP_FIN.BMP"));
+            mLSRButtons[1]->SetUpTexture(gAssetManager.LoadAsset<Texture>("LSR_PG6_CAP_FIN.BMP"));
         }
         mLSRButtons[1]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_CAPRICORN");

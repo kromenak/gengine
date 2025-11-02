@@ -37,7 +37,7 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
     if(randomCheck > random) { return 0; }
 
     // Definitely want to play the sound, if it exists.
-    Audio* audio = gAssetManager.LoadAudio(soundName, soundtrack->GetScope());
+    Audio* audio = gAssetManager.LoadAsset<Audio>(soundName, soundtrack->GetScope());
     if(audio == nullptr) { return 0; }
 
     // Create audio play params struct.

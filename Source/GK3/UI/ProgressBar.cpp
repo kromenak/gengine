@@ -23,7 +23,7 @@ ProgressBar::ProgressBar() : Actor("Progress Bar", TransformType::RectTransform)
 
     // Create background image. Default anchor properties (centered on screen) should be fine.
     mBackground = UI::CreateWidgetActor<UIImage>("Background", this);
-    mBackground->SetTexture(gAssetManager.LoadTexture("PROGRESS_GENERIC.BMP"), true);
+    mBackground->SetTexture(gAssetManager.LoadAsset<Texture>("PROGRESS_GENERIC.BMP"), true);
 
     // Create canvas to contain the progress bar image.
     // Using a canvas here allows us to mask the progress bar image.
@@ -37,7 +37,7 @@ ProgressBar::ProgressBar() : Actor("Progress Bar", TransformType::RectTransform)
     // The pivot is important to get the correct progress bar effect when modifying the parent canvas's size.
     mProgressBarImage = UI::CreateWidgetActor<UIImage>("BarImage", mProgressBarCanvas->GetOwner());
     mProgressBarImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-    mProgressBarImage->SetTexture(gAssetManager.LoadTexture("PROGRESS_SLIDER.BMP"), true);
+    mProgressBarImage->SetTexture(gAssetManager.LoadAsset<Texture>("PROGRESS_SLIDER.BMP"), true);
 }
 
 void ProgressBar::Show(Type type)
@@ -46,13 +46,13 @@ void ProgressBar::Show(Type type)
     switch(type)
     {
     case Type::Generic:
-        mBackground->SetTexture(gAssetManager.LoadTexture("PROGRESS_GENERIC.BMP"), true);
+        mBackground->SetTexture(gAssetManager.LoadAsset<Texture>("PROGRESS_GENERIC.BMP"), true);
         break;
     case Type::Save:
-        mBackground->SetTexture(gAssetManager.LoadTexture("PROGRESS_SAVE_SCREEN.BMP"), true);
+        mBackground->SetTexture(gAssetManager.LoadAsset<Texture>("PROGRESS_SAVE_SCREEN.BMP"), true);
         break;
     case Type::Load:
-        mBackground->SetTexture(gAssetManager.LoadTexture("PROGRESS_LOAD_SCREEN.BMP"), true);
+        mBackground->SetTexture(gAssetManager.LoadAsset<Texture>("PROGRESS_LOAD_SCREEN.BMP"), true);
         break;
     }
 

@@ -1,9 +1,11 @@
 #include "QuitPopup.h"
 
 #include "AssetManager.h"
+#include "Audio.h"
 #include "AudioManager.h"
 #include "GEngine.h"
 #include "InputManager.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UIUtil.h"
@@ -19,15 +21,15 @@ QuitPopup::QuitPopup() : Actor("QuitPopup", TransformType::RectTransform),
 
     // Create background image.
     UIImage* popupBackground = UI::CreateWidgetActor<UIImage>("Background", this);
-    popupBackground->SetTexture(gAssetManager.LoadTexture("QUITGAME.BMP"), true);
+    popupBackground->SetTexture(gAssetManager.LoadAsset<Texture>("QUITGAME.BMP"), true);
 
     // Create "yes" button.
     mYesButton = UI::CreateWidgetActor<UIButton>("YesButton", popupBackground);
     mYesButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
     mYesButton->GetRectTransform()->SetAnchoredPosition(261.0f, 59.0f);
-    mYesButton->SetUpTexture(gAssetManager.LoadTexture("QG_YES_U.BMP"));
-    mYesButton->SetHoverTexture(gAssetManager.LoadTexture("QG_YES_H.BMP"));
-    mYesButton->SetDownTexture(gAssetManager.LoadTexture("QG_YES_D.BMP"));
+    mYesButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("QG_YES_U.BMP"));
+    mYesButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("QG_YES_H.BMP"));
+    mYesButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("QG_YES_D.BMP"));
     mYesButton->SetPressCallback([](UIButton* button){
         GEngine::Instance()->Quit();
         // No SFX for this button press, since the game is quitting.
@@ -37,12 +39,12 @@ QuitPopup::QuitPopup() : Actor("QuitPopup", TransformType::RectTransform),
     mNoButton = UI::CreateWidgetActor<UIButton>("NoButton", popupBackground);
     mNoButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
     mNoButton->GetRectTransform()->SetAnchoredPosition(418.0f, 59.0f);
-    mNoButton->SetUpTexture(gAssetManager.LoadTexture("QG_NO_U.BMP"));
-    mNoButton->SetHoverTexture(gAssetManager.LoadTexture("QG_NO_H.BMP"));
-    mNoButton->SetDownTexture(gAssetManager.LoadTexture("QG_NO_D.BMP"));
+    mNoButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("QG_NO_U.BMP"));
+    mNoButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("QG_NO_H.BMP"));
+    mNoButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("QG_NO_D.BMP"));
     mNoButton->SetPressCallback([this](UIButton* button){
         Hide();
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+        gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDBUTN-1.WAV"));
     });
 
     // Hide by default.

@@ -4,6 +4,7 @@
 #include "Font.h"
 #include "IniParser.h"
 #include "TextAsset.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
@@ -31,7 +32,7 @@ HelpScreen::HelpScreen() : Actor("HelpScreen", TransformType::RectTransform),
     Texture* exitButtonDownTexture = nullptr;
     Texture* exitButtonHoverTexture = nullptr;
     {
-        TextAsset* textFile = gAssetManager.LoadText("HELPSCREEN.TXT", AssetScope::Manual);
+        TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("HELPSCREEN.TXT", AssetScope::Manual);
         IniParser parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
         parser.ParseAll();
@@ -56,39 +57,39 @@ HelpScreen::HelpScreen() : Actor("HelpScreen", TransformType::RectTransform),
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "TitleFont"))
             {
-                titleFont = gAssetManager.LoadFont(entry.value);
+                titleFont = gAssetManager.LoadAsset<Font>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "KeyFont"))
             {
-                mKeyFont = gAssetManager.LoadFont(entry.value);
+                mKeyFont = gAssetManager.LoadAsset<Font>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "UseFont"))
             {
-                mUseFont = gAssetManager.LoadFont(entry.value);
+                mUseFont = gAssetManager.LoadAsset<Font>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "BLCornerSprite"))
             {
-                boxParams.bottomLeftTexture = gAssetManager.LoadTexture(entry.value);
+                boxParams.bottomLeftTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "TLCornerSprite"))
             {
-                boxParams.topLeftTexture = gAssetManager.LoadTexture(entry.value);
+                boxParams.topLeftTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "BRCornerSprite"))
             {
-                boxParams.bottomRightTexture = gAssetManager.LoadTexture(entry.value);
+                boxParams.bottomRightTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "TRCornerSprite"))
             {
-                boxParams.topRightTexture = gAssetManager.LoadTexture(entry.value);
+                boxParams.topRightTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "SideSprite"))
             {
-                boxParams.leftTexture = boxParams.rightTexture = gAssetManager.LoadTexture(entry.value);
+                boxParams.leftTexture = boxParams.rightTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "TopSprite"))
             {
-                boxParams.topTexture = boxParams.bottomTexture = gAssetManager.LoadTexture(entry.value);
+                boxParams.topTexture = boxParams.bottomTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "NumPages"))
             {
@@ -100,39 +101,39 @@ HelpScreen::HelpScreen() : Actor("HelpScreen", TransformType::RectTransform),
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "NextBtnUp"))
             {
-                nextButtonUpTexture = gAssetManager.LoadTexture(entry.value);
+                nextButtonUpTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "NextBtnDown"))
             {
-                nextButtonDownTexture = gAssetManager.LoadTexture(entry.value);
+                nextButtonDownTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "NextBtnHov"))
             {
-                nextButtonHoverTexture = gAssetManager.LoadTexture(entry.value);
+                nextButtonHoverTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "PrevBtnUp"))
             {
-                prevButtonUpTexture = gAssetManager.LoadTexture(entry.value);
+                prevButtonUpTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "PrevBtnDown"))
             {
-                prevButtonDownTexture = gAssetManager.LoadTexture(entry.value);
+                prevButtonDownTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "PrevBtnHov"))
             {
-                prevButtonHoverTexture = gAssetManager.LoadTexture(entry.value);
+                prevButtonHoverTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "ExitBtnUp"))
             {
-                exitButtonUpTexture = gAssetManager.LoadTexture(entry.value);
+                exitButtonUpTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "ExitBtnDown"))
             {
-                exitButtonDownTexture = gAssetManager.LoadTexture(entry.value);
+                exitButtonDownTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "ExitBtnHov"))
             {
-                exitButtonHoverTexture = gAssetManager.LoadTexture(entry.value);
+                exitButtonHoverTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::StartsWithIgnoreCase(entry.key, "Size"))
             {
@@ -204,7 +205,7 @@ HelpScreen::HelpScreen() : Actor("HelpScreen", TransformType::RectTransform),
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "Sprite"))
                     {
-                        sectionEntry.second.texture = gAssetManager.LoadTexture(entry.value);
+                        sectionEntry.second.texture = gAssetManager.LoadAsset<Texture>(entry.value);
                     }
                 }
             }

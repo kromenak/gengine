@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "SidneyAnagramParser.h"
 #include "SidneyFiles.h"
@@ -23,14 +24,14 @@ void SidneyAnalyze::AnalyzeText_Init()
 
         // Add divider line for box header.
         UIImage* boxHeaderDividerImage = UI::CreateWidgetActor<UIImage>("Divider", mAnalyzeTextWindow);
-        boxHeaderDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        boxHeaderDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         boxHeaderDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         boxHeaderDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -17.0f);
         boxHeaderDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         // Add header label.
         mAnalyzeTextFileNameLabel = UI::CreateWidgetActor<UILabel>("FileNameLabel", mAnalyzeTextWindow);
-        mAnalyzeTextFileNameLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mAnalyzeTextFileNameLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mAnalyzeTextFileNameLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
         mAnalyzeTextFileNameLabel->SetVerticalAlignment(VerticalAlignment::Top);
         mAnalyzeTextFileNameLabel->SetMasked(true);
@@ -41,7 +42,7 @@ void SidneyAnalyze::AnalyzeText_Init()
 
         // Add text label.
         mAnalyzeTextLabel = UI::CreateWidgetActor<UILabel>("TextLabel", mAnalyzeTextWindow);
-        mAnalyzeTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mAnalyzeTextLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mAnalyzeTextLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mAnalyzeTextLabel->SetVerticalAlignment(VerticalAlignment::Center);
         mAnalyzeTextLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);

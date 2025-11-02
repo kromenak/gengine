@@ -2,6 +2,7 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Audio.h"
 #include "AudioManager.h"
 #include "GK3UI.h"
 #include "GKPrefs.h"
@@ -22,15 +23,15 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
 
     // Add death screen background image.
     mBackgroundImage = UI::CreateWidgetActor<UIImage>("Background", this);
-    mBackgroundImage->SetTexture(gAssetManager.LoadTexture("DEATHSCREEN.BMP"), true);
+    mBackgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>("DEATHSCREEN.BMP"), true);
 
     // Add buttons for retry, replay, and quit.
     {
         UIButton* retryButton = UI::CreateWidgetActor<UIButton>("RetryButton", mBackgroundImage);
-        retryButton->SetUpTexture(gAssetManager.LoadTexture("DS_RTRY_N.BMP"));
-        retryButton->SetHoverTexture(gAssetManager.LoadTexture("DS_RTRY_H.BMP"));
-        retryButton->SetDownTexture(gAssetManager.LoadTexture("DS_RTRY_D.BMP"));
-        retryButton->SetDisabledTexture(gAssetManager.LoadTexture("DS_RTRY_X.BMP"));
+        retryButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("DS_RTRY_N.BMP"));
+        retryButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("DS_RTRY_H.BMP"));
+        retryButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("DS_RTRY_D.BMP"));
+        retryButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("DS_RTRY_X.BMP"));
         retryButton->SetPressCallback([this](UIButton* button){
             OnRetryButtonPressed();
         });
@@ -40,10 +41,10 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
     }
     {
         UIButton* restoreButton = UI::CreateWidgetActor<UIButton>("RestoreButton", mBackgroundImage);
-        restoreButton->SetUpTexture(gAssetManager.LoadTexture("DS_REST_N.BMP"));
-        restoreButton->SetHoverTexture(gAssetManager.LoadTexture("DS_REST_H.BMP"));
-        restoreButton->SetDownTexture(gAssetManager.LoadTexture("DS_REST_D.BMP"));
-        restoreButton->SetDisabledTexture(gAssetManager.LoadTexture("DS_REST_X.BMP"));
+        restoreButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("DS_REST_N.BMP"));
+        restoreButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("DS_REST_H.BMP"));
+        restoreButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("DS_REST_D.BMP"));
+        restoreButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("DS_REST_X.BMP"));
         restoreButton->SetPressCallback([](UIButton* button){
             gGK3UI.ShowLoadScreen();
         });
@@ -53,10 +54,10 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
     }
     {
         UIButton* quitButton = UI::CreateWidgetActor<UIButton>("QuitButton", mBackgroundImage);
-        quitButton->SetUpTexture(gAssetManager.LoadTexture("DS_QUIT_N.BMP"));
-        quitButton->SetHoverTexture(gAssetManager.LoadTexture("DS_QUIT_H.BMP"));
-        quitButton->SetDownTexture(gAssetManager.LoadTexture("DS_QUIT_D.BMP"));
-        quitButton->SetDisabledTexture(gAssetManager.LoadTexture("DS_QUIT_X.BMP"));
+        quitButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("DS_QUIT_N.BMP"));
+        quitButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("DS_QUIT_H.BMP"));
+        quitButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("DS_QUIT_D.BMP"));
+        quitButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("DS_QUIT_X.BMP"));
         quitButton->SetPressCallback([](UIButton* button){
             gGK3UI.ShowQuitPopup();
         });
@@ -80,7 +81,7 @@ void DeathScreen::Show()
 
     // Play death stinger sound effect.
     PlayAudioParams params;
-    params.audio = gAssetManager.LoadAudio("TEMPLEDEATHTAG.WAV", AssetScope::Scene);
+    params.audio = gAssetManager.LoadAsset<Audio>("TEMPLEDEATHTAG.WAV", AssetScope::Scene);
     params.audioType = AudioType::Music;
     gAudioManager.Play(params);
 }

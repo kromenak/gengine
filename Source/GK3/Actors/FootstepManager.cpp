@@ -1,6 +1,7 @@
 #include "FootstepManager.h"
 
 #include "AssetManager.h"
+#include "Audio.h"
 #include "IniParser.h"
 #include "Loader.h"
 #include "Random.h"
@@ -14,7 +15,7 @@ void FootstepManager::Init()
         // STEP 1: FLOORMAP maps texture names to a floor type.
         {
             // Get FLOORMAP text file as a raw buffer.
-            TextAsset* textFile = gAssetManager.LoadText("FLOORMAP.TXT", AssetScope::Manual);
+            TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("FLOORMAP.TXT", AssetScope::Manual);
 
             // Pass that along to INI parser, since it is plain text and in INI format.
             IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -46,7 +47,7 @@ void FootstepManager::Init()
         // STEP 2: FOOTSTEPS maps floor types to audio files for footsteps.
         {
             // Next up: read in all the footstep data.
-            TextAsset* textFile = gAssetManager.LoadText("FOOTSTEPS.TXT", AssetScope::Manual);
+            TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("FOOTSTEPS.TXT", AssetScope::Manual);
 
             // Again, it's just an INI text file.
             IniParser footstepParser(textFile->GetText(), textFile->GetTextLength());
@@ -75,7 +76,7 @@ void FootstepManager::Init()
                     for(size_t i = 0; i < line.entries.size(); ++i)
                     {
                         IniKeyValue& current = line.entries[i];
-                        Audio* audio = gAssetManager.LoadAudio(current.value);
+                        Audio* audio = gAssetManager.LoadAsset<Audio>(current.value);
                         if(audio != nullptr)
                         {
                             footsteps.push_back(audio);
@@ -91,7 +92,7 @@ void FootstepManager::Init()
         // STEP 3: FOOTSCUFFS maps floor types to audio files for footscuffs.
         {
             // Finally, very similar thing with the footscuff data.
-            TextAsset* textFile = gAssetManager.LoadText("FOOTSCUFFS.TXT", AssetScope::Manual);
+            TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("FOOTSCUFFS.TXT", AssetScope::Manual);
 
             // Again, it's just an INI text file.
             IniParser footscuffParser(textFile->GetText(), textFile->GetTextLength());
@@ -120,7 +121,7 @@ void FootstepManager::Init()
                     for(size_t i = 0; i < line.entries.size(); ++i)
                     {
                         IniKeyValue& current = line.entries[i];
-                        Audio* audio = gAssetManager.LoadAudio(current.value);
+                        Audio* audio = gAssetManager.LoadAsset<Audio>(current.value);
                         if(audio != nullptr)
                         {
                             footscuffs.push_back(audio);
@@ -202,5 +203,5 @@ Audio* FootstepManager::GetFootscuff(const std::string& shoeType, const std::str
     if(footscuffSounds.size() <= 0) { return nullptr; }
 
     // Return one randomly.
-    return footscuffSounds[Random::Range(0, (int)footscuffSounds.size())];
+    return footscuffSounds[Random::Range(0, static_cast<int>(footscuffSounds.size()))];
 }

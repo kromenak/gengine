@@ -4,6 +4,7 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "Scene.h"
 #include "Sidney.h"
@@ -104,7 +105,7 @@ void SidneyFiles::Init(Sidney* parent)
         mRoot->GetTransform()->SetParent(parent->GetTransform());
 
         RectTransform* rt = mRoot->GetComponent<RectTransform>();
-        Texture* backgroundTexture = gAssetManager.LoadTexture("S_BKGND.BMP");
+        Texture* backgroundTexture = gAssetManager.LoadAsset<Texture>("S_BKGND.BMP");
         rt->SetSizeDelta(static_cast<float>(backgroundTexture->GetWidth()),
                          static_cast<float>(backgroundTexture->GetHeight()));
     }
@@ -318,7 +319,7 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
     {
         // Add one line divider for bottom of header.
         UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("Divider", mWindowRoot);
-        headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        headerDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -20.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
@@ -328,7 +329,7 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
         titleLabel->GetRectTransform()->SetAnchoredPosition(0.0f, -2.0f);
         titleLabel->GetRectTransform()->SetSizeDelta(0.0f, 20.0f);
 
-        titleLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
+        titleLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_18.FON"));
         titleLabel->SetText(forShapes ? SidneyUtil::GetAnalyzeLocalizer().GetText("ShapeList") :
                                         SidneyUtil::GetAnalyzeLocalizer().GetText("FileList"));
         titleLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
@@ -395,7 +396,7 @@ void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std
         {
             FileListButton& dirButton = GetFileListButton();
             dirButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
-            dirButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14_UL.FON"));
+            dirButton.label->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14_UL.FON"));
             dirButton.label->SetText("-" + SidneyUtil::GetMainScreenLocalizer().GetText(dir.name));
             dirButton.button->SetPressCallback(nullptr);
             topLeft.y -= 16.0f;
@@ -422,7 +423,7 @@ void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std
             // Create button for this file.
             FileListButton& fileButton = GetFileListButton();
             fileButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
-            fileButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            fileButton.label->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
             fileButton.button->SetPressCallback([this, selectCallback, file](UIButton* button){
                 mWindowRoot->SetActive(false);
                 if(selectCallback != nullptr) { selectCallback(file); }
@@ -431,7 +432,7 @@ void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std
             // Shapes use a texture instead of a text label.
             if(mForShapes)
             {
-                Texture* shapeTexture = gAssetManager.LoadTexture(file->name);
+                Texture* shapeTexture = gAssetManager.LoadAsset<Texture>(file->name);
                 fileButton.button->SetUpTexture(shapeTexture);
                 topLeft.y -= shapeTexture->GetHeight();
             }
@@ -469,7 +470,7 @@ void SidneyFiles::FileListWindow::Show(const std::string& title, const std::vect
     {
         FileListButton& fileButton = GetFileListButton();
         fileButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
-        fileButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        fileButton.label->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         fileButton.label->SetText(choices[i]);
 
         // Set callback for pressing this choice.

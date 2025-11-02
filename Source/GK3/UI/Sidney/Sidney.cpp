@@ -2,7 +2,8 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
-#include "InventoryManager.h"
+#include "Audio.h"
+#include "Font.h"
 #include "LocationManager.h"
 #include "Scene.h"
 #include "SidneyButton.h"
@@ -10,7 +11,6 @@
 #include "SidneyUtil.h"
 #include "UIButton.h"
 #include "UIImage.h"
-#include "UILabel.h"
 #include "UIUtil.h"
 #include "Window.h"
 
@@ -22,10 +22,10 @@ namespace
         button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         button->GetRectTransform()->SetAnchoredPosition(xPos, -24.0f);
 
-        button->SetUpTexture(gAssetManager.LoadTexture("B_" + buttonId + "_U.BMP"));
-        button->SetHoverTexture(gAssetManager.LoadTexture("B_" + buttonId + "_H.BMP"));
-        button->SetDownTexture(gAssetManager.LoadTexture("B_" + buttonId + "_D.BMP"));
-        button->SetDisabledTexture(gAssetManager.LoadTexture("B_" + buttonId + "_X.BMP"));
+        button->SetUpTexture(gAssetManager.LoadAsset<Texture>("B_" + buttonId + "_U.BMP"));
+        button->SetHoverTexture(gAssetManager.LoadAsset<Texture>("B_" + buttonId + "_H.BMP"));
+        button->SetDownTexture(gAssetManager.LoadAsset<Texture>("B_" + buttonId + "_D.BMP"));
+        button->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("B_" + buttonId + "_X.BMP"));
         return button;
     }
 }
@@ -38,17 +38,17 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
 
     // Add desktop background image.
     UIImage* desktopBackgroundImage = UI::CreateWidgetActor<UIImage>("Desktop", this);
-    desktopBackgroundImage->SetTexture(gAssetManager.LoadTexture("S_MAIN_SCN.BMP"), true);
+    desktopBackgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_MAIN_SCN.BMP"), true);
     Actor* desktopBackground = desktopBackgroundImage->GetOwner();
 
     // Add exit button as child of desktop background.
     {
         SidneyButton* button = new SidneyButton("ExitButton", desktopBackground);
-        button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
+        button->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_18.FON"));
         button->SetText(SidneyUtil::GetMainScreenLocalizer().GetText("MenuItem9"));
         button->SetWidth(80.0f);
 
-        button->SetPressAudio(gAssetManager.LoadAudio("SIDBUTTON3.WAV"));
+        button->SetPressAudio(gAssetManager.LoadAsset<Audio>("SIDBUTTON3.WAV"));
         button->SetPressCallback([this](){
             Hide();
         });
@@ -66,7 +66,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         float buttonPos = kButtonStart;
         UIButton* searchButton = CreateMainButton(desktopBackground, "SEARCH", buttonPos);
         searchButton->SetPressCallback([this](UIButton* button){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
 
             // Gabe refuses to use the search system.
             if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
@@ -83,7 +83,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* emailButton = CreateMainButton(desktopBackground, "EMAIL", buttonPos);
         emailButton->SetPressCallback([this](UIButton* button){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
 
             // Gabe also doesn't want to use email.
             if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
@@ -102,7 +102,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         filesButton->SetPressCallback([this](UIButton* button){
 
             // Show file selector, along with button SFX.
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
             mFiles.Show([this](SidneyFile* selectedFile){
 
                 // When a file is clicked, try to direct to the most relevant area of Sidney, with that file opened.
@@ -133,14 +133,14 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
                 }
 
                 // Plays another button SFX upon selecting a file.
-                gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+                gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
             });
         });
 
         buttonPos += kButtonSpacing;
         UIButton* analyzeButton = CreateMainButton(desktopBackground, "ANALYZE", buttonPos);
         analyzeButton->SetPressCallback([this](UIButton* button){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
 
             // Gabe also doesn't want to analyze stuff.
             if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
@@ -157,7 +157,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* translateButton = CreateMainButton(desktopBackground, "TRANSL", buttonPos);
         translateButton->SetPressCallback([this](UIButton* button){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
             mFiles.HideAllFileWindows();
             mTranslate.Show();
         });
@@ -165,7 +165,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* dataButton = CreateMainButton(desktopBackground, "ADDATA", buttonPos);
         dataButton->SetPressCallback([this](UIButton* button){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
             mFiles.HideAllFileWindows();
             mAddData.Start();
         });
@@ -173,7 +173,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* idButton = CreateMainButton(desktopBackground, "MAKEID", buttonPos);
         idButton->SetPressCallback([this](UIButton* button){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
             mFiles.HideAllFileWindows();
             mMakeId.Show();
         });
@@ -181,7 +181,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* suspectsButton = CreateMainButton(desktopBackground, "SUSPT", buttonPos);
         suspectsButton->SetPressCallback([this](UIButton* button){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDENTER.WAV"));
             mFiles.HideAllFileWindows();
             mSuspects.Show();
         });
@@ -203,26 +203,26 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         UIImage* topImage = UI::CreateWidgetActor<UIImage>("BGTop", desktopBackgroundImage);
         topImage->GetRectTransform()->SetAnchor(AnchorPreset::Top);
         topImage->GetRectTransform()->SetPivot(0.5f, 0.0f);
-        topImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD1024_TOP_A.BMP"), true);
+        topImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_SID_BKGD1024_TOP_A.BMP"), true);
 
         UIImage* bottomImage = UI::CreateWidgetActor<UIImage>("BGBottom", desktopBackgroundImage);
         bottomImage->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
         bottomImage->GetRectTransform()->SetPivot(0.5f, 1.0f);
-        bottomImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD1024_BOTTOM_A.BMP"), true);
+        bottomImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_SID_BKGD1024_BOTTOM_A.BMP"), true);
 
         UIImage* leftImage = UI::CreateWidgetActor<UIImage>("BGLeft", desktopBackgroundImage);
         leftImage->GetRectTransform()->SetAnchor(AnchorPreset::Left);
         leftImage->GetRectTransform()->SetPivot(1.0f, 0.5f);
-        leftImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD1024_LEFT_A.BMP"), true);
+        leftImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_SID_BKGD1024_LEFT_A.BMP"), true);
 
         UIImage* rightImage = UI::CreateWidgetActor<UIImage>("BGRight", desktopBackgroundImage);
         rightImage->GetRectTransform()->SetAnchor(AnchorPreset::Right);
         rightImage->GetRectTransform()->SetPivot(0.0f, 0.5f);
-        rightImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD1024_RIGHT_A.BMP"), true);
+        rightImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_SID_BKGD1024_RIGHT_A.BMP"), true);
 
         mLamaImage = UI::CreateWidgetActor<UIImage>("BGOverlay", desktopBackgroundImage);
         mLamaImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        mLamaImage->SetTexture(gAssetManager.LoadTexture("S_SID_BKGD800_LAMA_A.BMP"), true);
+        mLamaImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_SID_BKGD800_LAMA_A.BMP"), true);
     }
 
     // Not active by default.

@@ -1,6 +1,7 @@
 #include "Tooltip.h"
 
 #include "AssetManager.h"
+#include "Font.h"
 #include "IniParser.h"
 #include "InputManager.h"
 #include "Localizer.h"
@@ -36,7 +37,7 @@ Tooltip::Tooltip() : Actor("Tooltip", TransformType::RectTransform)
     Color32 backgroundColor;
     Color32 borderColor;
     {
-        TextAsset* textAsset = gAssetManager.LoadText("DEFAULT.TIP", AssetScope::Manual);
+        TextAsset* textAsset = gAssetManager.LoadAsset<TextAsset>("DEFAULT.TIP", AssetScope::Manual);
         IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
         IniSection section;
@@ -46,11 +47,11 @@ Tooltip::Tooltip() : Actor("Tooltip", TransformType::RectTransform)
             {
                 if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "Font Name"))
                 {
-                    mFont = gAssetManager.LoadFont(line.entries[0].value);
+                    mFont = gAssetManager.LoadAsset<Font>(line.entries[0].value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "Debug Font Name"))
                 {
-                    mDebugFont = gAssetManager.LoadFont(line.entries[0].value);
+                    mDebugFont = gAssetManager.LoadAsset<Font>(line.entries[0].value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "Show Delay"))
                 {

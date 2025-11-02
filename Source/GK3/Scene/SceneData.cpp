@@ -13,8 +13,8 @@
 SceneData::SceneData(const std::string& location, const std::string& timeblock) : mTimeblock(timeblock)
 {
     // Load general and specific SIF assets.
-    mGeneralSIF = gAssetManager.LoadSIF(location, AssetScope::Scene);
-    mSpecificSIF = gAssetManager.LoadSIF(location + timeblock, AssetScope::Scene);
+    mGeneralSIF = gAssetManager.LoadAsset<SceneInitFile>(location, AssetScope::Scene);
+    mSpecificSIF = gAssetManager.LoadAsset<SceneInitFile>(location + timeblock, AssetScope::Scene);
 }
 
 SceneData::~SceneData()
@@ -81,7 +81,7 @@ void SceneData::ResolveSceneData()
     // Also figure out whether we have a walker boundary - if so, create one.
     if(!mGeneralSettings.walkerBoundaryTextureName.empty())
     {
-        Texture* walkerTexture = gAssetManager.LoadTexture(mGeneralSettings.walkerBoundaryTextureName, AssetScope::Scene);
+        Texture* walkerTexture = gAssetManager.LoadAsset<Texture>(mGeneralSettings.walkerBoundaryTextureName, AssetScope::Scene);
 
         mWalkerBoundary = new WalkerBoundary();
         mWalkerBoundary->SetTexture(walkerTexture);

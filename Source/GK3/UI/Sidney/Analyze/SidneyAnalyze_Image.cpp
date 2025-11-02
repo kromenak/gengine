@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
+#include "Audio.h"
 #include "GameProgress.h"
 #include "RectTransform.h"
 #include "SidneyFiles.h"
@@ -56,7 +57,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     {
         mAnalyzeImageWindow->SetActive(true);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
-        mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT1_BASE.BMP"), true);
+        mAnalyzeImage->SetTexture(gAssetManager.LoadAsset<Texture>("PARCHMENT1_BASE.BMP"), true);
 
         mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, 0, true);
         mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, 1, false);
@@ -73,7 +74,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     {
         mAnalyzeImageWindow->SetActive(true);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
-        mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT2_BASE.BMP"), true);
+        mAnalyzeImage->SetTexture(gAssetManager.LoadAsset<Texture>("PARCHMENT2_BASE.BMP"), true);
 
         mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_ExtractAnomaliesIdx, false);
         mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_TranslateIdx, false);
@@ -90,7 +91,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     {
         mAnalyzeImageWindow->SetActive(true);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -107.0f); // this one is vertically centered for some reason
-        mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("POUSSIN.BMP"), true);
+        mAnalyzeImage->SetTexture(gAssetManager.LoadAsset<Texture>("POUSSIN.BMP"), true);
 
         mMenuBar.SetDropdownEnabled(kTextDropdownIdx, false);
 
@@ -104,7 +105,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     {
         mAnalyzeImageWindow->SetActive(true);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
-        mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("TENIERS.BMP"), true);
+        mAnalyzeImage->SetTexture(gAssetManager.LoadAsset<Texture>("TENIERS.BMP"), true);
 
         mMenuBar.SetDropdownEnabled(kTextDropdownIdx, false);
 
@@ -233,7 +234,7 @@ void SidneyAnalyze::AnalyzeImage_OnAnalyzeTextPressed()
         gActionManager.StartManualAction();
 
         // Play a modem SFX, so it seems like we're reaching out to the internet...
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDMODEM.WAV", AssetScope::Scene));
+        gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDMODEM.WAV", AssetScope::Scene));
 
         // Show a series of messages that make it seem like we're analyzing the text and downloading stuff from the internet.
         ShowAnalyzeMessage("Text1Parch2", Vector2(), HorizontalAlignment::Center, true);
@@ -382,9 +383,9 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
                     Timers::AddTimerSeconds(4.0f, [this](){
 
                         // Show tilted square.
-                        mAnalyzeVideoImages[0]->SetTexture(gAssetManager.LoadTexture("TENIERGEOC.BMP", AssetScope::Scene));
+                        mAnalyzeVideoImages[0]->SetTexture(gAssetManager.LoadAsset<Texture>("TENIERGEOC.BMP", AssetScope::Scene));
                         mAnalyzeVideoImages[0]->GetTexture()->SetTransparentColor(Color32(0, 255, 0));
-                        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTTON4.WAV"));
+                        gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDBUTTON4.WAV"));
                         ShowAnalyzeMessage("GeometryTenier4", Vector2(190.0f, -160.0f), HorizontalAlignment::Center, true);
 
                         // Wait a bit more.
@@ -431,7 +432,7 @@ void SidneyAnalyze::AnalyzeImage_OnRotateShapeButtonPressed()
             // Show an image popup with the rotated image.
             mAnalyzePopup->ResetToDefaults();
             mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("RotateParch2"));
-            mAnalyzePopup->SetImage(gAssetManager.LoadTexture("ZION_ROT.BMP", AssetScope::Scene));
+            mAnalyzePopup->SetImage(gAssetManager.LoadAsset<Texture>("ZION_ROT.BMP", AssetScope::Scene));
             mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
             mAnalyzePopup->SetWindowPosition(Vector2(-112.0f, 0.0f));
             mAnalyzePopup->SetWindowSize(Vector2(135.0f, 243.0f));
@@ -466,7 +467,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
             mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
             mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("SaveArcadia"));
 
-            mAnalyzePopup->SetImage(gAssetManager.LoadTexture("POUSSIN_ZOOM.BMP"));
+            mAnalyzePopup->SetImage(gAssetManager.LoadAsset<Texture>("POUSSIN_ZOOM.BMP"));
 
             // This popup has yes/no options.
             // If yes is pressed, we save the "arcadia" text as a file.
@@ -507,7 +508,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
             mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
             mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("GetVerse"));
 
-            mAnalyzePopup->SetImage(gAssetManager.LoadTexture("TENIERS_ZOOM.BMP"));
+            mAnalyzePopup->SetImage(gAssetManager.LoadAsset<Texture>("TENIERS_ZOOM.BMP"));
 
             // This popup has yes/no options.
             // If yes is pressed, we "reach out to the internet" to get the text.
@@ -515,7 +516,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
 
                 // Play a modem SFX, so it seems like we're reaching out to the internet...
                 gActionManager.StartManualAction();
-                gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDMODEM.WAV", AssetScope::Scene));
+                gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDMODEM.WAV", AssetScope::Scene));
                 ShowAnalyzeMessage("RetrieveVerse", Vector2(), HorizontalAlignment::Center, true);
 
                 // The audio file is about six seconds long.
@@ -558,7 +559,7 @@ void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIVideo
         gActionManager.FinishManualAction();
 
         // Set a final texture if specified.
-        Texture* finalTexture = gAssetManager.LoadTexture(finalTextureName, AssetScope::Scene);
+        Texture* finalTexture = gAssetManager.LoadAsset<Texture>(finalTextureName, AssetScope::Scene);
         if(finalTexture != nullptr)
         {
             videoImage->SetTransparentColor(finalTextureTransparentColor);

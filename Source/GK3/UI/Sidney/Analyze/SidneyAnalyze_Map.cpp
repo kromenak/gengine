@@ -3,7 +3,9 @@
 #include "Actor.h"
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Audio.h"
 #include "AudioManager.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "InputManager.h"
 #include "LocationManager.h"
@@ -82,7 +84,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
     // Create status text label.
     {
         mMapStatusLabel = UI::CreateWidgetActor<UILabel>("MapStatus", mAnalyzeMapWindow);
-        mMapStatusLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14_GRN.FON"));
+        mMapStatusLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14_GRN.FON"));
         mMapStatusLabel->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mMapStatusLabel->GetRectTransform()->SetAnchoredPosition(4.0f, 13.0f);
         mMapStatusLabel->SetEnabled(false);
@@ -622,7 +624,7 @@ void SidneyAnalyze::AnalyzeMap_CheckPiscesCompletion()
 
                 // Grace is excited that we figured it out.
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OAG2ZJU2\", 2)", [](const Action* action){
-                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
+                    gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("CLOCKTIMEBLOCK.WAV"));
                 });
 
                 // Show confirmation message.
@@ -773,7 +775,7 @@ void SidneyAnalyze::AnalyzeMap_CheckTaurusCompletion()
 
             // Grace is excited that we figured it out. And time moves forward a bit!
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7E2ZQB1\", 1)", [](const Action* action){
-                gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
+                gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("CLOCKTIMEBLOCK.WAV"));
             });
 
             // Taurus is done.

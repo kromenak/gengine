@@ -8,6 +8,7 @@
 #include "LocationManager.h"
 #include "SceneManager.h"
 #include "TextAsset.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -23,7 +24,7 @@ GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
     // 1) The UI layout to use for different screen resolutions.
     // 2) The mapping from world space to the GPS image and GPS coordinates for different locations in the game.
     {
-        TextAsset* textAsset = gAssetManager.LoadText("GPS.TXT", AssetScope::Manual);
+        TextAsset* textAsset = gAssetManager.LoadAsset<TextAsset>("GPS.TXT", AssetScope::Manual);
         IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
@@ -288,8 +289,8 @@ void GPSOverlay::SetLatLongFromTexturePos(const Vector2& texturePos)
     longitude.second = mCurrentLocation->referenceLongitude.second + seconds.x;
 
     // Format the text and display it on the GPS (whew)!
-    mLongitudeLabel->SetText(StringUtil::Format("%02d°%02d'%05.2f\"", longitude.degree, longitude.minute, longitude.second));
-    mLatitudeLabel->SetText(StringUtil::Format("%02d°%02d'%05.2f\"", latitude.degree, latitude.minute, latitude.second));
+    mLongitudeLabel->SetText(StringUtil::Format("%02dï¿½%02d'%05.2f\"", longitude.degree, longitude.minute, longitude.second));
+    mLatitudeLabel->SetText(StringUtil::Format("%02dï¿½%02d'%05.2f\"", latitude.degree, latitude.minute, latitude.second));
 }
 
 bool GPSOverlay::ParseLayout(const IniSection& section)
@@ -319,19 +320,19 @@ bool GPSOverlay::ParseLayout(const IniSection& section)
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "vLineFile"))
             {
-                uiSize.verticalLineTexture = gAssetManager.LoadTexture(entry.value);
+                uiSize.verticalLineTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "hLineFile"))
             {
-                uiSize.horizontalLineTexture = gAssetManager.LoadTexture(entry.value);
+                uiSize.horizontalLineTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "targetFile"))
             {
-                uiSize.targetSquareTexture = gAssetManager.LoadTexture(entry.value);
+                uiSize.targetSquareTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "fontFile"))
             {
-                uiSize.font = gAssetManager.LoadFont(entry.value);
+                uiSize.font = gAssetManager.LoadAsset<Font>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "cornerWidth"))
             {
@@ -368,19 +369,19 @@ bool GPSOverlay::ParseLayout(const IniSection& section)
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnUpSprite"))
             {
-                uiSize.powerButtonUpTexture = gAssetManager.LoadTexture(entry.value);
+                uiSize.powerButtonUpTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnDownSprite"))
             {
-                uiSize.powerButtonDownTexture = gAssetManager.LoadTexture(entry.value);
+                uiSize.powerButtonDownTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnHoverSprite"))
             {
-                uiSize.powerButtonHoverTexture = gAssetManager.LoadTexture(entry.value);
+                uiSize.powerButtonHoverTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
             else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnDisabledSprite"))
             {
-                uiSize.powerButtonDisabledTexture = gAssetManager.LoadTexture(entry.value);
+                uiSize.powerButtonDisabledTexture = gAssetManager.LoadAsset<Texture>(entry.value);
             }
         }
 
@@ -465,7 +466,7 @@ void GPSOverlay::ApplyLayout(int index)
 
     if(mCurrentLocation != nullptr)
     {
-        mMapImage->SetTexture(gAssetManager.LoadTexture(mCurrentLocation->mapTextureName + mLayouts[index].textureSuffix, AssetScope::Scene), true);
+        mMapImage->SetTexture(gAssetManager.LoadAsset<Texture>(mCurrentLocation->mapTextureName + mLayouts[index].textureSuffix, AssetScope::Scene), true);
     }
 
     mVerticalLineImage->SetTexture(mLayouts[index].verticalLineTexture, true);

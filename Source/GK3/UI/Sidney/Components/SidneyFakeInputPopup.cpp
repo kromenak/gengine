@@ -3,6 +3,8 @@
 #include "ActionManager.h"
 #include "AssetManager.h"
 #include "AudioManager.h"
+#include "Audio.h"
+#include "Font.h"
 #include "Random.h"
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
@@ -30,7 +32,7 @@ SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& nam
 
     {
         mHeaderLabel = UI::CreateWidgetActor<UILabel>("HeaderLabel", this);
-        mHeaderLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mHeaderLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mHeaderLabel->SetText("");
         mHeaderLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
@@ -40,7 +42,7 @@ SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& nam
     }
     {
         mPromptLabel = UI::CreateWidgetActor<UILabel>("PromptLabel", this);
-        mPromptLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mPromptLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mPromptLabel->SetText("");
         mPromptLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
@@ -50,7 +52,7 @@ SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& nam
     }
     {
         mInputLabel = UI::CreateWidgetActor<UILabel>("InputLabel", this);
-        mInputLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mInputLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mInputLabel->SetText("");
         mInputLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
@@ -59,7 +61,7 @@ SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& nam
         mInputLabel->GetRectTransform()->SetSizeDelta(226.0f, 16.0f);
 
         mOKButton = new SidneyButton("OKButton", this);
-        mOKButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+        mOKButton->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"));
         mOKButton->SetText(SidneyUtil::GetAddDataLocalizer().GetText("OKButton"));
         mOKButton->GetButton()->SetCanInteract(false);
 
@@ -135,7 +137,7 @@ void SidneyFakeInputPopup::OnUpdate(float deltaTime)
 
                 // Play random "key press" SFX from set of sounds.
                 int index = Random::Range(1, 5);
-                Audio* audio = gAssetManager.LoadAudio("COMPKEYSIN" + std::to_string(index), AssetScope::Scene);
+                Audio* audio = gAssetManager.LoadAsset<Audio>("COMPKEYSIN" + std::to_string(index), AssetScope::Scene);
                 gAudioManager.PlaySFX(audio);
             }
             else
@@ -154,7 +156,7 @@ void SidneyFakeInputPopup::OnUpdate(float deltaTime)
                 mOKButton->Press();
 
                 // The game also plays like an "enter key press" sound at this point.
-                gAudioManager.PlaySFX(gAssetManager.LoadAudio("COMPKEYSPACE.WAV", AssetScope::Scene));
+                gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("COMPKEYSPACE.WAV", AssetScope::Scene));
             }
         }
     }

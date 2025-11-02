@@ -15,25 +15,27 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFileNameN
 {
     // Load text assets for vertex and fragment shader sources.
     std::string vertexShaderFileName = Path::SetExtension(vertexShaderFileNameNoExt, GAPI::Get()->GetShaderFileExtension());
-    TextAsset* vertexShaderSource = gAssetManager.LoadText(vertexShaderFileName, AssetScope::Manual);
+    TextAsset* vertexShaderSource = gAssetManager.LoadAsset<TextAsset>(vertexShaderFileName, AssetScope::Manual, "shader_source");
 
     std::string fragmentShaderFileName = Path::SetExtension(fragmentShaderFileNameNoExt, GAPI::Get()->GetShaderFileExtension());
-    TextAsset* fragmentShaderSource = gAssetManager.LoadText(vertexShaderFileName, AssetScope::Manual);
+    TextAsset* fragmentShaderSource = gAssetManager.LoadAsset<TextAsset>(fragmentShaderFileName, AssetScope::Manual, "shader_source");
 
     // Create from source if both source files loaded successfully.
     if(vertexShaderSource != nullptr && fragmentShaderSource != nullptr)
     {
         CreateShader(vertexShaderSource, fragmentShaderSource, featureFlags);
-        delete vertexShaderSource;
-        delete fragmentShaderSource;
     }
+
+    // Delete text assets after use.
+    delete vertexShaderSource;
+    delete fragmentShaderSource;
 }
 
 Shader::Shader(const std::string& name, const std::string& shaderFileNameNoExt, const std::vector<std::string>& featureFlags) : Asset(name, AssetScope::Manual)
 {
     // Load text asset containing shader source.
     std::string shaderFileNameWithExt = Path::SetExtension(shaderFileNameNoExt, GAPI::Get()->GetShaderFileExtension());
-    TextAsset* shaderSource = gAssetManager.LoadText(shaderFileNameWithExt, AssetScope::Manual);
+    TextAsset* shaderSource = gAssetManager.LoadAsset<TextAsset>(shaderFileNameWithExt, AssetScope::Manual, "shader_source");
 
     // Create shader from source.
     // When a single source file is provided, we assume both vertex and fragment shader are in one file,
@@ -41,8 +43,10 @@ Shader::Shader(const std::string& name, const std::string& shaderFileNameNoExt, 
     if(shaderSource != nullptr)
     {
         CreateShader(shaderSource, shaderSource, featureFlags);
-        delete shaderSource;
     }
+
+    // Delete text assets after use.
+    delete shaderSource;
 }
 
 Shader::~Shader()

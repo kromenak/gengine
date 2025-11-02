@@ -26,10 +26,10 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
 
     // Add exit button to bottom-left corner of screen.
     UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", this);
-    exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
-    exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
-    exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
-    exitButton->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
+    exitButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("EXITN.BMP"));
+    exitButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("EXITD.BMP"));
+    exitButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("EXITHOV.BMP"));
+    exitButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("EXITDIS.BMP"));
     exitButton->SetPressCallback([this](UIButton* button){ Hide(); });
     exitButton->SetTooltipText("inventoryexit");
     exitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
@@ -39,11 +39,11 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
     // Add scrollbar on the right side of the screen, for when there are too many
     // inventory items to fit on one screen.
     UIScrollbarParams scrollbarParams;
-    scrollbarParams.decreaseValueButtonUp = gAssetManager.LoadTexture("INV_SCROLLUP_STD.BMP");
-    scrollbarParams.decreaseValueButtonDown = gAssetManager.LoadTexture("INV_SCROLLUP_DWN.BMP");
-    scrollbarParams.increaseValueButtonUp = gAssetManager.LoadTexture("INV_SCROLLDN_STD.BMP");
-    scrollbarParams.increaseValueButtonDown = gAssetManager.LoadTexture("INV_SCROLLDN_DWN.BMP");
-    scrollbarParams.scrollbarBacking = gAssetManager.LoadTexture("INV_SCROLLBACK.BMP");
+    scrollbarParams.decreaseValueButtonUp = gAssetManager.LoadAsset<Texture>("INV_SCROLLUP_STD.BMP");
+    scrollbarParams.decreaseValueButtonDown = gAssetManager.LoadAsset<Texture>("INV_SCROLLUP_DWN.BMP");
+    scrollbarParams.increaseValueButtonUp = gAssetManager.LoadAsset<Texture>("INV_SCROLLDN_STD.BMP");
+    scrollbarParams.increaseValueButtonDown = gAssetManager.LoadAsset<Texture>("INV_SCROLLDN_DWN.BMP");
+    scrollbarParams.scrollbarBacking = gAssetManager.LoadAsset<Texture>("INV_SCROLLBACK.BMP");
     scrollbarParams.handleParams.leftColor = scrollbarParams.handleParams.topColor = scrollbarParams.handleParams.topLeftColor = Color32(181, 125, 0);
     scrollbarParams.handleParams.rightColor = scrollbarParams.handleParams.bottomColor = scrollbarParams.handleParams.topRightColor =
         scrollbarParams.handleParams.bottomRightColor = scrollbarParams.handleParams.bottomLeftColor = Color32(90, 28, 33);
@@ -63,7 +63,7 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
 
     // Create active inventory item highlight, but hide by default.
     mActiveHighlightImage = UI::CreateWidgetActor<UIImage>("ActiveHighlight", this);
-    mActiveHighlightImage->SetTexture(gAssetManager.LoadTexture("INV_HIGHLIGHT.BMP"), true);
+    mActiveHighlightImage->SetTexture(gAssetManager.LoadAsset<Texture>("INV_HIGHLIGHT.BMP"), true);
     mActiveHighlightImage->SetEnabled(false);
     mActiveHighlightImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 

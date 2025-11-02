@@ -20,7 +20,7 @@ void SceneConstruction::Init(Scene* scene, SceneData* sceneData)
     // Record camera bounds models for visualization purposes.
     for(auto& modelName : sceneData->GetCameraBoundsModelNames())
     {
-        Model* model = gAssetManager.LoadModel(modelName, AssetScope::Scene);
+        Model* model = gAssetManager.LoadAsset<Model>(modelName, AssetScope::Scene);
         if(model != nullptr)
         {
             mCameraBoundsModels.push_back(model);

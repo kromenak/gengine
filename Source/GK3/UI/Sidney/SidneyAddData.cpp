@@ -2,7 +2,9 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Audio.h"
 #include "GameProgress.h"
+#include "Font.h"
 #include "InventoryManager.h"
 #include "Scene.h"
 #include "Sidney.h"
@@ -27,8 +29,8 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
         UINineSlice* innerBox = UI::CreateWidgetActor<UINineSlice>("LabelBox", mAddDataBox, SidneyUtil::GetGrayBoxParams(Color32(0, 0, 0, 180)));
         innerBox->GetRectTransform()->SetSizeDelta(220.0f, 17.0f);
 
-        mGreenFont = gAssetManager.LoadFont("SID_TEXT_14_GRN.FON");
-        mYellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
+        mGreenFont = gAssetManager.LoadAsset<Font>("SID_TEXT_14_GRN.FON");
+        mYellowFont = gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON");
 
         mAddDataLabel = UI::CreateWidgetActor<UILabel>("AddDataLabel", innerBox);
         mAddDataLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
@@ -126,7 +128,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 // CASE 3: Valid object selected, not scanned yet.
                 // Show box (and SFX) indicating we are scanning an item.
                 mAddDataBox->SetActive(true);
-                gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDSCAN.WAV"));
+                gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDSCAN.WAV"));
 
                 // Start with green text, but it will blink on an interval.
                 mAddDataLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("ScanningItem"));

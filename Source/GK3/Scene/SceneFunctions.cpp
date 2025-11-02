@@ -36,7 +36,7 @@ namespace
             {
                 // This anim involves Buchelli putting the wine glass down on the table.
                 // Get the vertex anims for the glass and contained liquid.
-                Animation* anim = gAssetManager.LoadAnimation("VITLBYSTANDWBRB.ANM", AssetScope::Scene);
+                Animation* anim = gAssetManager.LoadAsset<Animation>("VITLBYSTANDWBRB.ANM", AssetScope::Scene);
                 VertexAnimNode* glassAnim = anim->GetFirstVertexAnimationForModel("bglass");
                 VertexAnimNode* wineAnim = anim->GetFirstVertexAnimationForModel("bourbon");
 

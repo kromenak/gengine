@@ -2,10 +2,13 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Audio.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "Random.h"
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -25,25 +28,25 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
     // Lay out divider lines for the various areas of the anagram parser window.
     {
         UIImage* dividerImage = UI::CreateWidgetActor<UIImage>("Divider", window);
-        dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        dividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         dividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -61.0f);
         dividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         dividerImage = UI::CreateWidgetActor<UIImage>("Divider", window);
-        dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        dividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         dividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -231.0f);
         dividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         dividerImage = UI::CreateWidgetActor<UIImage>("Divider", window);
-        dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        dividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         dividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -291.0f);
         dividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         dividerImage = UI::CreateWidgetActor<UIImage>("Divider", window);
-        dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_SIDE.BMP"), true);
+        dividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_SIDE.BMP"), true);
         dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         dividerImage->GetRectTransform()->SetAnchoredPosition(183.0f, -61.0f);
         dividerImage->GetRectTransform()->SetSizeDelta(2.0f, 171.0f);
@@ -52,14 +55,14 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
     // Create labels in the header area.
     {
         UILabel* titleLabel = UI::CreateWidgetActor<UILabel>("TitleLabel", window);
-        titleLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        titleLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         titleLabel->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("AnagramTitle"));
         titleLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         titleLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -9.0f);
         titleLabel->FitRectTransformToText();
 
         mParsingHeaderLabel = UI::CreateWidgetActor<UILabel>("ParsingLabel", window);
-        mParsingHeaderLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mParsingHeaderLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mParsingHeaderLabel->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Parsing"));
         mParsingHeaderLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mParsingHeaderLabel->GetRectTransform()->SetAnchoredPosition(161.0f, -9.0f);
@@ -70,7 +73,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
         for(int i = 0; i < kMaxAnagramLetters; ++i)
         {
             mLetterLabels[i] = UI::CreateWidgetActor<UILabel>("AnagramLetter" + std::to_string(i), window);
-            mLetterLabels[i]->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            mLetterLabels[i]->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
             mLetterLabels[i]->SetText("A");
             mLetterLabels[i]->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             mLetterLabels[i]->GetRectTransform()->SetAnchoredPosition(kLetterX + i * kLetterSpacing, -34.0f);
@@ -97,7 +100,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
             for(int i = 0; i < kMaxAnagramWords; ++i)
             {
                 UILabel* label = UI::CreateWidgetActor<UILabel>("AnagramWord" + std::to_string(i), scrollRect);
-                label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+                label->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
                 label->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Word" + std::to_string(i + 1)));
                 label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 label->FitRectTransformToText();
@@ -118,7 +121,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
 
             // Add header label.
             UILabel* label = UI::CreateWidgetActor<UILabel>("SelectLabel", box);
-            label->SetFont(gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+            label->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_UL.FON"));
             label->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("SelectText"));
             label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             label->GetRectTransform()->SetAnchoredPosition(8.0f, -2.0f);
@@ -129,7 +132,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
     // Create message area.
     {
         mMessagesLabel = UI::CreateWidgetActor<UILabel>("MessageLabel", window);
-        mMessagesLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mMessagesLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mMessagesLabel->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("LatinMsg") + "\n" + SidneyUtil::GetAnalyzeLocalizer().GetText("Latin2Msg"));
         mMessagesLabel->SetVerticalAlignment(VerticalAlignment::Top);
         mMessagesLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
@@ -147,7 +150,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
 
         // Add header label.
         UILabel* label = UI::CreateWidgetActor<UILabel>("PhraseBuildingLabel", box);
-        label->SetFont(gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+        label->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_UL.FON"));
         label->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("PhraseText"));
         label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         label->GetRectTransform()->SetAnchoredPosition(8.0f, -2.0f);
@@ -159,13 +162,13 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
         for(int i = 0; i < kMaxSelectedWords; ++i)
         {
             UIImage* underline = UI::CreateWidgetActor<UIImage>("Slot" + std::to_string(i), window);
-            underline->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+            underline->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
             underline->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             underline->GetRectTransform()->SetAnchoredPosition(slotX + kSlotSpacing * i, -262.0f);
             underline->GetRectTransform()->SetSizeDelta(40.0f, 1.0f);
 
             mSelectedWordLabels[i] = UI::CreateWidgetActor<UILabel>("SlotWord" + std::to_string(i), window);
-            mSelectedWordLabels[i]->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            mSelectedWordLabels[i]->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
             mSelectedWordLabels[i]->SetText("");
             mSelectedWordLabels[i]->SetHorizonalAlignment(HorizontalAlignment::Center);
             mSelectedWordLabels[i]->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
@@ -174,7 +177,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
         }
 
         mTranslatedTextLabel = UI::CreateWidgetActor<UILabel>("TranslatedTextLabel", window);
-        mTranslatedTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mTranslatedTextLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mTranslatedTextLabel->SetText("");
         mTranslatedTextLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mTranslatedTextLabel->GetRectTransform()->SetAnchoredPosition(slotX, -270.0f);
@@ -239,7 +242,7 @@ void SidneyAnagramParser::Show(const std::string& anagramText, const std::functi
     mRemainingLetters = mAllLetters;
 
     // Populate individual anagram parser letters.
-    Font* font = gAssetManager.LoadFont("SID_TEXT_14.FON");
+    Font* font = gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON");
     for(int i = 0; i < kMaxAnagramLetters; ++i)
     {
         if(i < mAllLetters.length())
@@ -310,7 +313,7 @@ void SidneyAnagramParser::OnUpdate(float deltaTime)
         if(mScrambleTimer <= 0.0f)
         {
             // Do the scramble!
-            Font* unavailableFont = gAssetManager.LoadFont("SID_TEXT_14_UL.FON");
+            Font* unavailableFont = gAssetManager.LoadAsset<Font>("SID_TEXT_14_UL.FON");
             std::string lettersRemaining = mRemainingLetters;
             for(int i = 0; i < kMaxAnagramLetters; ++i)
             {
@@ -557,8 +560,8 @@ bool SidneyAnagramParser::RefreshSelectedAndAvailableWords()
 
     // Finally, refresh the remaining letters in the letter labels.
     // The easiest way to do this is to mark them all available, then go back and mark some unavailable.
-    Font* availableFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
-    Font* unavailableFont = gAssetManager.LoadFont("SID_TEXT_14_UL.FON");
+    Font* availableFont = gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON");
+    Font* unavailableFont = gAssetManager.LoadAsset<Font>("SID_TEXT_14_UL.FON");
     for(int i = 0; i < kMaxAnagramLetters; ++i)
     {
         mLetterLabels[i]->SetFont(availableFont);
@@ -615,7 +618,7 @@ void SidneyAnagramParser::StartScramble()
 {
     // Play a "we're scrambling the letters" sound.
     PlayAudioParams audioParams;
-    audioParams.audio = gAssetManager.LoadAudio("SIDANAGRAMSCRAMBLE.WAV", AssetScope::Scene);
+    audioParams.audio = gAssetManager.LoadAsset<Audio>("SIDANAGRAMSCRAMBLE.WAV", AssetScope::Scene);
     audioParams.audioType = AudioType::SFX;
     audioParams.loopCount = -1;
     mScrambleSoundHandle = gAudioManager.Play(audioParams);

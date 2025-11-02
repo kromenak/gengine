@@ -3,11 +3,12 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
+#include "Audio.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
 #include "Sidney.h"
 #include "SidneyButton.h"
-#include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UIImage.h"
@@ -26,7 +27,7 @@ Actor* SidneyUtil::CreateBackground(Actor* parent)
 
     // Add the background image and size to fit.
     UIImage* backgroundImage = backgroundActor->AddComponent<UIImage>();
-    backgroundImage->SetTexture(gAssetManager.LoadTexture("S_BKGND.BMP"), true);
+    backgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BKGND.BMP"), true);
 
     // Receive input to avoid sending inputs to main screen below this screen.
     backgroundImage->SetReceivesInput(true);
@@ -36,12 +37,12 @@ Actor* SidneyUtil::CreateBackground(Actor* parent)
 void SidneyUtil::CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback)
 {
     SidneyButton* button = new SidneyButton("MainMenuButton", parent);
-    button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
+    button->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_18.FON"));
     button->SetText(GetMainScreenLocalizer().GetText("HomeButton"));
     button->SetWidth(94.0f);
 
     button->SetPressCallback(pressCallback);
-    button->SetPressAudio(gAssetManager.LoadAudio("SIDEXIT.WAV"));
+    button->SetPressAudio(gAssetManager.LoadAsset<Audio>("SIDEXIT.WAV"));
 
     button->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
     button->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
@@ -54,9 +55,9 @@ UIButton* SidneyUtil::CreateCloseWindowButton(Actor* parent, const std::function
     closeButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     closeButton->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
 
-    closeButton->SetUpTexture(gAssetManager.LoadTexture("CLOSEWIN_UP.BMP"));
-    closeButton->SetDownTexture(gAssetManager.LoadTexture("CLOSEWIN_DOWN.BMP"));
-    closeButton->SetHoverTexture(gAssetManager.LoadTexture("CLOSEWIN_HOVER.BMP"));
+    closeButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("CLOSEWIN_UP.BMP"));
+    closeButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("CLOSEWIN_DOWN.BMP"));
+    closeButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("CLOSEWIN_HOVER.BMP"));
 
     closeButton->SetPressCallback([pressCallback](UIButton* button) {
         pressCallback();
@@ -67,14 +68,14 @@ UIButton* SidneyUtil::CreateCloseWindowButton(Actor* parent, const std::function
 SidneyButton* SidneyUtil::CreateBigButton(Actor* parent)
 {
     SidneyButton* button = new SidneyButton(parent);
-    button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"), gAssetManager.LoadFont("SID_TEXT_18_UL.FON"));
+    button->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_18.FON"), gAssetManager.LoadAsset<Font>("SID_TEXT_18_UL.FON"));
     return button;
 }
 
 SidneyButton* SidneyUtil::CreateSmallButton(Actor* parent)
 {
     SidneyButton* button = new SidneyButton(parent);
-    button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+    button->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"), gAssetManager.LoadAsset<Font>("SID_PDN_10_UL.FON"));
     button->SetWidth(80.0f);
     button->SetHeight(13.0f);
     return button;
@@ -88,14 +89,14 @@ FilePreviewWindow SidneyUtil::CreateFilePreviewWindow(Actor* parent)
 
     // Add one line for the box header.
     UIImage* boxHeaderDividerImage = UI::CreateWidgetActor<UIImage>("Divider", border);
-    boxHeaderDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+    boxHeaderDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
     boxHeaderDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
     boxHeaderDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -17.0f);
     boxHeaderDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
     // Add header label.
     UILabel* headerLabel = UI::CreateWidgetActor<UILabel>("HeaderLabel", border);
-    headerLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+    headerLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
     headerLabel->SetText("");
     headerLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
     headerLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -122,14 +123,14 @@ const UINineSliceParams& SidneyUtil::GetGrayBoxParams(const Color32& centerColor
     static UINineSliceParams params;
     if(params.topTexture == nullptr)
     {
-        params.topLeftTexture = gAssetManager.LoadTexture("S_BOX_CORNER_TL.BMP");
-        params.topRightTexture = gAssetManager.LoadTexture("S_BOX_CORNER_TR.BMP");
-        params.bottomLeftTexture = gAssetManager.LoadTexture("S_BOX_CORNER_BL.BMP");
-        params.bottomRightTexture = gAssetManager.LoadTexture("S_BOX_CORNER_BR.BMP");
+        params.topLeftTexture = gAssetManager.LoadAsset<Texture>("S_BOX_CORNER_TL.BMP");
+        params.topRightTexture = gAssetManager.LoadAsset<Texture>("S_BOX_CORNER_TR.BMP");
+        params.bottomLeftTexture = gAssetManager.LoadAsset<Texture>("S_BOX_CORNER_BL.BMP");
+        params.bottomRightTexture = gAssetManager.LoadAsset<Texture>("S_BOX_CORNER_BR.BMP");
         params.topLeftColor = params.topRightColor = params.bottomLeftColor = params.bottomRightColor = Color32::Clear;
 
-        params.leftTexture = params.rightTexture = gAssetManager.LoadTexture("S_BOX_SIDE.BMP");
-        params.bottomTexture = params.topTexture = gAssetManager.LoadTexture("S_BOX_TOP.BMP");
+        params.leftTexture = params.rightTexture = gAssetManager.LoadAsset<Texture>("S_BOX_SIDE.BMP");
+        params.bottomTexture = params.topTexture = gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP");
     }
     params.centerColor = centerColor;
     return params;
@@ -140,14 +141,14 @@ const UINineSliceParams& SidneyUtil::GetGoldBoxParams(const Color32& centerColor
     static UINineSliceParams params;
     if(params.topTexture == nullptr)
     {
-        params.topLeftTexture = gAssetManager.LoadTexture("S_BOX_CORNER_TL_L.BMP");
-        params.topRightTexture = gAssetManager.LoadTexture("S_BOX_CORNER_TR_L.BMP");
-        params.bottomLeftTexture = gAssetManager.LoadTexture("S_BOX_CORNER_BL_L.BMP");
-        params.bottomRightTexture = gAssetManager.LoadTexture("S_BOX_CORNER_BR_L.BMP");
+        params.topLeftTexture = gAssetManager.LoadAsset<Texture>("S_BOX_CORNER_TL_L.BMP");
+        params.topRightTexture = gAssetManager.LoadAsset<Texture>("S_BOX_CORNER_TR_L.BMP");
+        params.bottomLeftTexture = gAssetManager.LoadAsset<Texture>("S_BOX_CORNER_BL_L.BMP");
+        params.bottomRightTexture = gAssetManager.LoadAsset<Texture>("S_BOX_CORNER_BR_L.BMP");
         params.topLeftColor = params.topRightColor = params.bottomLeftColor = params.bottomRightColor = Color32::Clear;
 
-        params.leftTexture = params.rightTexture = gAssetManager.LoadTexture("S_BOX_SIDE_L.BMP");
-        params.bottomTexture = params.topTexture = gAssetManager.LoadTexture("S_BOX_TOP_L.BMP");
+        params.leftTexture = params.rightTexture = gAssetManager.LoadAsset<Texture>("S_BOX_SIDE_L.BMP");
+        params.bottomTexture = params.topTexture = gAssetManager.LoadAsset<Texture>("S_BOX_TOP_L.BMP");
     }
     params.centerColor = centerColor;
     return params;

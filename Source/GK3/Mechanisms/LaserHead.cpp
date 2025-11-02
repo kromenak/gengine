@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "Animation.h"
 #include "Animator.h"
 #include "AssetManager.h"
 #include "Debug.h"
@@ -166,7 +167,7 @@ void LaserHead::Turn(int dir, const std::function<void()>& callback)
     // Play turn animation.
     // This is basically Grace moving her hands in slightly different ways based on the rotation of the head.
     std::string animName = dir > 0 ? "GraCs2TrnHeadL" : "GraCs2TrnHeadR";
-    Animation* turnAnim = gAssetManager.LoadAnimation(animName + std::to_string(mTurnIndex), AssetScope::Scene);
+    Animation* turnAnim = gAssetManager.LoadAsset<Animation>(animName + std::to_string(mTurnIndex), AssetScope::Scene);
     gSceneManager.GetScene()->GetAnimator()->Start(turnAnim, callback);
 
     // Setting this to a negative value adds a slight delay before the laser head actually starts rotating.

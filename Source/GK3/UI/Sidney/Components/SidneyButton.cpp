@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "AudioManager.h"
+#include "Audio.h"
 #include "Font.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
@@ -38,10 +39,10 @@ SidneyButton::SidneyButton(const std::string& name, Actor* parent) : Actor(name,
     });
 
     // Use a default button press sound.
-    mPressAudio = gAssetManager.LoadAudio("SIDBUTTON5.WAV");
+    mPressAudio = gAssetManager.LoadAsset<Audio>("SIDBUTTON5.WAV");
 
     // Set default fonts.
-    SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+    SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"), gAssetManager.LoadAsset<Font>("SID_PDN_10_UL.FON"));
 }
 
 SidneyButton::SidneyButton(Actor* parent) : SidneyButton("SidneyButton", parent)

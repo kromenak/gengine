@@ -351,7 +351,7 @@ inline void PersistState::Xfer(const char* name, T*& asset)
     {
         if(!assetName.empty())
         {
-            asset = gAssetManager.GetOrLoadAsset<T>(assetName, assetScope);
+            asset = gAssetManager.LoadAsset<T>(assetName, assetScope);
         }
         else
         {

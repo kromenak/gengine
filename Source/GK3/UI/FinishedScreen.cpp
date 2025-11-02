@@ -15,7 +15,7 @@ FinishedScreen::FinishedScreen() : Actor(TransformType::RectTransform)
 
     // Add finished image.
     mBackgroundImage = UI::CreateWidgetActor<UIImage>("Image", this);
-    mBackgroundImage->SetTexture(gAssetManager.LoadTexture("FINISHED.BMP"), true);
+    mBackgroundImage->SetTexture(gAssetManager.LoadAsset<Texture>("FINISHED.BMP"), true);
 }
 
 void FinishedScreen::Show()

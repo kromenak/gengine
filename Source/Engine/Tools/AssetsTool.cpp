@@ -57,7 +57,7 @@ void AssetsTool::Render(bool& toolActive)
         const bool assetsAvailable = ImGui::BeginChild(ImGui::GetID("Hierarchy"), ImVec2(panelWidth, ImGui::GetContentRegionAvail().y), true, 0);
         if(assetsAvailable)
         {
-            AddAssetList<Animation>("ANM");
+            AddAssetList<Animation>();
             AddAssetList<Audio>();
             AddAssetList<BSP>();
             AddAssetList<BSPLightmap>();
@@ -74,7 +74,7 @@ void AssetsTool::Render(bool& toolActive)
             AddAssetList<Shader>();
             AddAssetList<SheepScript>();
             AddAssetList<Soundtrack>();
-            AddAssetList<TextAsset>("");
+            AddAssetList<TextAsset>();
             AddAssetList<Texture>();
             AddAssetList<VertexAnimation>();
             AddAssetList<Animation>("YAK");
@@ -124,7 +124,7 @@ void AssetsTool::AddAssetList(const std::string& id)
     ImGui::PushID(assetId.c_str());
 
      // Get list of loaded assets of this type, so we can display them in a giant tree view.
-    const std::string_map_ci<T*>* loadedAssets = gAssetManager.GetLoadedAssets<T>(id);
+    const std::string_map_ci<T*>* loadedAssets = gAssetManager.GetAssets<T>(id);
     if(loadedAssets == nullptr)
     {
         return;

@@ -183,11 +183,11 @@ void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "bitmap name"))
             {
-                mFontTexture = gAssetManager.LoadTexture(keyValue.value, GetScope());
+                mFontTexture = gAssetManager.LoadAsset<Texture>(keyValue.value, GetScope());
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "alpha channel"))
             {
-                alphaTexture = gAssetManager.LoadTexture(keyValue.value, GetScope());
+                alphaTexture = gAssetManager.LoadAsset<Texture>(keyValue.value, GetScope());
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "line count"))
             {
@@ -258,7 +258,7 @@ void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
     // a font texture with the same name as the font itself.
     if(mFontTexture == nullptr)
     {
-        mFontTexture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());
+        mFontTexture = gAssetManager.LoadAsset<Texture>(GetNameNoExtension(), GetScope());
     }
 
     // If we have an alpha channel apply it to the font texture.

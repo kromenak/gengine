@@ -3,9 +3,9 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
+#include "Audio.h"
 #include "Font.h"
 #include "GameProgress.h"
-#include "GK3UI.h"
 #include "Scene.h"
 #include "SidneyButton.h"
 #include "SidneyFiles.h"
@@ -72,7 +72,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
     });
 
     // Create window with suspect data.
-    Font* font = gAssetManager.LoadFont("SID_TEXT_14.FON");
+    Font* font = gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON");
     {
         // Window border.
         UINineSlice* windowBorder = UI::CreateWidgetActor<UINineSlice>("Window", mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
@@ -84,7 +84,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
         // Add header divider border.
         UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("Divider", windowBorder);
-        headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        headerDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -76.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
@@ -209,7 +209,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
         {
             // Add footer divider border.
             UIImage* footerDividerImage = UI::CreateWidgetActor<UIImage>("DividerBottom", windowBorder);
-            footerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+            footerDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
             footerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomStretch);
             footerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, 74.0f);
             footerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
@@ -291,7 +291,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
         // Add header divider border.
         UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("Divider", windowBorder);
-        headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        headerDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -18.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
@@ -327,7 +327,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
         actionBorder->GetRectTransform()->SetSizeDelta(170.0f, 18.0f);
 
         mMAActionLabel = UI::CreateWidgetActor<UILabel>("Label", actionBorder);
-        mMAActionLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14_GRN.FON"));
+        mMAActionLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14_GRN.FON"));
         mMAActionLabel->SetText("");
         mMAActionLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mMAActionLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
@@ -374,16 +374,16 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
     }
 
     // We also need to populate the match analysis fingerprint textures...
-    mSuspectInfos[0].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_MAD_FPRINT.BMP");
-    mSuspectInfos[1].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_VIT_FPRINT.BMP");
+    mSuspectInfos[0].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_MAD_FPRINT.BMP");
+    mSuspectInfos[1].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_VIT_FPRINT.BMP");
     // No print for Emilio.
-    mSuspectInfos[3].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_ABE_FPRINT.BMP");
-    mSuspectInfos[4].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_LHO_FPRINT.BMP");
-    mSuspectInfos[5].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_EST_FPRINT.BMP");
-    mSuspectInfos[6].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_WIL_FPRINT.BMP");
-    mSuspectInfos[7].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_LAR_FPRINT.BMP");
-    mSuspectInfos[8].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_MON_FPRINT.BMP");
-    mSuspectInfos[9].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_MOS_FPRINT.BMP");
+    mSuspectInfos[3].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_ABE_FPRINT.BMP");
+    mSuspectInfos[4].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_LHO_FPRINT.BMP");
+    mSuspectInfos[5].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_EST_FPRINT.BMP");
+    mSuspectInfos[6].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_WIL_FPRINT.BMP");
+    mSuspectInfos[7].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_LAR_FPRINT.BMP");
+    mSuspectInfos[8].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_MON_FPRINT.BMP");
+    mSuspectInfos[9].matchAnalysisFingerprintTexture = gAssetManager.LoadAsset<Texture>("S_MOS_FPRINT.BMP");
 
     // Set initial menu choices enabled or disabled.
     RefreshEnabledMenuChoices();
@@ -790,29 +790,29 @@ void SidneySuspects::OnMatchAnalysisPressed()
     int matchSuspectIndex = -1;
     if(mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint)
     {
-        fingerprintTexture = gAssetManager.LoadTexture("EST_LSR_PRINT.BMP", AssetScope::Scene);
-        compareTexture = gAssetManager.LoadTexture("EST_LSR_COMPARE.BMP", AssetScope::Scene);
+        fingerprintTexture = gAssetManager.LoadAsset<Texture>("EST_LSR_PRINT.BMP", AssetScope::Scene);
+        compareTexture = gAssetManager.LoadAsset<Texture>("EST_LSR_COMPARE.BMP", AssetScope::Scene);
         videoName = "EstLSRScan.avi";
         matchSuspectIndex = 5;
     }
     else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint1)
     {
-        fingerprintTexture = gAssetManager.LoadTexture("BUCH_BLD_PRINT.BMP", AssetScope::Scene);
-        compareTexture = gAssetManager.LoadTexture("BUCH_BLD_COMPARE.BMP", AssetScope::Scene);
+        fingerprintTexture = gAssetManager.LoadAsset<Texture>("BUCH_BLD_PRINT.BMP", AssetScope::Scene);
+        compareTexture = gAssetManager.LoadAsset<Texture>("BUCH_BLD_COMPARE.BMP", AssetScope::Scene);
         videoName = "BuchBldScan.avi";
         matchSuspectIndex = 1;
     }
     else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint2)
     {
-        fingerprintTexture = gAssetManager.LoadTexture("BUTH_BLD_PRINT.BMP", AssetScope::Scene);
-        compareTexture = gAssetManager.LoadTexture("BUTH_BLD_COMPARE.BMP", AssetScope::Scene);
+        fingerprintTexture = gAssetManager.LoadAsset<Texture>("BUTH_BLD_PRINT.BMP", AssetScope::Scene);
+        compareTexture = gAssetManager.LoadAsset<Texture>("BUTH_BLD_COMPARE.BMP", AssetScope::Scene);
         videoName = "ButhBldScan.avi";
         matchSuspectIndex = 0;
     }
     else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint3)
     {
-        fingerprintTexture = gAssetManager.LoadTexture("MOS_BLD_PRINT.BMP", AssetScope::Scene);
-        compareTexture = gAssetManager.LoadTexture("MOS_BLD_COMPARE.BMP", AssetScope::Scene);
+        fingerprintTexture = gAssetManager.LoadAsset<Texture>("MOS_BLD_PRINT.BMP", AssetScope::Scene);
+        compareTexture = gAssetManager.LoadAsset<Texture>("MOS_BLD_COMPARE.BMP", AssetScope::Scene);
         videoName = "MosBldScan.avi";
         matchSuspectIndex = 9;
     }
@@ -830,7 +830,7 @@ void SidneySuspects::OnMatchAnalysisPressed()
     gActionManager.StartManualAction();
 
     // Ok, we're going to put on a big show of analyzing the fingerprint and comparing it to all the suspects!
-    gAudioManager.PlaySFX(gAssetManager.LoadAudio("WORKING3.WAV", AssetScope::Scene), [this, videoName, compareTexture, matchSuspectIndex](){
+    gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("WORKING3.WAV", AssetScope::Scene), [this, videoName, compareTexture, matchSuspectIndex](){
 
         // Play video file of the match analysis occurring.
         mMAFingerprintVideoImage->SetEnabled(true);
@@ -909,7 +909,7 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
                 gActionManager.ExecuteDialogueAction("027X65Q3L2");
                 gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_buchelli");
                 gGameProgress.SetFlag("MatchedBuchelli");
-                mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("BUCH_RED_BLD_PRINT.BMP", AssetScope::Scene));
+                mMAFingerprintImage->SetTexture(gAssetManager.LoadAsset<Texture>("BUCH_RED_BLD_PRINT.BMP", AssetScope::Scene));
             }
             else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint2)
             {
@@ -917,7 +917,7 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
                 gActionManager.ExecuteDialogueAction("027X65Q3L1");
                 gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_buthane");
                 gGameProgress.SetFlag("MatchedButhane");
-                mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("BUTH_RED_BLD_PRINT.BMP", AssetScope::Scene));
+                mMAFingerprintImage->SetTexture(gAssetManager.LoadAsset<Texture>("BUTH_RED_BLD_PRINT.BMP", AssetScope::Scene));
             }
             else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint3)
             {
@@ -925,7 +925,7 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
                 gActionManager.ExecuteDialogueAction("027X65Q3L3");
                 gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_mosley");
                 gGameProgress.SetFlag("MatchedMosely");
-                mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("MOS_RED_BLD_PRINT.BMP", AssetScope::Scene));
+                mMAFingerprintImage->SetTexture(gAssetManager.LoadAsset<Texture>("MOS_RED_BLD_PRINT.BMP", AssetScope::Scene));
             }
             else if(mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint)
             {
@@ -933,7 +933,7 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
                 gActionManager.ExecuteDialogueAction("02OX660SJ1");
                 gGameProgress.ChangeScore("e_sidney_suspect_link_fingerprint_lsr_unknown");
                 gGameProgress.SetFlag("MatchedEstelle");
-                mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("EST_RED_LSR_PRINT.BMP", AssetScope::Scene));
+                mMAFingerprintImage->SetTexture(gAssetManager.LoadAsset<Texture>("EST_RED_LSR_PRINT.BMP", AssetScope::Scene));
             }
         }
         else

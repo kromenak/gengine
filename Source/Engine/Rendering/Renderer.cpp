@@ -411,7 +411,7 @@ void Renderer::SetUseMipmaps(bool useMipmaps)
     gSaveManager.GetPrefs()->Set(PREFS_HARDWARE_RENDERER, PREFS_MIPMAPS, mUseMipmaps);
 
     // Dynamically update loaded textures to use mipmaps.
-    for(auto& entry : *gAssetManager.GetLoadedAssets<Texture>())
+    for(auto& entry : *gAssetManager.GetAssets<Texture>())
     {
         // The trick is that this map has both UI and scene textures. And we only want to modify *scene* textures.
         // We can look at the current filtering setting as an indicator.
@@ -429,7 +429,7 @@ void Renderer::SetUseTrilinearFiltering(bool useTrilinearFiltering)
     gSaveManager.GetPrefs()->Set(PREFS_HARDWARE_RENDERER, PREFS_TRILINEAR_FILTERING, mUseTrilinearFiltering);
 
     // Dynamically update loaded textures to use trilinear filtering.
-    for(auto& entry : *gAssetManager.GetLoadedAssets<Texture>())
+    for(auto& entry : *gAssetManager.GetAssets<Texture>())
     {
         // The trick is that this map has both UI and scene textures. And we only want to modify *scene* textures.
         // We can look at the current filtering setting as an indicator.

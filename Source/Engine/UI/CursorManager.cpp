@@ -8,10 +8,10 @@ CursorManager gCursorManager;
 void CursorManager::Init()
 {
     // Can't do this in constructor b/c Assets might not yet be available.
-    mDefaultCursor = gAssetManager.LoadCursor("C_POINT.CUR");
-    mHighlightRedCursor = gAssetManager.LoadCursor("C_ZOOM.CUR");
-    mHighlightBlueCursor = gAssetManager.LoadCursor("C_ZOOM_2.CUR");
-    mWaitCursor = gAssetManager.LoadCursor("C_WAIT.CUR");
+    mDefaultCursor = gAssetManager.LoadAsset<Cursor>("C_POINT.CUR");
+    mHighlightRedCursor = gAssetManager.LoadAsset<Cursor>("C_ZOOM.CUR");
+    mHighlightBlueCursor = gAssetManager.LoadAsset<Cursor>("C_ZOOM_2.CUR");
+    mWaitCursor = gAssetManager.LoadAsset<Cursor>("C_WAIT.CUR");
 }
 
 void CursorManager::Update(float deltaTime)

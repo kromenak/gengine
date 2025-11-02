@@ -1,6 +1,7 @@
 #include "SheepAPI_Sound.h"
 
 #include "AssetManager.h"
+#include "Audio.h"
 #include "AudioManager.h"
 #include "ReportManager.h"
 #include "SceneManager.h"
@@ -108,7 +109,7 @@ shpvoid SetVolume(const std::string& soundType, int volume)
     volume = Math::Clamp(volume, 0, 100);
 
     // Internally, volumes are 0.0f - 1.0f. So, convert it.
-    float volumeNormalized = (float)volume / 100.0f;
+    float volumeNormalized = static_cast<float>(volume) / 100.0f;
 
     // Aaaand set it.
     if(soundType.empty() || StringUtil::EqualsIgnoreCase(soundType, "global"))
@@ -142,7 +143,7 @@ RegFunc2(SetVolume, void, string, int, IMMEDIATE, DEV_FUNC);
 
 shpvoid PlaySound(const std::string& soundName)
 {
-    Audio* audio = gAssetManager.LoadAudio(soundName, AssetScope::Scene);
+    Audio* audio = gAssetManager.LoadAsset<Audio>(soundName, AssetScope::Scene);
     if(audio != nullptr)
     {
         gAudioManager.PlaySFX(audio, AddWait());
@@ -155,7 +156,7 @@ shpvoid StopSound(const std::string& soundName)
 {
     // For a sound to play, it must be loaded already anyway.
     // And if it's null, the Stop function handles that.
-    gAudioManager.Stop(gAssetManager.LoadAudio(soundName, AssetScope::Scene));
+    gAudioManager.Stop(gAssetManager.LoadAsset<Audio>(soundName, AssetScope::Scene));
     return 0;
 }
 RegFunc1(StopSound, void, string, IMMEDIATE, REL_FUNC);
@@ -169,7 +170,7 @@ RegFunc0(StopAllSounds, void, IMMEDIATE, REL_FUNC);
 
 shpvoid PlaySoundTrack(const std::string& soundtrackName)
 {
-    Soundtrack* soundtrack = gAssetManager.LoadSoundtrack(soundtrackName, AssetScope::Scene);
+    Soundtrack* soundtrack = gAssetManager.LoadAsset<Soundtrack>(soundtrackName, AssetScope::Scene);
     if(soundtrack != nullptr)
     {
         gSceneManager.GetScene()->GetSoundtrackPlayer()->Play(soundtrack);
@@ -182,7 +183,7 @@ shpvoid StopSoundTrack(const std::string& soundtrackName)
 {
     // Soundtrack must already be loaded to be playing. So, just load and pass in pointer.
     // If it is null, Stop handles that for us.
-    gSceneManager.GetScene()->GetSoundtrackPlayer()->Stop(gAssetManager.LoadSoundtrack(soundtrackName, AssetScope::Scene));
+    gSceneManager.GetScene()->GetSoundtrackPlayer()->Stop(gAssetManager.LoadAsset<Soundtrack>(soundtrackName, AssetScope::Scene));
     return 0;
 }
 RegFunc1(StopSoundTrack, void, string, IMMEDIATE, REL_FUNC);

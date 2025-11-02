@@ -292,7 +292,7 @@ void SidneySearch::Init(Actor* parent)
         mTextInput->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mTextInput->GetRectTransform()->SetAnchoredPosition(4.0f, 0.0f);
         mTextInput->GetRectTransform()->SetSizeDelta(316.0f, 15.0f);
-        mTextInput->SetFont(gAssetManager.LoadFont("F_TIMES.FON"));
+        mTextInput->SetFont(gAssetManager.LoadAsset<Font>("F_TIMES.FON"));
         mTextInput->SetVerticalAlignment(VerticalAlignment::Bottom);
         mTextInput->SetText("");
         mTextInput->SetMaxLength(35); // should be enough?
@@ -347,7 +347,7 @@ void SidneySearch::Init(Actor* parent)
         mLinkTargetLabel->GetRectTransform()->SetAnchor(AnchorPreset::Right);
         mLinkTargetLabel->GetRectTransform()->SetAnchoredPosition(-5.0f, 0.0f);
         mLinkTargetLabel->GetRectTransform()->SetSizeDelta(0.0f, 28.0f);
-        mLinkTargetLabel->SetFont(gAssetManager.LoadFont("F_TIMES.FON"));
+        mLinkTargetLabel->SetFont(gAssetManager.LoadAsset<Font>("F_TIMES.FON"));
         mLinkTargetLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
         mLinkTargetLabel->SetVerticalAlignment(VerticalAlignment::Center);
     }
@@ -378,7 +378,7 @@ void SidneySearch::Init(Actor* parent)
 
     // Read in all the search terms and correlated pages.
     {
-        TextAsset* textFile = gAssetManager.LoadText("SIDSEARCH.TXT");
+        TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("SIDSEARCH.TXT");
         IniParser parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
@@ -403,7 +403,7 @@ void SidneySearch::Init(Actor* parent)
 
     // Read in all the dialogue triggers for visiting certain pages under certain conditions.
     {
-        TextAsset* textFile = gAssetManager.LoadText("SIDNEYDIALOG.TXT");
+        TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("SIDNEYDIALOG.TXT");
         IniParser parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
@@ -534,7 +534,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
     ClearWebPage();
 
     // Load the HTML text.
-    TextAsset* html = gAssetManager.LoadText(pageName, AssetScope::Scene);
+    TextAsset* html = gAssetManager.LoadAsset<TextAsset>(pageName, AssetScope::Scene);
 
     // Parse the HTML text to an in-memory HTML tree representation.
     HtmlElement root;
@@ -697,7 +697,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                     }
 
                     UIImage* bulletImage = UI::CreateWidgetActor<UIImage>("BulletPoint", mWebPageScrollRect);
-                    bulletImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBULLET.BMP", AssetScope::Global), true);
+                    bulletImage->SetTexture(gAssetManager.LoadAsset<Texture>("SIDNEYBULLET.BMP", AssetScope::Global), true);
                     bulletImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     bulletImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
                     mWebPageWidgets.push_back(bulletImage);
@@ -717,7 +717,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 
                     // Make an image with the horizontal rule.
                     UIImage* hrImage = UI::CreateWidgetActor<UIImage>("HR", mWebPageScrollRect);
-                    hrImage->SetTexture(gAssetManager.LoadTexture("HORIZONTALRULE.BMP"), true);
+                    hrImage->SetTexture(gAssetManager.LoadAsset<Texture>("HORIZONTALRULE.BMP"), true);
                     hrImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     hrImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
                     hrImage->GetRectTransform()->SetSizeDeltaX(kWebpageContentsWidth);
@@ -733,7 +733,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 {
                     // Create the image at the appropriate size.
                     UIImage* image = UI::CreateWidgetActor<UIImage>("Image", mWebPageScrollRect);
-                    image->SetTexture(gAssetManager.LoadTexture(element.attributes[0].value, AssetScope::Global), true);
+                    image->SetTexture(gAssetManager.LoadAsset<Texture>(element.attributes[0].value, AssetScope::Global), true);
                     image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     image->GetRectTransform()->SetAnchoredPosition(resultsPos);
                     mWebPageWidgets.push_back(image);
@@ -746,7 +746,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 }
                 else // text or text link
                 {
-                    Font* font = gAssetManager.LoadFont(fontName);
+                    Font* font = gAssetManager.LoadAsset<Font>(fontName);
                     lastFontGlyphHeight = font->GetGlyphHeight();
 
                     // If we're continuing the text on an existing line, we probably want to add a bit of x-pos for the space between words.

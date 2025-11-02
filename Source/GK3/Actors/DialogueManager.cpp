@@ -361,13 +361,13 @@ void DialogueManager::PlayNextDialogueLine()
     mDialogueSequenceNumber++;
 
     // Load the YAK! If we can't find it for some reason, output an error and move on right away.
-    Animation* yak = gAssetManager.LoadYak(Localizer::GetLanguagePrefix() + yakName, AssetScope::Scene);
+    Animation* yak = gAssetManager.LoadAsset<Animation>(Localizer::GetLanguagePrefix() + yakName, AssetScope::Scene, "yak");
     if(yak == nullptr)
     {
         printf("Couldn't load yak %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), yakName.c_str(), yakName.c_str());
 
         // Attempt to load English version.
-        yak = gAssetManager.LoadYak("E" + yakName, AssetScope::Scene);
+        yak = gAssetManager.LoadAsset<Animation>("E" + yakName, AssetScope::Scene, "yak");
         if(yak == nullptr)
         {
             printf("Couldn't load yak %s - skipping to next dialogue line.\n", yakName.c_str());

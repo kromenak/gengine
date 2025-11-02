@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
+#include "Audio.h"
 #include "AudioManager.h"
 #include "Font.h"
 #include "GameProgress.h"
@@ -10,6 +11,7 @@
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
 #include "TextAsset.h"
+#include "Texture.h"
 #include "Timers.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -41,14 +43,14 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
         // Add one line for the box header.
         UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("Divider", emailListWindow);
-        headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        headerDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -20.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         // Add header text.
         UILabel* headerLabel = UI::CreateWidgetActor<UILabel>("HeaderLabel", emailListWindow);
-        headerLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
+        headerLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_18.FON"));
         headerLabel->SetText(SidneyUtil::GetEmailLocalizer().GetText("EMailList"));
         headerLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         headerLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
@@ -56,7 +58,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
         // Add close button.
         SidneyUtil::CreateCloseWindowButton(emailListWindow->GetOwner(), [this](){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDEXIT.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDEXIT.WAV"));
             Hide();
         });
     }
@@ -70,20 +72,20 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
         // Create header divider line.
         UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("HeaderDivider", emailWindow);
-        headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        headerDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -100.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         // Create footer divider line.
         UIImage* footerDividerImage = UI::CreateWidgetActor<UIImage>("FooterDivider", emailWindow);
-        footerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        footerDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         footerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomStretch);
         footerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, 29.0f);
         footerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         // In the header, create all the data fields.
-        Font* font = gAssetManager.LoadFont("SID_TEXT_14.FON");
+        Font* font = gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON");
         {
             // From
             {
@@ -180,7 +182,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
             // Schattenjaeger logo.
             UIImage* logoImage = UI::CreateWidgetActor<UIImage>("Logo", emailWindow);
-            logoImage->SetTexture(gAssetManager.LoadTexture("S_SCHAT_LOGO.BMP"), true);
+            logoImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_SCHAT_LOGO.BMP"), true);
             logoImage->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
             logoImage->GetRectTransform()->SetAnchoredPosition(-7.0f, -13.0f);
         }
@@ -278,7 +280,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
         mNewEmailLabel = canvas->GetOwner()->AddComponent<UILabel>();
 
-        mNewEmailLabel->SetFont(gAssetManager.LoadFont("SID_PDN_10_GRN.FON"));
+        mNewEmailLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_GRN.FON"));
         mNewEmailLabel->SetText(SidneyUtil::GetEmailLocalizer().GetText("NewEMail"));
         mNewEmailLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
         mNewEmailLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -414,7 +416,7 @@ void SidneyEmail::UpdateNewEmail(float deltaTime)
         // If we do this during an action skip, the action skip logic will stomp this audio. So, wait until no skip is happening.
         if(mPlayNewEmailSfx && !gActionManager.IsSkippingCurrentAction())
         {
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("NEWEMAIL.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("NEWEMAIL.WAV"));
             mPlayNewEmailSfx = false;
         }
 
@@ -466,8 +468,8 @@ void SidneyEmail::ShowEmailList()
     mEmailListWindow->SetActive(true);
 
     // Two fonts are used, depending on whether an email is read or not.
-    Font* greenFont = gAssetManager.LoadFont("SID_TEXT_14_GRN.FON");
-    Font* yellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
+    Font* greenFont = gAssetManager.LoadAsset<Font>("SID_TEXT_14_GRN.FON");
+    Font* yellowFont = gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON");
 
     // Show a list item for each email we have received.
     Vector2 listItemPos(8.0f, -28.0f);
@@ -680,7 +682,7 @@ void SidneyEmail::BuildEmailBody(const std::string& emailId)
         for(int i = 0; i < 4; ++i)
         {
             mBodyImages[i]->SetEnabled(true);
-            mBodyImages[i]->SetTexture(gAssetManager.LoadTexture("SID_SYMB_" + std::to_string(i + 1) + ".BMP"));
+            mBodyImages[i]->SetTexture(gAssetManager.LoadAsset<Texture>("SID_SYMB_" + std::to_string(i + 1) + ".BMP"));
         }
 
         mBodyImages[0]->GetRectTransform()->SetAnchoredPosition(42.0f, -62.0f);
@@ -712,7 +714,7 @@ void SidneyEmail::BuildEmailBody(const std::string& emailId)
 UILabel* SidneyEmail::GetBodyLabel(const std::string& text)
 {
     // Most emails are a simple vertical layout of labels, so a bit easier to generate.
-    Font* yellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
+    Font* yellowFont = gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON");
 
     // Either reuse an existing label or create a new one.
     UILabel* label = nullptr;

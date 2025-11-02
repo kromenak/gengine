@@ -2,6 +2,7 @@
 
 #include <cctype>
 
+#include "Audio.h"
 #include "AnimationNodes.h"
 #include "AssetManager.h"
 #include "FileSystem.h"
@@ -117,7 +118,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 int frameNumber = line.entries[0].GetValueAsInt();
 
                 // Vertex animation must be specified.
-                VertexAnimation* vertexAnim = gAssetManager.LoadVertexAnimation(line.entries[1].key, GetScope());
+                VertexAnimation* vertexAnim = gAssetManager.LoadAsset<VertexAnimation>(line.entries[1].key, GetScope());
                 if(vertexAnim == nullptr)
                 {
                     printf("Failed to load vertex animation %s!\n", line.entries[1].key.c_str());
@@ -333,7 +334,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 // Create node.
                 SoundAnimNode* node = new SoundAnimNode();
                 node->frameNumber = frameNumber;
-                node->audio = gAssetManager.LoadAudio(soundName, GetScope());
+                node->audio = gAssetManager.LoadAsset<Audio>(soundName, GetScope());
                 node->volume = volume;
 
                 // Remaining arguments are optional.

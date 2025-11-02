@@ -1,9 +1,11 @@
 #include "ConfirmPopup.h"
 
 #include "AssetManager.h"
+#include "Font.h"
 #include "IniParser.h"
 #include "InputManager.h"
 #include "TextAsset.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UILabel.h"
 #include "UINineSlice.h"
@@ -31,7 +33,7 @@ ConfirmPopup::ConfirmPopup() : Actor("ConfirmPopup", TransformType::RectTransfor
     Vector2 textOffset;
     Vector2 minSize;
     {
-        TextAsset* textFile = gAssetManager.LoadText("MSGBOX.TXT", AssetScope::Manual);
+        TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("MSGBOX.TXT", AssetScope::Manual);
 
         // Pass that along to INI parser, since it is plain text and in INI format.
         IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -46,55 +48,55 @@ ConfirmPopup::ConfirmPopup() : Actor("ConfirmPopup", TransformType::RectTransfor
 
                 if(StringUtil::EqualsIgnoreCase(entry.key, "Font"))
                 {
-                    font = gAssetManager.LoadFont(entry.value);
+                    font = gAssetManager.LoadAsset<Font>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "yesSpriteUp"))
                 {
-                    yesButtonUpTexture = gAssetManager.LoadTexture(entry.value);
+                    yesButtonUpTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "yesSpriteDown"))
                 {
-                    yesButtonDownTexture = gAssetManager.LoadTexture(entry.value);
+                    yesButtonDownTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "yesSpriteHov"))
                 {
-                    yesButtonHoverTexture = gAssetManager.LoadTexture(entry.value);
+                    yesButtonHoverTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "noSpriteUp"))
                 {
-                    noButtonUpTexture = gAssetManager.LoadTexture(entry.value);
+                    noButtonUpTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "noSpriteDown"))
                 {
-                    noButtonDownTexture = gAssetManager.LoadTexture(entry.value);
+                    noButtonDownTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "noSpriteHov"))
                 {
-                    noButtonHoverTexture = gAssetManager.LoadTexture(entry.value);
+                    noButtonHoverTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "ulCornerSprite"))
                 {
-                    boxParams.topLeftTexture = gAssetManager.LoadTexture(entry.value);
+                    boxParams.topLeftTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "urCornerSprite"))
                 {
-                    boxParams.topRightTexture = gAssetManager.LoadTexture(entry.value);
+                    boxParams.topRightTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "llCornerSprite"))
                 {
-                    boxParams.bottomLeftTexture = gAssetManager.LoadTexture(entry.value);
+                    boxParams.bottomLeftTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "lrCornerSprite"))
                 {
-                    boxParams.bottomRightTexture = gAssetManager.LoadTexture(entry.value);
+                    boxParams.bottomRightTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "vertSprite"))
                 {
-                    boxParams.leftTexture = boxParams.rightTexture = gAssetManager.LoadTexture(entry.value);
+                    boxParams.leftTexture = boxParams.rightTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "horizSprite"))
                 {
-                    boxParams.topTexture = boxParams.bottomTexture = gAssetManager.LoadTexture(entry.value);
+                    boxParams.topTexture = boxParams.bottomTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "backgroundColor"))
                 {

@@ -313,7 +313,7 @@ bool AudioManager::Initialize()
     SetVolume(AudioType::Music, musicVolume);
 
     // Grab defaults from GAME.CFG.
-    Config* config = gAssetManager.LoadConfig("GAME.CFG");
+    Config* config = gAssetManager.LoadAsset<Config>("GAME.CFG");
     if(config != nullptr)
     {
         mDefault3DMinDist = config->GetFloat("Sound", "Default Sound Min Distance", mDefault3DMinDist);

@@ -1,7 +1,9 @@
 #include "SaveLoadScreen.h"
 
 #include "AssetManager.h"
+#include "Audio.h"
 #include "AudioManager.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
 #include "InputManager.h"
@@ -43,15 +45,15 @@ SaveLoadScreen::SaveLoadScreen() : Actor("SaveLoadScreen", TransformType::RectTr
 
     // Add load/save background image.
     UIImage* background = UI::CreateWidgetActor<UIImage>("Background", this);
-    background->SetTexture(gAssetManager.LoadTexture("LOADSAVE.BMP"), true);
+    background->SetTexture(gAssetManager.LoadAsset<Texture>("LOADSAVE.BMP"), true);
 
     // Create exit button.
     {
         mExitButton = UI::CreateWidgetActor<UIButton>("ExitButton", background);
-        mExitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
-        mExitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
-        mExitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
-        mExitButton->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
+        mExitButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("EXITN.BMP"));
+        mExitButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("EXITD.BMP"));
+        mExitButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("EXITHOV.BMP"));
+        mExitButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("EXITDIS.BMP"));
 
         // Anchor to bottom-right and position based off that.
         mExitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
@@ -66,10 +68,10 @@ SaveLoadScreen::SaveLoadScreen() : Actor("SaveLoadScreen", TransformType::RectTr
     // Create save & load buttons.
     {
         mSaveButton = UI::CreateWidgetActor<UIButton>("SaveButton", background);
-        mSaveButton->SetUpTexture(gAssetManager.LoadTexture("SAVEN.BMP"));
-        mSaveButton->SetDownTexture(gAssetManager.LoadTexture("SAVED.BMP"));
-        mSaveButton->SetHoverTexture(gAssetManager.LoadTexture("SAVEHOV.BMP"));
-        mSaveButton->SetDisabledTexture(gAssetManager.LoadTexture("SAVEDIS.BMP"));
+        mSaveButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("SAVEN.BMP"));
+        mSaveButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("SAVED.BMP"));
+        mSaveButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("SAVEHOV.BMP"));
+        mSaveButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("SAVEDIS.BMP"));
 
         // Anchor to top-right and position based off that.
         mSaveButton->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
@@ -82,10 +84,10 @@ SaveLoadScreen::SaveLoadScreen() : Actor("SaveLoadScreen", TransformType::RectTr
     }
     {
         mLoadButton = UI::CreateWidgetActor<UIButton>("LoadButton", background);
-        mLoadButton->SetUpTexture(gAssetManager.LoadTexture("RESTOREN.BMP"));
-        mLoadButton->SetDownTexture(gAssetManager.LoadTexture("RESTORED.BMP"));
-        mLoadButton->SetHoverTexture(gAssetManager.LoadTexture("RESTOREHOV.BMP"));
-        mLoadButton->SetDisabledTexture(gAssetManager.LoadTexture("RESTOREDIS.BMP"));
+        mLoadButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("RESTOREN.BMP"));
+        mLoadButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("RESTORED.BMP"));
+        mLoadButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("RESTOREHOV.BMP"));
+        mLoadButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("RESTOREDIS.BMP"));
 
         // Anchor to top-right and position based off that.
         mLoadButton->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
@@ -134,7 +136,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor("SaveLoadScreen", TransformType::RectTr
     // Create input field for entering save names.
     {
         mTextInput = UI::CreateWidgetActor<UITextInput>("SaveNameTextInput", mListActor);
-        mTextInput->SetFont(gAssetManager.LoadFont("F_SSERIF_T8.FON"));
+        mTextInput->SetFont(gAssetManager.LoadAsset<Font>("F_SSERIF_T8.FON"));
         mTextInput->SetVerticalAlignment(VerticalAlignment::Top);
         mTextInput->AllowInputToChangeFocus(false); // this text input is always focused if code focuses it
         mTextInput->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
@@ -162,11 +164,11 @@ SaveLoadScreen::SaveLoadScreen() : Actor("SaveLoadScreen", TransformType::RectTr
 
     // Add scrollbar for when there are too many saves to fit on screen.
     UIScrollbarParams scrollbarParams;
-    scrollbarParams.decreaseValueButtonUp = gAssetManager.LoadTexture("SAVELOAD_SCROLLUP_STD.BMP");
-    scrollbarParams.decreaseValueButtonDown = gAssetManager.LoadTexture("SAVELOAD_SCROLLUP_DWN.BMP");
-    scrollbarParams.increaseValueButtonUp = gAssetManager.LoadTexture("SAVELOAD_SCROLLDN_STD.BMP");
-    scrollbarParams.increaseValueButtonDown = gAssetManager.LoadTexture("SAVELOAD_SCROLLDN_DWN.BMP");
-    scrollbarParams.scrollbarBacking = gAssetManager.LoadTexture("SAVELOAD_SCROLLBACK.BMP");
+    scrollbarParams.decreaseValueButtonUp = gAssetManager.LoadAsset<Texture>("SAVELOAD_SCROLLUP_STD.BMP");
+    scrollbarParams.decreaseValueButtonDown = gAssetManager.LoadAsset<Texture>("SAVELOAD_SCROLLUP_DWN.BMP");
+    scrollbarParams.increaseValueButtonUp = gAssetManager.LoadAsset<Texture>("SAVELOAD_SCROLLDN_STD.BMP");
+    scrollbarParams.increaseValueButtonDown = gAssetManager.LoadAsset<Texture>("SAVELOAD_SCROLLDN_DWN.BMP");
+    scrollbarParams.scrollbarBacking = gAssetManager.LoadAsset<Texture>("SAVELOAD_SCROLLBACK.BMP");
     scrollbarParams.handleParams.leftColor = scrollbarParams.handleParams.topColor = scrollbarParams.handleParams.topLeftColor = Color32(181, 125, 0);
     scrollbarParams.handleParams.rightColor = scrollbarParams.handleParams.bottomColor = scrollbarParams.handleParams.topRightColor =
         scrollbarParams.handleParams.bottomRightColor = scrollbarParams.handleParams.bottomLeftColor = Color32(90, 28, 33);
@@ -353,7 +355,7 @@ void SaveLoadScreen::PopulateSaveList(bool justShown)
             nameLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             nameLabel->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
             nameLabel->GetRectTransform()->SetSizeDelta(kLeftColumnWidth, 14.0f);
-            nameLabel->SetFont(gAssetManager.LoadFont("F_SSERIF_T8.FON"));
+            nameLabel->SetFont(gAssetManager.LoadAsset<Font>("F_SSERIF_T8.FON"));
             nameLabel->SetVerticalAlignment(VerticalAlignment::Top);
             mListEntries.back().nameLabel = nameLabel;
 
@@ -362,7 +364,7 @@ void SaveLoadScreen::PopulateSaveList(bool justShown)
             dayTimeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             dayTimeLabel->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kColumnSeparatorWidth + 2.0f, -2.0f);
             dayTimeLabel->GetRectTransform()->SetSizeDelta(kMiddleColumnWidth, 14.0f);
-            dayTimeLabel->SetFont(gAssetManager.LoadFont("F_SSERIF_T8.FON"));
+            dayTimeLabel->SetFont(gAssetManager.LoadAsset<Font>("F_SSERIF_T8.FON"));
             dayTimeLabel->SetVerticalAlignment(VerticalAlignment::Top);
             mListEntries.back().dayTimeLabel = dayTimeLabel;
 
@@ -371,7 +373,7 @@ void SaveLoadScreen::PopulateSaveList(bool justShown)
             scoreLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             scoreLabel->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kMiddleColumnWidth + (2 * kColumnSeparatorWidth) + 2.0f, -2.0f);
             scoreLabel->GetRectTransform()->SetSizeDelta(kRightColumnWidth, 14.0f);
-            scoreLabel->SetFont(gAssetManager.LoadFont("F_SSERIF_T8.FON"));
+            scoreLabel->SetFont(gAssetManager.LoadAsset<Font>("F_SSERIF_T8.FON"));
             scoreLabel->SetVerticalAlignment(VerticalAlignment::Top);
             mListEntries.back().scoreLabel = scoreLabel;
         }
@@ -534,7 +536,7 @@ void SaveLoadScreen::OnListEntryButtonPressed(int listEntryIndex)
 
 void SaveLoadScreen::OnSaveButtonPressed()
 {
-    gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+    gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDBUTN-1.WAV"));
     if(mSaveIndex < gSaveManager.GetSaves().size())
     {
         if(!mTextInput->IsEnabled())
@@ -564,7 +566,7 @@ void SaveLoadScreen::OnSaveButtonPressed()
 
 void SaveLoadScreen::OnLoadButtonPressed()
 {
-    gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+    gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDBUTN-1.WAV"));
 
     // Hide this screen. Also, make sure title screen is hidden (in case loading from title screen).
     Hide();
@@ -575,7 +577,7 @@ void SaveLoadScreen::OnLoadButtonPressed()
 
 void SaveLoadScreen::OnExitButtonPressed()
 {
-    gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+    gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDBUTN-1.WAV"));
     Hide();
 }
 

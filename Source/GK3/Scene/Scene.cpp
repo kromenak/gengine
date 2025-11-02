@@ -5,6 +5,7 @@
 
 #include "ActionBar.h"
 #include "ActionManager.h"
+#include "Animation.h"
 #include "Animator.h"
 #include "AssetManager.h"
 #include "Billboard.h"
@@ -216,7 +217,7 @@ void Scene::Init()
     // If a camera bounds model exists for this scene, pass it along to the camera.
     for(auto& modelName : mSceneData->GetCameraBoundsModelNames())
     {
-        Model* model = gAssetManager.LoadModel(modelName, AssetScope::Scene);
+        Model* model = gAssetManager.LoadAsset<Model>(modelName, AssetScope::Scene);
         if(model != nullptr)
         {
             mCamera->AddBounds(model);
@@ -1343,7 +1344,7 @@ GKActor* Scene::CreateSceneActor(const SceneActor* sceneActor)
 
     // Create DOR prop, if one exists for this actor.
     // The DOR model assists with calculating an actor's facing direction, particularly while walking.
-    Model* walkerDorModel = gAssetManager.LoadModel("DOR_" + actor->GetMeshRenderer()->GetModelName());
+    Model* walkerDorModel = gAssetManager.LoadAsset<Model>("DOR_" + actor->GetMeshRenderer()->GetModelName());
     if(walkerDorModel != nullptr)
     {
         GKProp* walkerDOR = new GKProp(walkerDorModel);
@@ -1413,7 +1414,7 @@ void Scene::ExecuteAction(const Action* action)
         }
         case Action::Approach::Anim: // Example use: R25 Open/Close Window, Open/Close Dresser, Open/Close Drawer
         {
-            Animation* anim = gAssetManager.LoadAnimation(action->target, AssetScope::Scene);
+            Animation* anim = gAssetManager.LoadAsset<Animation>(action->target, AssetScope::Scene);
             if(anim != nullptr)
             {
                 mEgo->WalkToAnimationStart(anim, [action]() {

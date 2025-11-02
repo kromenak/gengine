@@ -2,6 +2,7 @@
 
 #include "ActionManager.h"
 #include "Actor.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "Scene.h"
 #include "SidneyButton.h"
@@ -67,14 +68,14 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
         // Add divider line for box header.
         UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("DividerTop", mTranslateWindow);
-        headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        headerDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -17.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         // Add another one for the bottom section.
         UIImage* bottomDividerImage = UI::CreateWidgetActor<UIImage>("DividerBottom", mTranslateWindow);
-        bottomDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        bottomDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         bottomDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         bottomDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -256.0f);
         bottomDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
@@ -83,7 +84,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
     // Top part of window: header label in top right corner.
     {
         mTranslateHeaderLabel = UI::CreateWidgetActor<UILabel>("HeaderLabel", mTranslateWindow);
-        mTranslateHeaderLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mTranslateHeaderLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mTranslateHeaderLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
         mTranslateHeaderLabel->SetVerticalAlignment(VerticalAlignment::Top);
         mTranslateHeaderLabel->SetMasked(true);
@@ -117,7 +118,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
         // Create text as child of background. Fill that area, with some margins on left/right.
         mTranslateTextLabel = UI::CreateWidgetActor<UILabel>("TranslateText", scrollRect);
-        mTranslateTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mTranslateTextLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mTranslateTextLabel->SetText("");
         mTranslateTextLabel->SetVerticalAlignment(VerticalAlignment::Top);
         mTranslateTextLabel->SetHorizontalOverflow(HorizontalOverflow::Wrap);
@@ -131,7 +132,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
     {
         // Create static "From:" and "To:" labels.
         UILabel* fromLabel = UI::CreateWidgetActor<UILabel>("FromLabel", mTranslateWindow);
-        fromLabel->SetFont(gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+        fromLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_UL.FON"));
         fromLabel->SetText(SidneyUtil::GetTranslateLocalizer().GetText("From"));
         fromLabel->SetVerticalAlignment(VerticalAlignment::Top);
         fromLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
@@ -139,7 +140,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
         fromLabel->GetRectTransform()->SetSizeDelta(100.0f, 10.0f);
 
         UILabel* toLabel = UI::CreateWidgetActor<UILabel>("ToLabel", mTranslateWindow);
-        toLabel->SetFont(gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+        toLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_UL.FON"));
         toLabel->SetText(SidneyUtil::GetTranslateLocalizer().GetText("To"));
         toLabel->SetVerticalAlignment(VerticalAlignment::Top);
         toLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
@@ -148,7 +149,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
         // An image connecting the from and to buttons.
         UIImage* fromToImage = UI::CreateWidgetActor<UIImage>("FromToConnector", mTranslateWindow);
-        fromToImage->SetTexture(gAssetManager.LoadTexture("S_FROM_TO.BMP"), true);
+        fromToImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_FROM_TO.BMP"), true);
         fromToImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         fromToImage->GetRectTransform()->SetAnchoredPosition(105.0f, -271.0f);
 

@@ -1,6 +1,7 @@
 #include "UIDropdown.h"
 
 #include "AssetManager.h"
+#include "Font.h"
 #include "InputManager.h"
 #include "Texture.h"
 #include "UIButton.h"
@@ -20,9 +21,9 @@ UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, Tra
         mExpandButton->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
         mExpandButton->GetRectTransform()->SetAnchoredPosition(-1.0f, 0.0f);
 
-        mExpandButton->SetUpTexture(gAssetManager.LoadTexture("RC_ARW_R.BMP"));
-        mExpandButton->SetDownTexture(gAssetManager.LoadTexture("RC_ARW_DWN.BMP"));
-        mExpandButton->SetHoverTexture(gAssetManager.LoadTexture("RC_ARW_HI.BMP"));
+        mExpandButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("RC_ARW_R.BMP"));
+        mExpandButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("RC_ARW_DWN.BMP"));
+        mExpandButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("RC_ARW_HI.BMP"));
 
         mExpandButton->SetPressCallback([this](UIButton* button){
             OnExpandButtonPressed();
@@ -44,7 +45,7 @@ UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, Tra
         // Font choice is not specified in UI spec file, so figured it out via trial and error.
         mCurrentChoiceLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mCurrentChoiceLabel->SetVerticalAlignment(VerticalAlignment::Center);
-        mCurrentChoiceLabel->SetFont(gAssetManager.LoadFont("F_ARIAL_T8"));
+        mCurrentChoiceLabel->SetFont(gAssetManager.LoadAsset<Font>("F_ARIAL_T8"));
         mCurrentChoiceLabel->SetText("800 x 600");
     }
 
@@ -69,11 +70,11 @@ UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, Tra
             Texture* texture = nullptr;
             if(i < 2)
             {
-                texture = gAssetManager.LoadTexture("RC_BOX_TOP.BMP");
+                texture = gAssetManager.LoadAsset<Texture>("RC_BOX_TOP.BMP");
             }
             else
             {
-                texture = gAssetManager.LoadTexture("RC_BOX_SIDE.BMP");
+                texture = gAssetManager.LoadAsset<Texture>("RC_BOX_SIDE.BMP");
             }
             image->SetRenderMode(UIImage::RenderMode::Tiled);
             image->SetTexture(texture);
@@ -207,7 +208,7 @@ void UIDropdown::RefreshChoicesUI()
 
             // Create center-aligned label.
             UILabel* label = button->GetOwner()->AddComponent<UILabel>();
-            label->SetFont(gAssetManager.LoadFont("F_ARIAL_T8"));
+            label->SetFont(gAssetManager.LoadAsset<Font>("F_ARIAL_T8"));
             label->SetHorizonalAlignment(HorizontalAlignment::Center);
             label->SetVerticalAlignment(VerticalAlignment::Center);
 

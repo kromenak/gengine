@@ -1,11 +1,15 @@
 #include "SceneInitFile.h"
 
+#include "Animation.h"
 #include "AssetManager.h"
+#include "GAS.h"
 #include "IniParser.h"
 #include "Model.h"
+#include "NVC.h"
 #include "SceneAsset.h"
 #include "SheepManager.h"
 #include "Skybox.h"
+#include "Soundtrack.h"
 #include "StringUtil.h"
 
 Skybox* GeneralBlock::CreateSkybox()
@@ -588,7 +592,7 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
             {
                 if(StringUtil::EqualsIgnoreCase(keyValue.key, "model"))
                 {
-                    actor.model = gAssetManager.LoadModel(keyValue.value, GetScope());
+                    actor.model = gAssetManager.LoadAsset<Model>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun"))
                 {
@@ -601,19 +605,19 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "idle"))
                 {
-                    actor.idleGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
+                    actor.idleGas = gAssetManager.LoadAsset<GAS>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "talk"))
                 {
-                    actor.talkGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
+                    actor.talkGas = gAssetManager.LoadAsset<GAS>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "listen"))
                 {
-                    actor.listenGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
+                    actor.listenGas = gAssetManager.LoadAsset<GAS>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initAnim"))
                 {
-                    actor.initAnim = gAssetManager.LoadAnimation(keyValue.value, GetScope());
+                    actor.initAnim = gAssetManager.LoadAsset<Animation>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "hidden"))
                 {
@@ -683,7 +687,7 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initanim"))
                 {
-                    model.initAnim = gAssetManager.LoadAnimation(keyValue.value, GetScope());
+                    model.initAnim = gAssetManager.LoadAsset<Animation>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "hidden"))
                 {
@@ -691,7 +695,7 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "gas"))
                 {
-                    model.gas = gAssetManager.LoadGAS(keyValue.value, GetScope());
+                    model.gas = gAssetManager.LoadAsset<GAS>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "fullColor"))
                 {
@@ -716,7 +720,7 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                (model.type == SceneModel::Type::Prop ||
                 model.type == SceneModel::Type::GasProp))
             {
-                model.model = gAssetManager.LoadModel(model.name, GetScope());
+                model.model = gAssetManager.LoadAsset<Model>(model.name, GetScope());
             }
         }
     }
@@ -806,7 +810,7 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
         // Add soundtracks.
         for(auto& line : section.lines)
         {
-            Soundtrack* soundtrack = gAssetManager.LoadSoundtrack(line.entries[0].key, GetScope());
+            Soundtrack* soundtrack = gAssetManager.LoadAsset<Soundtrack>(line.entries[0].key, GetScope());
             if(soundtrack != nullptr)
             {
                 soundtrackBlock.items.push_back(soundtrack);
@@ -845,19 +849,19 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "talk"))
                 {
-                    convo.talkGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
+                    convo.talkGas = gAssetManager.LoadAsset<GAS>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "listen"))
                 {
-                    convo.listenGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
+                    convo.listenGas = gAssetManager.LoadAsset<GAS>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "enter"))
                 {
-                    convo.enterAnim = gAssetManager.LoadAnimation(keyValue.value, GetScope());
+                    convo.enterAnim = gAssetManager.LoadAsset<Animation>(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "exit"))
                 {
-                    convo.exitAnim = gAssetManager.LoadAnimation(keyValue.value, GetScope());
+                    convo.exitAnim = gAssetManager.LoadAsset<Animation>(keyValue.value, GetScope());
                 }
             }
         }
@@ -878,7 +882,7 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
 
         for(auto& line : section.lines)
         {
-            NVC* nvc = gAssetManager.LoadNVC(line.entries[0].key, GetScope());
+            NVC* nvc = gAssetManager.LoadAsset<NVC>(line.entries[0].key, GetScope());
             if(nvc != nullptr)
             {
                 actionBlock.items.push_back(nvc);

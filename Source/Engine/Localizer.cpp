@@ -15,7 +15,7 @@ Localizer gLocalizer;
     if(languagePrefix.empty())
     {
         // If a language prefix is specified in GK3.ini, it will override anything else.
-        Config* config = gAssetManager.LoadConfig("GK3.ini");
+        Config* config = gAssetManager.LoadAsset<Config>("GK3.ini");
         if(config != nullptr && config->HasKey("Localization", "Locale"))
         {
             languagePrefix = config->GetString("Localization", "Locale", "E");

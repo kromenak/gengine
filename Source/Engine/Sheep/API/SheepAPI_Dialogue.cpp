@@ -1,5 +1,6 @@
 #include "SheepAPI_Dialogue.h"
 
+#include "Animation.h"
 #include "Animator.h"
 #include "AssetManager.h"
 #include "DialogueManager.h"
@@ -18,7 +19,7 @@ RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
 shpvoid StartYak(const std::string& yakAnimationName)
 {
     AnimParams params;
-    params.animation = gAssetManager.LoadYak(yakAnimationName, AssetScope::Scene);
+    params.animation = gAssetManager.LoadAsset<Animation>(yakAnimationName, AssetScope::Scene, "yak");
     params.finishCallback = AddWait();
     params.isYak = true;
     Scene::GetActiveAnimator()->Start(params);

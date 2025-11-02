@@ -32,7 +32,7 @@ bool Debug::sRenderRectTransformRects = false;
 void Debug::Init()
 {
     // Load any debug flags that can be set from the INI file.
-    Config* config = gAssetManager.LoadConfig("GK3.ini");
+    Config* config = gAssetManager.LoadAsset<Config>("GK3.ini");
     if(config != nullptr && config->GetBool("Debug", "GEngine AlwaysActive", false))
     {
         SetFlag("GEngine AlwaysActive");
@@ -319,4 +319,3 @@ void Debug::DrawSphere(const Vector3& position, float radius, const Color32& col
     Vector3 toZ = center + Vector3::UnitZ * radius;
     Debug::DrawLine(fromZ, toZ, color, duration);
 }
-

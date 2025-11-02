@@ -38,7 +38,7 @@ void AssetManager::Init()
 {
     // Load GK3.ini from the root directory so we can bootstrap asset search paths.
     mSearchPaths.emplace_back("");
-    Config* config = LoadConfig("GK3.ini");
+    Config* config = LoadAsset<Config>("GK3.ini");
     mSearchPaths.clear();
 
     // The config should be present, but is technically optional.
@@ -75,6 +75,28 @@ void AssetManager::Init()
 
     // Also allow searching the root directory for assets moving forward, but at the lowest priority.
     mSearchPaths.emplace_back("");
+
+    // Add expected extensions.
+    SetExpectedExtension<Audio>(".WAV");
+    SetExpectedExtension<Soundtrack>(".STK");
+    SetExpectedExtension<Animation>(".YAK", "yak");
+    SetExpectedExtension<Model>(".MOD");
+    SetExpectedExtension<Texture>(".BMP");
+    SetExpectedExtension<GAS>(".GAS");
+    SetExpectedExtension<Animation>(".ANM");
+    SetExpectedExtension<Animation>(".MOM", "mom");
+    SetExpectedExtension<VertexAnimation>(".ACT");
+    SetExpectedExtension<Sequence>(".SEQ");
+    SetExpectedExtension<SceneInitFile>(".SIF");
+    SetExpectedExtension<SceneAsset>(".SCN");
+    SetExpectedExtension<NVC>(".NVC");
+    SetExpectedExtension<BSP>(".BSP");
+    SetExpectedExtension<BSPLightmap>(".MUL");
+    SetExpectedExtension<SheepScript>(".SHP");
+    SetExpectedExtension<Cursor>(".CUR");
+    SetExpectedExtension<Font>(".FON");
+    SetExpectedExtension<TextAsset>(".TXT");
+    SetExpectedExtension<Config>(".CFG");
 }
 
 void AssetManager::Shutdown()
@@ -96,7 +118,7 @@ void AssetManager::AddSearchPath(const std::string& searchPath)
     mSearchPaths.push_back(searchPath);
 }
 
-std::string AssetManager::GetAssetPath(const std::string& fileName)
+std::string AssetManager::GetAssetPath(const std::string& fileName) const
 {
     // We have a set of paths, at which we should search for the specified filename.
     // So, iterate each search path and see if the file is in that folder.
@@ -111,7 +133,7 @@ std::string AssetManager::GetAssetPath(const std::string& fileName)
     return std::string();
 }
 
-std::string AssetManager::GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions)
+std::string AssetManager::GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions) const
 {
     // If already has an extension, just use the normal path find function.
     if(Path::HasExtension(fileName))
@@ -193,35 +215,10 @@ void AssetManager::WriteAllBarnAssetsToFile(const std::string& search, const std
     }
 }
 
-Audio* AssetManager::LoadAudio(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, AssetCache<Audio>::Get());
-}
-
-Soundtrack* AssetManager::LoadSoundtrack(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), scope, AssetCache<Soundtrack>::Get());
-}
-
-Animation* AssetManager::LoadYak(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Animation>(SanitizeAssetName(name, ".YAK"), scope, AssetCache<Animation>::Get("yak"));
-}
-
-Model* AssetManager::LoadModel(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Model>(SanitizeAssetName(name, ".MOD"), scope, AssetCache<Model>::Get());
-}
-
-Texture* AssetManager::LoadTexture(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, AssetCache<Texture>::Get());
-}
-
 Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scope)
 {
     // Load texture per usual.
-    Texture* texture = LoadTexture(name, scope);
+    Texture* texture = LoadAsset<Texture>(name, scope);
 
     // A "scene" texture means it is rendered as part of the 3D game scene (as opposed to a 2D UI texture).
     // These textures look better if you apply mipmaps and filtering.
@@ -248,98 +245,19 @@ Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scop
     return texture;
 }
 
-GAS* AssetManager::LoadGAS(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), scope, AssetCache<GAS>::Get());
-}
-
-Animation* AssetManager::LoadAnimation(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Animation>(SanitizeAssetName(name, ".ANM"), scope, AssetCache<Animation>::Get("anm"));
-}
-
-Animation* AssetManager::LoadMomAnimation(const std::string& name, AssetScope scope)
-{
-    // GK3 has this notion of a "mother-of-all-animations" file. Thing is, it's nearly identical to a normal .ANM file...
-    // Only difference I could find is MOM files support a few more keywords.
-    // Anyway, it's all the same thing in my eyes!
-    return LoadAsset<Animation>(SanitizeAssetName(name, ".MOM"), scope, AssetCache<Animation>::Get("mom"));
-}
-
-VertexAnimation* AssetManager::LoadVertexAnimation(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), scope, AssetCache<VertexAnimation>::Get());
-}
-
-Sequence* AssetManager::LoadSequence(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Sequence>(SanitizeAssetName(name, ".SEQ"), scope, AssetCache<Sequence>::Get());
-}
-
-SceneInitFile* AssetManager::LoadSIF(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<SceneInitFile>(SanitizeAssetName(name, ".SIF"), scope, AssetCache<SceneInitFile>::Get());
-}
-
-SceneAsset* AssetManager::LoadSceneAsset(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<SceneAsset>(SanitizeAssetName(name, ".SCN"), scope, AssetCache<SceneAsset>::Get());
-}
-
-NVC* AssetManager::LoadNVC(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<NVC>(SanitizeAssetName(name, ".NVC"), scope, AssetCache<NVC>::Get());
-}
-
-BSP* AssetManager::LoadBSP(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), scope, AssetCache<BSP>::Get());
-}
-
-BSPLightmap* AssetManager::LoadBSPLightmap(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<BSPLightmap>(SanitizeAssetName(name, ".MUL"), scope, AssetCache<BSPLightmap>::Get());
-}
-
-SheepScript* AssetManager::LoadSheep(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), scope, AssetCache<SheepScript>::Get());
-}
-
-Cursor* AssetManager::LoadCursor(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), scope, AssetCache<Cursor>::Get());
-}
-
-Font* AssetManager::LoadFont(const std::string& name, AssetScope scope)
-{
-    return LoadAsset<Font>(SanitizeAssetName(name, ".FON"), scope, AssetCache<Font>::Get());
-}
-
-TextAsset* AssetManager::LoadText(const std::string& name, AssetScope scope)
-{
-    // Specifically DO NOT delete the asset buffer when creating TextAssets, since they take direct ownership of it.
-    return LoadAsset<TextAsset>(name, scope, AssetCache<TextAsset>::Get());
-}
-
 TextAsset* AssetManager::LoadLocalizedText(const std::string& name, AssetScope scope)
 {
-    TextAsset* textFile = LoadText(Localizer::GetLanguagePrefix() + name, scope);
+    TextAsset* textFile = LoadAsset<TextAsset>(Localizer::GetLanguagePrefix() + name, scope);
     if(textFile == nullptr)
     {
         printf("Failed to load %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), name.c_str(), name.c_str());
-        textFile = LoadText("E" + name, scope);
+        textFile = LoadAsset<TextAsset>("E" + name, scope);
         if(textFile == nullptr)
         {
             printf("Failed to load localized text %s!\n", name.c_str());
         }
     }
     return textFile;
-}
-
-Config* AssetManager::LoadConfig(const std::string& name)
-{
-    return LoadAsset<Config>(SanitizeAssetName(name, ".CFG"), AssetScope::Global, AssetCache<Config>::Get());
 }
 
 Shader* AssetManager::GetShader(const std::string& id)
@@ -480,46 +398,6 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
         return assetName + expectedExtension;
     }
     return assetName;
-}
-
-template<typename T>
-T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache)
-{
-    // If already present in cache, return existing asset right away.
-    if(cache != nullptr && scope != AssetScope::Manual)
-    {
-        T* cachedAsset = cache->GetAsset(name);
-        if(cachedAsset != nullptr)
-        {
-            // One caveat: if the cached asset has a narrower scope than what's being requested, we must PROMOTE the scope.
-            // For example, a cached asset with SCENE scope being requested at GLOBAL scope must convert to GLOBAL scope.
-            if(cachedAsset->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
-            {
-                cachedAsset->SetScope(AssetScope::Global);
-            }
-            return cachedAsset;
-        }
-    }
-    //printf("Loading asset %s\n", assetName.c_str());
-
-    // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
-    AssetData assetData;
-    assetData.bytes.reset(CreateAssetBuffer(name, assetData.length));
-    if(assetData.bytes == nullptr) { return nullptr; }
-
-    // Create asset from asset buffer.
-    std::string upperName = StringUtil::ToUpperCopy(name);
-    T* asset = new T(upperName, scope);
-
-    // Add entry in cache, if we have a cache.
-    if(asset != nullptr && cache != nullptr && scope != AssetScope::Manual)
-    {
-        cache->SetAsset(name, asset);
-    }
-
-    // Load the asset.
-    asset->Load(assetData);
-    return asset;
 }
 
 uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize)

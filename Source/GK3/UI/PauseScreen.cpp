@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "InputManager.h"
+#include "Texture.h"
 #include "UIImage.h"
 #include "UIUtil.h"
 
@@ -16,7 +17,7 @@ PauseScreen::PauseScreen() : Actor("PauseScreen", TransformType::RectTransform),
 
     // Create background image.
     UIImage* background = UI::CreateWidgetActor<UIImage>("Paused", this);
-    background->SetTexture(gAssetManager.LoadTexture("PAUSED.BMP"), true);
+    background->SetTexture(gAssetManager.LoadAsset<Texture>("PAUSED.BMP"), true);
 
     // Hide by default.
     SetActive(false);

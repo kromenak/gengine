@@ -1,8 +1,10 @@
 #include "Pendulum.h"
 
 #include "ActionManager.h"
+#include "Animation.h"
 #include "Animator.h"
 #include "AssetManager.h"
+#include "Cursor.h"
 #include "CursorManager.h"
 #include "Debug.h"
 #include "GameCamera.h"
@@ -45,18 +47,18 @@ Pendulum::Pendulum() : Actor("Pendulum Puzzle")
     mGabeBloodActor = gSceneManager.GetScene()->GetSceneObjectByModelName("groundblood");
 
     // Load animations used during this sequence.
-    mIdleAnim = gAssetManager.LoadAnimation("gabBreathMic", AssetScope::Scene);
+    mIdleAnim = gAssetManager.LoadAsset<Animation>("gabBreathMic", AssetScope::Scene);
 
-    mJumpForwardStartAnim = gAssetManager.LoadAnimation("GABTE3JUMPFS", AssetScope::Scene);
-    mJumpForwardEndAnim = gAssetManager.LoadAnimation("GABTE3JUMPFE", AssetScope::Scene);
+    mJumpForwardStartAnim = gAssetManager.LoadAsset<Animation>("GABTE3JUMPFS", AssetScope::Scene);
+    mJumpForwardEndAnim = gAssetManager.LoadAsset<Animation>("GABTE3JUMPFE", AssetScope::Scene);
 
-    mJumpLeftStartAnim = gAssetManager.LoadAnimation("GABTE3JUMPLS", AssetScope::Scene);
-    mJumpLeftMiddleAnim = gAssetManager.LoadAnimation("GABTE3JUMPLM", AssetScope::Scene);
-    mJumpLeftEndAnim = gAssetManager.LoadAnimation("GABTE3JUMPLE", AssetScope::Scene);
+    mJumpLeftStartAnim = gAssetManager.LoadAsset<Animation>("GABTE3JUMPLS", AssetScope::Scene);
+    mJumpLeftMiddleAnim = gAssetManager.LoadAsset<Animation>("GABTE3JUMPLM", AssetScope::Scene);
+    mJumpLeftEndAnim = gAssetManager.LoadAsset<Animation>("GABTE3JUMPLE", AssetScope::Scene);
 
-    mJumpRightStartAnim = gAssetManager.LoadAnimation("GABTE3JUMPRS", AssetScope::Scene);
-    mJumpRightMiddleAnim = gAssetManager.LoadAnimation("GABTE3JUMPRM", AssetScope::Scene);
-    mJumpRightEndAnim = gAssetManager.LoadAnimation("GABTE3JUMPRE", AssetScope::Scene);
+    mJumpRightStartAnim = gAssetManager.LoadAsset<Animation>("GABTE3JUMPRS", AssetScope::Scene);
+    mJumpRightMiddleAnim = gAssetManager.LoadAsset<Animation>("GABTE3JUMPRM", AssetScope::Scene);
+    mJumpRightEndAnim = gAssetManager.LoadAsset<Animation>("GABTE3JUMPRE", AssetScope::Scene);
 
     // Idle anim loops.
     mIdleAnimParams.animation = mIdleAnim;
@@ -66,7 +68,7 @@ Pendulum::Pendulum() : Actor("Pendulum Puzzle")
     mJumpAnimParams.allowMove = true;
 
     // Cache the grab cursor.
-    mGrabCursor = gAssetManager.LoadCursor("C_GRAB.CUR", AssetScope::Scene);
+    mGrabCursor = gAssetManager.LoadAsset<Cursor>("C_GRAB.CUR", AssetScope::Scene);
 
     // There's a PENDULUM.TXT that these values can be read from.
     // But frankly, it's so simple, I'm not going to bother at the moment.
@@ -517,7 +519,7 @@ void Pendulum::UpdateGabeInteract()
                 {
                     // Show a short animation of Gabe jumping off the pendulum.
                     AnimParams jumpOffPendulumParams;
-                    jumpOffPendulumParams.animation = gAssetManager.LoadAnimation("GABJMPOFFPEN", AssetScope::Scene);
+                    jumpOffPendulumParams.animation = gAssetManager.LoadAsset<Animation>("GABJMPOFFPEN", AssetScope::Scene);
                     jumpOffPendulumParams.noParenting = true;
                     gSceneManager.GetScene()->GetAnimator()->Start(jumpOffPendulumParams, [this](){
 
@@ -585,7 +587,7 @@ void Pendulum::ResetAtEntryway()
     gSceneManager.GetScene()->GetCamera()->SetForcedCinematicMode(false);
 
     // Make sure door is opened again.
-    Animation* doorCloseAnim = gAssetManager.LoadAnimation("TE3_DOORCLOSE", AssetScope::Scene);
+    Animation* doorCloseAnim = gAssetManager.LoadAsset<Animation>("TE3_DOORCLOSE", AssetScope::Scene);
     gSceneManager.GetScene()->GetAnimator()->Sample(doorCloseAnim, 0);
 }
 
@@ -613,7 +615,7 @@ void Pendulum::OnForwardJumpStarted()
         mGabePlatformIndex = platformIndex;
 
         // Play animation of entry door closing.
-        Animation* doorCloseAnim = gAssetManager.LoadAnimation("TE3_DOORCLOSE", AssetScope::Scene);
+        Animation* doorCloseAnim = gAssetManager.LoadAsset<Animation>("TE3_DOORCLOSE", AssetScope::Scene);
         gSceneManager.GetScene()->GetAnimator()->Start(doorCloseAnim);
 
         // Play jump end animation.
@@ -782,7 +784,7 @@ void Pendulum::OnGrabPendulum()
 
     // Play the animation of Gabe jumping up onto the pendulum.
     AnimParams grabPendulumParams;
-    grabPendulumParams.animation = gAssetManager.LoadAnimation("GABJMPPNDULM", AssetScope::Scene);
+    grabPendulumParams.animation = gAssetManager.LoadAsset<Animation>("GABJMPPNDULM", AssetScope::Scene);
     grabPendulumParams.noParenting = true;
     gSceneManager.GetScene()->GetAnimator()->Start(grabPendulumParams, [](){
 
@@ -821,7 +823,7 @@ void Pendulum::OnFallToDeath()
     gSceneManager.GetScene()->SetCameraPosition("FALL_DOWN");
 
     // Play the fall death anim (RIP).
-    Animation* fallDeathAnim = gAssetManager.LoadAnimation("GABEFALLDEATH", AssetScope::Scene);
+    Animation* fallDeathAnim = gAssetManager.LoadAsset<Animation>("GABEFALLDEATH", AssetScope::Scene);
     gSceneManager.GetScene()->GetAnimator()->Start(fallDeathAnim, [this](){
 
         // Wait a beat so you can see your mistake.

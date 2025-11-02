@@ -1,5 +1,6 @@
 #include "CharacterManager.h"
 
+#include "Animation.h"
 #include "AssetManager.h"
 #include "IniParser.h"
 #include "Loader.h"
@@ -18,7 +19,7 @@ void CharacterManager::Init()
         // Read in faces first, as character configs reference these.
         {
             // Get FACES text file as a raw buffer.
-            TextAsset* textFile = gAssetManager.LoadText("FACES.TXT", AssetScope::Manual);
+            TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("FACES.TXT", AssetScope::Manual);
 
             // Pass that along to INI parser, since it is plain text and in INI format.
             IniParser facesParser(textFile->GetText(), textFile->GetTextLength());
@@ -95,9 +96,9 @@ void CharacterManager::Init()
                     // First, try to load the entry's face/eyelid/forehead textures.
                     // These are derived from the section name.
                     faceConfig.faceTexture = gAssetManager.LoadSceneTexture(section.name + "_face");
-                    faceConfig.eyelidsTexture = gAssetManager.LoadTexture(section.name + "_eyelids");
-                    faceConfig.foreheadTexture = gAssetManager.LoadTexture(section.name + "_forehead");
-                    faceConfig.mouthTexture = gAssetManager.LoadTexture(section.name + "_mouth00");
+                    faceConfig.eyelidsTexture = gAssetManager.LoadAsset<Texture>(section.name + "_eyelids");
+                    faceConfig.foreheadTexture = gAssetManager.LoadAsset<Texture>(section.name + "_forehead");
+                    faceConfig.mouthTexture = gAssetManager.LoadAsset<Texture>(section.name + "_mouth00");
 
                     // Each entry is a face property for the character.
                     for(auto& line : section.lines)
@@ -105,11 +106,11 @@ void CharacterManager::Init()
                         IniKeyValue& entry = line.entries.front();
                         if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Name"))
                         {
-                            faceConfig.leftEyeTexture = gAssetManager.LoadTexture(entry.value);
+                            faceConfig.leftEyeTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                         }
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Name"))
                         {
-                            faceConfig.rightEyeTexture = gAssetManager.LoadTexture(entry.value);
+                            faceConfig.rightEyeTexture = gAssetManager.LoadAsset<Texture>(entry.value);
                         }
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Offset"))
                         {
@@ -169,7 +170,7 @@ void CharacterManager::Init()
                         }
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Eyelids Alpha Channel"))
                         {
-                            faceConfig.eyelidsAlphaChannel = gAssetManager.LoadTexture(entry.value);
+                            faceConfig.eyelidsAlphaChannel = gAssetManager.LoadAsset<Texture>(entry.value);
 
                             // If we have eyelids and an alpha channel, just apply it right away, why not?
                             if(faceConfig.eyelidsTexture != nullptr && faceConfig.eyelidsAlphaChannel != nullptr)
@@ -189,12 +190,12 @@ void CharacterManager::Init()
                             {
                                 if(i == 0)
                                 {
-                                    faceConfig.blinkAnim1 = gAssetManager.LoadAnimation(tokens[i]);
+                                    faceConfig.blinkAnim1 = gAssetManager.LoadAsset<Animation>(tokens[i]);
                                     faceConfig.blinkAnim1Probability = (i + 1 < tokens.size()) ? StringUtil::ToInt(tokens[i + 1]) : 0;
                                 }
                                 else
                                 {
-                                    faceConfig.blinkAnim2 = gAssetManager.LoadAnimation(tokens[i]);
+                                    faceConfig.blinkAnim2 = gAssetManager.LoadAsset<Animation>(tokens[i]);
                                     faceConfig.blinkAnim2Probability = (i + 1 < tokens.size()) ? StringUtil::ToInt(tokens[i + 1]) : 0;
                                 }
                             }
@@ -227,7 +228,7 @@ void CharacterManager::Init()
         // Read in characters.
         {
             // Get CHARACTERS text file as a raw buffer.
-            TextAsset* textFile = gAssetManager.LoadText("CHARACTERS.TXT", AssetScope::Manual);
+            TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("CHARACTERS.TXT", AssetScope::Manual);
 
             // Pass that along to INI parser, since it is plain text and in INI format.
             IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -265,23 +266,23 @@ void CharacterManager::Init()
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StartAnim"))
                     {
-                        config.walkStartAnim = gAssetManager.LoadAnimation(entry.value);
+                        config.walkStartAnim = gAssetManager.LoadAsset<Animation>(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "ContAnim"))
                     {
-                        config.walkLoopAnim = gAssetManager.LoadAnimation(entry.value);
+                        config.walkLoopAnim = gAssetManager.LoadAsset<Animation>(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StopAnim"))
                     {
-                        config.walkStopAnim = gAssetManager.LoadAnimation(entry.value);
+                        config.walkStopAnim = gAssetManager.LoadAsset<Animation>(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StartTurnRightAnim"))
                     {
-                        config.walkStartTurnRightAnim = gAssetManager.LoadAnimation(entry.value);
+                        config.walkStartTurnRightAnim = gAssetManager.LoadAsset<Animation>(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StartTurnLeftAnim"))
                     {
-                        config.walkStartTurnLeftAnim = gAssetManager.LoadAnimation(entry.value);
+                        config.walkStartTurnLeftAnim = gAssetManager.LoadAsset<Animation>(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "HipAxesMeshIndex"))
                     {
@@ -334,7 +335,7 @@ void CharacterManager::Init()
                             if(config.clothesAnims[i].first.empty())
                             {
                                 config.clothesAnims[i].first = timeblockStr;
-                                config.clothesAnims[i].second = gAssetManager.LoadAnimation(entry.value);
+                                config.clothesAnims[i].second = gAssetManager.LoadAsset<Animation>(entry.value);
                                 break;
                             }
                         }
@@ -363,7 +364,7 @@ void CharacterManager::Init()
 
         // Load in valid actors list.
         {
-            TextAsset* textFile = gAssetManager.LoadText("Actors.txt", AssetScope::Manual);
+            TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("Actors.txt", AssetScope::Manual);
 
             // Parse as INI file.
             IniParser actorsParser(textFile->GetText(), textFile->GetTextLength());

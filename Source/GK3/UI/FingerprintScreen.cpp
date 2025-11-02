@@ -2,6 +2,7 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Cursor.h"
 #include "CursorManager.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
@@ -27,15 +28,15 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
 
     // Add base background image, which shows the fingerprint box up-close.
     UIImage* baseImage = UI::CreateWidgetActor<UIImage>("Background", this);
-    baseImage->SetTexture(gAssetManager.LoadTexture("FP_BASE.BMP"), true);
+    baseImage->SetTexture(gAssetManager.LoadAsset<Texture>("FP_BASE.BMP"), true);
 
     // Add exit button to bottom-left corner of screen.
     {
         UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", baseImage);
-        exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
-        exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
-        exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
-        exitButton->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
+        exitButton->SetUpTexture(gAssetManager.LoadAsset<Texture>("EXITN.BMP"));
+        exitButton->SetDownTexture(gAssetManager.LoadAsset<Texture>("EXITD.BMP"));
+        exitButton->SetHoverTexture(gAssetManager.LoadAsset<Texture>("EXITHOV.BMP"));
+        exitButton->SetDisabledTexture(gAssetManager.LoadAsset<Texture>("EXITDIS.BMP"));
         exitButton->SetPressCallback([this](UIButton* button){
             Hide();
         });
@@ -49,7 +50,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     // Add brush image along with button to pick up brush.
     {
         mBrushImage = UI::CreateWidgetActor<UIImage>("Brush", baseImage);
-        mBrushImage->SetTexture(gAssetManager.LoadTexture("FP_BRUSH.BMP"), true);
+        mBrushImage->SetTexture(gAssetManager.LoadAsset<Texture>("FP_BRUSH.BMP"), true);
         mBrushImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mBrushImage->GetRectTransform()->SetAnchoredPosition(128.0f, 90.0f);
 
@@ -122,10 +123,10 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     }
 
     // Load needed cursors.
-    mBrushCursor = gAssetManager.LoadCursor("C_FPBRUSH.CUR");
-    mDustedBrushCursor = gAssetManager.LoadCursor("C_FPBRUSH_WDUST.CUR");
-    mTapeCursor = gAssetManager.LoadCursor("C_FPTAPE_NOFP.CUR");
-    mUsedTapeCursor = gAssetManager.LoadCursor("C_FPTAPE_FP.CUR");
+    mBrushCursor = gAssetManager.LoadAsset<Cursor>("C_FPBRUSH.CUR");
+    mDustedBrushCursor = gAssetManager.LoadAsset<Cursor>("C_FPBRUSH_WDUST.CUR");
+    mTapeCursor = gAssetManager.LoadAsset<Cursor>("C_FPTAPE_NOFP.CUR");
+    mUsedTapeCursor = gAssetManager.LoadAsset<Cursor>("C_FPTAPE_FP.CUR");
 
     // UNFORTUNATELY, this is another spot where the logic doesn't seem data-driven.
     // So, we'll enumerate all the possible fingerprint instances here and nowwww.....
@@ -390,7 +391,7 @@ void FingerprintScreen::Show(const std::string& nounName)
     // Show the object being fingerprinted in the right panel.
     if(mActiveObject != nullptr)
     {
-        mFingerprintObjectImage->SetTexture(gAssetManager.LoadTexture(mActiveObject->textureName), true);
+        mFingerprintObjectImage->SetTexture(gAssetManager.LoadAsset<Texture>(mActiveObject->textureName), true);
         mFingerprintObjectImage->GetRectTransform()->SetAnchor(mActiveObject->anchor);
         mFingerprintObjectImage->GetRectTransform()->SetAnchoredPosition(mActiveObject->anchoredPosition);
     }
@@ -417,7 +418,7 @@ void FingerprintScreen::Show(const std::string& nounName)
 
             // Set fingerprint texture on the image.
             FingerprintObject::Fingerprint& fp = mActiveObject->fingerprints[fpIndex];
-            Texture* printTexture = gAssetManager.LoadTexture(fp.textureName);
+            Texture* printTexture = gAssetManager.LoadAsset<Texture>(fp.textureName);
             mPrintsToCollect[imageIndex].image->SetTexture(printTexture, true);
 
             // Fingerprint images are surrounded by black pixels that should render as transparent.

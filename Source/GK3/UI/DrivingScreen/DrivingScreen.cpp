@@ -4,6 +4,7 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Audio.h"
 #include "DrivingScreenBlip.h"
 #include "GameProgress.h"
 #include "GKPrefs.h"
@@ -28,13 +29,13 @@ DrivingScreen::DrivingScreen() : Actor("DrivingScreen", TransformType::RectTrans
     /*
     //TODO: This puts a blurry image behind the main map image for higher resolutions with black bars. Good or bad?
     UIImage* blurryBG = UI::CreateWidgetActor<UIImage>("MapBlurry", this);
-    blurryBG->SetTexture(gAssetManager.LoadTexture("DM_BASE.BMP"));
+    blurryBG->SetTexture(gAssetManager.LoadAsset<Texture>("DM_BASE.BMP"));
     blurryBG->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
     blurryBG->SetColor(Color32(255, 255, 255, 50));
     */
 
     // Add map background image.
-    mMapTexture = gAssetManager.LoadTexture("DM_BASE.BMP");
+    mMapTexture = gAssetManager.LoadAsset<Texture>("DM_BASE.BMP");
     mMapImage = UI::CreateWidgetActor<UIImage>("Map", this);
     mMapImage->SetTexture(mMapTexture, true);
     mMapActor = mMapImage->GetOwner();
@@ -165,20 +166,20 @@ void DrivingScreen::Show(FollowMode followMode)
         {
             if(currentTimeblock == Timeblock(2, 2))
             {
-                soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAP302A.STK"));
+                soundtrackPlayer->Play(gAssetManager.LoadAsset<Soundtrack>("MAP302A.STK"));
             }
             else
             {
-                soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPGABEGENDAY1.STK"));
+                soundtrackPlayer->Play(gAssetManager.LoadAsset<Soundtrack>("MAPGABEGENDAY1.STK"));
             }
         }
         else
         {
-            soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPFOLLOWGEN.STK"));
+            soundtrackPlayer->Play(gAssetManager.LoadAsset<Soundtrack>("MAPFOLLOWGEN.STK"));
         }
 
         // Also play motorcycle driving away SFX.
-        soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPHARLEYAWAY.STK"));
+        soundtrackPlayer->Play(gAssetManager.LoadAsset<Soundtrack>("MAPHARLEYAWAY.STK"));
 
 
 
@@ -208,7 +209,7 @@ void DrivingScreen::Hide()
     if(soundtrackPlayer != nullptr)
     {
         soundtrackPlayer->StopAll();
-        soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPHARLEYARRIVE.STK"));
+        soundtrackPlayer->Play(gAssetManager.LoadAsset<Soundtrack>("MAPHARLEYARRIVE.STK"));
     }
 
     // Clear follow mode.
@@ -319,8 +320,8 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     button->GetRectTransform()->SetPixelPerfect(false);
 
     // Set textures.
-    Texture* upTexture = gAssetManager.LoadTexture("DM_" + buttonId + "_UL.BMP");
-    Texture* hoverTexture = gAssetManager.LoadTexture("DM_" + buttonId + ".BMP");
+    Texture* upTexture = gAssetManager.LoadAsset<Texture>("DM_" + buttonId + "_UL.BMP");
+    Texture* hoverTexture = gAssetManager.LoadAsset<Texture>("DM_" + buttonId + ".BMP");
     button->SetUpTexture(upTexture);
     button->SetDownTexture(hoverTexture);
     button->SetHoverTexture(hoverTexture);
@@ -352,7 +353,7 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     }
 
     // Play sound effect when hovering these buttons.
-    button->SetHoverSound(gAssetManager.LoadAudio("MAPSWOOSH.WAV"));
+    button->SetHoverSound(gAssetManager.LoadAsset<Audio>("MAPSWOOSH.WAV"));
 
     // Add tooltip.
     button->SetTooltipText("dm_" + buttonId);
@@ -373,7 +374,7 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
 void DrivingScreen::LoadPaths()
 {
     // Load path data.
-    TextAsset* pathData = gAssetManager.LoadText("PATHDATA.TXT", AssetScope::Manual);
+    TextAsset* pathData = gAssetManager.LoadAsset<TextAsset>("PATHDATA.TXT", AssetScope::Manual);
 
     // Pass 1: Read in nodes and segments.
     {
@@ -850,7 +851,7 @@ void DrivingScreen::OnLocationButtonPressed(const std::string& locationCode)
     }
 
     // Play button sound effect.
-    gAudioManager.PlaySFX(gAssetManager.LoadAudio("MAPBUTTON.WAV"));
+    gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("MAPBUTTON.WAV"));
 
     // Check conditions under which we would NOT allow going to this location.
     // Don't allow going to Larry's place during timeblock 106P and 202A.

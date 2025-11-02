@@ -3,6 +3,8 @@
 #include "Actor.h"
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Audio.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
 #include "SidneyButton.h"
@@ -10,6 +12,7 @@
 #include "SidneyUtil.h"
 #include "Scene.h"
 #include "StringUtil.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
@@ -68,7 +71,7 @@ void SidneyMakeId::Init(Actor* parent)
     idWindow->GetRectTransform()->SetSizeDelta(426.0f, 282.0f);
     {
         UIImage* boxHeaderDividerImage = UI::CreateWidgetActor<UIImage>("Divider", idWindow);
-        boxHeaderDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        boxHeaderDividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
         boxHeaderDividerImage->GetRectTransform()->SetPivot(0.5f, 1.0f);
         boxHeaderDividerImage->GetRectTransform()->SetAnchorMin(0.0f, 1.0f);
         boxHeaderDividerImage->GetRectTransform()->SetAnchorMax(1.0f, 1.0f);
@@ -77,7 +80,7 @@ void SidneyMakeId::Init(Actor* parent)
 
         // Add header label.
         mIdToPrintLabel = UI::CreateWidgetActor<UILabel>("IdToPrintLabel", idWindow);
-        mIdToPrintLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mIdToPrintLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mIdToPrintLabel->SetText("MEDICAL ; DOCTOR");
         mIdToPrintLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
         mIdToPrintLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -99,13 +102,13 @@ void SidneyMakeId::Init(Actor* parent)
         // Add header divider and "Select:" text.
         {
             UIImage* dividerImage = UI::CreateWidgetActor<UIImage>("Divider", charBox);
-            dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+            dividerImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_BOX_TOP.BMP"), true);
             dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
             dividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -17.0f);
             dividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
             UILabel* label = UI::CreateWidgetActor<UILabel>("HeaderLabel", charBox);
-            label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            label->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
             label->SetText(SidneyUtil::GetMakeIdLocalizer().GetText("Select"));
             label->SetHorizonalAlignment(HorizontalAlignment::Center);
             label->SetVerticalAlignment(VerticalAlignment::Top);
@@ -119,7 +122,7 @@ void SidneyMakeId::Init(Actor* parent)
         // Add Gabriel button.
         {
             UIImage* buttonImage = UI::CreateWidgetActor<UIImage>("GabeButton", charBox);
-            buttonImage->SetTexture(gAssetManager.LoadTexture("GAB_MUGSHOT.BMP"), true);
+            buttonImage->SetTexture(gAssetManager.LoadAsset<Texture>("GAB_MUGSHOT.BMP"), true);
 
             UIButton* button = buttonImage->GetOwner()->AddComponent<UIButton>();
             button->SetPressCallback([this](UIButton* button){
@@ -134,7 +137,7 @@ void SidneyMakeId::Init(Actor* parent)
         // Add Grace button.
         {
             UIImage* buttonImage = UI::CreateWidgetActor<UIImage>("GraceButton", charBox);
-            buttonImage->SetTexture(gAssetManager.LoadTexture("GRA_MUGSHOT.BMP"), true);
+            buttonImage->SetTexture(gAssetManager.LoadAsset<Texture>("GRA_MUGSHOT.BMP"), true);
 
             UIButton* button = buttonImage->GetOwner()->AddComponent<UIButton>();
             button->SetPressCallback([this](UIButton* button){
@@ -157,7 +160,7 @@ void SidneyMakeId::Init(Actor* parent)
 
         // The ID image.
         mIdToPrintImage = UI::CreateWidgetActor<UIImage>("IdImage", border);
-        mIdToPrintImage->SetTexture(gAssetManager.LoadTexture("GAB_DOC.BMP"), true);
+        mIdToPrintImage->SetTexture(gAssetManager.LoadAsset<Texture>("GAB_DOC.BMP"), true);
         mIdToPrintImage->GetRectTransform()->SetAnchor(AnchorPreset::Center);
         mIdToPrintImage->GetRectTransform()->SetAnchoredPosition(-0.5f, 0.0f); // small offset needed for pixel-perfect positioning
     }
@@ -165,7 +168,7 @@ void SidneyMakeId::Init(Actor* parent)
     // Add the connector between the characters and the ID.
     {
         UIImage* connectorImage = UI::CreateWidgetActor<UIImage>("Connector", idWindow);
-        connectorImage->SetTexture(gAssetManager.LoadTexture("S_ID_BRACKET.BMP"), true);
+        connectorImage->SetTexture(gAssetManager.LoadAsset<Texture>("S_ID_BRACKET.BMP"), true);
         connectorImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         connectorImage->GetRectTransform()->SetAnchoredPosition(96.0f, 143.0f);
     }
@@ -174,7 +177,7 @@ void SidneyMakeId::Init(Actor* parent)
     {
         SidneyButton* button = new SidneyButton("PrintButton", idWindow->GetOwner());
         button->SetText(SidneyUtil::GetMakeIdLocalizer().GetText("Print"));
-        button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+        button->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"));
         button->SetWidth(135.0f);
 
         button->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
@@ -212,7 +215,7 @@ void SidneyMakeId::RefreshIdHeader(const std::string& category, const std::strin
 
 void SidneyMakeId::RefreshId()
 {
-    mIdToPrintImage->SetTexture(gAssetManager.LoadTexture(mCharacterId + "_" + mJobId + ".BMP"));
+    mIdToPrintImage->SetTexture(gAssetManager.LoadAsset<Texture>(mCharacterId + "_" + mJobId + ".BMP"));
 }
 
 void SidneyMakeId::PrintId()
@@ -304,7 +307,7 @@ void SidneyMakeId::PrintId()
                     gActionManager.ExecuteSheepAction(vo);
 
                     // Play a print SFX.
-                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDPRINTID.WAV", AssetScope::Scene));
+                    gAudioManager.PlaySFX(gAssetManager.LoadAsset<Audio>("SIDPRINTID.WAV", AssetScope::Scene));
 
                     // Grant the inventory item.
                     gInventoryManager.AddInventoryItem(invItemName);

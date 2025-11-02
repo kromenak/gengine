@@ -97,7 +97,7 @@ bool GEngine::Initialize()
         gAssetManager.LoadBarn("override.brn", BarnSearchPriority::High);
 
         // Also check if any other Barns are specified in the INI file to load.
-        Config* config = gAssetManager.LoadConfig("GK3.ini");
+        Config* config = gAssetManager.LoadAsset<Config>("GK3.ini");
         if(config != nullptr)
         {
             std::string customBarns = config->GetString("Custom Barns", "");

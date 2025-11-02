@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "Animation.h"
 #include "Animator.h"
 #include "AssetManager.h"
 #include "GasNodes.h"
@@ -78,7 +79,7 @@ void GAS::Load(AssetData& data)
 
             // Read in the required field (anim name).
             AnimGasNode* node = new AnimGasNode();
-            node->animation = gAssetManager.LoadAnimation(tokenizer.GetNext(), GetScope());
+            node->animation = gAssetManager.LoadAsset<Animation>(tokenizer.GetNext(), GetScope());
 
             // Read in optional fields.
             if(tokenizer.HasNext())
@@ -111,7 +112,7 @@ void GAS::Load(AssetData& data)
 
             // Read in the required field (anim name).
             AnimGasNode* node = new AnimGasNode();
-            node->animation = gAssetManager.LoadAnimation(tokenizer.GetNext(), GetScope());
+            node->animation = gAssetManager.LoadAsset<Animation>(tokenizer.GetNext(), GetScope());
 
             // Read in optional fields.
             if(tokenizer.HasNext())
@@ -374,7 +375,7 @@ void GAS::Load(AssetData& data)
                 node->forTalk = isUseTalk;
                 if(tokenizer.HasNext())
                 {
-                    node->animation = gAssetManager.LoadAnimation(tokenizer.GetNext(), GetScope());
+                    node->animation = gAssetManager.LoadAsset<Animation>(tokenizer.GetNext(), GetScope());
                 }
                 mNodes.push_back(node);
             }
@@ -398,8 +399,8 @@ void GAS::Load(AssetData& data)
                 //TODO: Mayyybe the cleanup mappings could just be defined in the GAS asset as static data.
                 //TODO: But I'm not sure yet whether autoscripts expect this mapping to dynamically update as the script plays or not...
                 UseCleanupGasNode* node = new UseCleanupGasNode();
-                node->animationNeedingCleanup = gAssetManager.LoadAnimation(animNeedingCleanupName, GetScope());
-                node->animationDoingCleanup = gAssetManager.LoadAnimation(animDoingCleanupName, GetScope());
+                node->animationNeedingCleanup = gAssetManager.LoadAsset<Animation>(animNeedingCleanupName, GetScope());
+                node->animationDoingCleanup = gAssetManager.LoadAsset<Animation>(animDoingCleanupName, GetScope());
                 node->forTalk = isUseTalk;
                 mNodes.push_back(node);
             }
@@ -412,7 +413,7 @@ void GAS::Load(AssetData& data)
                 }
 
                 UseNewIdleGasNode* node = new UseNewIdleGasNode();
-                node->newGas = gAssetManager.LoadGAS(tokenizer.GetNext(), GetScope());
+                node->newGas = gAssetManager.LoadAsset<GAS>(tokenizer.GetNext(), GetScope());
                 node->forTalk = isUseTalk;
                 mNodes.push_back(node);
             }
@@ -439,7 +440,7 @@ void GAS::Load(AssetData& data)
             }
 
             NewIdleGasNode* node = new NewIdleGasNode();
-            node->newGas = gAssetManager.LoadGAS(tokenizer.GetNext(), GetScope());
+            node->newGas = gAssetManager.LoadAsset<GAS>(tokenizer.GetNext(), GetScope());
             mNodes.push_back(node);
         }
         else if(StringUtil::EqualsIgnoreCase(command, "WHENNEAR") ||
@@ -495,13 +496,13 @@ void GAS::Load(AssetData& data)
 
             // Attempt to load YAK using current language.
             std::string yakName = tokenizer.GetNext();
-            Animation* yakAnimation = gAssetManager.LoadYak(Localizer::GetLanguagePrefix() + yakName, GetScope());
+            Animation* yakAnimation = gAssetManager.LoadAsset<Animation>(Localizer::GetLanguagePrefix() + yakName, GetScope(), "yak");
             if(yakAnimation == nullptr)
             {
                 printf("Couldn't load yak %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), yakName.c_str(), yakName.c_str());
 
                 // But fall back and try English if we couldn't find anything.
-                yakAnimation = gAssetManager.LoadYak("E" + yakName, GetScope());
+                yakAnimation = gAssetManager.LoadAsset<Animation>("E" + yakName, GetScope(), "yak");
                 if(yakAnimation == nullptr)
                 {
                     printf("Invalid yak %s specified in GAS DLG (%s)\n", yakName.c_str(), GetName().c_str());

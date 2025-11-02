@@ -39,7 +39,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
     // Add message label.
     {
         mMessage = UI::CreateWidgetActor<UILabel>("Message", mWindow);
-        mMessage->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mMessage->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mMessage->SetHorizonalAlignment(HorizontalAlignment::Left);
         mMessage->SetHorizontalOverflow(HorizontalOverflow::Wrap);
         mMessage->SetVerticalAlignment(VerticalAlignment::Top);
@@ -60,7 +60,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
     // Add a text input field.
     {
         mTextInput = UI::CreateWidgetActor<UITextInput>("TextInput", mWindow);
-        mTextInput->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mTextInput->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14.FON"));
         mTextInput->AllowInputToChangeFocus(false); // Can't click elsewhere to unfocus this input.
         mTextInput->SetMaxLength(8); // Don't allow too many characters to be added.
 
@@ -81,7 +81,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
     // Add OK button.
     {
         mOKButton = new SidneyButton("OKButton", mWindow);
-        mOKButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+        mOKButton->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"));
         mOKButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("OKButton"));
         mOKButton->SetWidth(80.0f);
         mOKButton->SetHeight(13.0f);
@@ -98,7 +98,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
     // Add YES button.
     {
         mYesButton = new SidneyButton("YesButton", mWindow);
-        mYesButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+        mYesButton->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"));
         mYesButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("YesButton"));
         mYesButton->SetWidth(80.0f);
         mYesButton->SetHeight(13.0f);
@@ -115,7 +115,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
     // Add NO button.
     {
         mNoButton = new SidneyButton("NoButton", mWindow);
-        mNoButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+        mNoButton->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"));
         mNoButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("NoButton"));
         mNoButton->SetWidth(80.0f);
         mNoButton->SetHeight(13.0f);
@@ -133,7 +133,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
     {
         {
             mLeftButton = new SidneyButton("LeftButton", mWindow);
-            mLeftButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+            mLeftButton->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"));
             mLeftButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("French"));
             mLeftButton->SetWidth(60.0f);
             mLeftButton->SetHeight(13.0f);
@@ -143,7 +143,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
         }
         {
             mCenterButton = new SidneyButton("CenterButton", mWindow);
-            mCenterButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+            mCenterButton->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"));
             mCenterButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("English"));
             mCenterButton->SetWidth(60.0f);
             mCenterButton->SetHeight(13.0f);
@@ -153,7 +153,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
         }
         {
             mRightButton = new SidneyButton("RightButton", mWindow);
-            mRightButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+            mRightButton->SetFont(gAssetManager.LoadAsset<Font>("SID_PDN_10_L.FON"));
             mRightButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Latin"));
             mRightButton->SetWidth(60.0f);
             mRightButton->SetHeight(13.0f);

@@ -1,5 +1,6 @@
 #include "SheepAPI_Scene.h"
 
+#include "Animation.h"
 #include "Animator.h"
 #include "AssetManager.h"
 #include "BSPActor.h"
@@ -411,7 +412,7 @@ shpvoid WalkToAnimation(const std::string& actorName, const std::string& animati
     }
 
     // Get the animation.
-    Animation* anim = gAssetManager.LoadAnimation(animationName, AssetScope::Scene);
+    Animation* anim = gAssetManager.LoadAsset<Animation>(animationName, AssetScope::Scene);
     if(anim == nullptr)
     {
         ExecError();

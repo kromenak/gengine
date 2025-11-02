@@ -2,6 +2,7 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "Cursor.h"
 #include "CursorManager.h"
 #include "GameProgress.h"
 #include "InputManager.h"
@@ -490,15 +491,15 @@ void MapState::UpdateZoomedOutShapeManipulation()
 
     if(resizeShapeCursor || zoomedOutClickAction == MapState::ClickAction::ResizeShape)
     {
-        gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGRESIZED1.CUR"), 1);
+        gCursorManager.UseCustomCursor(gAssetManager.LoadAsset<Cursor>("C_DRAGRESIZED1.CUR"), 1);
     }
     else if(moveShapeCursor || zoomedOutClickAction == MapState::ClickAction::MoveShape)
     {
-        gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGMOVE.CUR"), 1);
+        gCursorManager.UseCustomCursor(gAssetManager.LoadAsset<Cursor>("C_DRAGMOVE.CUR"), 1);
     }
     else if(rotateShapeCursor || zoomedOutClickAction == MapState::ClickAction::RotateShape)
     {
-        gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_TURNRIGHT.CUR"), 1);
+        gCursorManager.UseCustomCursor(gAssetManager.LoadAsset<Cursor>("C_TURNRIGHT.CUR"), 1);
     }
     else
     {
