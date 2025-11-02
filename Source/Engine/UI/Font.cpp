@@ -17,9 +17,9 @@ TYPEINFO_INIT(Font, Asset, GENERATE_TYPE_ID)
     TYPEINFO_VAR(Font, VariableType::Int, mGlyphHeight);
 }
 
-void Font::Load(uint8_t* data, uint32_t dataLength)
+void Font::Load(AssetData& data)
 {
-    ParseFromData(data, dataLength);
+    ParseFromData(data.bytes.get(), data.length);
 
     // After parsing, if we have no font texture, we can't do much more.
     if(mFontTexture == nullptr) { return; }

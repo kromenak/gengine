@@ -17,9 +17,9 @@ BSPLightmap::~BSPLightmap()
     }
 }
 
-void BSPLightmap::Load(uint8_t* data, uint32_t dataLength)
+void BSPLightmap::Load(AssetData& data)
 {
-    BinaryReader reader(data, dataLength);
+    BinaryReader reader(data.bytes.get(), data.length);
 
     // 4 bytes: file identifier "TULM" (MULT backwards).
     std::string identifier = reader.ReadString(4);
@@ -52,4 +52,3 @@ void BSPLightmap::Load(uint8_t* data, uint32_t dataLength)
     }
     */
 }
-

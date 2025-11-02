@@ -14,9 +14,9 @@ public:
     TextAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~TextAsset() override;
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
-    uint8_t* GetText() { return mText; }
+    uint8_t* GetText() const { return mText; }
     uint32_t GetTextLength() const { return mTextLength; }
 
 private:

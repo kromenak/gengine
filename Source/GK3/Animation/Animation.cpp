@@ -28,9 +28,9 @@ Animation::~Animation()
     }
 }
 
-void Animation::Load(uint8_t* data, uint32_t dataLength)
+void Animation::Load(AssetData& data)
 {
-    ParseFromData(data, dataLength);
+    ParseFromData(data.bytes.get(), data.length);
 }
 
 std::vector<AnimNode*>* Animation::GetFrame(int frameNumber)

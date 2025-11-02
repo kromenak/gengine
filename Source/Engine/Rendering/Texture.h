@@ -70,7 +70,7 @@ public:
     Texture(BinaryReader& reader);
     ~Texture() override;
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     // Activates the texture in the graphics library.
     void Activate(uint8_t textureUnit);

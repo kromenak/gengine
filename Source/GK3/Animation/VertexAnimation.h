@@ -48,7 +48,7 @@ public:
     VertexAnimation(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~VertexAnimation();
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     // Queries transform (position, rotation, scale) for a mesh at a frame/time.
     VertexAnimationTransformPose SampleTransformPose(int frame, int meshIndex);

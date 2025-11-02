@@ -103,9 +103,9 @@ SceneInitFile::~SceneInitFile()
     //TODO: delete any block conditions - we own them after compiling!
 }
 
-void SceneInitFile::Load(uint8_t* data, uint32_t dataLength)
+void SceneInitFile::Load(AssetData& data)
 {
-    ParseFromData(data, dataLength);
+    ParseFromData(data.bytes.get(), data.length);
 }
 
 const SceneActor* SceneInitFile::FindCurrentEgo() const

@@ -8,10 +8,10 @@ TYPEINFO_INIT(Config, Asset, GENERATE_TYPE_ID)
 
 }
 
-void Config::Load(uint8_t* data, uint32_t dataLength)
+void Config::Load(AssetData& data)
 {
     // Read in each section and store it.
-    IniParser parser(data, dataLength);
+    IniParser parser(data.bytes.get(), data.length);
     parser.SetMultipleKeyValuePairsPerLine(false);
 
     IniSection section;

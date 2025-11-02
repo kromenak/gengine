@@ -18,22 +18,21 @@ Audio::~Audio()
     gAudioManager.ReleaseAudioData(this);
 }
 
-void Audio::Load(uint8_t* data, uint32_t dataLength)
+void Audio::Load(AssetData& data)
 {
-    // Note that AssetManager typically deletes the data buffer after the asset is created.
-    // But for Audio, it knows to not do this - so it's OK for us to save the data pointer.
-    mDataBuffer = data;
-    mDataBufferLength = dataLength;
+    // Take ownership of the data buffer.
+    mDataBuffer = data.bytes.release();
+    mDataBufferLength = data.length;
 
     // The audio manager can read this data as-is (it's just WAV data).
     // But parsing it can be helpful to retrieve some info, like duration, for later use.
-    BinaryReader reader(data, dataLength);
+    BinaryReader reader(mDataBuffer, mDataBufferLength);
 
     // First 4 bytes: chunk ID "RIFF".
     std::string identifier = reader.ReadString(4);
     if(identifier != "RIFF")
     {
-        std::cout << "WAV file does not have RIFF identifier!" << std::endl;
+        std::cout << "WAV file does not have RIFF identifier!\n";
         return;
     }
 
@@ -44,7 +43,7 @@ void Audio::Load(uint8_t* data, uint32_t dataLength)
     identifier = reader.ReadString(4);
     if(identifier != "WAVE")
     {
-        std::cout << "WAV file does not have WAVE identifier!" << std::endl;
+        std::cout << "WAV file does not have WAVE identifier!\n";
         return;
     }
 
@@ -53,7 +52,7 @@ void Audio::Load(uint8_t* data, uint32_t dataLength)
     identifier = reader.ReadString(4);
     if(identifier != "fmt ")
     {
-        std::cout << "WAV file chunk didn't start with 'fmt ' identifier!" << std::endl;
+        std::cout << "WAV file chunk didn't start with 'fmt ' identifier!\n";
         return;
     }
 
@@ -97,7 +96,7 @@ void Audio::Load(uint8_t* data, uint32_t dataLength)
         identifier = reader.ReadString(4);
         if(identifier != "fact")
         {
-            std::cout << "Non-PCM WAV file is missing fact chunk!" << std::endl;
+            std::cout << "Non-PCM WAV file is missing fact chunk!\n";
             return;
         }
 
@@ -110,7 +109,7 @@ void Audio::Load(uint8_t* data, uint32_t dataLength)
     identifier = reader.ReadString(4);
     if(identifier != "data")
     {
-        std::cout << "WAV file is missing data chunk!" << std::endl;
+        std::cout << "WAV file is missing data chunk!\n";
         return;
     }
 

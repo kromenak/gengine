@@ -195,7 +195,7 @@ void AssetManager::WriteAllBarnAssetsToFile(const std::string& search, const std
 
 Audio* AssetManager::LoadAudio(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, AssetCache<Audio>::Get(), false);
+    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, AssetCache<Audio>::Get());
 }
 
 Soundtrack* AssetManager::LoadSoundtrack(const std::string& name, AssetScope scope)
@@ -319,7 +319,7 @@ Font* AssetManager::LoadFont(const std::string& name, AssetScope scope)
 TextAsset* AssetManager::LoadText(const std::string& name, AssetScope scope)
 {
     // Specifically DO NOT delete the asset buffer when creating TextAssets, since they take direct ownership of it.
-    return LoadAsset<TextAsset>(name, scope, AssetCache<TextAsset>::Get(), false);
+    return LoadAsset<TextAsset>(name, scope, AssetCache<TextAsset>::Get());
 }
 
 TextAsset* AssetManager::LoadLocalizedText(const std::string& name, AssetScope scope)
@@ -483,7 +483,7 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 }
 
 template<typename T>
-T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache, bool deleteBuffer)
+T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache)
 {
     // If already present in cache, return existing asset right away.
     if(cache != nullptr && scope != AssetScope::Manual)
@@ -503,9 +503,9 @@ T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache
     //printf("Loading asset %s\n", assetName.c_str());
 
     // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
-    uint32_t bufferSize = 0;
-    uint8_t* buffer = CreateAssetBuffer(name, bufferSize);
-    if(buffer == nullptr) { return nullptr; }
+    AssetData assetData;
+    assetData.bytes.reset(CreateAssetBuffer(name, assetData.length));
+    if(assetData.bytes == nullptr) { return nullptr; }
 
     // Create asset from asset buffer.
     std::string upperName = StringUtil::ToUpperCopy(name);
@@ -518,13 +518,7 @@ T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache
     }
 
     // Load the asset.
-    asset->Load(buffer, bufferSize);
-
-    // Delete the buffer after use (or it'll leak).
-    if(deleteBuffer)
-    {
-        delete[] buffer;
-    }
+    asset->Load(assetData);
     return asset;
 }
 

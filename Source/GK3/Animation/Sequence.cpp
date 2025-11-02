@@ -11,9 +11,9 @@ TYPEINFO_INIT(Sequence, Asset, GENERATE_TYPE_ID)
     TYPEINFO_VAR(Sequence, VariableType::Int, mFramesPerSecond);
 }
 
-void Sequence::Load(uint8_t* data, uint32_t dataLength)
+void Sequence::Load(AssetData& data)
 {
-    IniParser parser(data, dataLength);
+    IniParser parser(data.bytes.get(), data.length);
     parser.SetMultipleKeyValuePairsPerLine(false);
     while(parser.ReadLine())
     {

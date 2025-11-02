@@ -22,7 +22,7 @@ public:
     GAS(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~GAS();
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     GasNode* GetNode(int index) { return mNodes[index]; }
     int GetNodeCount() { return (int)mNodes.size(); }

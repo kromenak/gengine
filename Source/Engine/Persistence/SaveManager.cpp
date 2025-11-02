@@ -74,10 +74,10 @@ SaveManager::SaveManager()
 {
     std::string prefsPath = Paths::GetUserDataPath("Prefs.ini");
 
-    uint32_t bufferSize = 0;
-    uint8_t* buffer = File::ReadIntoBuffer(prefsPath, bufferSize);
+    AssetData assetData;
+    assetData.bytes.reset(File::ReadIntoBuffer(prefsPath, assetData.length));
     mPrefs = new Config("Prefs.ini", AssetScope::Manual);
-    mPrefs->Load(buffer, bufferSize);
+    mPrefs->Load(assetData);
 
     // Increment run count.
     int runCount = mPrefs->GetInt("App", "Run Count", 0);

@@ -115,9 +115,9 @@ VertexAnimation::~VertexAnimation()
     }
 }
 
-void VertexAnimation::Load(uint8_t* data, uint32_t dataLength)
+void VertexAnimation::Load(AssetData& data)
 {
-    ParseFromData(data, dataLength);
+    ParseFromData(data.bytes.get(), data.length);
 }
 
 VertexAnimationTransformPose VertexAnimation::SampleTransformPose(int frame, int meshIndex)

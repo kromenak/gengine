@@ -51,7 +51,7 @@ public:
     SceneAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~SceneAsset();
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     const std::string& GetBSPName() const { return mBspName; }
     Skybox* GetSkybox() const { return mSkybox; }

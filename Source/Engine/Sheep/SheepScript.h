@@ -27,7 +27,7 @@ public:
     SheepScript(const std::string& name, SheepScriptBuilder& builder);
     ~SheepScript() override;
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
     void Load(const SheepScriptBuilder& builder);
 
     SysFuncImport* GetSysImport(int index);

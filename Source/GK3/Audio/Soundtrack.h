@@ -117,7 +117,7 @@ public:
     Soundtrack(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Soundtrack();
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     AudioType GetSoundType() const { return mSoundType; }
     const std::vector<SoundtrackNode*>& GetNodes() const { return mNodes; }

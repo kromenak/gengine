@@ -23,7 +23,7 @@ public:
     Animation(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Animation();
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     // Gets all anim nodes associated with a particular frame number. Null may be returned!
     // Mainly used by Animator to get frame data as needed and play/sample.

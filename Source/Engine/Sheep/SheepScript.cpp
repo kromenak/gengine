@@ -32,18 +32,18 @@ SheepScript::~SheepScript()
     delete[] mBytecode;
 }
 
-void SheepScript::Load(uint8_t* data, uint32_t dataLength)
+void SheepScript::Load(AssetData& data)
 {
     // If the data is already compiled, we can just parse it directly.
-    if(IsSheepDataCompiled(data, dataLength))
+    if(IsSheepDataCompiled(data.bytes.get(), data.length))
     {
-        ParseFromData(data, dataLength);
+        ParseFromData(data.bytes.get(), data.length);
         return;
     }
 
     // If the data is in uncompiled text format, we must compile it!
     SheepCompiler compiler;
-    imstream stream(reinterpret_cast<char*>(data), dataLength);
+    imstream stream(reinterpret_cast<char*>(data.bytes.get()), data.length);
     if(compiler.Compile(GetNameNoExtension(), stream))
     {
         Load(compiler.GetCompiledBuilder());

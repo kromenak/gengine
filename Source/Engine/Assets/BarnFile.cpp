@@ -212,14 +212,14 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     BarnAsset* asset = GetAsset(assetName);
     if(asset == nullptr)
     {
-        std::cout << "No asset named " << assetName << "in Barn file!" << std::endl;
+        std::cout << "No asset named " << assetName << "in Barn file!\n";
         return nullptr;
     }
 
     // Make sure this asset actually exists within this barn file, and it isn't a pointer to another barn file.
     if(asset->IsPointer())
     {
-        std::cout << "Can't create asset buffer for " << asset->name << " - it is an asset pointer!" << std::endl;
+        std::cout << "Can't create asset buffer for " << asset->name << " - it is an asset pointer!\n";
         return nullptr;
     }
 
@@ -373,7 +373,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
     BarnAsset* asset = GetAsset(assetName);
     if(asset == nullptr)
     {
-        std::cout << "No asset named " << assetName << " in Barn file!" << std::endl;
+        std::cout << "No asset named " << assetName << " in Barn file!\n";
         return false;
     }
 
@@ -381,7 +381,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
     // In this case, the caller needs to redirect to the correct bundle before writing out.
     if(asset->IsPointer())
     {
-        std::cout << "Asset " << assetName << " can't be extracted from Barn - it is only an asset pointer!" << std::endl;
+        std::cout << "Asset " << assetName << " can't be extracted from Barn - it is only an asset pointer!\n";
         return false;
     }
 
@@ -407,25 +407,26 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
 
     // Extract the asset and write it to file.
     bool result = false;
-    unsigned int bufferSize = 0;
-    uint8_t* assetData = CreateAssetBuffer(assetName, bufferSize);
-    if(assetData != nullptr)
+
+    AssetData assetData;
+    assetData.bytes.reset(CreateAssetBuffer(assetName, assetData.length));
+    if(assetData.bytes != nullptr)
     {
         // Textures can't be written directly to file and open correctly.
         // Handle those separately (TODO: More modular/extendable way to do this?)
         if(assetName.find(".BMP") != std::string::npos)
         {
             Texture tex(assetName, AssetScope::Manual);
-            tex.Load(assetData, bufferSize);
+            tex.Load(assetData);
             tex.WriteToFile(outputPath);
             result = true;
         }
         else if(assetName.find(".SHP") != std::string::npos &&
-                SheepScript::IsSheepDataCompiled(assetData, bufferSize))
+                SheepScript::IsSheepDataCompiled(assetData.bytes.get(), assetData.length))
         {
             // If sheep asset is compiled, we need to decompile it to get any useful data.
             SheepScript script(assetName, AssetScope::Manual);
-            script.Load(assetData, bufferSize);
+            script.Load(assetData);
             script.Decompile(outputPath);
             result = true;
         }
@@ -435,7 +436,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
             std::ofstream fileStream(outputPath, std::istream::out | std::istream::binary);
             if(fileStream.good())
             {
-                fileStream.write(reinterpret_cast<char*>(assetData), bufferSize);
+                fileStream.write(reinterpret_cast<char*>(assetData.bytes.get()), assetData.length);
                 fileStream.close();
                 result = true;
             }
@@ -445,15 +446,12 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
     // Output the result of the write.
     if(result)
     {
-        std::cout << "Wrote out " << asset->name << std::endl;
+        std::cout << "Wrote out " << asset->name << "\n";
     }
     else
     {
-        std::cout << "Error while extracting " << asset->name << std::endl;
+        std::cout << "Error while extracting " << asset->name << "\n";
     }
-
-    // Delete our new'd asset data array, no longer needed.
-    delete[] assetData;
 
     // Return success or failure.
     return result;

@@ -85,7 +85,7 @@ class NVC : public Asset
 public:
     NVC(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     const std::vector<Action*>& GetActions() const { return mActions; }
     const std::vector<Action>& GetActions(const std::string& noun) const;

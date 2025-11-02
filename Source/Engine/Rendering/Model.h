@@ -25,7 +25,7 @@ public:
     Model(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Model();
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
 

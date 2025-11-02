@@ -106,9 +106,9 @@ Soundtrack::~Soundtrack()
     }
 }
 
-void Soundtrack::Load(uint8_t* data, uint32_t dataLength)
+void Soundtrack::Load(AssetData& data)
 {
-    IniParser parser(data, dataLength);
+    IniParser parser(data.bytes.get(), data.length);
     IniSection section;
     std::vector<SoundNode*> prsSoundNodes;
     while(parser.ReadNextSection(section))

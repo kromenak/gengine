@@ -62,9 +62,9 @@ TYPEINFO_INIT(BSP, Asset, GENERATE_TYPE_ID)
 
 }
 
-void BSP::Load(uint8_t* data, uint32_t dataLength)
+void BSP::Load(AssetData& data)
 {
-    ParseFromData(data, dataLength);
+    ParseFromData(data.bytes.get(), data.length);
 
     // Use lightmap shader for BSP rendering.
     mMaterial.SetShader(gAssetManager.GetShader("LightmapTexture"));

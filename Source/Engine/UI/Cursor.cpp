@@ -23,7 +23,7 @@ Cursor::~Cursor()
     FreeCursorFrames();
 }
 
-void Cursor::Load(uint8_t* data, uint32_t dataLength)
+void Cursor::Load(AssetData& data)
 {
     // Texture used is always the same as the name of the cursor.
     mTexture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());
@@ -35,7 +35,7 @@ void Cursor::Load(uint8_t* data, uint32_t dataLength)
 
     // Parse data from ini format.
     bool hotspotIsPercent = false;
-    IniParser parser(data, dataLength);
+    IniParser parser(data.bytes.get(), data.length);
     parser.SetMultipleKeyValuePairsPerLine(false);
     while(parser.ReadLine())
     {

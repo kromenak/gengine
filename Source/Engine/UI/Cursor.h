@@ -21,7 +21,7 @@ public:
     Cursor(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Cursor() override;
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     void Activate(bool animate = true);
     void Update(float deltaTime);

@@ -100,9 +100,9 @@ Texture::~Texture()
     mPaletteIndexes = nullptr;
 }
 
-void Texture::Load(uint8_t* data, uint32_t dataLength)
+void Texture::Load(AssetData& data)
 {
-    BinaryReader reader(data, dataLength);
+    BinaryReader reader(data.bytes.get(), data.length);
     LoadInternal(reader);
 }
 

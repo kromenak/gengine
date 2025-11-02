@@ -15,7 +15,7 @@ public:
     Audio(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Audio() override;
 
-    void Load(uint8_t* data, uint32_t dataLength);
+    void Load(AssetData& data);
 
     uint8_t* GetDataBuffer() const { return mDataBuffer; }
     uint32_t GetDataBufferLength() const { return mDataBufferLength; }

@@ -10,8 +10,9 @@ TextAsset::~TextAsset()
     delete[] mText;
 }
 
-void TextAsset::Load(uint8_t* data, uint32_t dataLength)
+void TextAsset::Load(AssetData& data)
 {
-    mText = data;
-    mTextLength = dataLength;
+    // Take ownership of the byte buffer.
+    mText = data.bytes.release();
+    mTextLength = data.length;
 }

@@ -32,9 +32,9 @@ Model::~Model()
     }
 }
 
-void Model::Load(uint8_t* data, uint32_t dataLength)
+void Model::Load(AssetData& data)
 {
-    ParseFromData(data, dataLength);
+    ParseFromData(data.bytes.get(), data.length);
 }
 
 void Model::WriteToObjFile(const std::string& filePath)

@@ -27,9 +27,9 @@ GAS::~GAS()
     }
 }
 
-void GAS::Load(uint8_t* data, uint32_t dataLength)
+void GAS::Load(AssetData& data)
 {
-    imstream stream(reinterpret_cast<char*>(data), dataLength);
+    imstream stream(reinterpret_cast<char*>(data.bytes.get()), data.length);
 
     // Store any created "ONEOF" node, since they are generated over several lines.
     OneOfGasNode* oneOfNode = nullptr;

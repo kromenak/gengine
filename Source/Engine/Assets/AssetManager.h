@@ -123,7 +123,7 @@ private:
 
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
 
-    template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache, bool deleteBuffer = true);
+    template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache);
     uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
 };
 
