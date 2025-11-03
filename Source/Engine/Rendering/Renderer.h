@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 
+#include "Asset.h"
 #include "Window.h"
 
 class BSP;
@@ -35,6 +36,8 @@ public:
 
     void SetBSP(BSP* bsp) { mBSP = bsp; }
     BSP* GetBSP() const { return mBSP; }
+
+    Texture* LoadSceneTexture(const std::string& name, AssetScope scope = AssetScope::Global);
 
     void SetSkybox(Skybox* skybox);
 

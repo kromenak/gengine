@@ -6,6 +6,7 @@
 #include "IniParser.h"
 #include "Model.h"
 #include "NVC.h"
+#include "Renderer.h"
 #include "SceneAsset.h"
 #include "SheepManager.h"
 #include "Skybox.h"
@@ -21,12 +22,12 @@ Skybox* GeneralBlock::CreateSkybox()
     if(!hasSkyboxData) { return nullptr; }
 
     SkyboxTextures textures;
-    textures.named.left = gAssetManager.LoadSceneTexture(skyboxLeftTextureName, AssetScope::Scene);
-    textures.named.right = gAssetManager.LoadSceneTexture(skyboxRightTextureName, AssetScope::Scene);
-    textures.named.back = gAssetManager.LoadSceneTexture(skyboxBackTextureName, AssetScope::Scene);
-    textures.named.front = gAssetManager.LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene);
-    textures.named.bottom = gAssetManager.LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene);
-    textures.named.top = gAssetManager.LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene);
+    textures.named.left = gRenderer.LoadSceneTexture(skyboxLeftTextureName, AssetScope::Scene);
+    textures.named.right = gRenderer.LoadSceneTexture(skyboxRightTextureName, AssetScope::Scene);
+    textures.named.back = gRenderer.LoadSceneTexture(skyboxBackTextureName, AssetScope::Scene);
+    textures.named.front = gRenderer.LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene);
+    textures.named.bottom = gRenderer.LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene);
+    textures.named.top = gRenderer.LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene);
 
     // GK3 does some non-standard stuff with the skybox textures.
     SceneAsset::FixGK3SkyboxTextures(textures);

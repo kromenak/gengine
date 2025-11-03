@@ -124,11 +124,7 @@ void AssetsTool::AddAssetList(const std::string& id)
     ImGui::PushID(assetId.c_str());
 
      // Get list of loaded assets of this type, so we can display them in a giant tree view.
-    const std::string_map_ci<T*>* loadedAssets = gAssetManager.GetAssets<T>(id);
-    if(loadedAssets == nullptr)
-    {
-        return;
-    }
+    const std::string_map_ci<T*>& loadedAssets = gAssetManager.GetAssets<T>(id);
 
     // For all nodes, only expand the tree if you click on the arrow.
     ImGuiTreeNodeFlags assetTypeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
@@ -137,17 +133,17 @@ void AssetsTool::AddAssetList(const std::string& id)
     bool node_open;
     if(id.empty())
     {
-        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s (%zu)", typeName, loadedAssets->size());
+        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s (%zu)", typeName, loadedAssets.size());
     }
     else
     {
-        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s %s (%zu)", id.c_str(), typeName, loadedAssets->size());
+        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s %s (%zu)", id.c_str(), typeName, loadedAssets.size());
     }
 
     // If open, draw all the loaded assets of this type.
     if(node_open)
     {
-        for(auto& entry : *loadedAssets)
+        for(auto& entry : loadedAssets)
         {
             ImGui::PushID(entry.second);
 

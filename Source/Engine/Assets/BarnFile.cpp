@@ -11,15 +11,14 @@
 #include "SheepScript.h"
 #include "Texture.h"
 
-BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriority) :
+BarnFile::BarnFile(const std::string& filePath) :
     mName(filePath),
-    mSearchPriority(searchPriority),
     mReader(filePath.c_str())
 {
     // Make sure we can actually read this file.
     if(!mReader.OK())
     {
-        std::cout << "Can't read barn file at " << filePath << std::endl;
+        std::cout << "Can't read barn file at " << filePath << "\n";
         return;
     }
 
@@ -29,7 +28,7 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
     uint32_t barnIdentifier = mReader.ReadUInt();
     if(gameIdentifier != kGameIdentifier && barnIdentifier != kBarnIdentifier)
     {
-        std::cout << "Invalid file type!" << std::endl;
+        std::cout << "Invalid file type!\n";
         return;
     }
 
@@ -193,23 +192,20 @@ BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriorit
     }
 }
 
-BarnAsset* BarnFile::GetAsset(const std::string& assetName)
+bool BarnFile::ContainsAsset(const std::string& assetName) const
 {
+    // This Barn contains the asset if it's in our map AND it isn't a pointer asset.
     auto it = mAssetMap.find(assetName);
-    if(it != mAssetMap.end())
-    {
-        return &it->second;
-    }
-    return nullptr;
+    return it != mAssetMap.end() && !it->second.IsPointer();
 }
 
-uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize)
+uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const
 {
     // Use a sane default value for this.
     outBufferSize = 0;
 
     // Get the asset handle associated with this asset name.
-    BarnAsset* asset = GetAsset(assetName);
+    const BarnAsset* asset = GetAsset(assetName);
     if(asset == nullptr)
     {
         std::cout << "No asset named " << assetName << "in Barn file!\n";
@@ -255,7 +251,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     // The "-1" case can happen when reading the last file in the barn, but asset is still valid.
     if(readCount != asset->size && readCount != asset->size - 1)
     {
-        std::cout << "Didn't read desired number of bytes." << std::endl;
+        std::cout << "Didn't read desired number of bytes.\n";
         delete[] compressedBuffer;
         return nullptr;
     }
@@ -280,7 +276,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         int result = inflateInit(&strm);
         if(result != Z_OK)
         {
-            std::cout << "Error when calling inflateInit: " << result << std::endl;
+            std::cout << "Error when calling inflateInit: " << result << "\n";
             delete[] compressedBuffer;
             delete[] buffer;
             return nullptr;
@@ -290,7 +286,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         result = inflate(&strm, Z_FINISH);
         if(result != Z_STREAM_END)
         {
-            std::cout << "Inflate didn't inflate entire stream, or an error occurred: " << result << std::endl;
+            std::cout << "Inflate didn't inflate entire stream, or an error occurred: " << result << "\n";
             delete[] compressedBuffer;
             delete[] buffer;
             return nullptr;
@@ -300,7 +296,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         result = inflateEnd(&strm);
         if(result != Z_OK)
         {
-            std::cout << "Error while ending inflate: " << result << std::endl;
+            std::cout << "Error while ending inflate: " << result << "\n";
             delete[] compressedBuffer;
             delete[] buffer;
             return nullptr;
@@ -319,7 +315,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
             }
             else
             {
-                std::cout << "Failed to init LZO!" << std::endl;
+                std::cout << "Failed to init LZO!\n";
                 delete[] compressedBuffer;
                 delete[] buffer;
                 return nullptr;
@@ -338,7 +334,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         // I'll let it slide for now...but it might indicate an earlier read error, or I'm missing something somewhere.
         if(result != LZO_E_OK && result != LZO_E_INPUT_NOT_CONSUMED)
         {
-            std::cout << "Error during LZO decompress: " << result << std::endl;
+            std::cout << "Error during LZO decompress: " << result << "\n";
             delete[] compressedBuffer;
             delete[] buffer;
             return nullptr;
@@ -349,7 +345,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     }
     else
     {
-        std::cout << "Asset " << asset->name << " has invalid compression type " << (int)asset->compressionType << std::endl;
+        std::cout << "Asset " << asset->name << " has invalid compression type " << static_cast<int>(asset->compressionType) << "\n";
         delete[] compressedBuffer;
         delete[] buffer;
         return nullptr;
@@ -362,15 +358,10 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     return buffer;
 }
 
-bool BarnFile::WriteToFile(const std::string& assetName)
-{
-    return WriteToFile(assetName, "");
-}
-
-bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outputDir)
+bool BarnFile::ExtractAsset(const std::string& assetName, const std::string& outputDir) const
 {
     // Retrieve the asset handle, first of all.
-    BarnAsset* asset = GetAsset(assetName);
+    const BarnAsset* asset = GetAsset(assetName);
     if(asset == nullptr)
     {
         std::cout << "No asset named " << assetName << " in Barn file!\n";
@@ -443,7 +434,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
         }
     }
 
-    // Output the result of the write.
+    // Output the result.
     if(result)
     {
         std::cout << "Wrote out " << asset->name << "\n";
@@ -457,27 +448,38 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
     return result;
 }
 
-void BarnFile::WriteAllToFile(const std::string& search)
+uint32_t BarnFile::ExtractAssets(const std::string& ifNameContains, const std::string& outputDirectory) const
 {
-    return WriteAllToFile(search, "");
-}
-
-void BarnFile::WriteAllToFile(const std::string& search, const std::string& outputDir)
-{
-    // Search through all assets for the search term.
-    // If it's found, write the asset to file.
+    // Iterate all assets to extract those matching the if condition.
+    uint32_t extractCount = 0;
     for(auto& entry : mAssetMap)
     {
         // Can't write out asset pointers anyway.
         if(entry.second.IsPointer()) { continue; }
 
-        if(entry.first.find(search) != std::string::npos)
+        // If the asset name contains the search string anywhere, we extract it.
+        if(entry.first.find(ifNameContains) != std::string::npos)
         {
-            WriteToFile(entry.first, outputDir);
+            if(ExtractAsset(entry.first, outputDirectory))
+            {
+                ++extractCount;
+            }
         }
     }
+    return extractCount;
 }
 
+const BarnAsset* BarnFile::GetAsset(const std::string& assetName) const
+{
+    auto it = mAssetMap.find(assetName);
+    if(it != mAssetMap.end())
+    {
+        return &it->second;
+    }
+    return nullptr;
+}
+
+/*
 void BarnFile::OutputAssetList() const
 {
     for(auto& entry : mAssetMap)
@@ -489,3 +491,4 @@ void BarnFile::OutputAssetList() const
         std::cout << entry.second.name << " - " << static_cast<int>(entry.second.compressionType) << " - " << entry.second.size << std::endl;
     }
 }
+*/

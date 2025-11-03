@@ -36,6 +36,26 @@
 #include "VerbManager.h"
 #include "Window.h"
 
+// Includes for all asset types
+#include "Animation.h"
+#include "Audio.h"
+#include "BSP.h"
+#include "BSPLightmap.h"
+#include "Config.h"
+#include "Cursor.h"
+#include "Font.h"
+#include "GAS.h"
+#include "Model.h"
+#include "NVC.h"
+#include "SceneAsset.h"
+#include "SceneInitFile.h"
+#include "Sequence.h"
+#include "SheepScript.h"
+#include "Soundtrack.h"
+#include "TextAsset.h"
+#include "Texture.h"
+#include "VertexAnimation.h"
+
 GEngine* GEngine::sInstance = nullptr;
 
 GEngine::GEngine()
@@ -56,62 +76,9 @@ bool GEngine::Initialize()
     gConsole.SetReportStream(&gReportManager.GetReportStream("Console"));
 
     // Init asset manager.
-    gAssetManager.Init();
-
-    // See if the demo barn is present. If so, we'll load the game in demo mode.
-    mDemoMode = gAssetManager.LoadBarn("Gk3demo.brn");
-
-    // For simplicity right now, let's just load all barns at once.
-    if(!mDemoMode)
+    if(!InitAssetManager())
     {
-        std::vector<std::string> requiredBarns = {
-            "ambient.brn",
-            "common.brn",
-            "core.brn",
-            "day1.brn",
-            "day2.brn",
-            "day3.brn",
-            "day23.brn",
-            "day123.brn"
-        };
-        for(auto& barn : requiredBarns)
-        {
-            TIMER_SCOPED_VAR(barn.c_str(), barnTimer);
-            if(!gAssetManager.LoadBarn(barn))
-            {
-                // Generate expected path for this asset.
-                std::string path = Paths::GetDataPath(Path::Combine({ "Data", barn }));
-
-                // Generate error and show error box.
-                std::string error = StringUtil::Format("Could not load barn %s.\n\nMake sure Data directory is populated before running the game.", path.c_str());
-                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                                         "Gabriel Knight 3",
-                                         error.c_str(),
-                                         nullptr);
-                return false;
-            }
-        }
-
-        // Official localized versions of the game also came with a Barn called "override.brn". This barn contains assets that override ordinary assets.
-        // Try to load this, but since it's optional, it shouldn't show an error message.
-        gAssetManager.LoadBarn("override.brn", BarnSearchPriority::High);
-
-        // Also check if any other Barns are specified in the INI file to load.
-        Config* config = gAssetManager.LoadAsset<Config>("GK3.ini");
-        if(config != nullptr)
-        {
-            std::string customBarns = config->GetString("Custom Barns", "");
-            if(!customBarns.empty())
-            {
-                // Multiple paths are separated by semicolons.
-                std::vector<std::string> customBarnNames = StringUtil::Split(customBarns, ';');
-                for(auto& barnName : customBarnNames)
-                {
-                    printf("Load barn %s\n", barnName.c_str());
-                    gAssetManager.LoadBarn(barnName, BarnSearchPriority::High);
-                }
-            }
-        }
+        return false;
     }
 
     // Init tools.
@@ -327,6 +294,130 @@ void GEngine::OnPersist(PersistState& ps)
     ps.Xfer(PERSIST_VAR(mFrameNumber));
     ps.Xfer(PERSIST_VAR(mTimeMultiplier));
     ps.Xfer(PERSIST_VAR(mDemoMode));
+}
+
+bool GEngine::InitAssetManager()
+{
+    // Load GK3.ini from the root directory so we can bootstrap asset search paths.
+    gAssetManager.AddSearchPath("");
+    Config* config = gAssetManager.LoadAsset<Config>("GK3.ini");
+    gAssetManager.RemoveSearchPath("");
+
+    // The config should be present, but is technically optional.
+    if(config != nullptr)
+    {
+        // Load "high priority" custom paths, if any.
+        // These paths will be searched first to find any requested resources.
+        std::string customPaths = config->GetString("Custom Paths", "");
+        if(!customPaths.empty())
+        {
+            // Multiple paths are separated by semicolons.
+            std::vector<std::string> paths = StringUtil::Split(customPaths, ';');
+            for(auto& path : paths)
+            {
+                gAssetManager.AddSearchPath(path);
+            }
+        }
+    }
+
+    // Add hard-coded default paths *after* any custom paths specified in .INI file.
+    // Assets: loose files that aren't packed into a BRN.
+    gAssetManager.AddSearchPath("Assets");
+
+    // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
+    {
+        // The original game only ever shipped with one language per SKU, so there was no way to change the language after install.
+        // But we would like to support that maybe, for both official and unofficial translations.
+        // To support OFFICIAL translations, we'll use Data folders with a suffix equal to the language prefix (e.g. DataF for French, DataG for German).
+        if(Localizer::GetLanguagePrefix()[0] != 'E')
+        {
+            gAssetManager.AddSearchPath("Data" + Localizer::GetLanguagePrefix());
+        }
+
+        // Lowest priority is the normal "Data" folder.
+        gAssetManager.AddSearchPath("Data");
+    }
+
+    // Also allow searching the root directory for assets moving forward, but at the lowest priority.
+    gAssetManager.AddSearchPath("");
+
+    // Add expected extensions.
+    gAssetManager.SetExpectedExtension<Audio>(".WAV");
+    gAssetManager.SetExpectedExtension<Soundtrack>(".STK");
+    gAssetManager.SetExpectedExtension<Animation>(".YAK", "yak");
+    gAssetManager.SetExpectedExtension<Model>(".MOD");
+    gAssetManager.SetExpectedExtension<Texture>(".BMP");
+    gAssetManager.SetExpectedExtension<GAS>(".GAS");
+    gAssetManager.SetExpectedExtension<Animation>(".ANM");
+    gAssetManager.SetExpectedExtension<Animation>(".MOM", "mom");
+    gAssetManager.SetExpectedExtension<VertexAnimation>(".ACT");
+    gAssetManager.SetExpectedExtension<Sequence>(".SEQ");
+    gAssetManager.SetExpectedExtension<SceneInitFile>(".SIF");
+    gAssetManager.SetExpectedExtension<SceneAsset>(".SCN");
+    gAssetManager.SetExpectedExtension<NVC>(".NVC");
+    gAssetManager.SetExpectedExtension<BSP>(".BSP");
+    gAssetManager.SetExpectedExtension<BSPLightmap>(".MUL");
+    gAssetManager.SetExpectedExtension<SheepScript>(".SHP");
+    gAssetManager.SetExpectedExtension<Cursor>(".CUR");
+    gAssetManager.SetExpectedExtension<Font>(".FON");
+    gAssetManager.SetExpectedExtension<TextAsset>(".TXT");
+    gAssetManager.SetExpectedExtension<Config>(".CFG");
+
+    // See if the demo barn is present. If so, we'll load the game in demo mode.
+    mDemoMode = gAssetManager.LoadAssetArchive("Gk3demo.brn");
+
+    // For simplicity right now, let's just load all barns at once.
+    if(!mDemoMode)
+    {
+        std::vector<std::string> requiredBarns = {
+            "ambient.brn",
+            "common.brn",
+            "core.brn",
+            "day1.brn",
+            "day2.brn",
+            "day3.brn",
+            "day23.brn",
+            "day123.brn"
+        };
+        for(auto& barn : requiredBarns)
+        {
+            TIMER_SCOPED_VAR(barn.c_str(), barnTimer);
+            if(!gAssetManager.LoadAssetArchive(barn))
+            {
+                // Generate expected path for this asset.
+                std::string path = Paths::GetDataPath(Path::Combine({ "Data", barn }));
+
+                // Generate error and show error box.
+                std::string error = StringUtil::Format("Could not load barn %s.\n\nMake sure Data directory is populated before running the game.", path.c_str());
+                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                                         "Gabriel Knight 3",
+                                         error.c_str(),
+                                         nullptr);
+                return false;
+            }
+        }
+
+        // Official localized versions of the game also came with a Barn called "override.brn". This barn contains assets that override ordinary assets.
+        // Try to load this, but since it's optional, it shouldn't show an error message.
+        gAssetManager.LoadAssetArchive("override.brn", -1);
+
+        // Also check if any other Barns are specified in the INI file to load.
+        if(config != nullptr)
+        {
+            std::string customBarns = config->GetString("Custom Barns", "");
+            if(!customBarns.empty())
+            {
+                // Multiple paths are separated by semicolons.
+                std::vector<std::string> customBarnNames = StringUtil::Split(customBarns, ';');
+                for(auto& barnName : customBarnNames)
+                {
+                    printf("Load barn %s\n", barnName.c_str());
+                    gAssetManager.LoadAssetArchive(barnName, -1);
+                }
+            }
+        }
+    }
+    return true;
 }
 
 void GEngine::ShowOpeningMovies()

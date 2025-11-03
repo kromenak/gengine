@@ -8,6 +8,7 @@
 #include "Mesh.h"
 #include "Ray.h"
 #include "Renderer.h"
+#include "ShaderCache.h"
 #include "Texture.h"
 
 namespace
@@ -71,7 +72,7 @@ Skybox::Skybox(const SkyboxTextures& textures) : mTextures(textures)
     {
         if(textures.array[i] != nullptr)
         {
-            mMaskTextures.array[i] = gAssetManager.LoadSceneTexture(textures.array[i]->GetNameNoExtension() + "_MASK", textures.array[i]->GetScope());
+            mMaskTextures.array[i] = gRenderer.LoadSceneTexture(textures.array[i]->GetNameNoExtension() + "_MASK", textures.array[i]->GetScope());
         }
     }
 }
@@ -252,7 +253,7 @@ void Skybox::CreateMeshAndCubemap()
     }
 
     // Use skybox shader to render the skybox.
-    mMaterial.SetShader(gAssetManager.GetShader("Skybox"));
+    mMaterial.SetShader(ShaderCache::GetShader("Skybox"));
 
     // Generate cubemap from skybox textures.
     {

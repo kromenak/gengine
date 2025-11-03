@@ -1,12 +1,12 @@
 #include "GKProp.h"
 
-#include "AssetManager.h"
 #include "Billboard.h"
 #include "GasPlayer.h"
 #include "MeshRenderer.h"
 #include "Model.h"
 #include "PersistState.h"
 #include "SceneData.h"
+#include "ShaderCache.h"
 #include "VertexAnimator.h"
 
 TYPEINFO_INIT(GKProp, GKObject, 32)
@@ -17,7 +17,7 @@ TYPEINFO_INIT(GKProp, GKObject, 32)
 GKProp::GKProp() : GKObject()
 {
     mMeshRenderer = AddComponent<MeshRenderer>();
-    mMeshRenderer->SetShader(gAssetManager.GetShader("LitTexture"));
+    mMeshRenderer->SetShader(ShaderCache::GetShader("LitTexture"));
 
     mVertexAnimator = AddComponent<VertexAnimator>();
 

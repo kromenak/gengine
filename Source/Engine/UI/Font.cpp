@@ -4,6 +4,7 @@
 #include "Color32.h"
 #include "IniParser.h"
 #include "Material.h"
+#include "ShaderCache.h"
 #include "StringUtil.h"
 #include "Texture.h"
 
@@ -159,7 +160,7 @@ Shader* Font::GetShader() const
 {
     if(mColorMode == ColorMode::ColorReplace)
     {
-        return gAssetManager.GetShader("TextColorReplace");
+        return ShaderCache::GetShader("TextColorReplace");
     }
     return Material::sDefaultShader;
 }

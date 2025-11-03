@@ -35,14 +35,7 @@ shpvoid Extract(const std::string& fileSpec, const std::string& outputPath)
 
     // An empty output path defaults to EXE directory.
     // If a path is provided, absolute or relative paths will work.
-    if(outputPath.empty())
-    {
-        gAssetManager.WriteBarnAssetToFile(fileSpec);
-    }
-    else
-    {
-        gAssetManager.WriteBarnAssetToFile(fileSpec, outputPath);
-    }
+    gAssetManager.ExtractAsset(fileSpec, outputPath);
     return 0;
 }
 RegFunc2(Extract, void, string, string, IMMEDIATE, REL_FUNC);

@@ -3,14 +3,15 @@
 #include <bitset>
 #include <iostream>
 
-#include "AssetManager.h"
 #include "BinaryReader.h"
 #include "BSPActor.h"
 #include "BSPLightmap.h"
 #include "Debug.h"
 #include "RaycastTool.h"
+#include "Renderer.h"
 #include "ReportManager.h"
 #include "Shader.h"
+#include "ShaderCache.h"
 #include "StringUtil.h"
 #include "Texture.h"
 #include "Triangle.h"
@@ -67,7 +68,7 @@ void BSP::Load(AssetData& data)
     ParseFromData(data.bytes.get(), data.length);
 
     // Use lightmap shader for BSP rendering.
-    mMaterial.SetShader(gAssetManager.GetShader("LightmapTexture"));
+    mMaterial.SetShader(ShaderCache::GetShader("LightmapTexture"));
 }
 
 BSPActor* BSP::CreateBSPActor(const std::string& objectName)
@@ -650,7 +651,7 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
         BSPSurface& surface = mSurfaces[i];
         surface.objectIndex = reader.ReadUInt();
 
-        surface.texture = gAssetManager.LoadSceneTexture(reader.ReadString(32), GetScope());
+        surface.texture = gRenderer.LoadSceneTexture(reader.ReadString(32), GetScope());
 
         surface.lightmapUvOffset = reader.ReadVector2();
         surface.lightmapUvScale = reader.ReadVector2();

@@ -1,127 +1,49 @@
 #include "AssetManager.h"
 
+#include <algorithm> // std::sort
 #include <cstring>
-#include <fstream>
-#include <iostream>
 #include <string>
 
+#include "BarnFile.h"
 #include "FileSystem.h"
-#include "Localizer.h"
-#include "Renderer.h"
-#include "SheepManager.h"
 #include "StringUtil.h"
-#include "ThreadPool.h"
-
-// Includes for all asset types
-#include "Animation.h"
-#include "Audio.h"
-#include "BSP.h"
-#include "BSPLightmap.h"
-#include "Config.h"
-#include "Cursor.h"
-#include "Font.h"
-#include "GAS.h"
-#include "Model.h"
-#include "NVC.h"
-#include "SceneAsset.h"
-#include "SceneInitFile.h"
-#include "Sequence.h"
-#include "Shader.h"
-#include "Soundtrack.h"
-#include "TextAsset.h"
-#include "Texture.h"
-#include "VertexAnimation.h"
 
 AssetManager gAssetManager;
-
-void AssetManager::Init()
-{
-    // Load GK3.ini from the root directory so we can bootstrap asset search paths.
-    mSearchPaths.emplace_back("");
-    Config* config = LoadAsset<Config>("GK3.ini");
-    mSearchPaths.clear();
-
-    // The config should be present, but is technically optional.
-    if(config != nullptr)
-    {
-        // Load "high priority" custom paths, if any.
-        // These paths will be searched first to find any requested resources.
-        std::string customPaths = config->GetString("Custom Paths", "");
-        if(!customPaths.empty())
-        {
-            // Multiple paths are separated by semicolons.
-            std::vector<std::string> paths = StringUtil::Split(customPaths, ';');
-            mSearchPaths.insert(mSearchPaths.end(), paths.begin(), paths.end());
-        }
-    }
-
-    // Add hard-coded default paths *after* any custom paths specified in .INI file.
-    // Assets: loose files that aren't packed into a BRN.
-    mSearchPaths.emplace_back("Assets");
-
-    // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
-    {
-        // The original game only ever shipped with one language per SKU, so there was no way to change the language after install.
-        // But we would like to support that maybe, for both official and unofficial translations.
-        // To support OFFICIAL translations, we'll use Data folders with a suffix equal to the language prefix (e.g. DataF for French, DataG for German).
-        if(Localizer::GetLanguagePrefix()[0] != 'E')
-        {
-            mSearchPaths.push_back("Data" + Localizer::GetLanguagePrefix());
-        }
-
-        // Lowest priority is the normal "Data" folder.
-        mSearchPaths.emplace_back("Data");
-    }
-
-    // Also allow searching the root directory for assets moving forward, but at the lowest priority.
-    mSearchPaths.emplace_back("");
-
-    // Add expected extensions.
-    SetExpectedExtension<Audio>(".WAV");
-    SetExpectedExtension<Soundtrack>(".STK");
-    SetExpectedExtension<Animation>(".YAK", "yak");
-    SetExpectedExtension<Model>(".MOD");
-    SetExpectedExtension<Texture>(".BMP");
-    SetExpectedExtension<GAS>(".GAS");
-    SetExpectedExtension<Animation>(".ANM");
-    SetExpectedExtension<Animation>(".MOM", "mom");
-    SetExpectedExtension<VertexAnimation>(".ACT");
-    SetExpectedExtension<Sequence>(".SEQ");
-    SetExpectedExtension<SceneInitFile>(".SIF");
-    SetExpectedExtension<SceneAsset>(".SCN");
-    SetExpectedExtension<NVC>(".NVC");
-    SetExpectedExtension<BSP>(".BSP");
-    SetExpectedExtension<BSPLightmap>(".MUL");
-    SetExpectedExtension<SheepScript>(".SHP");
-    SetExpectedExtension<Cursor>(".CUR");
-    SetExpectedExtension<Font>(".FON");
-    SetExpectedExtension<TextAsset>(".TXT");
-    SetExpectedExtension<Config>(".CFG");
-}
 
 void AssetManager::Shutdown()
 {
     // Unload all assets.
     UnloadAssets(AssetScope::Global);
 
-    // Clear all loaded barns.
-    mLoadedBarns.clear();
+    // Clear all loaded asset archives.
+    for(AssetArchive& archive : mArchives)
+    {
+        delete archive.archive;
+    }
+    mArchives.clear();
 }
 
 void AssetManager::AddSearchPath(const std::string& searchPath)
 {
-    // If the search path already exists in the list, don't add it again.
-    if(std::find(mSearchPaths.begin(), mSearchPaths.end(), searchPath) != mSearchPaths.end())
+    auto it = std::find(mSearchPaths.begin(), mSearchPaths.end(), searchPath);
+    if(it == mSearchPaths.end())
     {
-        return;
+        mSearchPaths.push_back(searchPath);
     }
-    mSearchPaths.push_back(searchPath);
+}
+
+void AssetManager::RemoveSearchPath(const std::string& searchPath)
+{
+    auto it = std::find(mSearchPaths.begin(), mSearchPaths.end(), searchPath);
+    if(it != mSearchPaths.end())
+    {
+        mSearchPaths.erase(it);
+    }
 }
 
 std::string AssetManager::GetAssetPath(const std::string& fileName) const
 {
-    // We have a set of paths, at which we should search for the specified filename.
-    // So, iterate each search path and see if the file is in that folder.
+    // Iterate each search path and see if a file with this filename exists at that path.
     std::string assetPath;
     for(auto& searchPath : mSearchPaths)
     {
@@ -143,6 +65,7 @@ std::string AssetManager::GetAssetPath(const std::string& fileName, std::initial
 
     // Otherwise, we have a filename, but multiple valid extensions.
     // A good example is a movie file. The file might be called "intro", but the extension could be "avi" or "bik".
+    // Iterate possible extensions and try to find a valid asset path.
     for(const std::string& extension : extensions)
     {
         std::string assetPath = GetAssetPath(fileName + "." + extension);
@@ -154,166 +77,50 @@ std::string AssetManager::GetAssetPath(const std::string& fileName, std::initial
     return std::string();
 }
 
-bool AssetManager::LoadBarn(const std::string& barnName, BarnSearchPriority priority)
+bool AssetManager::LoadAssetArchive(const std::string& archiveName, int searchOrder)
 {
-    // If the barn is already in the map, then we don't need to load it again.
-    if(mLoadedBarns.find(barnName) != mLoadedBarns.end()) { return true; }
-
-    // Find path to barn file.
-    std::string assetPath = GetAssetPath(barnName);
-    if(assetPath.empty())
+    // Find the archive on the disk, or fail.
+    std::string archivePath = GetAssetPath(archiveName);
+    if(archivePath.empty())
     {
         return false;
     }
 
-    // Remember if this is the highest search priority we've seen.
-    if(priority > mHighestBarnSearchPriority)
-    {
-        mHighestBarnSearchPriority = priority;
-    }
+    // Add to list of archives.
+    mArchives.emplace_back();
+    mArchives.back().archive = new BarnFile(archivePath);
+    mArchives.back().searchOrder = searchOrder;
 
-    // Load barn file.
-    mLoadedBarns.emplace(std::piecewise_construct, std::forward_as_tuple(barnName), std::forward_as_tuple(assetPath, priority));
+    // Sort archive list based on search order.
+    std::sort(mArchives.begin(), mArchives.end(), [](const AssetArchive& a, const AssetArchive& b){
+        return a.searchOrder < b.searchOrder;
+    });
     return true;
 }
 
-void AssetManager::UnloadBarn(const std::string& barnName)
+void AssetManager::ExtractAsset(const std::string& assetName, const std::string& outputDirectory) const
 {
-    // If the barn isn't in the map, we can't unload it!
-    auto iter = mLoadedBarns.find(barnName);
-    if(iter == mLoadedBarns.end()) { return; }
-
-    // Remove from map.
-    mLoadedBarns.erase(iter);
-}
-
-void AssetManager::WriteBarnAssetToFile(const std::string& assetName)
-{
-    WriteBarnAssetToFile(assetName, "");
-}
-
-void AssetManager::WriteBarnAssetToFile(const std::string& assetName, const std::string& outputDir)
-{
-    BarnFile* barn = GetBarnContainingAsset(assetName);
-    if(barn != nullptr)
+    // Find archive containing this asset and extract it.
+    IAssetArchive* archive = GetArchiveContainingAsset(assetName);
+    if(archive != nullptr && archive->ExtractAsset(assetName, outputDirectory))
     {
-        barn->WriteToFile(assetName, outputDir);
+        printf("Extracted asset %s to %s\n", assetName.c_str(), outputDirectory.c_str());
+    }
+    else
+    {
+        printf("Could not extract asset %s\n", assetName.c_str());
     }
 }
 
-void AssetManager::WriteAllBarnAssetsToFile(const std::string& search)
-{
-    WriteAllBarnAssetsToFile(search, "");
-}
-
-void AssetManager::WriteAllBarnAssetsToFile(const std::string& search, const std::string& outputDir)
+void AssetManager::ExtractAssets(const std::string& search, const std::string& outputDirectory) const
 {
     // Pass the buck to all loaded barn files.
-    for(auto& entry : mLoadedBarns)
+    uint32_t extractCount = 0;
+    for(auto& entry : mArchives)
     {
-        entry.second.WriteAllToFile(search, outputDir);
+        extractCount += entry.archive->ExtractAssets(search, outputDirectory);
     }
-}
-
-Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scope)
-{
-    // Load texture per usual.
-    Texture* texture = LoadAsset<Texture>(name, scope);
-
-    // A "scene" texture means it is rendered as part of the 3D game scene (as opposed to a 2D UI texture).
-    // These textures look better if you apply mipmaps and filtering.
-    if(texture != nullptr && texture->GetRenderType() != Texture::RenderType::AlphaTest)
-    {
-        bool useMipmaps = gRenderer.UseMipmaps();
-        texture->SetMipmaps(useMipmaps);
-
-        bool useTrilinearFiltering = gRenderer.UseTrilinearFiltering();
-        texture->SetFilterMode(useTrilinearFiltering ? Texture::FilterMode::Trilinear : Texture::FilterMode::Bilinear);
-    }
-
-    // For some reason, many transparent scene textures in GK3 (mostly foliage) have a single non-transparent pixel at (1, 0).
-    // This pixel is obviously supposed to be transparent when rendered.
-    if(texture != nullptr && texture->GetRenderType() == Texture::RenderType::AlphaTest)
-    {
-        if(texture->GetPixelColor(0, 0) == Color32::Magenta &&
-           texture->GetPixelColor(2, 0) == Color32::Magenta &&
-           texture->GetPixelColor(1, 1) == Color32::Magenta)
-        {
-            texture->SetPixelColor(1, 0, Color32::Magenta);
-        }
-    }
-    return texture;
-}
-
-TextAsset* AssetManager::LoadLocalizedText(const std::string& name, AssetScope scope)
-{
-    TextAsset* textFile = LoadAsset<TextAsset>(Localizer::GetLanguagePrefix() + name, scope);
-    if(textFile == nullptr)
-    {
-        printf("Failed to load %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), name.c_str(), name.c_str());
-        textFile = LoadAsset<TextAsset>("E" + name, scope);
-        if(textFile == nullptr)
-        {
-            printf("Failed to load localized text %s!\n", name.c_str());
-        }
-    }
-    return textFile;
-}
-
-Shader* AssetManager::GetShader(const std::string& id)
-{
-    // Attempt to return a cached shader.
-    return AssetCache<Shader>::Get()->GetAsset(id);
-}
-
-Shader* AssetManager::LoadShader(const std::string& idToUse, const std::string& vertexShaderFileNameNoExt,
-                                 const std::string& fragmentShaderFileNameNoExt, const std::vector<std::string>& featureFlags)
-{
-    // If shader by this name is already loaded, return that.
-    Shader* cachedShader = GetShader(idToUse);
-    if(cachedShader != nullptr)
-    {
-        return cachedShader;
-    }
-
-    // Otherwise, create a new shader.
-    Shader* shader = new Shader(idToUse, vertexShaderFileNameNoExt, fragmentShaderFileNameNoExt, featureFlags);
-
-    // If not valid, delete and return null. Log should display compiler error.
-    if(!shader->IsValid())
-    {
-        delete shader;
-        return nullptr;
-    }
-
-    // Cache and return.
-    AssetCache<Shader>::Get()->SetAsset(idToUse, shader);
-    return shader;
-}
-
-Shader* AssetManager::LoadShader(const std::string& idToUse, const std::string& shaderFileNameNoExt, const std::vector<std::string>& featureFlags)
-{
-    // Very similar to above, but assumes both vertex and fragment shader are stored in a single source file.
-    // Return cached shader if one exists.
-    Shader* cachedShader = GetShader(idToUse);
-    if(cachedShader != nullptr)
-    {
-        return cachedShader;
-    }
-
-    // Create new shader.
-    Shader* shader = new Shader(idToUse, shaderFileNameNoExt, featureFlags);
-
-    // If not valid, delete and return null. Log should display compiler error.
-    if(!shader->IsValid())
-    {
-        delete shader;
-        return nullptr;
-    }
-
-    // Cache and return.
-    AssetCache<Shader>::Get()->SetAsset(idToUse, shader);
-    return shader;
+    printf("Extracted %u assets matching search string %s.\n", extractCount, search.c_str());
 }
 
 void AssetManager::UnloadAssets(AssetScope scope)
@@ -327,58 +134,16 @@ void AssetManager::UnloadAssets(AssetScope scope)
     }
 }
 
-BarnFile* AssetManager::GetBarn(const std::string& barnName)
+IAssetArchive* AssetManager::GetArchiveContainingAsset(const std::string& assetName) const
 {
-    // If we find it, return it.
-    auto iter = mLoadedBarns.find(barnName);
-    if(iter != mLoadedBarns.end())
+    // The archives array is already sorted by priority, so just return the first one that contains a matching asset.
+    for(auto& entry : mArchives)
     {
-        return &iter->second;
-    }
-
-    //TODO: Maybe load barn if not loaded?
-    return nullptr;
-}
-
-BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
-{
-    // Starting at the highest priority for loaded Barn files, try to find the asset.
-    BarnSearchPriority priority = mHighestBarnSearchPriority;
-    while(priority >= BarnSearchPriority::Low)
-    {
-        for(auto& entry : mLoadedBarns)
+        if(entry.archive->ContainsAsset(assetName))
         {
-            // If this Barn doesn't match the priority we're currently on, skip it for now.
-            if(entry.second.GetSearchPriority() == priority)
-            {
-                BarnAsset* asset = entry.second.GetAsset(fileName);
-                if(asset != nullptr)
-                {
-                    // If the asset is a pointer, we need to redirect to the correct BarnFile.
-                    // If the correct Barn isn't available, spit out an error and fail.
-                    if(asset->IsPointer())
-                    {
-                        BarnFile* barn = GetBarn(*asset->barnFileName);
-                        if(barn == nullptr)
-                        {
-                            std::cout << "Asset " << fileName << " exists in Barn " << (*asset->barnFileName) << ", but that Barn is not loaded!\n";
-                        }
-                        return barn;
-                    }
-                    else
-                    {
-                        return &entry.second;
-                    }
-                }
-            }
+            return entry.archive;
         }
-
-        // We didn't find the asset in any barn at this priority.
-        // Decrement to the next lowest priority.
-        priority = static_cast<BarnSearchPriority>(static_cast<int>(priority) - 1);
     }
-
-    // Didn't find the Barn containing this asset.
     return nullptr;
 }
 
@@ -400,22 +165,21 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
     return assetName;
 }
 
-uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize)
+uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const
 {
-    // First, see if the asset exists at any asset search path.
-    // If so, we load the asset directly from file.
-    // Loose files take precedence over packaged barn assets.
+    // First, see if the asset exists at any search path. If so, we load the asset directly from file.
+    // Loose files take precedence over archived assets.
     std::string assetPath = GetAssetPath(assetName);
     if(!assetPath.empty())
     {
         return File::ReadIntoBuffer(assetPath, outBufferSize);
     }
 
-    // If no file to load, we'll get the asset from a barn.
-    BarnFile* barn = GetBarnContainingAsset(assetName);
-    if(barn != nullptr)
+    // If no loose file to load, we'll get the asset from am asset archive.
+    IAssetArchive* archive = GetArchiveContainingAsset(assetName);
+    if(archive != nullptr)
     {
-        return barn->CreateAssetBuffer(assetName, outBufferSize);
+        return archive->CreateAssetBuffer(assetName, outBufferSize);
     }
 
     // Couldn't find this asset!

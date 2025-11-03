@@ -2,7 +2,6 @@
 
 #include <cassert>
 
-#include "AssetManager.h"
 #include "Config.h"
 #include "IniParser.h"
 #include "TextAsset.h"
@@ -41,7 +40,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
     // Sometimes, we don't care about the sections - we just load the entire file into a single localizer.
     // However, sometimes sections have duplicate keys - in that case, it's better to treat each section as its own localizer.
     // NOTE: SIDNEY.TXT and SIDNEYEMAIL.TXT are always prefixed with an E even in other languages
-    TextAsset* textFile = gAssetManager.LoadLocalizedText(fileName, AssetScope::Manual);
+    TextAsset* textFile = LoadLocalizedAsset<TextAsset>(fileName, AssetScope::Manual);
     if(textFile == nullptr)
     {
         return;

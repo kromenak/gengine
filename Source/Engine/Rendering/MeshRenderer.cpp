@@ -163,7 +163,7 @@ void MeshRenderer::AddMesh(Mesh* mesh)
         if(!submesh->GetTextureName().empty())
         {
             // The scope here would depend on whether this MeshRenderer is scene-specific or persists between scenes.
-            Texture* tex = gAssetManager.LoadSceneTexture(submesh->GetTextureName(), GetOwner()->IsDestroyOnLoad() ? AssetScope::Scene : AssetScope::Global);
+            Texture* tex = gRenderer.LoadSceneTexture(submesh->GetTextureName(), GetOwner()->IsDestroyOnLoad() ? AssetScope::Scene : AssetScope::Global);
             m.SetDiffuseTexture(tex);
         }
         else

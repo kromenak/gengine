@@ -18,6 +18,7 @@
 #include "SaveManager.h"
 #include "SceneManager.h"
 #include "SequentialFilePathGenerator.h"
+#include "ShaderCache.h"
 #include "Skybox.h"
 #include "Texture.h"
 #include "UICanvas.h"
@@ -124,18 +125,18 @@ bool Renderer::Initialize()
     GAPI::Get()->SetPolygonWindingOrder(GAPI::WindingOrder::Clockwise);
 
     // Load default shader.
-    Shader* defaultShader = gAssetManager.LoadShader("Texture", "Uber", { "FEATURE_TEXTURING" });
+    Shader* defaultShader = ShaderCache::LoadShader("Texture", "Uber", { "FEATURE_TEXTURING" });
     if(defaultShader == nullptr) { return false; }
     Material::sDefaultShader = defaultShader;
 
     // Pre-load additional shaders.
     // One reason this is important is because GL commands can only run on the main thread.
     // Avoid dealing with background thread loading of shaders by loading them all up front.
-    gAssetManager.LoadShader("LightmapTexture", "Uber", { "FEATURE_TEXTURING", "FEATURE_LIGHTMAPS" });
-    gAssetManager.LoadShader("LitTexture", "Uber", { "FEATURE_TEXTURING", "FEATURE_LIGHTING" });
-    gAssetManager.LoadShader("Skybox", "Uber", { "FEATURE_SKYBOX" });
-    gAssetManager.LoadShader("TextColorReplace", "Uber", { "FEATURE_TEXTURING", "FEATURE_COLOR_REPLACE" });
-    gAssetManager.LoadShader("PointsAsCircles", "Uber", { "FEATURE_TEXTURING", "FEATURE_DRAW_POINTS_AS_CIRCLES" });
+    ShaderCache::LoadShader("LightmapTexture", "Uber", { "FEATURE_TEXTURING", "FEATURE_LIGHTMAPS" });
+    ShaderCache::LoadShader("LitTexture", "Uber", { "FEATURE_TEXTURING", "FEATURE_LIGHTING" });
+    ShaderCache::LoadShader("Skybox", "Uber", { "FEATURE_SKYBOX" });
+    ShaderCache::LoadShader("TextColorReplace", "Uber", { "FEATURE_TEXTURING", "FEATURE_COLOR_REPLACE" });
+    ShaderCache::LoadShader("PointsAsCircles", "Uber", { "FEATURE_TEXTURING", "FEATURE_DRAW_POINTS_AS_CIRCLES" });
 
     // Create simple shapes (useful for debugging/visualization).
     // Line
@@ -400,6 +401,33 @@ void Renderer::RemoveMeshRenderer(MeshRenderer* mr)
     }
 }
 
+Texture* Renderer::LoadSceneTexture(const std::string& name, AssetScope scope)
+{
+    // Load texture per usual.
+    Texture* texture = gAssetManager.LoadAsset<Texture>(name, scope);
+
+    // A "scene" texture means it is rendered as part of the 3D game scene (as opposed to a 2D UI texture).
+    // These textures look better if you apply mipmaps and filtering.
+    if(texture != nullptr && texture->GetRenderType() != Texture::RenderType::AlphaTest)
+    {
+        texture->SetMipmaps(UseMipmaps());
+        texture->SetFilterMode(UseTrilinearFiltering() ? Texture::FilterMode::Trilinear : Texture::FilterMode::Bilinear);
+    }
+
+    // For some reason, many transparent scene textures in GK3 (mostly foliage) have a single non-transparent pixel at (1, 0).
+    // This pixel is obviously supposed to be transparent when rendered.
+    if(texture != nullptr && texture->GetRenderType() == Texture::RenderType::AlphaTest)
+    {
+        if(texture->GetPixelColor(0, 0) == Color32::Magenta &&
+           texture->GetPixelColor(2, 0) == Color32::Magenta &&
+           texture->GetPixelColor(1, 1) == Color32::Magenta)
+        {
+            texture->SetPixelColor(1, 0, Color32::Magenta);
+        }
+    }
+    return texture;
+}
+
 void Renderer::SetSkybox(Skybox* skybox)
 {
     mSkybox = skybox;
@@ -411,7 +439,7 @@ void Renderer::SetUseMipmaps(bool useMipmaps)
     gSaveManager.GetPrefs()->Set(PREFS_HARDWARE_RENDERER, PREFS_MIPMAPS, mUseMipmaps);
 
     // Dynamically update loaded textures to use mipmaps.
-    for(auto& entry : *gAssetManager.GetAssets<Texture>())
+    for(auto& entry : gAssetManager.GetAssets<Texture>())
     {
         // The trick is that this map has both UI and scene textures. And we only want to modify *scene* textures.
         // We can look at the current filtering setting as an indicator.
@@ -429,7 +457,7 @@ void Renderer::SetUseTrilinearFiltering(bool useTrilinearFiltering)
     gSaveManager.GetPrefs()->Set(PREFS_HARDWARE_RENDERER, PREFS_TRILINEAR_FILTERING, mUseTrilinearFiltering);
 
     // Dynamically update loaded textures to use trilinear filtering.
-    for(auto& entry : *gAssetManager.GetAssets<Texture>())
+    for(auto& entry : gAssetManager.GetAssets<Texture>())
     {
         // The trick is that this map has both UI and scene textures. And we only want to modify *scene* textures.
         // We can look at the current filtering setting as an indicator.

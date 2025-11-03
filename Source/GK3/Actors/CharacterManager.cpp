@@ -5,6 +5,7 @@
 #include "IniParser.h"
 #include "Loader.h"
 #include "Profiler.h"
+#include "Renderer.h"
 #include "ReportManager.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -95,7 +96,7 @@ void CharacterManager::Init()
 
                     // First, try to load the entry's face/eyelid/forehead textures.
                     // These are derived from the section name.
-                    faceConfig.faceTexture = gAssetManager.LoadSceneTexture(section.name + "_face");
+                    faceConfig.faceTexture = gRenderer.LoadSceneTexture(section.name + "_face");
                     faceConfig.eyelidsTexture = gAssetManager.LoadAsset<Texture>(section.name + "_eyelids");
                     faceConfig.foreheadTexture = gAssetManager.LoadAsset<Texture>(section.name + "_forehead");
                     faceConfig.mouthTexture = gAssetManager.LoadAsset<Texture>(section.name + "_mouth00");
@@ -215,7 +216,7 @@ void CharacterManager::Init()
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Face Name"))
                         {
                             // In some cases, the face texture name doesn't follow convention and is obtained from a specific key in the ini section.
-                            faceConfig.faceTexture = gAssetManager.LoadSceneTexture(entry.value);
+                            faceConfig.faceTexture = gRenderer.LoadSceneTexture(entry.value);
                         }
                     }
                 }

@@ -1,8 +1,8 @@
 #include "UIPoints.h"
 
 #include "Actor.h"
-#include "AssetManager.h"
 #include "Mesh.h"
+#include "ShaderCache.h"
 
 TYPEINFO_INIT(UIPoints, UIShapes<Vector2>, 24)
 {
@@ -11,7 +11,7 @@ TYPEINFO_INIT(UIPoints, UIShapes<Vector2>, 24)
 
 UIPoints::UIPoints(Actor* owner) : UIShapes<Vector2>(owner)
 {
-    mMaterial.SetShader(gAssetManager.GetShader("PointsAsCircles"));
+    mMaterial.SetShader(ShaderCache::GetShader("PointsAsCircles"));
     mMaterial.SetDiffuseTexture(&Texture::White);
 }
 

@@ -1,9 +1,8 @@
 #include "SceneAsset.h"
 
-#include <iostream>
-
 #include "AssetManager.h"
 #include "IniParser.h"
+#include "Renderer.h"
 #include "Skybox.h"
 #include "StringUtil.h"
 
@@ -72,27 +71,27 @@ void SceneAsset::ParseFromData(uint8_t* data, uint32_t dataLength)
                     IniKeyValue& entry = line.entries.front();
                     if(StringUtil::EqualsIgnoreCase(entry.key, "left"))
                     {
-                        skyboxTextures.named.left = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                        skyboxTextures.named.left = gRenderer.LoadSceneTexture(entry.value, GetScope());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "right"))
                     {
-                        skyboxTextures.named.right = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                        skyboxTextures.named.right = gRenderer.LoadSceneTexture(entry.value, GetScope());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "back"))
                     {
-                        skyboxTextures.named.back = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                        skyboxTextures.named.back = gRenderer.LoadSceneTexture(entry.value, GetScope());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "front"))
                     {
-                        skyboxTextures.named.front = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                        skyboxTextures.named.front = gRenderer.LoadSceneTexture(entry.value, GetScope());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "down"))
                     {
-                        skyboxTextures.named.bottom = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                        skyboxTextures.named.bottom = gRenderer.LoadSceneTexture(entry.value, GetScope());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "up"))
                     {
-                        skyboxTextures.named.top = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                        skyboxTextures.named.top = gRenderer.LoadSceneTexture(entry.value, GetScope());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "azimuth"))
                     {

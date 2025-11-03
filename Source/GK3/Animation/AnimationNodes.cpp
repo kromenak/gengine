@@ -12,6 +12,7 @@
 #include "GKActor.h"
 #include "Heading.h"
 #include "MeshRenderer.h"
+#include "Renderer.h"
 #include "SceneManager.h"
 #include "SoundtrackPlayer.h"
 #include "Texture.h"
@@ -159,7 +160,7 @@ Vector3 VertexAnimNode::CalcAbsolutePosition()
 
 void SceneTextureAnimNode::Play(AnimationState* animState)
 {
-    Texture* texture = gAssetManager.LoadSceneTexture(textureName, AssetScope::Scene);
+    Texture* texture = gRenderer.LoadSceneTexture(textureName, AssetScope::Scene);
     if(texture != nullptr)
     {
         //TODO: Ensure sceneName matches loaded scene name?
@@ -201,7 +202,7 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
         while(material != nullptr && material->GetDiffuseTexture() == originalTexture)
         {
             // Apply the texture to that material.
-            Texture* texture = gAssetManager.LoadSceneTexture(textureName, AssetScope::Scene);
+            Texture* texture = gRenderer.LoadSceneTexture(textureName, AssetScope::Scene);
             if(texture != nullptr)
             {
                 material->SetDiffuseTexture(texture);

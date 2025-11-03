@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "BinaryReader.h"
+#include "IAssetArchive.h"
 #include "StringUtil.h"
 
 enum class CompressionType
@@ -45,37 +46,18 @@ struct BarnAsset
     bool IsPointer() const { return barnFileName != nullptr; }
 };
 
-enum class BarnSearchPriority
-{
-    Low = 0,
-    Normal = 1,
-    High = 2
-};
-
-class BarnFile
+class BarnFile : public IAssetArchive
 {
 public:
-    BarnFile(const std::string& filePath, BarnSearchPriority searchPriority = BarnSearchPriority::Normal);
+    explicit BarnFile(const std::string& filePath);
 
-    // Retrieves an asset handle, if it exists in this bundle.
-    BarnAsset* GetAsset(const std::string& assetName);
+    const std::string& GetName() const override { return mName; }
 
-    // Creates a buffer containing the desired asset. Caller owns the returned buffer.
-    uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
+    bool ContainsAsset(const std::string& assetName) const override;
+    uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const override;
 
-    // For debugging, write assets to file.
-    bool WriteToFile(const std::string& assetName);
-    bool WriteToFile(const std::string& assetName, const std::string& outputDir);
-
-    // For debugging, write assets to file whose names match a search string.
-    void WriteAllToFile(const std::string& search);
-    void WriteAllToFile(const std::string& search, const std::string& outputDir);
-
-    // For debugging, output asset list to cout.
-    void OutputAssetList() const;
-
-    const std::string& GetName() const { return mName; }
-    BarnSearchPriority GetSearchPriority() const { return mSearchPriority; }
+    bool ExtractAsset(const std::string& assetName, const std::string& outputDirectory) const override;
+    uint32_t ExtractAssets(const std::string& ifNameContains, const std::string& outputDirectory) const override;
 
 private:
     // Identifiers required to verify file type.
@@ -89,17 +71,13 @@ private:
     // The name of the barn file.
     std::string mName;
 
-    // Specifies the priority of this Barn vs. other Barns for finding assets.
-    // Higher priority Barns are searched first, so they can override lower priority Barn files.
-    BarnSearchPriority mSearchPriority = BarnSearchPriority::Normal;
-
     // Offset within the file to where the data is located.
     uint32_t mDataOffset = 0;
 
     // Binary reader for extracting data.
     // Extraction may occur on multiple threads at once, so a mutex is required to guard access.
-    BinaryReader mReader;
-    std::mutex mReaderMutex;
+    mutable BinaryReader mReader;
+    mutable std::mutex mReaderMutex;
 
     // If *this* Barn contains pointers to *other* Barns, this contains the names of those other Barns.
     // Individual assets that are pointers will point to these elements.
@@ -108,4 +86,6 @@ private:
     // Map of asset name to an asset handle. Assets must be extracted before being used.
     // Asset names are case-insensitive.
     std::string_map_ci<BarnAsset> mAssetMap;
+
+    const BarnAsset* GetAsset(const std::string& assetName) const;
 };

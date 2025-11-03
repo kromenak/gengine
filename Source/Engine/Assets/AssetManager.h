@@ -10,84 +10,60 @@
 
 #include "Asset.h"
 #include "AssetCache.h"
-#include "BarnFile.h"
+#include "IAssetArchive.h"
 #include "StringUtil.h"
-
-class Shader;
-class TextAsset;
-class Texture;
 
 class AssetManager
 {
 public:
-    void Init();
     void Shutdown();
 
-    // Loose Files
-    // Adds a filesystem path to search for assets and bundles at.
     void AddSearchPath(const std::string& searchPath);
+    void RemoveSearchPath(const std::string& searchPath);
 
-    // Given a filename, finds the path to the file if it exists on one of the search paths.
-    // Returns empty string if file is not found.
+    // Finds loose file path, if it exists on a search path. Returns empty string if no file is found.
     std::string GetAssetPath(const std::string& fileName) const;
     std::string GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions) const;
 
-    // Barn Files
-    // Load or unload a barn bundle.
-    bool LoadBarn(const std::string& barnName, BarnSearchPriority priority = BarnSearchPriority::Normal);
-    void UnloadBarn(const std::string& barnName);
+    // Asset Archives
+    bool LoadAssetArchive(const std::string& archiveName, int searchOrder = 0);
 
-    // Write an asset from a bundle to a file.
-    void WriteBarnAssetToFile(const std::string& assetName);
-    void WriteBarnAssetToFile(const std::string& assetName, const std::string& outputDir);
-
-    // Write all assets from a bundle that match a search string.
-    void WriteAllBarnAssetsToFile(const std::string& search);
-    void WriteAllBarnAssetsToFile(const std::string& search, const std::string& outputDir);
-
-    // Loading (or Getting) Assets
-    Texture* LoadSceneTexture(const std::string& name, AssetScope scope = AssetScope::Global);
-    TextAsset* LoadLocalizedText(const std::string& name, AssetScope scope = AssetScope::Global);
-
-    Shader* GetShader(const std::string& id);
-    Shader* LoadShader(const std::string& idToUse, const std::string& vertexShaderFileNameNoExt, const std::string& fragmentShaderFileNameNoExt, const std::vector<std::string>& featureFlags);
-    Shader* LoadShader(const std::string& idToUse, const std::string& shaderFileNameNoExt, const std::vector<std::string>& featureFlags);
+    // Asset Archive Extraction
+    void ExtractAsset(const std::string& assetName, const std::string& outputDirectory) const;
+    void ExtractAssets(const std::string& search, const std::string& outputDirectory) const;
 
     // Asset Extensions
     template<typename T> void SetExpectedExtension(const std::string& extension, const std::string& assetCacheId = "");
 
+    // Querying Assets
+    template<typename T> T* LoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
+    template<typename T> const std::string_map_ci<T*>& GetAssets(const std::string& assetCacheId = "");
+
     // Unloading Assets
     void UnloadAssets(AssetScope scope);
 
-    // Querying Assets
-    template<typename T> T* LoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
-    template<typename T> const std::string_map_ci<T*>* GetAssets(const std::string& assetCacheId = "");
-
 private:
-    // A list of paths to search for assets.
-    // In priority order, since we'll search in order, and stop when we find the item.
+    // Search paths for loading assets from the disk. Used for loading loose files and asset archives.
+    // Expected to be in priority order - an asset is loaded from the first place it is found.
     std::vector<std::string> mSearchPaths;
 
-    // A map of loaded barn files. If an asset isn't found on any search path,
-    // we then search each loaded barn file for the asset.
-    std::string_map_ci<BarnFile> mLoadedBarns;
-
-    // Tracks the highest priority we've seen for a loaded Barn.
-    // This just helps us be a bit more efficient (e.g. don't bother searching High priority if no high priority Barns even exist).
-    BarnSearchPriority mHighestBarnSearchPriority = BarnSearchPriority::Low;
+    // A set of asset archives that have been loaded. Each archive can contain many assets to be loaded.
+    // Again, in priority order - an asset is loaded from the first archive it is found in.
+    struct AssetArchive
+    {
+        int searchOrder = 0;
+        IAssetArchive* archive = nullptr;
+    };
+    std::vector<AssetArchive> mArchives;
 
     // Asset names are often provided without extensions. But an extension is always needed to load from disk.
     // This map lets us automatically set an extension if one is not provided.
     std::unordered_map<TypeId, std::string_map_ci<std::string>> mExpectedAssetExtensionsByType;
 
-    // Retrieve a barn bundle by name, or by contained asset.
-    BarnFile* GetBarn(const std::string& barnName);
-    BarnFile* GetBarnContainingAsset(const std::string& assetName);
-
+    IAssetArchive* GetArchiveContainingAsset(const std::string& assetName) const;
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
-
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache);
-    uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
+    uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const;
 };
 
 extern AssetManager gAssetManager;
@@ -131,9 +107,9 @@ T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, const std:
 }
 
 template<typename T>
-const std::string_map_ci<T*>* AssetManager::GetAssets(const std::string& assetCacheId)
+const std::string_map_ci<T*>& AssetManager::GetAssets(const std::string& assetCacheId)
 {
-    return &AssetCache<T>::Get(assetCacheId)->GetAssets();
+    return AssetCache<T>::Get(assetCacheId)->GetAssets();
 }
 
 template<typename T>

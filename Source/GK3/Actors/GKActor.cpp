@@ -5,7 +5,6 @@
 #include "Animator.h"
 #include "AnimationNodes.h"
 #include "AssetManager.h"
-#include "BSP.h"
 #include "CharacterManager.h"
 #include "Debug.h"
 #include "FaceController.h"
@@ -15,7 +14,9 @@
 #include "MeshRenderer.h"
 #include "Model.h"
 #include "PersistState.h"
+#include "Renderer.h"
 #include "SceneManager.h"
+#include "ShaderCache.h"
 #include "StringUtil.h"
 #include "VertexAnimation.h"
 #include "VertexAnimator.h"
@@ -53,7 +54,7 @@ GKActor::GKActor(const SceneActor* actorDef) :
 
     // Add 3D model renderer using lit textured shader.
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
-    mMeshRenderer->SetShader(gAssetManager.GetShader("LitTexture")); // Shader must be applied first
+    mMeshRenderer->SetShader(ShaderCache::GetShader("LitTexture")); // Shader must be applied first
     mMeshRenderer->SetModel(mActorDef->model);
 
     // Add vertex animator so the 3D model can be animated.
@@ -81,9 +82,9 @@ GKActor::GKActor(const SceneActor* actorDef) :
     shadowMeshRenderer->SetMesh(quad);
 
     // The shadow texture is similar to a BSP lightmap texture, so we'll render it in the same way.
-    Material m(gAssetManager.GetShader("LightmapTexture"));
+    Material m(ShaderCache::GetShader("LightmapTexture"));
     m.SetDiffuseTexture(&Texture::White);
-    m.SetTexture("uLightmap", gAssetManager.LoadSceneTexture("SHADOW.BMP"));
+    m.SetTexture("uLightmap", gRenderer.LoadSceneTexture("SHADOW.BMP"));
     m.SetVector4("uLightmapScaleOffset", Vector4::One);
     m.SetFloat("uLightmapMultiplier", 2.1f); // higher value makes the shadow less noticeable
     m.SetTranslucent(true);
