@@ -7,10 +7,6 @@
 #include "minilzo.h"
 #include "zlib.h"
 
-#include "FileSystem.h"
-#include "SheepScript.h"
-#include "Texture.h"
-
 BarnFile::BarnFile(const std::string& filePath) :
     mName(filePath),
     mReader(filePath.c_str())
@@ -192,64 +188,56 @@ BarnFile::BarnFile(const std::string& filePath) :
     }
 }
 
-bool BarnFile::ContainsAsset(const std::string& assetName) const
-{
-    // This Barn contains the asset if it's in our map AND it isn't a pointer asset.
-    auto it = mAssetMap.find(assetName);
-    return it != mAssetMap.end() && !it->second.IsPointer();
-}
-
 uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const
 {
     // Use a sane default value for this.
     outBufferSize = 0;
 
     // Get the asset handle associated with this asset name.
-    const BarnAsset* asset = GetAsset(assetName);
-    if(asset == nullptr)
+    auto it = mAssetMap.find(assetName);
+    if(it == mAssetMap.end())
     {
-        std::cout << "No asset named " << assetName << "in Barn file!\n";
         return nullptr;
     }
+    const BarnAsset& asset = it->second;
 
     // Make sure this asset actually exists within this barn file, and it isn't a pointer to another barn file.
-    if(asset->IsPointer())
+    if(asset.IsPointer())
     {
-        std::cout << "Can't create asset buffer for " << asset->name << " - it is an asset pointer!\n";
         return nullptr;
     }
 
     // If this is an uncompressed asset, we can simply read the bytes and be done with it - easy.
-    if(asset->compressionType == CompressionType::None)
+    if(asset.compressionType == CompressionType::None)
     {
         // Allocate buffer to hold asset data.
-        uint8_t* buffer = new uint8_t[asset->size];
-        outBufferSize = asset->size;
+        uint8_t* buffer = new uint8_t[asset.size];
+        outBufferSize = asset.size;
 
         // Seek to the data and read into the buffer. Since it's already uncompressed, we're done!
         mReaderMutex.lock();
-        mReader.Seek(mDataOffset + asset->offset);
-        mReader.Read(buffer, asset->size);
+        mReader.Seek(mDataOffset + asset.offset);
+        mReader.Read(buffer, asset.size);
         mReaderMutex.unlock();
         return buffer;
     }
 
     // Otherwise, data is compressed - we need to read in compressed data, and then use an appropriate decompressor.
     // Create buffer to hold compressed data.
-    uint8_t* compressedBuffer = new uint8_t[asset->size];
+    uint8_t* compressedBuffer = new uint8_t[asset.size];
 
     // Read compressed data into a buffer.
     // Also grab the decompressed asset size while we're there.
     mReaderMutex.lock();
-    mReader.Seek(mDataOffset + asset->offset);
+    mReader.Seek(mDataOffset + asset.offset);
     outBufferSize = mReader.ReadUInt();
     mReader.Skip(4);
-    uint32_t readCount = mReader.Read(compressedBuffer, asset->size);
+    uint32_t readCount = mReader.Read(compressedBuffer, asset.size);
     mReaderMutex.unlock();
 
     // Make sure we read what we were expecting.
     // The "-1" case can happen when reading the last file in the barn, but asset is still valid.
-    if(readCount != asset->size && readCount != asset->size - 1)
+    if(readCount != asset.size && readCount != asset.size - 1)
     {
         std::cout << "Didn't read desired number of bytes.\n";
         delete[] compressedBuffer;
@@ -260,12 +248,12 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     uint8_t* buffer = new uint8_t[outBufferSize];
 
     // How we decompress the data depends on the compression type...
-    if(asset->compressionType == CompressionType::Zlib)
+    if(asset.compressionType == CompressionType::Zlib)
     {
         // Create params object.
         z_stream strm {};
         strm.next_in = compressedBuffer;
-        strm.avail_in = asset->size;
+        strm.avail_in = asset.size;
         strm.next_out = buffer;
         strm.avail_out = outBufferSize;
         strm.zalloc = Z_NULL;
@@ -302,7 +290,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
             return nullptr;
         }
     }
-    else if(asset->compressionType == CompressionType::Lzo)
+    else if(asset.compressionType == CompressionType::Lzo)
     {
         // Make sure LZO library is initialized.
         static bool initLzo = false;
@@ -327,7 +315,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         lzo_bytep compressedPtr = static_cast<lzo_bytep>(compressedBuffer);
         lzo_bytep bufferPtr = static_cast<lzo_bytep>(buffer);
         lzo_uint bufferSize = 0;
-        int result = lzo1x_decompress(compressedPtr, asset->size, bufferPtr, &bufferSize, nullptr);
+        int result = lzo1x_decompress(compressedPtr, asset.size, bufferPtr, &bufferSize, nullptr);
 
         // For some reason *most* GK3 data decompresses with result of LZO_E_INPUT_NOT_CONSUMED.
         // This still works OK. It may indicate that "compressedSize" passed is larger than the compressed data.
@@ -345,7 +333,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     }
     else
     {
-        std::cout << "Asset " << asset->name << " has invalid compression type " << static_cast<int>(asset->compressionType) << "\n";
+        std::cout << "Asset " << asset.name << " has invalid compression type " << static_cast<int>(asset.compressionType) << "\n";
         delete[] compressedBuffer;
         delete[] buffer;
         return nullptr;
@@ -358,137 +346,15 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     return buffer;
 }
 
-bool BarnFile::ExtractAsset(const std::string& assetName, const std::string& outputDir) const
+void BarnFile::ForEachAsset(const std::function<void(const std::string&)>& callback) const
 {
-    // Retrieve the asset handle, first of all.
-    const BarnAsset* asset = GetAsset(assetName);
-    if(asset == nullptr)
-    {
-        std::cout << "No asset named " << assetName << " in Barn file!\n";
-        return false;
-    }
-
-    // Make sure we're not trying to write out an asset pointer.
-    // In this case, the caller needs to redirect to the correct bundle before writing out.
-    if(asset->IsPointer())
-    {
-        std::cout << "Asset " << assetName << " can't be extracted from Barn - it is only an asset pointer!\n";
-        return false;
-    }
-
-    // If output directory is provided, make sure the directory exists. If not, create it.
-    // Our final output path will also be different.
-    std::string outputPath;
-    if(!outputDir.empty())
-    {
-        Directory::CreateAll(outputDir);
-        if(!Directory::Exists(outputDir))
-        {
-            outputPath = asset->name;
-        }
-        else
-        {
-            outputPath = Path::Combine({ outputDir, asset->name });
-        }
-    }
-    else
-    {
-        outputPath = asset->name;
-    }
-
-    // Extract the asset and write it to file.
-    bool result = false;
-
-    AssetData assetData;
-    assetData.bytes.reset(CreateAssetBuffer(assetName, assetData.length));
-    if(assetData.bytes != nullptr)
-    {
-        // Textures can't be written directly to file and open correctly.
-        // Handle those separately (TODO: More modular/extendable way to do this?)
-        if(assetName.find(".BMP") != std::string::npos)
-        {
-            Texture tex(assetName, AssetScope::Manual);
-            tex.Load(assetData);
-            tex.WriteToFile(outputPath);
-            result = true;
-        }
-        else if(assetName.find(".SHP") != std::string::npos &&
-                SheepScript::IsSheepDataCompiled(assetData.bytes.get(), assetData.length))
-        {
-            // If sheep asset is compiled, we need to decompile it to get any useful data.
-            SheepScript script(assetName, AssetScope::Manual);
-            script.Load(assetData);
-            script.Decompile(outputPath);
-            result = true;
-        }
-        else
-        {
-            // Most other assets can just be written out directly.
-            std::ofstream fileStream(outputPath, std::istream::out | std::istream::binary);
-            if(fileStream.good())
-            {
-                fileStream.write(reinterpret_cast<char*>(assetData.bytes.get()), assetData.length);
-                fileStream.close();
-                result = true;
-            }
-        }
-    }
-
-    // Output the result.
-    if(result)
-    {
-        std::cout << "Wrote out " << asset->name << "\n";
-    }
-    else
-    {
-        std::cout << "Error while extracting " << asset->name << "\n";
-    }
-
-    // Return success or failure.
-    return result;
-}
-
-uint32_t BarnFile::ExtractAssets(const std::string& ifNameContains, const std::string& outputDirectory) const
-{
-    // Iterate all assets to extract those matching the if condition.
-    uint32_t extractCount = 0;
+    // Iterate all assets and execute the callback on each one.
     for(auto& entry : mAssetMap)
     {
-        // Can't write out asset pointers anyway.
-        if(entry.second.IsPointer()) { continue; }
-
-        // If the asset name contains the search string anywhere, we extract it.
-        if(entry.first.find(ifNameContains) != std::string::npos)
+        // Pointers aren't actually in this barn, so ignore them.
+        if(!entry.second.IsPointer())
         {
-            if(ExtractAsset(entry.first, outputDirectory))
-            {
-                ++extractCount;
-            }
+            callback(entry.first);
         }
     }
-    return extractCount;
 }
-
-const BarnAsset* BarnFile::GetAsset(const std::string& assetName) const
-{
-    auto it = mAssetMap.find(assetName);
-    if(it != mAssetMap.end())
-    {
-        return &it->second;
-    }
-    return nullptr;
-}
-
-/*
-void BarnFile::OutputAssetList() const
-{
-    for(auto& entry : mAssetMap)
-    {
-        // Don't output asset pointers.
-        if(entry.second.IsPointer()) { continue; }
-
-        // Output the info.
-        std::cout << entry.second.name << " - " << static_cast<int>(entry.second.compressionType) << " - " << entry.second.size << std::endl;
-    }
-}
-*/

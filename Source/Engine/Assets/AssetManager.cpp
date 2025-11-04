@@ -2,6 +2,7 @@
 
 #include <algorithm> // std::sort
 #include <cstring>
+#include <fstream>
 #include <string>
 
 #include "BarnFile.h"
@@ -98,27 +99,55 @@ bool AssetManager::LoadAssetArchive(const std::string& archiveName, int searchOr
     return true;
 }
 
-void AssetManager::ExtractAsset(const std::string& assetName, const std::string& outputDirectory) const
+void AssetManager::SetAssetExtractor(const std::string& extension, const std::function<bool(AssetExtractData&)>& extractorFunction)
 {
-    // Find archive containing this asset and extract it.
-    IAssetArchive* archive = GetArchiveContainingAsset(assetName);
-    if(archive != nullptr && archive->ExtractAsset(assetName, outputDirectory))
+    if(extension.empty())
     {
-        printf("Extracted asset %s to %s\n", assetName.c_str(), outputDirectory.c_str());
+        printf("Empty extension passed to SetAssetExtractor.");
+        return;
+    }
+
+    // Add the extractor function to the map. Make sure the extension key has a leading dot, for consistency.
+    if(extension.front() != '.')
+    {
+        mAssetExtractorsByExtension["." + extension] = extractorFunction;
     }
     else
     {
-        printf("Could not extract asset %s\n", assetName.c_str());
+        mAssetExtractorsByExtension[extension] = extractorFunction;
     }
 }
 
-void AssetManager::ExtractAssets(const std::string& search, const std::string& outputDirectory) const
+bool AssetManager::ExtractAsset(const std::string& assetName, const std::string& outputDirectory) const
+{
+    for(auto& entry : mArchives)
+    {
+        if(ExtractAsset(entry.archive, assetName, outputDirectory))
+        {
+            printf("Extracted asset %s to %s\n", assetName.c_str(), outputDirectory.c_str());
+            return true;
+        }
+    }
+
+    printf("Could not extract asset %s\n", assetName.c_str());
+    return false;
+}
+
+void AssetManager::ExtractAssets(const std::string& search, const std::string& outputDirectory)
 {
     // Pass the buck to all loaded barn files.
     uint32_t extractCount = 0;
     for(auto& entry : mArchives)
     {
-        extractCount += entry.archive->ExtractAssets(search, outputDirectory);
+        entry.archive->ForEachAsset([this, search, outputDirectory, entry, &extractCount](const std::string& assetName) {
+            if(assetName.find(search) != std::string::npos)
+            {
+                if(ExtractAsset(entry.archive, assetName, outputDirectory))
+                {
+                    ++extractCount;
+                }
+            }
+        });
     }
     printf("Extracted %u assets matching search string %s.\n", extractCount, search.c_str());
 }
@@ -134,17 +163,54 @@ void AssetManager::UnloadAssets(AssetScope scope)
     }
 }
 
-IAssetArchive* AssetManager::GetArchiveContainingAsset(const std::string& assetName) const
+bool AssetManager::ExtractAsset(IAssetArchive* archive, const std::string& assetName,  const std::string& outputDirectory) const
 {
-    // The archives array is already sorted by priority, so just return the first one that contains a matching asset.
-    for(auto& entry : mArchives)
+    // Must have an archive to extract from.
+    if(archive == nullptr) { return false; }
+
+    AssetExtractData extractData;
+    extractData.assetName = assetName;
+
+    // Get the raw bytes for the asset to be extracted.
+    extractData.assetData.bytes.reset(archive->CreateAssetBuffer(assetName, extractData.assetData.length));
+    if(extractData.assetData.bytes == nullptr)
     {
-        if(entry.archive->ContainsAsset(assetName))
+        return false;
+    }
+
+    // Decide on an output path. Try to use what's provided, but fall back on working directory worst case.
+    if(!outputDirectory.empty() && Directory::CreateAll(outputDirectory))
+    {
+        extractData.outputPath = Path::Combine({ outputDirectory, assetName });
+    }
+    else
+    {
+        extractData.outputPath = assetName;
+    }
+
+    // Attempt to extract the asset using a registered asset extractor.
+    bool result = false;
+    auto it = mAssetExtractorsByExtension.find(Path::GetExtension(assetName, true));
+    if(it != mAssetExtractorsByExtension.end())
+    {
+        result = it->second(extractData);
+    }
+
+    // If there is no asset extractor, or if the asset extractor doesn't succeed, fall back on writing the raw bytes.
+    // This works for a lot of assets - only a few need custom processing.
+    if(!result)
+    {
+        std::ofstream fileStream(extractData.outputPath, std::istream::out | std::istream::binary);
+        if(fileStream.good())
         {
-            return entry.archive;
+            fileStream.write(reinterpret_cast<char*>(extractData.assetData.bytes.get()), extractData.assetData.length);
+            fileStream.close();
+            result = true;
         }
     }
-    return nullptr;
+
+    // Return success or failure.
+    return result;
 }
 
 std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
@@ -175,11 +241,14 @@ uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t&
         return File::ReadIntoBuffer(assetPath, outBufferSize);
     }
 
-    // If no loose file to load, we'll get the asset from am asset archive.
-    IAssetArchive* archive = GetArchiveContainingAsset(assetName);
-    if(archive != nullptr)
+    // If no loose file to load, we'll get the asset from an asset archive.
+    for(auto& entry : mArchives)
     {
-        return archive->CreateAssetBuffer(assetName, outBufferSize);
+        uint8_t* buffer = entry.archive->CreateAssetBuffer(assetName, outBufferSize);
+        if(buffer != nullptr)
+        {
+            return buffer;
+        }
     }
 
     // Couldn't find this asset!

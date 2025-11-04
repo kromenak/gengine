@@ -11,11 +11,10 @@ shpvoid AddPath(const std::string& pathName)
 }
 RegFunc1(AddPath, void, string, IMMEDIATE, DEV_FUNC);
 
-/*
 shpvoid FullScanPaths()
 {
-    // Scans and indexes assets on all search paths.
-    // Really only useful when dealing with loose files.
+    // Scans and indexes assets on all search paths. Really only useful when dealing with loose files.
+    // I don't think this needs to do anything in G-Engine. No-op?
     return 0;
 }
 RegFunc0(FullScanPaths, void, IMMEDIATE, DEV_FUNC);
@@ -23,10 +22,10 @@ RegFunc0(FullScanPaths, void, IMMEDIATE, DEV_FUNC);
 shpvoid RescanPaths()
 {
     // Same as full scan paths, but dumps any existing indexes as well.
+    // Again, don't think this needs to do anything in G-Engine. No-op.
     return 0;
 }
 RegFunc0(RescanPaths, void, IMMEDIATE, DEV_FUNC);
-*/
 
 shpvoid Extract(const std::string& fileSpec, const std::string& outputPath)
 {

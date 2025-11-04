@@ -52,12 +52,8 @@ public:
     explicit BarnFile(const std::string& filePath);
 
     const std::string& GetName() const override { return mName; }
-
-    bool ContainsAsset(const std::string& assetName) const override;
     uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const override;
-
-    bool ExtractAsset(const std::string& assetName, const std::string& outputDirectory) const override;
-    uint32_t ExtractAssets(const std::string& ifNameContains, const std::string& outputDirectory) const override;
+    void ForEachAsset(const std::function<void(const std::string&)>& callback) const override;
 
 private:
     // Identifiers required to verify file type.
@@ -86,6 +82,4 @@ private:
     // Map of asset name to an asset handle. Assets must be extracted before being used.
     // Asset names are case-insensitive.
     std::string_map_ci<BarnAsset> mAssetMap;
-
-    const BarnAsset* GetAsset(const std::string& assetName) const;
 };

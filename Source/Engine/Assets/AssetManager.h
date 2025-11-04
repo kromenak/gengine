@@ -13,33 +13,48 @@
 #include "IAssetArchive.h"
 #include "StringUtil.h"
 
+// Helper struct used when extracting an asset.
+struct AssetExtractData
+{
+    // The name of the asset being extracted.
+    std::string assetName;
+
+    // The byte data of the asset to be extracted.
+    AssetData assetData;
+
+    // The path to extract the asset to.
+    std::string outputPath;
+};
+
 class AssetManager
 {
 public:
     void Shutdown();
 
+    // Search Paths
     void AddSearchPath(const std::string& searchPath);
     void RemoveSearchPath(const std::string& searchPath);
 
-    // Finds loose file path, if it exists on a search path. Returns empty string if no file is found.
+    // Asset Paths
+    // Finds the full path to an asset on any search path, or empty string if asset can't be found.
     std::string GetAssetPath(const std::string& fileName) const;
     std::string GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions) const;
 
     // Asset Archives
     bool LoadAssetArchive(const std::string& archiveName, int searchOrder = 0);
 
-    // Asset Archive Extraction
-    void ExtractAsset(const std::string& assetName, const std::string& outputDirectory) const;
-    void ExtractAssets(const std::string& search, const std::string& outputDirectory) const;
+    // Asset Extraction
+    void SetAssetExtractor(const std::string& extension, const std::function<bool(AssetExtractData&)>& extractorFunction);
+    bool ExtractAsset(const std::string& assetName, const std::string& outputDirectory = "") const;
+    void ExtractAssets(const std::string& search, const std::string& outputDirectory = "");
 
     // Asset Extensions
     template<typename T> void SetExpectedExtension(const std::string& extension, const std::string& assetCacheId = "");
 
-    // Querying Assets
+    // Asset Loading/Unloading
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
+    template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache);
     template<typename T> const std::string_map_ci<T*>& GetAssets(const std::string& assetCacheId = "");
-
-    // Unloading Assets
     void UnloadAssets(AssetScope scope);
 
 private:
@@ -60,9 +75,12 @@ private:
     // This map lets us automatically set an extension if one is not provided.
     std::unordered_map<TypeId, std::string_map_ci<std::string>> mExpectedAssetExtensionsByType;
 
-    IAssetArchive* GetArchiveContainingAsset(const std::string& assetName) const;
+    // Maps an asset extension to a custom extractor function.
+    // Many assets can simply be written to disk byte-for-byte. But some can require custom processing.
+    std::unordered_map<std::string, std::function<bool(AssetExtractData&)>> mAssetExtractorsByExtension;
+
+    bool ExtractAsset(IAssetArchive* archive, const std::string& assetName, const std::string& outputDirectory) const;
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
-    template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache);
     uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const;
 };
 
@@ -107,12 +125,6 @@ T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, const std:
 }
 
 template<typename T>
-const std::string_map_ci<T*>& AssetManager::GetAssets(const std::string& assetCacheId)
-{
-    return AssetCache<T>::Get(assetCacheId)->GetAssets();
-}
-
-template<typename T>
 T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache)
 {
     // If already present in cache, return existing asset right away.
@@ -150,4 +162,10 @@ T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache
     // Load the asset.
     asset->Load(assetData);
     return asset;
+}
+
+template<typename T>
+const std::string_map_ci<T*>& AssetManager::GetAssets(const std::string& assetCacheId)
+{
+    return AssetCache<T>::Get(assetCacheId)->GetAssets();
 }

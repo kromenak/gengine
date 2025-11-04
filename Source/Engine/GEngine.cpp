@@ -341,7 +341,7 @@ bool GEngine::InitAssetManager()
     // Also allow searching the root directory for assets moving forward, but at the lowest priority.
     gAssetManager.AddSearchPath("");
 
-    // Add expected extensions.
+    // Register expected extensions.
     gAssetManager.SetExpectedExtension<Audio>(".WAV");
     gAssetManager.SetExpectedExtension<Soundtrack>(".STK");
     gAssetManager.SetExpectedExtension<Animation>(".YAK", "yak");
@@ -417,6 +417,27 @@ bool GEngine::InitAssetManager()
             }
         }
     }
+
+    // Register asset extractors.
+    gAssetManager.SetAssetExtractor("BMP", [](AssetExtractData& assetExtractData) -> bool {
+        Texture tex(assetExtractData.assetName, AssetScope::Manual);
+        tex.Load(assetExtractData.assetData);
+        tex.WriteToFile(assetExtractData.outputPath);
+        return true;
+    });
+    gAssetManager.SetAssetExtractor("SHP", [](AssetExtractData& assetExtractData) -> bool {
+        if(SheepScript::IsSheepDataCompiled(assetExtractData.assetData.bytes.get(), assetExtractData.assetData.length))
+        {
+            // If sheep asset is compiled, we need to decompile it to get any useful data.
+            SheepScript script(assetExtractData.assetName, AssetScope::Manual);
+            script.Load(assetExtractData.assetData);
+            script.Decompile(assetExtractData.outputPath);
+            return true;
+        }
+        return false;
+    });
+
+    // Init succeeded.
     return true;
 }
 
