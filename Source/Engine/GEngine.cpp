@@ -341,27 +341,38 @@ bool GEngine::InitAssetManager()
     // Also allow searching the root directory for assets moving forward, but at the lowest priority.
     gAssetManager.AddSearchPath("");
 
-    // Register expected extensions.
-    gAssetManager.SetExpectedExtension<Audio>(".WAV");
-    gAssetManager.SetExpectedExtension<Soundtrack>(".STK");
-    gAssetManager.SetExpectedExtension<Animation>(".YAK", "yak");
-    gAssetManager.SetExpectedExtension<Model>(".MOD");
-    gAssetManager.SetExpectedExtension<Texture>(".BMP");
-    gAssetManager.SetExpectedExtension<GAS>(".GAS");
-    gAssetManager.SetExpectedExtension<Animation>(".ANM");
-    gAssetManager.SetExpectedExtension<Animation>(".MOM", "mom");
-    gAssetManager.SetExpectedExtension<VertexAnimation>(".ACT");
-    gAssetManager.SetExpectedExtension<Sequence>(".SEQ");
-    gAssetManager.SetExpectedExtension<SceneInitFile>(".SIF");
-    gAssetManager.SetExpectedExtension<SceneAsset>(".SCN");
-    gAssetManager.SetExpectedExtension<NVC>(".NVC");
-    gAssetManager.SetExpectedExtension<BSP>(".BSP");
-    gAssetManager.SetExpectedExtension<BSPLightmap>(".MUL");
-    gAssetManager.SetExpectedExtension<SheepScript>(".SHP");
-    gAssetManager.SetExpectedExtension<Cursor>(".CUR");
-    gAssetManager.SetExpectedExtension<Font>(".FON");
-    gAssetManager.SetExpectedExtension<TextAsset>(".TXT");
-    gAssetManager.SetExpectedExtension<Config>(".CFG");
+    // Register expected extensions for various asset types.
+    AssetNameResolver assetNameResolver;
+    assetNameResolver.AddTypeExtension<Audio>(".WAV");
+    assetNameResolver.AddTypeExtension<Soundtrack>(".STK");
+    assetNameResolver.AddTypeExtension<Animation>(".YAK", "yak");
+    assetNameResolver.AddTypeExtension<Model>(".MOD");
+    assetNameResolver.AddTypeExtension<Texture>(".BMP");
+    assetNameResolver.AddTypeExtension<GAS>(".GAS");
+    assetNameResolver.AddTypeExtension<Animation>(".ANM");
+    assetNameResolver.AddTypeExtension<Animation>(".MOM", "mom");
+    assetNameResolver.AddTypeExtension<VertexAnimation>(".ACT");
+    assetNameResolver.AddTypeExtension<Sequence>(".SEQ");
+    assetNameResolver.AddTypeExtension<SceneInitFile>(".SIF");
+    assetNameResolver.AddTypeExtension<SceneAsset>(".SCN");
+    assetNameResolver.AddTypeExtension<NVC>(".NVC");
+    assetNameResolver.AddTypeExtension<BSP>(".BSP");
+    assetNameResolver.AddTypeExtension<BSPLightmap>(".MUL");
+    assetNameResolver.AddTypeExtension<SheepScript>(".SHP");
+    assetNameResolver.AddTypeExtension<Cursor>(".CUR");
+    assetNameResolver.AddTypeExtension<Font>(".FON");
+    assetNameResolver.AddTypeExtension<TextAsset>(".TXT");
+    assetNameResolver.AddTypeExtension<Config>(".CFG");
+
+    // In GK3, a valid asset extension must be exactly 3 characters - .BMP and .ACT are valid, .JSON would not be.
+    // This is important because, unfortunately, some GK3 asset names include periods (e.g PREP.HEDGE) and we don't want those to be mistaken for the asset extension.
+    assetNameResolver.SetHasValidExtensionCallback([](const std::string& assetName) -> bool {
+        int lastIndex = assetName.size() - 1;
+        return lastIndex > 3 && assetName[lastIndex - 3] == '.';
+    });
+
+    // Tell asset manager to use this asset name resolver.
+    gAssetManager.SetAssetNameResolver(assetNameResolver);
 
     // See if the demo barn is present. If so, we'll load the game in demo mode.
     mDemoMode = gAssetManager.LoadAssetArchive("Gk3demo.brn");

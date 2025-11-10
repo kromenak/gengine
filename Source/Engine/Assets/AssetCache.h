@@ -23,7 +23,7 @@ class IAssetCache
 public:
     // Tracks all known asset caches in existence, keyed by asset type.
     static std::unordered_map<TypeId, std::vector<IAssetCache*>> sAssetCachesByType;
-    static std::mutex sMutex;
+    static std::mutex sAssetCachesMutex;
 
     virtual ~IAssetCache() = default;
     virtual const std::string& GetId() = 0;
@@ -37,7 +37,7 @@ public:
     static AssetCache<T>* Get(const std::string& id = "")
     {
         // This code could run on multiple threads, so we should guard reads/writes to the static collection.
-        std::lock_guard<std::mutex> lock(sMutex);
+        std::lock_guard<std::mutex> lock(sAssetCachesMutex);
 
         // Get all asset caches that exist for this type.
         // This creates a new list if the type is not yet in the map.

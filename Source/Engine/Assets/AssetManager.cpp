@@ -120,11 +120,13 @@ void AssetManager::SetAssetExtractor(const std::string& extension, const std::fu
 
 bool AssetManager::ExtractAsset(const std::string& assetName, const std::string& outputDirectory) const
 {
+    // Find the first archive that has this asset and extract it.
+    // Since archives are ordered, the asset will be extracted from the highest priority archive it exists in.
     for(auto& entry : mArchives)
     {
         if(ExtractAsset(entry.archive, assetName, outputDirectory))
         {
-            printf("Extracted asset %s to %s\n", assetName.c_str(), outputDirectory.c_str());
+            printf("Extracted asset %s from archive %s to %s\n", assetName.c_str(), entry.archive->GetName().c_str(), outputDirectory.c_str());
             return true;
         }
     }
@@ -135,7 +137,7 @@ bool AssetManager::ExtractAsset(const std::string& assetName, const std::string&
 
 void AssetManager::ExtractAssets(const std::string& search, const std::string& outputDirectory)
 {
-    // Pass the buck to all loaded barn files.
+    // Iterate all archives and extract all assets that contain the provided search string.
     uint32_t extractCount = 0;
     for(auto& entry : mArchives)
     {
@@ -154,9 +156,10 @@ void AssetManager::ExtractAssets(const std::string& search, const std::string& o
 
 void AssetManager::UnloadAssets(AssetScope scope)
 {
+    // Iterate all asset caches and tell them to unload assets at the given scope.
     for(auto& entry : IAssetCache::sAssetCachesByType)
     {
-        for(auto& assetCache : entry.second)
+        for(IAssetCache* assetCache : entry.second)
         {
             assetCache->UnloadAssets(scope);
         }
@@ -168,6 +171,7 @@ bool AssetManager::ExtractAsset(IAssetArchive* archive, const std::string& asset
     // Must have an archive to extract from.
     if(archive == nullptr) { return false; }
 
+    // Create extract data struct and populate it.
     AssetExtractData extractData;
     extractData.assetName = assetName;
 
@@ -189,46 +193,26 @@ bool AssetManager::ExtractAsset(IAssetArchive* archive, const std::string& asset
     }
 
     // Attempt to extract the asset using a registered asset extractor.
-    bool result = false;
+    bool extractSucceeded = false;
     auto it = mAssetExtractorsByExtension.find(Path::GetExtension(assetName, true));
     if(it != mAssetExtractorsByExtension.end())
     {
-        result = it->second(extractData);
+        extractSucceeded = it->second(extractData);
     }
 
     // If there is no asset extractor, or if the asset extractor doesn't succeed, fall back on writing the raw bytes.
     // This works for a lot of assets - only a few need custom processing.
-    if(!result)
+    if(!extractSucceeded)
     {
         std::ofstream fileStream(extractData.outputPath, std::istream::out | std::istream::binary);
         if(fileStream.good())
         {
             fileStream.write(reinterpret_cast<char*>(extractData.assetData.bytes.get()), extractData.assetData.length);
             fileStream.close();
-            result = true;
+            extractSucceeded = true;
         }
     }
-
-    // Return success or failure.
-    return result;
-}
-
-std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
-{
-    // If a three-letter extension already exists, accept it and assume the caller knows what they're doing.
-    // Only for 3-letter extensions! GK3 actually includes periods in a few asset names, but never with a three letter ending.
-    int lastIndex = assetName.size() - 1;
-    if(lastIndex > 3 && assetName[lastIndex - 3] == '.')
-    {
-        return assetName;
-    }
-
-    // No three-letter extension, add the expected extension if missing.
-    if(!Path::HasExtension(assetName, expectedExtension))
-    {
-        return assetName + expectedExtension;
-    }
-    return assetName;
+    return extractSucceeded;
 }
 
 uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const
