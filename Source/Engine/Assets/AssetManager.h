@@ -1,7 +1,28 @@
 //
 // Clark Kromenaker
 //
-// Manages loading and caching of assets.
+// Acts as a central hub for loading, caching, and managing assets.
+// Provides the following key features:
+//
+// 1) Ordered search paths: provide a list of paths at which to search for loose file assets or asset archives.
+//    Assets or asset archives are loaded at the first path they are discovered at.
+//
+// 2) Loose file path resolution: provide a file name, its full path will be resolved to one of the search paths (if it exists).
+//    Multiple potential file extensions can also be provided and checked.
+//
+// 3) Loading of asset archives: rather than only using loose files, assets can be bundled into archives for distribution.
+//    Multiple different types of asset archives can be implemented.
+//
+// 4) Extracting assets from archives: if an asset exists in a loaded archive, it can be extracted to the disk by name.
+//
+// 5) Load assets to C++ class representation and cache for later retrieval.
+//    When an asset is loaded, it is stored in an Asset Cache. Subsequent retrievals return the cached instance.
+//
+// 6) When loading assets, you can specify the full name with extension, or just the name.
+//    If only the name is provided, an "asset name resolver" can be provided that maps asset types and cache IDs to expected extensions.
+//    The system will then try to use the expected extensions to find and load the correct asset.
+//
+// 7) Asset unloading via scope: each asset stores a scope (Global, Scene, etc). Assets can be unloaded by scope at any time.
 //
 #pragma once
 #include <initializer_list>
@@ -33,15 +54,14 @@ public:
     void Shutdown();
 
     // Search Paths
+    // Paths to search when loading loose files (both individual assets and archives).
     void AddSearchPath(const std::string& searchPath);
     void RemoveSearchPath(const std::string& searchPath);
 
-    // Asset Paths
-    // Finds the full path to an asset on any search path, or empty string if asset can't be found.
-    std::string GetAssetPath(const std::string& fileName) const;
-    std::string GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions) const;
-
-    void SetAssetNameResolver(const AssetNameResolver& resolver) { mAssetNameResolver = resolver; }
+    // Loose File Paths
+    // Finds the full path of a loose file (either an individual asset or an archive). Returns empty string if not found.
+    std::string FindLooseFilePath(const std::string& fileName) const;
+    std::string FindLooseFilePath(const std::string& fileName, std::initializer_list<std::string> extensions) const;
 
     // Asset Archives
     bool LoadAssetArchive(const std::string& archiveName, int searchOrder = 0);
@@ -52,6 +72,7 @@ public:
     void ExtractAssets(const std::string& search, const std::string& outputDirectory = "");
 
     // Asset Loading/Unloading
+    void SetAssetNameResolver(const AssetNameResolver& resolver) { mAssetNameResolver = resolver; }
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache);
     template<typename T> const std::string_map_ci<T*>& GetAssets(const std::string& assetCacheId = "");

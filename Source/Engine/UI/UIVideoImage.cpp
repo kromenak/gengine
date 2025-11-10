@@ -28,7 +28,7 @@ bool UIVideoImage::Play(const std::string& videoName, const std::function<void()
 
     // The name passed is just a filename (e.g. "intro.bik"). Need to convert that into a full path.
     // Names can also be passed with or without extension, so we have to try to resolve any ambiguous name.
-    std::string videoPath = gAssetManager.GetAssetPath(videoName, { "bik", "avi" });
+    std::string videoPath = gAssetManager.FindLooseFilePath(videoName, { "bik", "avi" });
 
     // Create new video.
     mVideo = new VideoState(videoPath.c_str());

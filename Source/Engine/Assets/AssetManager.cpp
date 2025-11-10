@@ -42,9 +42,10 @@ void AssetManager::RemoveSearchPath(const std::string& searchPath)
     }
 }
 
-std::string AssetManager::GetAssetPath(const std::string& fileName) const
+std::string AssetManager::FindLooseFilePath(const std::string& fileName) const
 {
     // Iterate each search path and see if a file with this filename exists at that path.
+    // Search paths are ordered, so higher priority search paths will be checked first (allowing asset overrides).
     std::string assetPath;
     for(auto& searchPath : mSearchPaths)
     {
@@ -53,35 +54,53 @@ std::string AssetManager::GetAssetPath(const std::string& fileName) const
             return assetPath;
         }
     }
+
+    // Couldn't find a file with this name at any search path, so just return empty string for failure.
     return std::string();
 }
 
-std::string AssetManager::GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions) const
+std::string AssetManager::FindLooseFilePath(const std::string& fileName, std::initializer_list<std::string> extensions) const
 {
-    // If already has an extension, just use the normal path find function.
-    if(Path::HasExtension(fileName))
+    // If this file already seems to have a valid extension, just try to find its full path.
+    if(mAssetNameResolver.HasValidExtension(fileName))
     {
-        return GetAssetPath(fileName);
+        std::string filePath = FindLooseFilePath(fileName);
+        if(!filePath.empty())
+        {
+            return filePath;
+        }
     }
 
-    // Otherwise, we have a filename, but multiple valid extensions.
-    // A good example is a movie file. The file might be called "intro", but the extension could be "avi" or "bik".
-    // Iterate possible extensions and try to find a valid asset path.
+    // Otherwise, try to append the provided extensions and see if any results in a valid file path.
+    // A good example of this scenario is movie files. The file might be called "intro", but the extension could be "avi" or "bik".
+    std::string assetPath;
     for(const std::string& extension : extensions)
     {
-        std::string assetPath = GetAssetPath(fileName + "." + extension);
+        if(extension.empty()) { continue; }
+
+        // Handle including or not including leading period on extension.
+        if(extension.front() == '.')
+        {
+            assetPath = FindLooseFilePath(fileName + extension);
+        }
+        else
+        {
+            assetPath = FindLooseFilePath(fileName + '.' + extension);
+        }
         if(!assetPath.empty())
         {
             return assetPath;
         }
     }
+
+    // Can't find a file path for this file at any search path with any extension - return empty string for failure.
     return std::string();
 }
 
 bool AssetManager::LoadAssetArchive(const std::string& archiveName, int searchOrder)
 {
     // Find the archive on the disk, or fail.
-    std::string archivePath = GetAssetPath(archiveName);
+    std::string archivePath = FindLooseFilePath(archiveName);
     if(archivePath.empty())
     {
         return false;
@@ -219,7 +238,7 @@ uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t&
 {
     // First, see if the asset exists at any search path. If so, we load the asset directly from file.
     // Loose files take precedence over archived assets.
-    std::string assetPath = GetAssetPath(assetName);
+    std::string assetPath = FindLooseFilePath(assetName);
     if(!assetPath.empty())
     {
         return File::ReadIntoBuffer(assetPath, outBufferSize);
