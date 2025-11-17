@@ -4,54 +4,26 @@
 
 #include "mstream.h"
 
-BinaryWriter::BinaryWriter(const char* filePath)
+BinaryWriter::BinaryWriter(const char* filePath) :
+    StreamWriter(new std::ofstream(filePath, std::ios::out | std::ios::binary), true)
 {
-    mStream = new std::ofstream(filePath, std::ios::out | std::ios::binary);
+
 }
 
-BinaryWriter::BinaryWriter(uint8_t* memory, uint32_t memoryLength)
+BinaryWriter::BinaryWriter(uint8_t* memory, uint32_t memoryLength) :
+    StreamWriter(new omstream(reinterpret_cast<char*>(memory), memoryLength), true)
 {
-    mStream = new omstream(reinterpret_cast<char*>(memory), memoryLength);
+
 }
 
-BinaryWriter::~BinaryWriter()
+BinaryWriter::BinaryWriter(std::ostream* stream) : StreamWriter(stream)
 {
-    delete mStream;
-}
 
-void BinaryWriter::Seek(uint32_t position)
-{
-    // It's possible we've hit EOF, especially if we're jumping around a lot.
-    // If we are trying to seek on an EOF stream, clear the error flags and do the seek.
-    if(!mStream->good() && mStream->eof())
-    {
-        mStream->clear();
-    }
-    mStream->seekp(position, std::ios::beg);
-}
-
-void BinaryWriter::Skip(uint32_t count)
-{
-    mStream->seekp(count, std::ios::cur);
-}
-
-uint32_t BinaryWriter::GetPosition() const
-{
-    // Technically, tellp can return -1 in an error state.
-    // But we just want it to return 0 for our purposes.
-    std::streampos pos = mStream->tellp();
-    if(pos < 0) { pos = 0; }
-    return static_cast<uint32_t>(pos);
 }
 
 void BinaryWriter::Write(const uint8_t* buffer, uint32_t size)
 {
     mStream->write(reinterpret_cast<const char*>(buffer), size);
-}
-
-void BinaryWriter::Write(const char* buffer, uint32_t size)
-{
-    mStream->write(buffer, size);
 }
 
 void BinaryWriter::WriteByte(uint8_t val)
@@ -130,23 +102,23 @@ void BinaryWriter::WriteString(const std::string& str, uint32_t bufferSize)
     }
 }
 
-void BinaryWriter::WriteTinyString(const std::string& str)
+void BinaryWriter::WriteString8(const std::string& str)
 {
-    // A "tiny" string must be <= 255 chars.
+    // String must be <= 255 chars.
     WriteByte(static_cast<uint8_t>(str.size()));
     WriteString(str);
 }
 
-void BinaryWriter::WriteShortString(const std::string& str)
+void BinaryWriter::WriteString16(const std::string& str)
 {
-    // A "short" string must be <= 65,535 chars (really quite a large string).
+    // String must be <= 65,535 chars (really quite a large string).
     WriteUShort(static_cast<uint16_t>(str.size()));
     WriteString(str);
 }
 
-void BinaryWriter::WriteMedString(const std::string& str)
+void BinaryWriter::WriteString32(const std::string& str)
 {
-    // A "medium" string can have length up to max size of unsigned 32-bit integer.
+    // String can have length up to max size of unsigned 32-bit integer.
     WriteUInt(static_cast<uint32_t>(str.size()));
     WriteString(str);
 }

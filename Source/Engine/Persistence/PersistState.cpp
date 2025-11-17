@@ -94,7 +94,7 @@ void PersistState::Xfer(const char* name, std::string& value)
     }
     else if(mBinaryWriter != nullptr)
     {
-        mBinaryWriter->WriteMedString(value);
+        mBinaryWriter->WriteString32(value);
     }
     else if(mIniReader != nullptr)
     {

@@ -4,14 +4,16 @@
 
 #include "mstream.h"
 
-BinaryReader::BinaryReader(const char* filePath)
+BinaryReader::BinaryReader(const char* filePath) :
+    StreamReader(new std::ifstream(filePath, std::ios::in | std::ios::binary), true)
 {
-    mStream = new std::ifstream(filePath, std::ios::in | std::ios::binary);
+    //mStream = new std::ifstream(filePath, std::ios::in | std::ios::binary);
 }
 
-BinaryReader::BinaryReader(const uint8_t* memory, uint32_t memoryLength)
+BinaryReader::BinaryReader(const uint8_t* memory, uint32_t memoryLength) :
+    StreamReader(new imstream(reinterpret_cast<const char*>(memory), memoryLength), true)
 {
-    mStream = new imstream(reinterpret_cast<const char*>(memory), memoryLength);
+    //mStream = new imstream(reinterpret_cast<const char*>(memory), memoryLength);
 }
 
 BinaryReader::BinaryReader(const char* memory, uint32_t memoryLength) :
@@ -20,45 +22,14 @@ BinaryReader::BinaryReader(const char* memory, uint32_t memoryLength) :
 
 }
 
-BinaryReader::~BinaryReader()
+BinaryReader::BinaryReader(std::istream* stream) : StreamReader(stream)
 {
-    delete mStream;
-}
 
-void BinaryReader::Seek(uint32_t position)
-{
-    // It's possible we've hit EOF, especially if we're jumping around a lot.
-    // If we are trying to seek on an EOF stream, clear the error flags and do the seek.
-    if(!mStream->good() && mStream->eof())
-    {
-        mStream->clear();
-    }
-    mStream->seekg(static_cast<std::streamoff>(position), std::ios::beg);
-}
-
-void BinaryReader::Skip(uint32_t count)
-{
-    mStream->seekg(static_cast<std::streamoff>(count), std::ios::cur);
-}
-
-uint32_t BinaryReader::GetPosition() const
-{
-    // Technically, tellg can return -1 in an error state.
-    // But we just want it to return 0 for our purposes.
-    std::streampos pos = mStream->tellg();
-    if(pos < 0) { pos = 0; }
-    return static_cast<uint32_t>(pos);
 }
 
 uint32_t BinaryReader::Read(uint8_t* buffer, uint32_t size)
 {
     mStream->read(reinterpret_cast<char*>(buffer), size);
-    return static_cast<uint32_t>(mStream->gcount());
-}
-
-uint32_t BinaryReader::Read(char* buffer, uint32_t size)
-{
-    mStream->read(buffer, size);
     return static_cast<uint32_t>(mStream->gcount());
 }
 
@@ -197,15 +168,14 @@ void BinaryReader::ReadString32(std::string& str)
 
 Vector2 BinaryReader::ReadVector2()
 {
-    float x = ReadFloat();
-    float y = ReadFloat();
-    return Vector2(x, y);
+    Vector3 vector;
+    mStream->read(reinterpret_cast<char*>(&vector), 8);
+    return vector;
 }
 
 Vector3 BinaryReader::ReadVector3()
 {
-    float x = ReadFloat();
-    float y = ReadFloat();
-    float z = ReadFloat();
-    return Vector3(x, y, z);
+    Vector3 vector;
+    mStream->read(reinterpret_cast<char*>(&vector), 12);
+    return vector;
 }

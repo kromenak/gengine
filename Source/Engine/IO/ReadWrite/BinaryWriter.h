@@ -4,28 +4,21 @@
 // Wrapper around an output stream that makes it easier to write out binary data.
 //
 #pragma once
+#include "StreamReaderWriter.h"
+
 #include <cstdint>
 #include <ostream>
 
-class BinaryWriter
+class BinaryWriter : public StreamWriter
 {
 public:
     BinaryWriter(const char* filePath);
     BinaryWriter(uint8_t* memory, uint32_t memoryLength);
-    ~BinaryWriter();
-
-    // Should only write if OK is true.
-    // Remember, "good" returns true as long as fail/bad/eof bits are all false.
-    bool OK() const { return mStream->good(); }
-
-    // Position
-    void Seek(uint32_t position);
-    void Skip(uint32_t count);
-    uint32_t GetPosition() const;
+    BinaryWriter(std::ostream* stream);
 
     // Write arbitrary data
+    using StreamWriter::Write; // ensures Write function from base class is visible in this class
     void Write(const uint8_t* buffer, uint32_t size);
-    void Write(const char* buffer, uint32_t size);
 
     // Write numeric types
     void WriteByte(uint8_t val);
@@ -47,16 +40,11 @@ public:
     // If buffer size is specified, exactly that sized buffer will be written (with truncation or padding as needed).
     void WriteString(const std::string& str, uint32_t bufferSize = 0);
 
-    // Write strings with size info encoded as 8/16/32/64-bit value.
-    void WriteTinyString(const std::string& str);
-    void WriteShortString(const std::string& str);
-    void WriteMedString(const std::string& str);
-
-    // Flush
-    void Flush() { mStream->flush(); }
+    // Write strings with size info encoded as 8/16/32-bit value.
+    void WriteString8(const std::string& str);
+    void WriteString16(const std::string& str);
+    void WriteString32(const std::string& str);
 
 private:
-    // Stream we are writing to.
-    // Needs to be pointer because type of stream (memory, file, etc) changes sometimes.
-    std::ostream* mStream = nullptr;
+
 };

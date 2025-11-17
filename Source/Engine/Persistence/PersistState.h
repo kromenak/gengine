@@ -270,7 +270,7 @@ inline void PersistState::Xfer(const char* name, std::unordered_map<std::string,
         mBinaryWriter->WriteULong(map.size());
         for(auto& entry : map)
         {
-            mBinaryWriter->WriteMedString(entry.first);
+            mBinaryWriter->WriteString32(entry.first);
             Xfer("", entry.second);
         }
     }
@@ -296,7 +296,7 @@ inline void PersistState::Xfer(const char* name, std::string_map_ci<T>& map)
         mBinaryWriter->WriteULong(map.size());
         for(auto& entry : map)
         {
-            mBinaryWriter->WriteMedString(entry.first);
+            mBinaryWriter->WriteString32(entry.first);
             Xfer("", entry.second);
         }
     }

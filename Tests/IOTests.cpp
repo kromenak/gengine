@@ -17,7 +17,7 @@ TEST_CASE("Read/Write binary memory works")
 
     // Create writer, test default state.
     BinaryWriter writer(memory, 256);
-    REQUIRE(writer.OK());
+    REQUIRE(writer.CanWrite());
     REQUIRE(writer.GetPosition() == 0);
 
     // Write a bunch of data.
@@ -50,7 +50,7 @@ TEST_CASE("Read/Write binary memory works")
     REQUIRE(writer.GetPosition() == 31);
 
     std::string strIn = "This is a test!";
-    writer.WriteTinyString(strIn);
+    writer.WriteString8(strIn);
     REQUIRE(writer.GetPosition() == 47);
 
     std::string strBufferIn = "Smaller than buffer";
@@ -66,7 +66,7 @@ TEST_CASE("Read/Write binary memory works")
 
     // Create reader, test default state.
     BinaryReader reader(memory, 256);
-    REQUIRE(reader.OK());
+    REQUIRE(reader.CanRead());
     REQUIRE(reader.GetPosition() == 0);
 
     // Read in, making sure the data is right.

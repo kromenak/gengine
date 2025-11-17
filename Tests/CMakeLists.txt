@@ -22,9 +22,8 @@ target_include_directories(tests PRIVATE
     ../Source/Engine/Audio
     ../Source/Engine/Containers
     ../Source/Engine/Debug
-    ../Source/GK3
-    ../Source/GK3/Scene
     ../Source/Engine/IO
+    ../Source/Engine/IO/ReadWrite
     ../Source/Engine/IO/Streams
     ../Source/Engine/Math
     ../Source/Engine/Memory
@@ -35,14 +34,17 @@ target_include_directories(tests PRIVATE
     ../Source/Engine/Sheep
     ../Source/Engine/Util
     ../Source/Engine/Video
+    ../Source/GK3
+    ../Source/GK3/Scene
 )
 
 # Game source files being tested.
 target_sources(tests PRIVATE
     ../Source/GK3/Timeblock.cpp
 
-    ../Source/Engine/IO/BinaryReader.cpp
-    ../Source/Engine/IO/BinaryWriter.cpp
+    ../Source/Engine/IO/ReadWrite/BinaryReader.cpp
+    ../Source/Engine/IO/ReadWrite/BinaryWriter.cpp
+    ../Source/Engine/IO/ReadWrite/StreamReaderWriter.cpp
     ../Source/Engine/IO/Streams/mstream.cpp
 
     ../Source/Engine/Math/Matrix3.cpp

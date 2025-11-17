@@ -374,12 +374,12 @@ void SheepScript::Decompile(const std::string& filePath)
     std::unordered_map<int, std::string> gotoLabels;
     {
         BinaryReader goToReader(mBytecode, mBytecodeLength);
-        if(!goToReader.OK()) { return; }
+        if(!goToReader.CanRead()) { return; }
 
         while(true)
         {
             uint8_t byte = goToReader.ReadByte();
-            if(!goToReader.OK()) { break; }
+            if(!goToReader.CanRead()) { break; }
 
             SheepInstruction instruction = static_cast<SheepInstruction>(byte);
             switch(instruction)
@@ -425,7 +425,7 @@ void SheepScript::Decompile(const std::string& filePath)
 
     // Create reader for the bytecode.
     BinaryReader reader(mBytecode, mBytecodeLength);
-    if(!reader.OK()) { return; }
+    if(!reader.CanRead()) { return; }
 
     // Create output file.
     std::ofstream out(filePath, std::ios::out);
@@ -555,7 +555,7 @@ void SheepScript::Decompile(const std::string& filePath)
         SheepInstruction instruction = (SheepInstruction)byte;
 
         // Break when read instruction fails (perhaps due to reading past end of file/mem stream).
-        if(!reader.OK()) { break; }
+        if(!reader.CanRead()) { break; }
 
         // Interpret instruction.
         switch(instruction)

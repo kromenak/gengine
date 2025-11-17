@@ -12,7 +12,7 @@ BarnFile::BarnFile(const std::string& filePath) :
     mReader(filePath.c_str())
 {
     // Make sure we can actually read this file.
-    if(!mReader.OK())
+    if(!mReader.CanRead())
     {
         std::cout << "Can't read barn file at " << filePath << "\n";
         return;

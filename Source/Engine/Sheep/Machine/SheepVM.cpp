@@ -571,7 +571,7 @@ void SheepVM::ContinueExecution(SheepThread* thread)
 
     // Create reader for the bytecode.
     BinaryReader reader(bytecode, bytecodeLength);
-    if(!reader.OK()) { return; }
+    if(!reader.CanRead()) { return; }
 
     // Skip ahead to desired offset.
     reader.Skip(thread->mCodeOffset);
@@ -584,7 +584,7 @@ void SheepVM::ContinueExecution(SheepThread* thread)
         char instruction = reader.ReadByte();
 
         // Break when read instruction fails (perhaps due to reading past end of file/mem stream).
-        if(!reader.OK()) { break; }
+        if(!reader.CanRead()) { break; }
 
         // Perform the action associated with each instruction.
         switch((SheepInstruction)instruction)
@@ -1301,7 +1301,7 @@ void SheepVM::ContinueExecution(SheepThread* thread)
     thread->mCodeOffset = reader.GetPosition();
 
     // If reached end of file, assume the thread is no longer running.
-    if(!reader.OK())
+    if(!reader.CanRead())
     {
         thread->mRunning = false;
     }
