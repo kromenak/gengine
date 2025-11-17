@@ -7,7 +7,9 @@
 
 #include "Console.h"
 #include "GameProgress.h"
+#include "GEngine.h"
 #include "LocationManager.h"
+#include "OSDialog.h"
 #include "SystemUtil.h"
 
 ReportStream::ReportStream(const std::string& name) :
@@ -22,8 +24,6 @@ void ReportStream::Log(const std::string& content)
     // Easy part: don't do anything if not enabled.
     if(!mEnabled) { return; }
 
-    //TODO: Based on action, do something!
-
     // Build output string based on desired contents.
     std::string output = BuildOutputString(content);
 
@@ -36,14 +36,44 @@ void ReportStream::Log(const std::string& content)
     // Handle debugger output type.
     if((mOutput & ReportOutput::Debugger) != ReportOutput::None)
     {
-        std::cout << output;
+        printf("%s", output.c_str());
     }
 
-    //TODO: Handle file output type
+    // Handle file output type.
+    if((mOutput & ReportOutput::File) != ReportOutput::None)
+    {
 
-    //TODO: Handle shared memory output type
+    }
 
-    //TODO: Handle OS dialog output type
+    // Handle shared memory output type (or rather...DON'T!).
+    if((mOutput & ReportOutput::SharedMemory) != ReportOutput::None)
+    {
+        // Do nothing, not supported for now...
+    }
+
+    // Handle OS dialog output type
+    if((mOutput & ReportOutput::OSDialog) != ReportOutput::None)
+    {
+        OSDialog::Ok(OSDIALOG_INFO, output);
+    }
+
+    // If this report stream has an action associated with it, take that action.
+    if(mAction == ReportAction::Fatal)
+    {
+        OSDialog::Ok(OSDIALOG_ERROR,
+                     "Cannot continue after previous error (category '" + mName + "') [see error log for more information]. Aborting...");
+        GEngine::Instance()->Quit();
+    }
+    else if(mAction == ReportAction::Prompt)
+    {
+        if(!OSDialog::YesNo(OSDIALOG_ERROR,
+                           "Continue Playing?",
+                           "An error has occurred and we recommend that you quit and reload the game. Ignore this advice and keep playing anyway?"))
+        {
+            OSDialog::Ok(OSDIALOG_ERROR, "Smart move");
+            GEngine::Instance()->Quit();
+        }
+    }
 }
 
 std::string ReportStream::BuildOutputString(const std::string& content)
@@ -136,14 +166,14 @@ std::string ReportStream::BuildOutputString(const std::string& content)
         {
             outputStr << "--------------------";
         }
-        outputStr << std::endl;
+        outputStr << "\n";
     }
 
     // If we want "Content" content, that means we want to output what was passed in!
     // It seems pretty rare to NOT do this...but you can!
     if((mContent & ReportContent::Content) != ReportContent::None)
     {
-        outputStr << content << std::endl;
+        outputStr << content << "\n";
     }
 
     // If we want "End" content, we'll add an empty line for spacing.

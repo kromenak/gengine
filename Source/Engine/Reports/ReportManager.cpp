@@ -39,7 +39,7 @@ ReportManager::ReportManager()
 
     // Sheep compiler fatal stream.
     ReportStream& sheepCompilerFatal = GetOrCreateStream("SheepCompilerFatal");
-    sheepCompilerFatal.SetAction(ReportAction::Error);
+    sheepCompilerFatal.SetAction(ReportAction::Log);
     sheepCompilerFatal.AddOutput(ReportOutput::Debugger);
     sheepCompilerFatal.AddOutput(ReportOutput::SharedMemory);
     sheepCompilerFatal.AddOutput(ReportOutput::Console);
@@ -50,7 +50,7 @@ ReportManager::ReportManager()
 
     // Sheep compiler error stream.
     ReportStream& sheepCompilerError = GetOrCreateStream("SheepCompilerError");
-    sheepCompilerError.SetAction(ReportAction::Error);
+    sheepCompilerError.SetAction(ReportAction::Log);
     sheepCompilerError.AddOutput(ReportOutput::Debugger);
     sheepCompilerError.AddOutput(ReportOutput::SharedMemory);
     sheepCompilerError.AddOutput(ReportOutput::Console);
@@ -61,7 +61,7 @@ ReportManager::ReportManager()
 
     // Sheep compiler warning stream.
     ReportStream& sheepCompilerWarning = GetOrCreateStream("SheepCompilerWarning");
-    sheepCompilerWarning.SetAction(ReportAction::Warning);
+    sheepCompilerWarning.SetAction(ReportAction::Log);
     sheepCompilerWarning.AddOutput(ReportOutput::Debugger);
     sheepCompilerWarning.AddOutput(ReportOutput::SharedMemory);
     sheepCompilerWarning.AddOutput(ReportOutput::Console);
@@ -110,7 +110,7 @@ ReportManager::ReportManager()
 
     // Create stream that outputs to OS dialog box.
     ReportStream& messageBox = GetOrCreateStream("MessageBox");
-    messageBox.SetAction(ReportAction::Warning);
+    messageBox.SetAction(ReportAction::Log);
     messageBox.AddOutput(ReportOutput::File);
     messageBox.AddOutput(ReportOutput::OSDialog);
     messageBox.AddOutput(ReportOutput::Debugger);
@@ -147,7 +147,7 @@ ReportManager::ReportManager()
 
     // Create stream for errors.
     ReportStream& error = GetOrCreateStream("Error");
-    error.SetAction(ReportAction::Error);
+    error.SetAction(ReportAction::Log);
     error.AddOutput(ReportOutput::File);
     error.AddOutput(ReportOutput::Debugger);
     error.AddOutput(ReportOutput::SharedMemory);
@@ -157,7 +157,7 @@ ReportManager::ReportManager()
 
     // Create stream for warnings.
     ReportStream& warning = GetOrCreateStream("Warning");
-    warning.SetAction(ReportAction::Warning);
+    warning.SetAction(ReportAction::Log);
     warning.AddOutput(ReportOutput::File);
     warning.AddOutput(ReportOutput::Debugger);
     warning.AddOutput(ReportOutput::SharedMemory);
@@ -185,7 +185,7 @@ ReportManager::ReportManager()
 
     // Create resource tracker (restrack) stream.
     ReportStream& resTrack = GetOrCreateStream("ResTrack");
-    resTrack.SetAction(ReportAction::ResTrack);
+    resTrack.SetAction(ReportAction::Log);
     resTrack.AddOutput(ReportOutput::File);
     resTrack.AddContent(ReportContent::All);
     resTrack.RemoveContent(ReportContent::Date);
@@ -196,7 +196,7 @@ ReportManager::ReportManager()
 
     // Create stream for serious errors.
     ReportStream& seriousError = GetOrCreateStream("SeriousError");
-    seriousError.SetAction(ReportAction::Error);
+    seriousError.SetAction(ReportAction::Log);
     seriousError.AddOutput(ReportOutput::File);
     seriousError.AddOutput(ReportOutput::Debugger);
     seriousError.AddOutput(ReportOutput::SharedMemory);
@@ -301,7 +301,7 @@ ReportStream& ReportManager::GetOrCreateStream(const std::string& streamName)
 
     // Otherwise, we need to create a stream with this name.
     // Emplace adds a new ReportStream using ReportStream(name) constructor.
-    // Returns std::pair with iterator to added item/
+    // Returns std::pair with iterator to added item.
     auto insertedIt = mStreams.emplace(streamName, streamName).first;
     return insertedIt->second;
 }

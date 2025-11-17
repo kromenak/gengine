@@ -1,25 +1,31 @@
 //
 // Clark Kromenaker
 //
-// A stream takes as input logs/info/reports (as text). It optionally outputs
-// that input to some configurable locations (file, console, etc). It also
-// optionally triggers some action due to receiving input (simply log, throw exception, etc).
+// A Report Stream takes a log/report (as text) and performs a few actions:
+//
+// 1) If the stream is disabled, nothing happens.
+//
+// 2) Formats the text with additional header/footer decorators as configured.
+//    Examples are adding the date/time, the name of the user or machine, separators, etc.
+//
+// 3) Outputs the formatted text to configuredlocations - console, file, etc.
+//
+// 4) Optionally, can trigger other actions (throw an exception).
 //
 #pragma once
 #include <string>
 
 #include "EnumClassFlags.h"
 
+// Action to take when a report is logged.
 enum class ReportAction
 {
-    Log,
-    Warning,
-    Error,
-    Fatal,
-    Prompt,
-    ResTrack,
+    Log,        // Log to outputs only.
+    Fatal,      // Throw an exception and die.
+    Prompt,     // Prompt user to continue.
 };
 
+// Output locations for a report.
 enum class ReportOutput : int
 {
     None            = 0,
@@ -31,6 +37,7 @@ enum class ReportOutput : int
 };
 ENUM_CLASS_FLAGS(ReportOutput);
 
+// Content to include with a report.
 enum class ReportContent : int
 {
     None			= 0,
@@ -88,10 +95,10 @@ private:
     ReportAction mAction = ReportAction::Log;
 
     // Zero or more outputs to send any inputs to.
-    ReportOutput mOutput = (ReportOutput)0;
+    ReportOutput mOutput = ReportOutput::None;
 
     // Zero or more contents to use when outputting.
-    ReportContent mContent = (ReportContent)0;
+    ReportContent mContent = ReportContent::None;
 
     // When writing to file, the name of the file to write to.
     std::string mFilename;

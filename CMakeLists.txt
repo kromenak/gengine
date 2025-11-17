@@ -9,6 +9,10 @@ project(gengine VERSION 0.5.1
                 DESCRIPTION "Gabriel Knight 3 game engine"
                 LANGUAGES C CXX)
 
+# Set publisher/application name, to inject into BuildEnv.h
+set(PUBLISHER_NAME "Sierra On-Line")
+set(APPLICATION_NAME "Gabriel Knight 3")
+
 # Build for C++17, standard required, no extensions.
 # Using global "set" so that all targets use the same rules.
 set(CMAKE_CXX_STANDARD 17)
@@ -462,7 +466,7 @@ if(WIN32)
     )
 elseif(APPLE)
     set(ZIP_FILE_NAME "GK3-Mac-${PROJECT_VERSION}.zip")
-    set(APP_FILENAME "Gabriel Knight 3.app")
+    set(APP_FILENAME "${APPLICATION_NAME}.app")
     set(ASSETS_ROOT_DIR "${DEPLOY_DIR}/${APP_FILENAME}/Contents/Resources")
 
     # Copy over app bundle.
@@ -474,7 +478,7 @@ elseif(APPLE)
     )
 else() # Linux
     set(ZIP_FILE_NAME "GK3-Linux-${PROJECT_VERSION}.zip")
-    set(APP_FILENAME "Gabriel Knight 3")
+    set(APP_FILENAME "${APPLICATION_NAME}")
     set(ASSETS_ROOT_DIR "${DEPLOY_DIR}")
 
     # Copy over application and libraries.

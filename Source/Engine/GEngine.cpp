@@ -21,6 +21,7 @@
 #include "Loader.h"
 #include "Localizer.h"
 #include "LocationManager.h"
+#include "OSDialog.h"
 #include "Paths.h"
 #include "PersistState.h"
 #include "Profiler.h"
@@ -400,10 +401,7 @@ bool GEngine::InitAssetManager()
 
                 // Generate error and show error box.
                 std::string error = StringUtil::Format("Could not load barn %s.\n\nMake sure Data directory is populated before running the game.", path.c_str());
-                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                                         "Gabriel Knight 3",
-                                         error.c_str(),
-                                         nullptr);
+                OSDialog::Ok(OSDIALOG_ERROR, error);
                 return false;
             }
         }

@@ -1,10 +1,9 @@
 //
 // Clark Kromenaker
 //
-// A manager for reporting information to "report streams". Each report stream
-// can output info to various locations (file, dialog, console), trigger an
-// action due (normal logging, throw exception, etc), and consistently format
-// output.
+// "Reports" are the engine's logging mechanism. Reports are sent to one or more "Report Streams."
+//
+// Each Report Stream is configurable for output location, write actions, and formatting.
 //
 #pragma once
 #include <string>
@@ -37,9 +36,6 @@ public:
 
     // Subsystems may want to get a ReportStream and call functions on it directly.
     ReportStream& GetReportStream(const std::string& streamName);
-
-    // ShowReportGraph
-    // HideReportGraph
 
 private:
     // All defined streams, keyed by stream name.

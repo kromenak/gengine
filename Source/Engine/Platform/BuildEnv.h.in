@@ -4,6 +4,8 @@
 // Project info.
 #define PROJECT_NAME "@PROJECT_NAME@"
 #define PROJECT_VERSION "@PROJECT_VERSION@"
+#define PUBLISHER_NAME "@PUBLISHER_NAME@"
+#define APPLICATION_NAME "@APPLICATION_NAME@"
 
 // Build system headers.
 #cmakedefine HAVE_STAT_H 1

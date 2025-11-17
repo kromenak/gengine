@@ -26,7 +26,6 @@ namespace Path
      */
     std::string Combine(std::initializer_list<std::string> paths);
 
-
     /**
      * Given a filename and a relative search path, determine if a file exists (return value) and determines
      * a full path (via out variable) that can be used to read the file.
