@@ -25,6 +25,7 @@ target_include_directories(tests PRIVATE
     ../Source/GK3
     ../Source/GK3/Scene
     ../Source/Engine/IO
+    ../Source/Engine/IO/Streams
     ../Source/Engine/Math
     ../Source/Engine/Memory
     ../Source/Engine/Platform
@@ -42,7 +43,7 @@ target_sources(tests PRIVATE
 
     ../Source/Engine/IO/BinaryReader.cpp
     ../Source/Engine/IO/BinaryWriter.cpp
-    ../Source/Engine/IO/mstream.cpp
+    ../Source/Engine/IO/Streams/mstream.cpp
 
     ../Source/Engine/Math/Matrix3.cpp
     ../Source/Engine/Math/Matrix4.cpp

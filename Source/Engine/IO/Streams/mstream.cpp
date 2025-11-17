@@ -106,3 +106,10 @@ omstream::omstream(char* data, uint32_t length) :
 {
 
 }
+
+mstream::mstream(char* data, uint32_t length) :
+    std::iostream(&buffer),
+    buffer(data, length, std::ios_base::in | std::ios_base::out)
+{
+
+}

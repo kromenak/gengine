@@ -43,3 +43,13 @@ public:
 private:
     membuf buffer;
 };
+
+// Combined input/output stream that uses memory buffer.
+class mstream : public std::iostream
+{
+public:
+    mstream(char* data, uint32_t length);
+
+private:
+    membuf buffer;
+};
