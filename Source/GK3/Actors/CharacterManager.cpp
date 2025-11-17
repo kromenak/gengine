@@ -2,7 +2,7 @@
 
 #include "Animation.h"
 #include "AssetManager.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Loader.h"
 #include "Profiler.h"
 #include "Renderer.h"
@@ -23,7 +23,7 @@ void CharacterManager::Init()
             TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("FACES.TXT", AssetScope::Manual);
 
             // Pass that along to INI parser, since it is plain text and in INI format.
-            IniParser facesParser(textFile->GetText(), textFile->GetTextLength());
+            IniReader facesParser(textFile->GetText(), textFile->GetTextLength());
             facesParser.SetMultipleKeyValuePairsPerLine(false); // Stops splitting on commas.
 
             // All face configs start from this template.
@@ -232,7 +232,7 @@ void CharacterManager::Init()
             TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("CHARACTERS.TXT", AssetScope::Manual);
 
             // Pass that along to INI parser, since it is plain text and in INI format.
-            IniParser parser(textFile->GetText(), textFile->GetTextLength());
+            IniReader parser(textFile->GetText(), textFile->GetTextLength());
 
             // Read one section at a time.
             // Each section correlates to one character.
@@ -368,8 +368,8 @@ void CharacterManager::Init()
             TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("Actors.txt", AssetScope::Manual);
 
             // Parse as INI file.
-            IniParser actorsParser(textFile->GetText(), textFile->GetTextLength());
-            actorsParser.ParseAll();
+            IniReader actorsParser(textFile->GetText(), textFile->GetTextLength());
+            actorsParser.ReadAll();
 
             IniSection actors = actorsParser.GetSection("ACTORS");
             for(auto& line : actors.lines)

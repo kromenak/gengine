@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 #include "Font.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "SaveManager.h"
 #include "Scene.h"
 #include "TextAsset.h"
@@ -38,8 +38,8 @@ CaptionsOverlay::CaptionsOverlay() : Actor("CaptionsOverlay", TransformType::Rec
     // Load font data.
     TextAsset* fontColors = gAssetManager.LoadAsset<TextAsset>("FONTCOLOR.TXT", AssetScope::Manual);
     {
-        IniParser parser(fontColors->GetText(), fontColors->GetTextLength());
-        parser.ParseAll();
+        IniReader parser(fontColors->GetText(), fontColors->GetTextLength());
+        parser.ReadAll();
 
         IniSection section = parser.GetSection("FONTCOLORS");
         for(auto& line : section.lines)

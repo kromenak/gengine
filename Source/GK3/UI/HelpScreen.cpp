@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 #include "Font.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
@@ -33,9 +33,9 @@ HelpScreen::HelpScreen() : Actor("HelpScreen", TransformType::RectTransform),
     Texture* exitButtonHoverTexture = nullptr;
     {
         TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("HELPSCREEN.TXT", AssetScope::Manual);
-        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+        IniReader parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
-        parser.ParseAll();
+        parser.ReadAll();
 
         int pageCount = 0;
         IniSection rootSection = parser.GetSection("");

@@ -1,7 +1,7 @@
 #include "SceneAsset.h"
 
 #include "AssetManager.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Renderer.h"
 #include "Skybox.h"
 #include "StringUtil.h"
@@ -43,7 +43,7 @@ void SceneAsset::Load(AssetData& data)
 
 void SceneAsset::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
-    IniParser parser(data, dataLength);
+    IniReader parser(data, dataLength);
     parser.SetMultipleKeyValuePairsPerLine(false);
 
     IniSection section;

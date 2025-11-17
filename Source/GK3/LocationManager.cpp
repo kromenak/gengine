@@ -4,7 +4,7 @@
 #include "AssetManager.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Localizer.h"
 #include "ReportManager.h"
 #include "SceneManager.h"
@@ -19,8 +19,8 @@ void LocationManager::Init()
 {
     // Parse as INI file.
     TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("Locations.txt", AssetScope::Manual);
-    IniParser parser(textFile->GetText(), textFile->GetTextLength());
-    parser.ParseAll();
+    IniReader parser(textFile->GetText(), textFile->GetTextLength());
+    parser.ReadAll();
 
     IniSection locations = parser.GetSection("LOCATIONS");
     for(auto& line : locations.lines)

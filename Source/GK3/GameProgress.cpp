@@ -4,7 +4,7 @@
 #include "Config.h"
 #include "GK3UI.h"
 #include "GMath.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "ReportManager.h"
@@ -21,7 +21,7 @@ void GameProgress::Init()
 {
     // Parse valid score events (and score amount) into map of score events.
     TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("Scores.txt", AssetScope::Manual);
-    IniParser parser(textFile->GetText(), textFile->GetTextLength());
+    IniReader parser(textFile->GetText(), textFile->GetTextLength());
     IniSection section;
     while(parser.ReadNextSection(section))
     {

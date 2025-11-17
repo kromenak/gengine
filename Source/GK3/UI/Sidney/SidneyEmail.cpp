@@ -7,7 +7,7 @@
 #include "AudioManager.h"
 #include "Font.h"
 #include "GameProgress.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
 #include "TextAsset.h"
@@ -289,7 +289,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
     // Read in email data.
     {
         TextAsset* textFile = Localizer::LoadLocalizedAsset<TextAsset>("SIDNEYEMAIL.TXT");
-        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+        IniReader parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
         // Each section corresponds to a specific email.

@@ -3,7 +3,7 @@
 #include "AssetManager.h"
 #include "Audio.h"
 #include "GKObject.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Random.h"
 #include "SceneManager.h"
 #include "StringUtil.h"
@@ -108,7 +108,7 @@ Soundtrack::~Soundtrack()
 
 void Soundtrack::Load(AssetData& data)
 {
-    IniParser parser(data.bytes.get(), data.length);
+    IniReader parser(data.bytes.get(), data.length);
     IniSection section;
     std::vector<SoundNode*> prsSoundNodes;
     while(parser.ReadNextSection(section))

@@ -8,7 +8,7 @@
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "GKPrefs.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "LocationManager.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -145,7 +145,7 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
     // Read in Binocs use case data.
     {
         TextAsset* textAsset = gAssetManager.LoadAsset<TextAsset>("BINOCS.TXT", AssetScope::Manual);
-        IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
+        IniReader parser(textAsset->GetText(), textAsset->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
         // This file is guaranteed to have its data in a specific order, so we can make some assumptions here.

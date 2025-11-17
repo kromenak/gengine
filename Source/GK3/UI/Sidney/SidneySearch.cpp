@@ -6,7 +6,7 @@
 #include "Console.h"
 #include "Font.h"
 #include "GameProgress.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "InputManager.h"
 #include "LayerManager.h"
 #include "SidneyButton.h"
@@ -379,7 +379,7 @@ void SidneySearch::Init(Actor* parent)
     // Read in all the search terms and correlated pages.
     {
         TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("SIDSEARCH.TXT");
-        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+        IniReader parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
         // Each section's name correlates to the associated HTML page.
@@ -404,7 +404,7 @@ void SidneySearch::Init(Actor* parent)
     // Read in all the dialogue triggers for visiting certain pages under certain conditions.
     {
         TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("SIDNEYDIALOG.TXT");
-        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+        IniReader parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
         // Each section's name correlates to the associated HTML page.

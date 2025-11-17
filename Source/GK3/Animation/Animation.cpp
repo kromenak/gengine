@@ -6,7 +6,7 @@
 #include "AnimationNodes.h"
 #include "AssetManager.h"
 #include "FileSystem.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Localizer.h"
 #include "StringUtil.h"
 #include "VertexAnimation.h"
@@ -89,7 +89,7 @@ VertexAnimNode* Animation::GetFirstVertexAnimationForModel(const std::string& mo
 
 void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
-    IniParser parser(data, dataLength);
+    IniReader parser(data, dataLength);
     IniSection section;
     while(parser.ReadNextSection(section))
     {

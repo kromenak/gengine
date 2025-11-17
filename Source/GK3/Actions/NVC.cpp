@@ -1,6 +1,6 @@
 #include "NVC.h"
 
-#include "IniParser.h"
+#include "IniReader.h"
 #include "SheepManager.h"
 #include "Timeblock.h"
 
@@ -75,8 +75,8 @@ const Action* NVC::GetAction(const std::string& noun, const std::string& verb) c
 
 void NVC::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
-    IniParser parser(data, dataLength);
-    parser.ParseAll();
+    IniReader parser(data, dataLength);
+    parser.ReadAll();
 
     // For all actions in this NVC, figure out what their priority will be.
     // The rule is that a more specific NVC should override a less specific NVC.

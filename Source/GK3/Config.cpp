@@ -11,7 +11,7 @@ TYPEINFO_INIT(Config, Asset, GENERATE_TYPE_ID)
 void Config::Load(AssetData& data)
 {
     // Read in each section and store it.
-    IniParser parser(data.bytes.get(), data.length);
+    IniReader parser(data.bytes.get(), data.length);
     parser.SetMultipleKeyValuePairsPerLine(false);
 
     IniSection section;

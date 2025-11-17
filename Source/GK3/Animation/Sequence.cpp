@@ -3,7 +3,7 @@
 #include <string>
 
 #include "AssetManager.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "StringUtil.h"
 #include "Texture.h"
 
@@ -14,7 +14,7 @@ TYPEINFO_INIT(Sequence, Asset, GENERATE_TYPE_ID)
 
 void Sequence::Load(AssetData& data)
 {
-    IniParser parser(data.bytes.get(), data.length);
+    IniReader parser(data.bytes.get(), data.length);
     parser.SetMultipleKeyValuePairsPerLine(false);
     while(parser.ReadLine())
     {

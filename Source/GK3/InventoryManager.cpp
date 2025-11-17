@@ -1,7 +1,7 @@
 #include "InventoryManager.h"
 
 #include "AssetManager.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "InventoryScreen.h"
 #include "InventoryInspectScreen.h"
 #include "Loader.h"
@@ -24,7 +24,7 @@ void InventoryManager::Init()
         TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("INVENTORYSPRITES.TXT", AssetScope::Manual);
 
         // Pass that along to INI parser, since it is plain text and in INI format.
-        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+        IniReader parser(textFile->GetText(), textFile->GetTextLength());
 
         // There's only one unnamed section in this file.
         while(parser.ReadLine())

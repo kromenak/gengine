@@ -7,7 +7,7 @@
 
 #include "AssetManager.h"
 #include "GKPrefs.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "StringUtil.h"
 #include "Texture.h"
 #include "UIUtil.h"
@@ -35,7 +35,7 @@ void Cursor::Load(AssetData& data)
 
     // Parse data from ini format.
     bool hotspotIsPercent = false;
-    IniParser parser(data.bytes.get(), data.length);
+    IniReader parser(data.bytes.get(), data.length);
     parser.SetMultipleKeyValuePairsPerLine(false);
     while(parser.ReadLine())
     {

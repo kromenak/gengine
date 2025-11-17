@@ -14,6 +14,7 @@
 #include "mstream.h"
 #include "StringTokenizer.h"
 #include "StringUtil.h"
+#include "TextReader.h"
 
 TYPEINFO_INIT(GAS, Asset, GENERATE_TYPE_ID)
 {
@@ -30,7 +31,7 @@ GAS::~GAS()
 
 void GAS::Load(AssetData& data)
 {
-    imstream stream(reinterpret_cast<char*>(data.bytes.get()), data.length);
+    TextReader textReader(data.bytes.get(), data.length);
 
     // Store any created "ONEOF" node, since they are generated over several lines.
     OneOfGasNode* oneOfNode = nullptr;
@@ -46,8 +47,10 @@ void GAS::Load(AssetData& data)
 
     // Read in the GAS file contents one line at a time.
     std::string line;
-    while(StringUtil::GetLineSanitized(stream, line))
+    while(textReader.ReadLine(line))
     {
+        StringUtil::SanitizeLine(line);
+
         // Ignore commented out lines (// format)
         if(line[0] == '/' && line[1] == '/') { continue; }
 

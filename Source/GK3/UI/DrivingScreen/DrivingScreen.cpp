@@ -8,7 +8,7 @@
 #include "DrivingScreenBlip.h"
 #include "GameProgress.h"
 #include "GKPrefs.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "LocationManager.h"
 #include "SoundtrackPlayer.h"
 #include "StringTokenizer.h"
@@ -379,7 +379,7 @@ void DrivingScreen::LoadPaths()
     // Pass 1: Read in nodes and segments.
     {
         IniKeyValue kv;
-        IniParser parser(pathData->GetText(), pathData->GetTextLength());
+        IniReader parser(pathData->GetText(), pathData->GetTextLength());
         while(parser.ReadLine())
         {
             StringTokenizer tokenizer(parser.GetLine(), { ' ' });
@@ -418,7 +418,7 @@ void DrivingScreen::LoadPaths()
         int nodeIndex = 0;
         bool inLinks = false;
 
-        IniParser parser(pathData->GetText(), pathData->GetTextLength());
+        IniReader parser(pathData->GetText(), pathData->GetTextLength());
         while(parser.ReadLine())
         {
             StringTokenizer tokenizer(parser.GetLine(), { ' ' });

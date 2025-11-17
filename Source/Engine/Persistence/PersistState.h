@@ -19,7 +19,7 @@
 #include "BinaryWriter.h"
 #include "StringUtil.h" // for string maps
 
-class IniParser;
+class IniReader;
 class IniWriter;
 
 class Circle;
@@ -153,7 +153,7 @@ private:
     PersistMode mMode = PersistMode::Save;
 
     BinaryReader* mBinaryReader = nullptr;
-    IniParser* mIniReader = nullptr;
+    IniReader* mIniReader = nullptr;
 
     BinaryWriter* mBinaryWriter = nullptr;
     IniWriter* mIniWriter = nullptr;

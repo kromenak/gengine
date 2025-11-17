@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 #include "Color32.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Material.h"
 #include "ShaderCache.h"
 #include "StringUtil.h"
@@ -168,7 +168,7 @@ Shader* Font::GetShader() const
 void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     // Font is in INI format, but only one key per line.
-    IniParser parser(data, dataLength);
+    IniReader parser(data, dataLength);
     parser.SetMultipleKeyValuePairsPerLine(false);
 
     // Read each line, and each key/pair, one at a time.

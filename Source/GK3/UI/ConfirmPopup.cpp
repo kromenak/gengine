@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 #include "Font.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "InputManager.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -36,7 +36,7 @@ ConfirmPopup::ConfirmPopup() : Actor("ConfirmPopup", TransformType::RectTransfor
         TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("MSGBOX.TXT", AssetScope::Manual);
 
         // Pass that along to INI parser, since it is plain text and in INI format.
-        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+        IniReader parser(textFile->GetText(), textFile->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false); // Stops splitting on commas.
 
         while(parser.ReadLine())

@@ -4,7 +4,7 @@
 #include "Font.h"
 #include "GKActor.h"
 #include "GK3UI.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "LocationManager.h"
 #include "SceneManager.h"
 #include "TextAsset.h"
@@ -25,7 +25,7 @@ GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
     // 2) The mapping from world space to the GPS image and GPS coordinates for different locations in the game.
     {
         TextAsset* textAsset = gAssetManager.LoadAsset<TextAsset>("GPS.TXT", AssetScope::Manual);
-        IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
+        IniReader parser(textAsset->GetText(), textAsset->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
 
         // Read each section in turn.

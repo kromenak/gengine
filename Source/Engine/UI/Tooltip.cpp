@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 #include "Font.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "InputManager.h"
 #include "Localizer.h"
 #include "StringUtil.h"
@@ -38,7 +38,7 @@ Tooltip::Tooltip() : Actor("Tooltip", TransformType::RectTransform)
     Color32 borderColor;
     {
         TextAsset* textAsset = gAssetManager.LoadAsset<TextAsset>("DEFAULT.TIP", AssetScope::Manual);
-        IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
+        IniReader parser(textAsset->GetText(), textAsset->GetTextLength());
         parser.SetMultipleKeyValuePairsPerLine(false);
         IniSection section;
         if(parser.ReadNextSection(section))

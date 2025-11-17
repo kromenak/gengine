@@ -10,7 +10,7 @@
 #include "GEngine.h"
 #include "GK3UI.h"
 #include "HintManager.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
 #include "LayerManager.h"
@@ -125,9 +125,9 @@ OptionBar::OptionBar() : Actor("OptionBar", TransformType::RectTransform)
     // Load layout text file, parse to key/value map, and then delete it.
     TextAsset* optionBarText = gAssetManager.LoadAsset<TextAsset>("RC_LAYOUT.TXT", AssetScope::Manual);
 
-    IniParser parser(optionBarText->GetText(), optionBarText->GetTextLength());
+    IniReader parser(optionBarText->GetText(), optionBarText->GetTextLength());
     parser.SetMultipleKeyValuePairsPerLine(false);
-    std::unordered_map<std::string, IniKeyValue> optionBarConfig = parser.ParseAllAsMap();
+    std::unordered_map<std::string, IniKeyValue> optionBarConfig = parser.ReadAllAsMap();
 
     // Create canvas, to contain the UI components.
     UI::AddCanvas(this, 11);

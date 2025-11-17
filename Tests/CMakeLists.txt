@@ -23,6 +23,7 @@ target_include_directories(tests PRIVATE
     ../Source/Engine/Containers
     ../Source/Engine/Debug
     ../Source/Engine/IO
+    ../Source/Engine/IO/Ini
     ../Source/Engine/IO/ReadWrite
     ../Source/Engine/IO/Streams
     ../Source/Engine/Math

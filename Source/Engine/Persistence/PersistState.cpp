@@ -1,6 +1,6 @@
 #include "PersistState.h"
 
-#include "IniParser.h"
+#include "IniReader.h"
 #include "IniWriter.h"
 
 #include "Circle.h"
@@ -29,7 +29,7 @@ PersistState::PersistState(const char* filePath, PersistFormat format, PersistMo
     {
         if(format == PersistFormat::Text)
         {
-            mIniReader = new IniParser(filePath);
+            mIniReader = new IniReader(filePath);
         }
         else if(format == PersistFormat::Binary)
         {

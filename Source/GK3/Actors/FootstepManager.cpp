@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 #include "Audio.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Loader.h"
 #include "Random.h"
 #include "TextAsset.h"
@@ -18,7 +18,7 @@ void FootstepManager::Init()
             TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("FLOORMAP.TXT", AssetScope::Manual);
 
             // Pass that along to INI parser, since it is plain text and in INI format.
-            IniParser parser(textFile->GetText(), textFile->GetTextLength());
+            IniReader parser(textFile->GetText(), textFile->GetTextLength());
 
             // There's only one section in this file - FloorMap.
             IniSection section;
@@ -50,7 +50,7 @@ void FootstepManager::Init()
             TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("FOOTSTEPS.TXT", AssetScope::Manual);
 
             // Again, it's just an INI text file.
-            IniParser footstepParser(textFile->GetText(), textFile->GetTextLength());
+            IniReader footstepParser(textFile->GetText(), textFile->GetTextLength());
 
             // Each section in this file correlates to a shoe type.
             IniSection section;
@@ -95,7 +95,7 @@ void FootstepManager::Init()
             TextAsset* textFile = gAssetManager.LoadAsset<TextAsset>("FOOTSCUFFS.TXT", AssetScope::Manual);
 
             // Again, it's just an INI text file.
-            IniParser footscuffParser(textFile->GetText(), textFile->GetTextLength());
+            IniReader footscuffParser(textFile->GetText(), textFile->GetTextLength());
 
             // Each section in this file correlates to a shoe type.
             IniSection section;

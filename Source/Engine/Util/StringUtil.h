@@ -142,27 +142,26 @@ namespace StringUtil
         }
     }
 
-    inline bool GetLineSanitized(std::istream& is, std::string& str)
+    inline void TrimSpecialChars(std::string& str)
     {
-        if(std::getline(is, str))
+        // Discard any Windows carriage returns (\r) on the end of the line.
+        // Also, std::string should not have a visible null terminator (\0) at the back - if so, then there are really TWO null terminators.
+        // (TODO: I forget exactly why the \0 check was needed; something to do with Config files? Need to investigate that.)
+        while(!str.empty() && (str.back() == '\r' || str.back() == '\0'))
         {
-            // Get rid of anything after a comment.
-            TrimComment(str);
-
-            // "getline" can sometimes leave some unwanted chars on the end of the line, so let's get rid of those.
-            // "getline" discards \n on end of lines, but leaves Windows line breaks (\r) - get rid of them!
-            // For the last line in a stream, "getline" may add an extra \0 - don't need it, and causes string append bugs.
-            while(!str.empty() && (str.back() == '\r' || str.back() == '\0'))
-            {
-                str.pop_back();
-            }
-
-            // Trim the line of any whitespaces and tabs.
-            Trim(str);
-            Trim(str, '\t');
-            return true;
+            str.pop_back();
         }
-        return false;
+    }
+
+    inline void SanitizeLine(std::string& str)
+    {
+        // Get rid of anything after a comment.
+        TrimComment(str);
+
+        TrimSpecialChars(str);
+
+        // Trim the line of any whitespaces (spaces or tabs) at front or back.
+        TrimWhitespace(str);
     }
 
     inline std::string Unescape(const std::string& str)

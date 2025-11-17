@@ -3,7 +3,7 @@
 #include "Animation.h"
 #include "AssetManager.h"
 #include "GAS.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Model.h"
 #include "NVC.h"
 #include "Renderer.h"
@@ -198,8 +198,8 @@ const SceneModel* SceneInitFile::FindModel(const std::string& modelName) const
 
 void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
-    IniParser parser(data, dataLength);
-    parser.ParseAll();
+    IniReader parser(data, dataLength);
+    parser.ReadAll();
 
     // Read in general section.
     std::vector<IniSection> generals = parser.GetSections("GENERAL");

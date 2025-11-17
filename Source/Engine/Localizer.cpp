@@ -3,7 +3,7 @@
 #include <cassert>
 
 #include "Config.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "TextAsset.h"
 
 Localizer gLocalizer;
@@ -48,7 +48,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
 
     // Parse as INI file.
     // Ignore multiple key values per line b/c a comma is going to be part of the translation copy, rather than another key/value on the same line.
-    IniParser parser(textFile->GetText(), textFile->GetTextLength());
+    IniReader parser(textFile->GetText(), textFile->GetTextLength());
     parser.SetMultipleKeyValuePairsPerLine(false);
 
     // Read one section at a time.

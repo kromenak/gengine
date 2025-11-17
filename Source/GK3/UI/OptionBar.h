@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "IniParser.h"
+#include "IniReader.h"
 
 class RectTransform;
 class UIButton;

@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 #include "Cursor.h"
-#include "IniParser.h"
+#include "IniReader.h"
 #include "Loader.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -26,8 +26,8 @@ void VerbManager::Init()
         TextAsset* text = gAssetManager.LoadAsset<TextAsset>("VERBS.TXT", AssetScope::Manual);
 
         // Pass that along to INI parser, since it is plain text and in INI format.
-        IniParser parser(text->GetText(), text->GetTextLength());
-        parser.ParseAll();
+        IniReader parser(text->GetText(), text->GetTextLength());
+        parser.ReadAll();
 
         // Everything is contained within the "VERBS" section.
         // There's only one section in the whole file.

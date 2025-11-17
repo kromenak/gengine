@@ -12,7 +12,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "IniParser.h"
+#include "IniReader.h"
 
 class Config : public Asset
 {
