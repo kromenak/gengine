@@ -5,6 +5,7 @@
 //
 #pragma once
 #include <iostream>
+#include <string>
 
 #include "GMath.h"
 
@@ -65,6 +66,11 @@ public:
     // Scalar and vector products
     static float Dot(const Vector4& lhs, const Vector4& rhs);
     static Vector4 Cross(const Vector4& lhs, const Vector4& rhs);
+
+    // To/From String
+    static Vector4 Parse(const std::string& string, char delimiter = ',');
+    static bool TryParse(const std::string& string, Vector4& vector, char delimiter = ',');
+    std::string ToString(char delimiter = ',', char openChar = '(', char closeChar = ')') const;
 
     // Vector elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;

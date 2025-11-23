@@ -1,5 +1,6 @@
 #include "Vector2.h"
 
+#include "MathStringUtil.h"
 #include "Vector3.h"
 
 Vector2 Vector2::Zero(0.0f, 0.0f);
@@ -152,6 +153,49 @@ Vector2& Vector2::Normalize()
 {
     // See Vector3 class for explanation.
     return (a - (b * (Dot(a, b) / Dot(b, b))));
+}
+
+/*static*/ Vector2 Vector2::Parse(const std::string& string, char delimiter)
+{
+    Vector2 vector;
+    TryParse(string, vector, delimiter);
+    return vector;
+}
+
+/*static*/ bool Vector2::TryParse(const std::string& string, Vector2& vector, char delimiter)
+{
+    // Get rid of all leading and trailing cruft - just numbers.
+    std::string workingString = MathStringUtil::TrimToNumbersOnly(string);
+    if(workingString.empty()) { return false; }
+
+    // Find the comma index. If not present, this isn't the right form, so we fail.
+    std::size_t commaIndex = workingString.find(delimiter);
+    if(commaIndex == std::string::npos) { return false; }
+
+    // Split at the comma.
+    std::string firstNum = workingString.substr(0, commaIndex);
+    std::string secondNum = workingString.substr(commaIndex + 1, std::string::npos);
+
+    // Make sure the number strings appear valid.
+    MathStringUtil::TrimToValidNumberString(firstNum);
+    MathStringUtil::TrimToValidNumberString(secondNum);
+
+    // Convert to numbers and return.
+    vector.x = std::stof(firstNum);
+    vector.y = std::stof(secondNum);
+    return true;
+}
+
+std::string Vector2::ToString(char delimiter, char openChar, char closeChar) const
+{
+    // Create a string like "(5, -10)".
+    std::string result;
+    result.push_back(openChar);
+    result += std::to_string(x);
+    result.push_back(delimiter);
+    result += std::to_string(y);
+    result.push_back(closeChar);
+    return result;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector2& v)

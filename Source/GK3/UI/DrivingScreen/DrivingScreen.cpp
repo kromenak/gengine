@@ -378,11 +378,11 @@ void DrivingScreen::LoadPaths()
 
     // Pass 1: Read in nodes and segments.
     {
-        IniKeyValue kv;
-        IniReader parser(pathData->GetText(), pathData->GetTextLength());
-        while(parser.ReadLine())
+        TextReader textReader(pathData->GetText(), pathData->GetTextLength());
+        std::string line;
+        while(textReader.ReadLine(line))
         {
-            StringTokenizer tokenizer(parser.GetLine(), { ' ' });
+            StringTokenizer tokenizer(line, { ' ' });
             if(!tokenizer.HasNext()) { continue; }
 
             const std::string& token = tokenizer.GetNext();
@@ -395,8 +395,7 @@ void DrivingScreen::LoadPaths()
             else if(StringUtil::EqualsIgnoreCase(token, "Location"))
             {
                 assert(tokenizer.HasNext());
-                kv.value = tokenizer.GetNext();
-                mPathData.nodes.back().point = kv.GetValueAsVector2();
+                mPathData.nodes.back().point = Vector2::Parse(tokenizer.GetNext());
             }
             else if(StringUtil::EqualsIgnoreCase(token, "SegmentBegin"))
             {
@@ -407,8 +406,7 @@ void DrivingScreen::LoadPaths()
             else if(StringUtil::EqualsIgnoreCase(token, "Point"))
             {
                 assert(tokenizer.HasNext());
-                kv.value = tokenizer.GetNext();
-                mPathData.segments.back().points.emplace_back(kv.GetValueAsVector2());
+                mPathData.segments.back().points.emplace_back(Vector2::Parse(tokenizer.GetNext()));
             }
         }
     }
@@ -418,10 +416,11 @@ void DrivingScreen::LoadPaths()
         int nodeIndex = 0;
         bool inLinks = false;
 
-        IniReader parser(pathData->GetText(), pathData->GetTextLength());
-        while(parser.ReadLine())
+        TextReader textReader(pathData->GetText(), pathData->GetTextLength());
+        std::string line;
+        while(textReader.ReadLine(line))
         {
-            StringTokenizer tokenizer(parser.GetLine(), { ' ' });
+            StringTokenizer tokenizer(line, { ' ' });
             if(!tokenizer.HasNext()) { continue; }
 
             const std::string& token = tokenizer.GetNext();

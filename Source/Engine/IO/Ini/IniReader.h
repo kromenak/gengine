@@ -1,8 +1,9 @@
 //
 // Clark Kromenaker
 //
-// Parses key/value data from INI-format files.
-// Does contain some special-sauce unique to GK3.
+// Reads INI-formatted files.
+// Can extract individual sections or individual key/value pairs.
+// Can also support multiple key/value pairs on a single line.
 //
 #pragma once
 #include <cstdint>
@@ -41,8 +42,6 @@ public:
     bool ReadLine();
     bool ReadKeyValuePair();
     const IniKeyValue& GetKeyValue() { return mCurrentKeyValue; }
-
-    const std::string& GetLine() const { return mCurrentLine; } //TODO: Get rid of this one!
 
 private:
     // The stream object we use to read in the file contents.

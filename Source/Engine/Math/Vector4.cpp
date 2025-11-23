@@ -1,5 +1,6 @@
 #include "Vector4.h"
 
+#include "MathStringUtil.h"
 #include "Vector3.h"
 
 Vector4 Vector4::Zero(0.0f, 0.0f, 0.0f, 0.0f);
@@ -172,6 +173,63 @@ Vector4 Vector4::Cross(const Vector4& lhs, const Vector4& rhs)
                    lhs.z * rhs.x - lhs.x * rhs.z,
                    lhs.x * rhs.y - lhs.y * rhs.x,
                    lhs.w * rhs.w);
+}
+
+/*static*/ Vector4 Vector4::Parse(const std::string& string, char delimiter)
+{
+    Vector4 vector;
+    TryParse(string, vector, delimiter);
+    return vector;
+}
+
+/*static*/ bool Vector4::TryParse(const std::string& string, Vector4& vector, char delimiter)
+{
+    // Get rid of all leading and trailing cruft - just numbers.
+    std::string workingString = MathStringUtil::TrimToNumbersOnly(string);
+    if(workingString.empty()) { return false; }
+
+    // Find the three commas.
+    std::size_t firstCommaIndex = workingString.find(delimiter);
+    if(firstCommaIndex == std::string::npos) { return false; }
+    std::size_t secondCommaIndex = workingString.find(delimiter, firstCommaIndex + 1);
+    if(secondCommaIndex == std::string::npos) { return false; }
+    std::size_t thirdCommaIndex = workingString.find(delimiter, secondCommaIndex + 1);
+    if(thirdCommaIndex == std::string::npos) { return false; }
+
+    // Split at commas.
+    std::string firstNum = workingString.substr(0, firstCommaIndex);
+    std::string secondNum = workingString.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1);
+    std::string thirdNum = workingString.substr(secondCommaIndex + 1, thirdCommaIndex - secondCommaIndex - 1);
+    std::string fourthNum = workingString.substr(thirdCommaIndex + 1, std::string::npos);
+
+    // Make sure the number strings appear valid.
+    MathStringUtil::TrimToValidNumberString(firstNum);
+    MathStringUtil::TrimToValidNumberString(secondNum);
+    MathStringUtil::TrimToValidNumberString(thirdNum);
+    MathStringUtil::TrimToValidNumberString(fourthNum);
+
+    // Convert to numbers and return.
+    vector.x = std::stof(firstNum);
+    vector.y = std::stof(secondNum);
+    vector.z = std::stof(thirdNum);
+    vector.w = std::stof(fourthNum);
+    return true;
+}
+
+std::string Vector4::ToString(char delimiter, char openChar, char closeChar) const
+{
+    // Create a string like "(5, -10, 20)".
+    std::string result;
+    result.push_back(openChar);
+    result += std::to_string(x);
+    result.push_back(delimiter);
+    result += std::to_string(y);
+    result.push_back(delimiter);
+    result += std::to_string(z);
+    result.push_back(delimiter);
+    result += std::to_string(w);
+    result.push_back(closeChar);
+    return result;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector4& v)

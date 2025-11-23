@@ -2,6 +2,7 @@
 
 #include <iomanip> // std::setprecision
 
+#include "MathStringUtil.h"
 #include "Vector2.h"
 
 Vector3 Vector3::Zero(0.0f, 0.0f, 0.0f);
@@ -179,6 +180,56 @@ Vector3& Vector3::Normalize()
 {
     // Basically calculate projection of a onto b (as above), then subtract from a.
     return (a - (b * (Dot(a, b) / Dot(b, b))));
+}
+
+/*static*/ Vector3 Vector3::Parse(const std::string& string, char delimiter)
+{
+    Vector3 vector;
+    TryParse(string, vector, delimiter);
+    return vector;
+}
+
+/*static*/ bool Vector3::TryParse(const std::string& string, Vector3& vector, char delimiter)
+{
+    // Get rid of all leading and trailing cruft - just numbers.
+    std::string workingString = MathStringUtil::TrimToNumbersOnly(string);
+    if(workingString.empty()) { return false; }
+
+    // Find the two commas.
+    std::size_t firstCommaIndex = workingString.find(delimiter);
+    if(firstCommaIndex == std::string::npos) { return false; }
+    std::size_t secondCommaIndex = workingString.find(delimiter, firstCommaIndex + 1);
+    if(secondCommaIndex == std::string::npos) { return false; }
+
+    // Split at commas.
+    std::string firstNum = workingString.substr(0, firstCommaIndex);
+    std::string secondNum = workingString.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1);
+    std::string thirdNum = workingString.substr(secondCommaIndex + 1, std::string::npos);
+
+    // Make sure the number strings appear valid.
+    MathStringUtil::TrimToValidNumberString(firstNum);
+    MathStringUtil::TrimToValidNumberString(secondNum);
+    MathStringUtil::TrimToValidNumberString(thirdNum);
+
+    // Convert to numbers and return.
+    vector.x = std::stof(firstNum);
+    vector.y = std::stof(secondNum);
+    vector.z = std::stof(thirdNum);
+    return true;
+}
+
+std::string Vector3::ToString(char delimiter, char openChar, char closeChar) const
+{
+    // Create a string like "(5, -10, 20)".
+    std::string result;
+    result.push_back(openChar);
+    result += std::to_string(x);
+    result.push_back(delimiter);
+    result += std::to_string(y);
+    result.push_back(delimiter);
+    result += std::to_string(z);
+    result.push_back(closeChar);
+    return result;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector3& v)

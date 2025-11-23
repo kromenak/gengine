@@ -5,6 +5,7 @@
 //
 #pragma once
 #include <iostream>
+#include <string>
 
 #include "GMath.h"
 
@@ -71,6 +72,11 @@ public:
     // Projection and rejection
     static Vector3 Project(const Vector3& a, const Vector3& b);
     static Vector3 Reject(const Vector3& a, const Vector3& b);
+
+    // To/From String
+    static Vector3 Parse(const std::string& string, char delimiter = ',');
+    static bool TryParse(const std::string& string, Vector3& vector, char delimiter = ',');
+    std::string ToString(char delimiter = ',', char openChar = '(', char closeChar = ')') const;
 
     // Vector elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;
