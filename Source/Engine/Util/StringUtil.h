@@ -7,6 +7,7 @@
 #pragma once
 #include <algorithm>
 #include <cctype>
+#include <cstdarg>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -285,13 +286,12 @@ namespace StringUtil
         return static_cast<float>(atof(str.c_str()));
     }
 
-    template<typename ... Args>
-    inline std::string Format(const char* format, Args ... args)
+    inline std::string vFormatf(const char* format, va_list args)
     {
         // Calling snprintf with nullptr & 0 buff_size let's you determine the expected size of the result.
         // Per: https://en.cppreference.com/w/cpp/io/c/fprintf
         // +1 for the \0 null terminator.
-        int res = snprintf(nullptr, 0, format, args ...) + 1;
+        int res = vsnprintf(nullptr, 0, format, args) + 1;
         if(res < 0)
         {
             return std::string();
@@ -303,10 +303,25 @@ namespace StringUtil
         std::unique_ptr<char[]> buf(new char[size]);
 
         // Actually put the formatted string in the buffer "for real".
-        snprintf(buf.get(), size, format, args ...);
+        vsnprintf(buf.get(), size, format, args);
 
         // Create a string from the buffer (-1 b/c we don't need the \0 for the string).
         return std::string(buf.get(), buf.get() + size - 1);
+    }
+
+    inline std::string Formatf(const char* format, ...)
+    {
+        va_list args;
+        va_start(args, format);
+        std::string result = vFormatf(format, args);
+        va_end(args);
+        return result;
+    }
+
+    template<typename ... Args>
+    inline std::string Format(const char* format, Args... args)
+    {
+        return Formatf(format, args...);
     }
 
     inline unsigned long HashCaseInsensitive(const char* str)
