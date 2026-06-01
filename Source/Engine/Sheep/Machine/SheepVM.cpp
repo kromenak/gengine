@@ -215,7 +215,7 @@ void SheepVM::OnPersist(PersistState& ps)
     // Usually, when someone saves a game, there are NO sheep threads running.
     // Sheep threads are mainly used during cutscenes, UNLESS there is some background scene logic using them.
     // In those cases, the thread will ALWAYS be blocked here!
-    //  Since SheepVM runs on a single thread, if THIS code is running, the threads MUST be blocked.
+    // Since SheepVM runs on a single thread, if THIS code is running, the threads MUST be blocked.
 
     // Calculate how many running & blocked threads exist - save/load that count.
     int runningThreadCount = 0;
@@ -225,7 +225,7 @@ void SheepVM::OnPersist(PersistState& ps)
         {
             if(thread->mRunning && thread->mBlocked)
             {
-                printf("Sheep thread %s is running and blocked\n", thread->GetName().c_str());
+                //printf("Sheep thread %s is running and blocked\n", thread->GetName().c_str());
                 ++runningThreadCount;
             }
         }

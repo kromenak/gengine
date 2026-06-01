@@ -7,6 +7,7 @@
 
 #include "BarnFile.h"
 #include "FileSystem.h"
+#include "ReportManager.h"
 #include "StringUtil.h"
 
 AssetManager gAssetManager;
@@ -122,7 +123,7 @@ void AssetManager::SetAssetExtractor(const std::string& extension, const std::fu
 {
     if(extension.empty())
     {
-        printf("Empty extension passed to SetAssetExtractor.");
+        LOG_WARNING("Empty extension passed to SetAssetExtractor.");
         return;
     }
 
@@ -145,12 +146,12 @@ bool AssetManager::ExtractAsset(const std::string& assetName, const std::string&
     {
         if(ExtractAsset(entry.archive, assetName, outputDirectory))
         {
-            printf("Extracted asset %s from archive %s to %s\n", assetName.c_str(), entry.archive->GetName().c_str(), outputDirectory.c_str());
+            LOG_GENERIC("Extracted asset %s from archive \"%s\" to \"%s\"", assetName.c_str(), entry.archive->GetName().c_str(), (outputDirectory + assetName).c_str());
             return true;
         }
     }
 
-    printf("Could not extract asset %s\n", assetName.c_str());
+    LOG_ERROR("Could not extract asset %s", assetName.c_str());
     return false;
 }
 
@@ -170,7 +171,7 @@ void AssetManager::ExtractAssets(const std::string& search, const std::string& o
             }
         });
     }
-    printf("Extracted %u assets matching search string %s.\n", extractCount, search.c_str());
+    LOG_GENERIC("Extracted %u assets matching search string %s.", extractCount, search.c_str());
 }
 
 void AssetManager::UnloadAssets(AssetScope scope)

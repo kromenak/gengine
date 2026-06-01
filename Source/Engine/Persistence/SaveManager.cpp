@@ -12,6 +12,7 @@
 #include "Paths.h"
 #include "ProgressBar.h"
 #include "Renderer.h"
+#include "ReportManager.h"
 #include "SceneManager.h"
 #include "SheepManager.h"
 #include "Sidney.h"
@@ -284,7 +285,7 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     std::string saveFolderPath = Path::Combine({ Paths::GetUserDataPath(), "Save Games" });
     if(!Directory::CreateAll(saveFolderPath))
     {
-        printf("Failed to save; could not create \"Save Games\" folder!\n");
+        LOG_ERROR("Failed to save; could not create \"Save Games\" folder!");
         return;
     }
 
@@ -358,7 +359,7 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
         // Save running sheep scripts.
         gSheepManager.OnPersist(ps);
     }
-    printf("Saved to file %s.\n", savePath.c_str());
+    LOG_GENERIC("Saved to file %s.", savePath.c_str());
 
     // Update entry in save list.
     if(mPendingSaveIndex >= 0 && mPendingSaveIndex < mSaves.size())
@@ -416,7 +417,7 @@ void SaveManager::LoadInternal(const std::string& loadPath)
         if(gGameProgress.IsChangingTimeblock())
         {
             gGameProgress.StartTimeblock(gGameProgress.GetTimeblock(), true, nullptr);
-            printf("Loaded save file %s.\n", loadPath.c_str());
+            LOG_GENERIC("Loaded save file %s.", loadPath.c_str());
             delete mLoadPersistState;
         }
         else
@@ -440,7 +441,7 @@ void SaveManager::LoadInternal(const std::string& loadPath)
 
                 // Done with persist state - delete it.
                 delete mLoadPersistState;
-                printf("Loaded save file %s.\n", loadPath.c_str());
+                LOG_GENERIC("Loaded save file %s.", loadPath.c_str());
             }, false);
         }
     });

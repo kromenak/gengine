@@ -5,6 +5,7 @@
 #include "GKObject.h"
 #include "IniReader.h"
 #include "Random.h"
+#include "ReportManager.h"
 #include "SceneManager.h"
 #include "StringUtil.h"
 
@@ -148,7 +149,7 @@ void Soundtrack::Load(AssetData& data)
                 }
                 else
                 {
-                    std::cout << "Unexpected key: " << entry.key << std::endl;
+                    LOG_WARNING("Unexpected WAIT key %s in Soundtrack %s.", entry.key.c_str(), mName.c_str());
                 }
             }
             mNodes.push_back(node);
@@ -193,13 +194,13 @@ void Soundtrack::Load(AssetData& data)
                 }
                 else
                 {
-                    std::cout << "Unexpected key: " << entry.key << std::endl;
+                    LOG_WARNING("Unexpected SOUNTRACK key %s in Soundtrack %s.", entry.key.c_str(), mName.c_str());
                 }
             }
         }
         else
         {
-            std::cout << "Unexpected section name: " << section.name << std::endl;
+            LOG_WARNING("Unexpected section %s in Soundtrack %s.", section.name.c_str(), mName.c_str());
         }
     }
 }
@@ -289,7 +290,7 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
         }
         else
         {
-            std::cout << "Unexpected key: " << entry.key << std::endl;
+            LOG_WARNING("Unexpected sound node key %s in Soundtrack %s.", entry.key.c_str(), mName.c_str());
         }
     }
     return node;

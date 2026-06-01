@@ -25,7 +25,6 @@ void Timers::Update(float deltaTime)
         if(timer.secondsRemaining > 0.0f)
         {
             timer.secondsRemaining -= deltaTime;
-            //printf("Time remaining: %f\n", timer.secondsRemaining);
 
             // Timer is complete! Execute callbacks.
             if(timer.secondsRemaining <= 0.0f)

@@ -1,6 +1,7 @@
 #include "NVC.h"
 
 #include "IniReader.h"
+#include "ReportManager.h"
 #include "SheepManager.h"
 #include "Timeblock.h"
 
@@ -171,7 +172,7 @@ void NVC::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else
                 {
-                    std::cout << "ERROR: invalid approach " << keyValue.value << std::endl;
+                    LOG_WARNING("In NVC %s, invalid approach: %s", mName.c_str(), keyValue.value.c_str());
                 }
             }
             else if(StringUtil::StartsWithIgnoreCase(keyValue.key, "Targe")) // accommodates typo in at least one NVC file
@@ -254,7 +255,7 @@ void NVC::ParseFromData(uint8_t* data, uint32_t dataLength)
         }
         else
         {
-            std::cout << "Multiple case labels for " << caseLabel << std::endl;
+            LOG_WARNING("In NVC %s, multiple case labels exist for %s.", mName.c_str(), caseLabel.c_str());
         }
     }
 }

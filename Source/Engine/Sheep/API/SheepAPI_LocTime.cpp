@@ -201,7 +201,6 @@ shpvoid Warp(std::string locationAndTime)
 {
     // Lots of input handling to figure out string and handle errors...
     // Wonder if this is ever used?
-    std::cout << "Warp" << std::endl;
     return 0;
 }
 RegFunc1(Warp, void, string, WAITABLE, REL_FUNC);

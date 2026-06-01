@@ -2,6 +2,7 @@
 
 #include <fstream>
 
+#include "Log.h"
 #include "StringUtil.h"
 
 #if defined(PLATFORM_MAC)
@@ -287,7 +288,7 @@ bool Directory::Create(const std::string& path)
             if(GetLastError() == ERROR_ALREADY_EXISTS) { return true; }
 
             // Some error occurred.
-            std::cout << "Failed to make directory at " << path << std::endl;
+            Logf("Failed to create directory at %s.", path.c_str());
             return false;
         }
         return true;
@@ -304,7 +305,7 @@ bool Directory::Create(const std::string& path)
             if(errno == EEXIST) { return true; }
 
             // Some error occurred.
-            std::cout << "Failed to make directory at " << path << std::endl;
+            Logf("Failed to create directory at %s.", path.c_str());
             return false;
         }
         return true;
@@ -342,7 +343,7 @@ bool Directory::CreateAll(const std::string& path)
             bool madeDirectory = Create(buildPath);
             if(!madeDirectory)
             {
-                printf("Failed to create directory %s!", buildPath.c_str());
+                Logf("Failed to create directory %s!", buildPath.c_str());
                 return false;
             }
         }

@@ -121,7 +121,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 VertexAnimation* vertexAnim = gAssetManager.LoadAsset<VertexAnimation>(line.entries[1].key, GetScope());
                 if(vertexAnim == nullptr)
                 {
-                    printf("Failed to load vertex animation %s!\n", line.entries[1].key.c_str());
+                    LOG_WARNING("Failed to load vertex animation %s!", line.entries[1].key.c_str());
                     continue;
                 }
 
@@ -412,7 +412,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else
                 {
-                    std::cout << "Unexpected option: " << option << std::endl;
+                    LOG_WARNING("In animation %s, unexpected option: %s.", mName.c_str(), option.c_str());
                 }
             }
         }
@@ -787,7 +787,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else
                 {
-                    std::cout << "Unexpected GK3 animation keyword: " << keyword << std::endl;
+                    LOG_ERROR("In animation %s, unexpected GK3 animation keyword: %s.", mName.c_str(), keyword.c_str());
                 }
             }
         }
@@ -798,7 +798,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
         }
         else
         {
-            std::cout << "Unexpected animation header: " << section.name << std::endl;
+            LOG_ERROR("In animation %s, unexpected animation header: %s.", mName.c_str(), section.name.c_str());
         }
     }
 

@@ -211,7 +211,7 @@ RegFunc0(ClearForcedCameraCuts, void, IMMEDIATE, REL_FUNC);
 
 shpvoid SetCameraAngleType(const std::string& cameraName, const std::string& type)
 {
-    printf("SetCameraAngleType(%s, %s)\n", cameraName.c_str(), type.c_str());
+    Logf("SetCameraAngleType(%s, %s)", cameraName.c_str(), type.c_str());
     return 0;
 }
 RegFunc2(SetCameraAngleType, void, string, string, IMMEDIATE, REL_FUNC);

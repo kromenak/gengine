@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 
+#include "ReportManager.h"
 #include "SaveManager.h"
 #include "StringUtil.h"
 
@@ -256,7 +257,7 @@ void Window::Create(const char* title, int x, int y, int w, int h, Uint32 flags)
     window = SDL_CreateWindow(title, x, y, w, h, flags);
     if(window == nullptr)
     {
-        printf("Failed to create SDL window! Error: %s\n", SDL_GetError());
+        LOG_FATAL("Failed to create SDL window! Error: %s\n", SDL_GetError());
     }
     //DumpVideoInfo(window);
 

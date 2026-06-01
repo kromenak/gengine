@@ -65,7 +65,6 @@ RegFunc1(FollowOnDrivingMap, void, int, WAITABLE, REL_FUNC);
 /*
 shpvoid SetPamphletPage(int page)
 {
-    std::cout << "SetPamphletPage" << std::endl;
     return 0;
 }
 RegFunc1(SetPamphletPage, void, int, WAITABLE, REL_FUNC);

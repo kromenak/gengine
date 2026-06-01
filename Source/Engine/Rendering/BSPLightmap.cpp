@@ -1,6 +1,7 @@
 #include "BSPLightmap.h"
 
 #include "BinaryReader.h"
+#include "ReportManager.h"
 #include "Texture.h"
 
 TYPEINFO_INIT(BSPLightmap, Asset, GENERATE_TYPE_ID)
@@ -25,7 +26,7 @@ void BSPLightmap::Load(AssetData& data)
     std::string identifier = reader.ReadString(4);
     if(identifier != "TLUM")
     {
-        std::cout << "BSP lightmap asset does not have MULT identifier! Instead has " << identifier << std::endl;
+        LOG_ERROR("BSP lightmap %s does not have MULT file identifier!", mName.c_str());
         return;
     }
 

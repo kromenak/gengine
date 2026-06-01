@@ -34,14 +34,14 @@ void LayerManager::PopLayer(Layer* expectedLayer)
     // Can't pop an empty stack. We also don't allow popping the bottom/global layer.
     if(mLayerStack.size() <= 1)
     {
-        std::cout << "Attempting to pop layer, but stack is empty!" << std::endl;
+        LOG_WARNING("Attempting to pop layer, but stack is empty!");
         return;
     }
 
     // Caller can provide an "expected layer", kind of as a way to assert that they are popping what they think they're popping.
     if(expectedLayer != nullptr && !IsTopLayer(expectedLayer))
     {
-        std::cout << "Expected to pop " << expectedLayer->GetName() << ", but top layer is actually " << mLayerStack.back()->GetName() << std::endl;
+        LOG_WARNING("Expected to pop %s, but top layer is actually %s.", expectedLayer->GetName().c_str(), mLayerStack.back()->GetName().c_str());
         return;
     }
 
@@ -70,7 +70,7 @@ void LayerManager::RemoveLayer(const Layer& layer)
     }
     else
     {
-        std::cout << "Layer " << layer.GetName() << " did not exist in the layer stack!" << std::endl;
+        LOG_WARNING("Layer %s did not exist in the layer stack.", layer.GetName().c_str());
     }
 }
 

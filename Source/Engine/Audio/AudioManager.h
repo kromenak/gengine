@@ -11,44 +11,11 @@
 
 #include <fmod.hpp>
 
+#include "Fader.h"
+#include "PlayingSoundHandle.h"
 #include "Vector3.h"
 
 class Audio;
-
-// Handle to a playing sound. Returned by audio manager to represent a playing sound.
-// After sound stops/finishes, the handle is no longer valid. But it can still be passed around, used, and stored just fine.
-// Calling functions on an invalid handle will have no effect.
-class PlayingSoundHandle
-{
-public:
-    PlayingSoundHandle() = default;
-    PlayingSoundHandle(FMOD::Channel* channel, FMOD::Sound* sound);
-
-    void Stop(float fadeOutTime = 0.0f);
-    void Pause();
-    void Resume();
-    bool IsPlaying() const;
-
-    void SetVolume(float volume);
-    void SetPosition(const Vector3& position);
-
-private:
-    friend class AudioManager; // Allow audio manager to access internals.
-
-    // An FMOD "channel" represents a single playing sound. Channel* is returned by PlaySound.
-    // Once returned, this pointer is always valid, even if the sound stops playing or the channel is reused.
-    // In one of those scenarios, calls to channel functions start to return FMOD_ERR_INVALID_HANDLE or similar result codes.
-    FMOD::Channel* channel = nullptr;
-
-    // Sound data being played.
-    FMOD::Sound* sound = nullptr;
-
-    // Callback to execute when sound finishes playing (either naturally or via stop).
-    std::function<void()> mFinishCallback = nullptr;
-
-    // The frame this sound started on.
-    uint32_t mStartFrame = 0;
-};
 
 struct AudioSaveState
 {
@@ -61,41 +28,6 @@ enum class AudioType
     VO,         // Audio plays on VO channels
     Ambient,    // Audio plays on Ambient channels
     Music       // Audio plays on Music channels
-};
-
-// Handles fading in/out audio volume.
-struct Fader
-{
-    float fadeDuration = 0.0f;
-    float fadeTimer = 0.0f;
-    float fadeTo = 0.0f;
-    float fadeFrom = 0.0f;
-    FMOD::ChannelControl* channelControl = nullptr;
-
-    Fader() = default;
-    Fader(FMOD::ChannelControl* cc) : channelControl(cc) { }
-
-    bool Update(float deltaTime);
-    void SetFade(float fadeTime, float targetVolume, float startVolume = -1.0f);
-};
-
-// Handles crossfading two sets of playing audio.
-struct Crossfader
-{
-    // The channel group. The fade groups are inputs to this, and this outputs to master.
-    // This allows modifying volume in a consistent way regardless of the fade state of the fade groups.
-    FMOD::ChannelGroup* channelGroup = nullptr;
-
-    // Two channel groups that feed into the above channel group.
-    // These are swapped between to enable crossfading of audio tracks.
-    FMOD::ChannelGroup* faderChannelGroups[2] { nullptr, nullptr };
-    Fader faders[2];
-    int fadeIndex = 0;
-
-    bool Init(FMOD::System* system, const char* name);
-    void Update(float deltaTime);
-    void Swap();
-    FMOD::ChannelGroup* GetActive() const { return faderChannelGroups[fadeIndex]; }
 };
 
 struct PlayAudioParams

@@ -376,14 +376,12 @@ RegFunc5(SetWalkAnim, void, string, string, string, string, string, IMMEDIATE, R
  /*
 shpvoid TurnHead(std::string actorName, int percentX, int percentY, int durationMs)
 {
- std::cout << "TurnHead" << std::endl;
  return 0;
 }
 RegFunc4(TurnHead, void, string, int, int, int, WAITABLE, REL_FUNC);
 
 shpvoid TurnToModel(std::string actorName, std::string modelName)
 {
- std::cout << "TurnToModel" << std::endl;
  return 0;
 }
 RegFunc2(TurnToModel, void, string, string, WAITABLE, REL_FUNC);

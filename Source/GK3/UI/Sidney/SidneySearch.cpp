@@ -158,7 +158,7 @@ namespace
                     }
                     else
                     {
-                        printf("HTML: close tag %s doesn't match with an open tag in %s. Ignoring!\n", tokens[0].c_str(), html->GetName().c_str());
+                        LOG_WARNING("HTML: close tag %s doesn't match with an open tag in %s. Ignoring!", tokens[0].c_str(), html->GetName().c_str());
                     }
                     continue;
                 }
@@ -647,7 +647,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 std::string fontName = (fontSize == 2 ? "F_TIMES_2.FON" : "F_TIMES.FON");
                 if(bold && italic)
                 {
-                    printf("HTML: unsupported text format bold AND italic...\n");
+                    LOG_WARNING("HTML: unsupported text format bold AND italic...");
                 }
                 else if(bold)
                 {
@@ -657,7 +657,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 {
                     if(fontSize != 0)
                     {
-                        printf("HTML: unsupported text format (italic font size %i)\n", fontSize);
+                        LOG_WARNING("HTML: unsupported text format (italic font size %i)", fontSize);
                     }
                     fontName = "F_TIMES_I.FON";
                 }

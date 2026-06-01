@@ -3,6 +3,7 @@
 #include <SDL_messagebox.h>
 
 #include "BuildEnv.h"
+#include "Log.h"
 
 namespace
 {
@@ -33,7 +34,7 @@ void OSDialog::Ok(OSDialogType type, const std::string& title, const std::string
                                           nullptr);
     if(result != 0)
     {
-        printf("Failed to show message box with error: %s\n", SDL_GetError());
+        Logf("Failed to show message box with error: %s", SDL_GetError());
     }
 }
 
@@ -55,7 +56,7 @@ bool OSDialog::YesNo(OSDialogType type, const std::string& title, const std::str
     messageBoxData.message = message.c_str();
     messageBoxData.numbuttons = 2;
 
-    SDL_MessageBoxButtonData buttons[2] = { 0 };
+    SDL_MessageBoxButtonData buttons[2] = { { 0 } };
     buttons[1].buttonid = 1;
     buttons[1].text = leftButtonText.c_str();
     buttons[0].buttonid = 0;
@@ -66,7 +67,7 @@ bool OSDialog::YesNo(OSDialogType type, const std::string& title, const std::str
     int result = SDL_ShowMessageBox(&messageBoxData, &buttonIdPressed);
     if(result != 0)
     {
-        printf("Failed to show message box with error: %s\n", SDL_GetError());
+        Logf("Failed to show message box with error: %s", SDL_GetError());
         return false;
     }
     return buttonIdPressed == 1;

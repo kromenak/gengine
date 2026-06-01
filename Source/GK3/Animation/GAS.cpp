@@ -12,6 +12,7 @@
 #include "GasNodes.h"
 #include "Localizer.h"
 #include "mstream.h"
+#include "ReportManager.h"
 #include "StringTokenizer.h"
 #include "StringUtil.h"
 #include "TextReader.h"
@@ -76,7 +77,7 @@ void GAS::Load(AssetData& data)
             // The next token (anim name) is mandatory.
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing anim name in GAS file!" << std::endl;
+                LOG_WARNING("Missing anim name in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -102,7 +103,7 @@ void GAS::Load(AssetData& data)
             // The next token (anim name) is mandatory.
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing anim name in GAS file!" << std::endl;
+                LOG_WARNING("Missing anim name in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -135,7 +136,7 @@ void GAS::Load(AssetData& data)
             // The next token (min seconds to wait) is mandatory.
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing min wait time in GAS file!" << std::endl;
+                LOG_WARNING("Missing min wait time in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -171,7 +172,7 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing label name in GAS file!" << std::endl;
+                LOG_WARNING("Missing label name in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -183,7 +184,7 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing label name in GAS file!" << std::endl;
+                LOG_WARNING("Missing label name in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -205,14 +206,14 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing var name in SET" << std::endl;
+                LOG_WARNING("Missing SET var name in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string varName = tokenizer.GetNext();
 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing var value in SET" << std::endl;
+                LOG_WARNING("Missing SET var value in GAS file %s!", mName.c_str());
                 continue;
             }
             int varValue = StringUtil::ToInt(tokenizer.GetNext());
@@ -227,7 +228,7 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing var name in INC" << std::endl;
+                LOG_WARNING("Missing INC var name in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string varName = tokenizer.GetNext();
@@ -241,7 +242,7 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing var name in DEC" << std::endl;
+                LOG_WARNING("Missing DEC var name in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string varName = tokenizer.GetNext();
@@ -255,28 +256,28 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing var name in IF" << std::endl;
+                LOG_WARNING("Missing IF var name in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string varName = tokenizer.GetNext();
 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing comparison operator in IF" << std::endl;
+                LOG_WARNING("Missing IF comparison operator in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string opString = tokenizer.GetNext();
 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing value in IF" << std::endl;
+                LOG_WARNING("Missing IF var value in GAS file %s!", mName.c_str());
                 continue;
             }
             int value = StringUtil::ToInt(tokenizer.GetNext());
 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing label name in IF" << std::endl;
+                LOG_WARNING("Missing IF label name in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string label = tokenizer.GetNext();
@@ -297,7 +298,7 @@ void GAS::Load(AssetData& data)
             }
             else
             {
-                std::cout << "Invalid operation in IF" << std::endl;
+                LOG_WARNING("Invalid IF operation in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -315,7 +316,7 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing position in WALKTO" << std::endl;
+                LOG_WARNING("Missing WALKTO position in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string position = tokenizer.GetNext();
@@ -326,10 +327,15 @@ void GAS::Load(AssetData& data)
             if(tokenizer.HasNext())
             {
                 float x = StringUtil::ToFloat(position);
+                if(!tokenizer.HasNext())
+                {
+                    LOG_WARNING("Missing WALKTO XYZ position in GAS file %s!", mName.c_str());
+                    continue;
+                }
                 float y = StringUtil::ToFloat(tokenizer.GetNext());
                 if(!tokenizer.HasNext())
                 {
-                    std::cout << "Malformed X/Y/Z position in WALKTO" << std::endl;
+                    LOG_WARNING("Missing WALKTO XYZ position in GAS file %s!", mName.c_str());
                     continue;
                 }
                 float z = StringUtil::ToFloat(tokenizer.GetNext());
@@ -360,7 +366,7 @@ void GAS::Load(AssetData& data)
             bool isUseTalk = command.size() > 4;
             if(!tokenizer.HasNext())
             {
-                std::cout << "Incomplete USE statement" << std::endl;
+                LOG_WARNING("Incomplete USE statement in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -369,7 +375,7 @@ void GAS::Load(AssetData& data)
             {
                 if(!tokenizer.HasNext())
                 {
-                    std::cout << "Missing position in USE IPOS" << std::endl;
+                    LOG_WARNING("Missing USE IPOS position in GAS file %s!", mName.c_str());
                     continue;
                 }
 
@@ -386,14 +392,14 @@ void GAS::Load(AssetData& data)
             {
                 if(!tokenizer.HasNext())
                 {
-                    std::cout << "Missing animation name in USE CLEANUP" << std::endl;
+                    LOG_WARNING("Missing USE CLEANUP animation name in GAS file %s!", mName.c_str());
                     continue;
                 }
                 std::string animNeedingCleanupName = tokenizer.GetNext();
 
                 if(!tokenizer.HasNext())
                 {
-                    std::cout << "Missing animation name in USE CLEANUP" << std::endl;
+                    LOG_WARNING("Missing USE CLEANUP animation name in GAS file %s!", mName.c_str());
                     continue;
                 }
                 std::string animDoingCleanupName = tokenizer.GetNext();
@@ -411,7 +417,7 @@ void GAS::Load(AssetData& data)
             {
                 if(!tokenizer.HasNext())
                 {
-                    std::cout << "Missing autoscript name in USE NEWIDLE" << std::endl;
+                    LOG_WARNING("Missing USE NEWIDLE autoscript name in GAS file %s!", mName.c_str());
                     continue;
                 }
 
@@ -424,7 +430,7 @@ void GAS::Load(AssetData& data)
             {
                 if(!tokenizer.HasNext())
                 {
-                    std::cout << "Missing flag name in USE CLEARFLAG" << std::endl;
+                    LOG_WARNING("Missing USE CLEARFLAG flag name in GAS file %s!", mName.c_str());
                     continue;
                 }
 
@@ -438,7 +444,7 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing autoscript name in NEWIDLE" << std::endl;
+                LOG_WARNING("Missing NEWIDLE autoscript name in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -452,21 +458,21 @@ void GAS::Load(AssetData& data)
             // Get required parameters.
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing noun in WHENNEAR/WHENNOLONGERNEAR" << std::endl;
+                LOG_WARNING("Missing WHENNEAR/WHENNOLONGERNEAR noun in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string noun = tokenizer.GetNext();
 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing distance in WHENNEAR/WHENNOLONGERNEAR" << std::endl;
+                LOG_WARNING("Missing WHENNEAR/WHENNOLONGERNEAR distance in GAS file %s!", mName.c_str());
                 continue;
             }
             float distance = StringUtil::ToFloat(tokenizer.GetNext());
 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing label in WHENNEAR/WHENNOLONGERNEAR" << std::endl;
+                LOG_WARNING("Missing WHENNEAR/WHENNOLONGERNEAR label in GAS file %s!", mName.c_str());
                 continue;
             }
             std::string label = tokenizer.GetNext();
@@ -493,23 +499,16 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing yak in DLG" << std::endl;
+                LOG_WARNING("Missing DLG yak in GAS file %s!", mName.c_str());
                 continue;
             }
 
             // Attempt to load YAK using current language.
             std::string yakName = tokenizer.GetNext();
-            Animation* yakAnimation = gAssetManager.LoadAsset<Animation>(Localizer::GetLanguagePrefix() + yakName, GetScope(), "yak");
+            Animation* yakAnimation = Localizer::LoadLocalizedAsset<Animation>(yakName, GetScope(), "yak");
             if(yakAnimation == nullptr)
             {
-                printf("Couldn't load yak %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), yakName.c_str(), yakName.c_str());
-
-                // But fall back and try English if we couldn't find anything.
-                yakAnimation = gAssetManager.LoadAsset<Animation>("E" + yakName, GetScope(), "yak");
-                if(yakAnimation == nullptr)
-                {
-                    printf("Invalid yak %s specified in GAS DLG (%s)\n", yakName.c_str(), GetName().c_str());
-                }
+                LOG_WARNING("Invalid yak %s specified in GAS DLG (%s)", yakName.c_str(), GetName().c_str());
                 continue;
             }
 
@@ -521,7 +520,7 @@ void GAS::Load(AssetData& data)
         {
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing location in LOCATION" << std::endl;
+                LOG_WARNING("Missing LOCATION location in GAS file %s!", mName.c_str());
                 continue;
             }
 
@@ -531,7 +530,7 @@ void GAS::Load(AssetData& data)
         }
         else
         {
-            std::cout << "Unrecognized GAS command: " << line << std::endl;
+            LOG_WARNING("Unrecognized GAS command %s in GAS file %s!", line.c_str(), mName.c_str());
         }
     }
 

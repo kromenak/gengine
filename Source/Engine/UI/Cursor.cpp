@@ -8,6 +8,7 @@
 #include "AssetManager.h"
 #include "GKPrefs.h"
 #include "IniReader.h"
+#include "ReportManager.h"
 #include "StringUtil.h"
 #include "Texture.h"
 #include "UIUtil.h"
@@ -29,7 +30,7 @@ void Cursor::Load(AssetData& data)
     mTexture = gAssetManager.LoadAsset<Texture>(GetNameNoExtension(), GetScope());
     if(mTexture == nullptr)
     {
-        printf("Create cursor %s failed: couldn't load texture.\n", mName.c_str());
+        LOG_ERROR("Create cursor %s failed: couldn't load texture.", mName.c_str());
         return;
     }
 
@@ -204,7 +205,7 @@ void Cursor::CreateCursorFrames(float scaleFactor)
                                                        rmask, gmask, bmask, amask);
     if(srcSurface == nullptr)
     {
-        printf("Create cursor %s failed: couldn't create surface from texture (%s).\n", mName.c_str(), SDL_GetError());
+        LOG_ERROR("Create cursor %s failed: couldn't create surface from texture (%s).", mName.c_str(), SDL_GetError());
         return;
     }
 
@@ -234,19 +235,19 @@ void Cursor::CreateCursorFrames(float scaleFactor)
         SDL_Surface* dstSurface = SDL_CreateRGBSurface(0, frameWidth, frameHeight, 32, rmask, gmask, bmask, amask);
         if(dstSurface == nullptr)
         {
-            printf("Create cursor %s failed: couldn't create dest surface for frame %i (%s).\n", mName.c_str(), i, SDL_GetError());
+            LOG_ERROR("Create cursor %s failed: couldn't create dest surface for frame %i (%s).LOG_ERROR", mName.c_str(), i, SDL_GetError());
         }
         int result = SDL_BlitSurface(srcSurface, &srcRect, dstSurface, nullptr);
         if(result != 0)
         {
-            printf("Create cursor %s failed: couldn't blit to dest surface for frame %i (%s).\n", mName.c_str(), i, SDL_GetError());
+            LOG_ERROR("Create cursor %s failed: couldn't blit to dest surface for frame %i (%s).", mName.c_str(), i, SDL_GetError());
         }
 
         // Use destination surface to create cursor. This duplicates the surface pixel data.
         SDL_Cursor* cursor = SDL_CreateColorCursor(dstSurface, hotspotX, hotspotY);
         if(cursor == nullptr)
         {
-            printf("Create cursor %s failed: couldn't create cursor frame %i (%s).\n", mName.c_str(), i, SDL_GetError());
+            LOG_ERROR("Create cursor %s failed: couldn't create cursor frame %i (%s).", mName.c_str(), i, SDL_GetError());
         }
         mCursorFrames.push_back(cursor);
 

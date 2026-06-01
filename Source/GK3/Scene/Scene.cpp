@@ -1186,7 +1186,7 @@ void Scene::OnPersist(PersistState& ps)
             // This can happen sometimes, if an object switches from a dynamic prop to static BSP based on scene load conditions.
             if(object != nullptr && object->GetTypeId() != objType)
             {
-                printf("Type mismatch for object %s - skipping.\n", name.c_str());
+                LOG_WARNING("Type mismatch for object %s - skipping.", name.c_str());
                 ps.GetBinaryReader()->Skip(objSize);
             }
             else if(object == nullptr) // can't find the object - can maybe recover
@@ -1212,7 +1212,7 @@ void Scene::OnPersist(PersistState& ps)
                     }
                     else
                     {
-                        printf("Object %s doesn't exist in the scene and can't be spawned - skipping.\n", name.c_str());
+                        LOG_WARNING("Object %s doesn't exist in the scene and can't be spawned - skipping.", name.c_str());
                         ps.GetBinaryReader()->Skip(objSize);
                     }
                 }
@@ -1323,7 +1323,7 @@ GKObject* Scene::CreateSceneModel(const SceneModel* sceneModel)
         }
 
         default:
-            std::cout << "Unaccounted for model type: " << (int)sceneModel->type << std::endl;
+            LOG_WARNING("Unknown model type: %i", static_cast<int>(sceneModel->type));
             break;
     }
     return nullptr;
@@ -1432,7 +1432,7 @@ void Scene::ExecuteAction(const Action* action)
         }
         case Action::Approach::Near: // Never used in GK3.
         {
-            std::cout << "Executed NEAR approach type!" << std::endl;
+            LOG_WARNING("Executed NEAR approach type! This is unexpected!");
             gActionManager.ExecuteAction(action, nullptr, false);
             break;
         }
@@ -1530,7 +1530,7 @@ void Scene::ExecuteAction(const Action* action)
             }
             else
             {
-                std::cout << "Could not find WalkToSee target " << action->target << std::endl;
+                LOG_WARNING("Could not find WalkToSee target %s.", action->target.c_str());
                 gActionManager.ExecuteAction(action, nullptr, false);
             }
             break;

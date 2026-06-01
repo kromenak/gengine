@@ -2,6 +2,7 @@
 
 #include "Collisions.h"
 #include "Ray.h"
+#include "ReportManager.h"
 
 Submesh::Submesh(const MeshDefinition& meshDefinition) :
     mIndexes(meshDefinition.indexData),
@@ -140,7 +141,7 @@ bool Submesh::Raycast(const Ray& ray, float& outRayT, Vector2& outUV)
     // This function doesn't support certain submesh configurations yet.
     if(mRenderMode != RenderMode::Triangles)
     {
-        std::cout << "Submesh::Raycast only supports 'Triangles' RenderMode - aborting." << std::endl;
+        LOG_ERROR("Submesh::Raycast only supports 'Triangles' RenderMode - aborting.");
         return false;
     }
 

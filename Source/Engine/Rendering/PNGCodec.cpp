@@ -8,6 +8,7 @@
 
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
+#include "Log.h"
 
 using namespace PNG;
 
@@ -16,13 +17,13 @@ namespace
     void OnPNGError(png_structp pngContext, png_const_charp message)
     {
         //png_get_error_ptr(pngContext));
-        printf("PNG error: %s\n", message);
+        Logf("PNG error: %s", message);
     }
 
     void OnPNGWarning(png_structp pngContext, png_const_charp message)
     {
         //png_get_error_ptr(pngContext));
-        printf("PNG warning: %s\n", message);
+        Logf("PNG warning: %s", message);
     }
 
     void OnPNGReadData(png_structp pngRead, png_bytep data, size_t length)

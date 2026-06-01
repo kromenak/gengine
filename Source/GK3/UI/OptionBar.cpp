@@ -618,7 +618,7 @@ void OptionBar::CreateSoundOptionsSection(std::unordered_map<std::string, IniKey
     // Create max sounds slider.
     UISlider* maxSoundsSlider = CreateSlider(config, "optSoundNumSlider", mSoundOptionsSection);
     maxSoundsSlider->SetValueChangeCallback([](float value) {
-        std::cout << "Changed max sounds to " << value << std::endl;
+        printf("Changed max sounds to %f\n", value);
     });
 }
 
@@ -647,7 +647,7 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
     // Create "incremental rendering" toggle.
     UIToggle* incRenderingToggle = CreateToggle(config, "graphOptIncremental", mGraphicOptionsSection);
     incRenderingToggle->SetToggleCallback([](bool isOn) {
-        std::cout << "Incremental rendering is toggled " << isOn << std::endl;
+        printf("Incremental rendering is toggled %s.", isOn ? "on" : "off");
     });
 
     // Create advanced graphics options button.
@@ -729,7 +729,7 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
     // Create "animation interpolation" toggle.
     UIToggle* animInterpToggle = CreateToggle(config, "advGraphOptInterpolation", mAdvancedGraphicOptionsSection);
     animInterpToggle->SetToggleCallback([](bool isOn) {
-        std::cout << "Anim interp is toggled " << isOn << std::endl;
+        printf("Animation interpolation is toggled %s.", isOn ? "on" : "off");
     });
 
     // Create "trilinear filtering" text (text can be "disabled", like a button, if graphics system doesn't support this option).
@@ -780,7 +780,7 @@ void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyV
     // Create keyboard controls button.
     UIButton* controlsButton = CreateButton(config, "gameOptControls", mGameOptionsSection);
     controlsButton->SetPressCallback([](UIButton* button) {
-        std::cout << "Controls" << std::endl;
+        printf("Controls\n");
     });
 }
 

@@ -6,11 +6,11 @@
 
 #include "BinaryReader.h"
 #include "Mesh.h"
+#include "ReportManager.h"
 #include "Submesh.h"
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
-#include "Debug.h"
 
 //#define DEBUG_OUTPUT
 #if defined(DEBUG_OUTPUT)
@@ -42,7 +42,7 @@ void Model::WriteToObjFile(const std::string& filePath)
     std::ofstream out(filePath, std::ios::out);
     if(!out.good())
     {
-        std::cout << "Can't write to file " << filePath << "!" << std::endl;
+        LOG_ERROR("Can't write to file %s!", filePath.c_str());
         return;
     }
 
@@ -131,7 +131,7 @@ void Model::WriteToObjFile(const std::string& filePath)
 
                     if(f1 < 1 || f1 > count || f2 < 1 || f2 > count || f3 < 1 || f3 > count)
                     {
-                        std::cout << "Using face index " << f1 << " which is greater than max of " << count << std::endl;
+                        LOG_WARNING("Using face index %i which is greater than max of %i.", f1, count);
                     }
 
                     out << "f " << f1;
@@ -155,7 +155,7 @@ void Model::ParseFromData(uint8_t* data, uint32_t dataLength)
     std::string identifier = reader.ReadString(4);
     if(identifier != "LDOM")
     {
-        std::cout << "MOD file does not have MODL identifier!" << std::endl;
+        LOG_ERROR("MOD file %s does not have MODL identifier!", mName.c_str());
         return;
     }
 
@@ -227,7 +227,7 @@ void Model::ParseFromData(uint8_t* data, uint32_t dataLength)
         identifier = reader.ReadString(4);
         if(identifier != "HSEM")
         {
-            std::cout << "Expected MESH identifier. Instead got " << identifier << std::endl;
+            LOG_ERROR("MOD file %s expected MESH identifier on mesh %u of %u", mName.c_str(), i, numMeshes);
             return;
         }
 
@@ -286,7 +286,7 @@ void Model::ParseFromData(uint8_t* data, uint32_t dataLength)
             identifier = reader.ReadString(4);
             if(identifier != "PRGM")
             {
-                std::cout << "Expected MGRP identifier." << std::endl;
+                LOG_ERROR("MOD file %s expected MGRP identifier on submesh %u of %u in mesh %u", mName.c_str(), j, numSubMeshes, i);
                 return;
             }
 
@@ -431,7 +431,7 @@ void Model::ParseFromData(uint8_t* data, uint32_t dataLength)
                 identifier = reader.ReadString(4);
                 if(identifier != "KDOL")
                 {
-                    std::cout << "Expected LODK identifier. Instead found " << identifier << std::endl;
+                    LOG_ERROR("MOD file %s expected LODK identifier on LODK block %u of %u", mName.c_str(), k, lodkCount);
                     return;
                 }
 
@@ -467,7 +467,7 @@ void Model::ParseFromData(uint8_t* data, uint32_t dataLength)
     identifier = reader.ReadString(4);
     if(identifier != "XDOM")
     {
-        std::cout << "Expected MODX identifier." << std::endl;
+        LOG_ERROR("MOD file %s expected MODX identifier", mName.c_str());
         return;
     }
 

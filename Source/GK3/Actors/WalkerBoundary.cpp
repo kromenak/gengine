@@ -81,7 +81,6 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
         {
             if(mPathfindingNodeSkip > 1)
             {
-                printf("Failed to find path - trying again with higher fidelity\n");
                 mPathfindingNodeSkip /= 2;
             }
             else

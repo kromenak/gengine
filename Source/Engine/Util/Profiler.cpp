@@ -5,6 +5,8 @@
 
 #include <SDL.h>
 
+#include "Log.h"
+
 uint64_t Profiler::sFrameNumber = 0L;
 std::vector<Sample> Profiler::sActiveSamples;
 
@@ -16,14 +18,14 @@ Sample::Sample(const char* name) :
 
 Sample::~Sample()
 {
-    printf("[%s] %.2f ms\n", mName, mTimer.GetMilliseconds());
+    Logf("[%s] %.2f ms", mName, mTimer.GetMilliseconds());
 }
 
 /*static*/ void Profiler::BeginFrame()
 {
     sActiveSamples.clear();
 
-    printf("===== Begin Frame %" PRIu64 " =====\n", sFrameNumber);
+    Logf("===== Begin Frame %" PRIu64 " =====", sFrameNumber);
     BeginSample("Total");
 }
 
@@ -35,7 +37,7 @@ Sample::~Sample()
 
     // End overall frame sample.
     EndSample();
-    printf("===== End Frame %" PRIu64 " =====\n", sFrameNumber);
+    Logf("===== End Frame %" PRIu64 " =====", sFrameNumber);
 
     // Increment frame number at end of frame (if you do this at beginning, it just means there's no frame 0).
     sFrameNumber++;

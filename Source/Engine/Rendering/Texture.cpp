@@ -9,6 +9,7 @@
 #include "FileSystem.h"
 #include "GAPI.h"
 #include "PNGCodec.h"
+#include "ReportManager.h"
 #include "ThreadUtil.h"
 
 namespace
@@ -385,7 +386,7 @@ void Texture::SetTransparentColor(const Color32& color)
 {
     if(mPixels == nullptr || mBytesPerPixel < 4)
     {
-        printf("ERROR: transparent color can only be set on 32-bit textures.\n");
+        LOG_ERROR("ERROR: transparent color can only be set on 32-bit textures.");
         return;
     }
 
@@ -416,7 +417,7 @@ void Texture::ClearTransparentColor()
 {
     if(mPixels == nullptr || mBytesPerPixel < 4)
     {
-        printf("ERROR: transparent color can only be cleared on 32-bit textures.\n");
+        LOG_ERROR("ERROR: transparent color can only be cleared on 32-bit textures.");
         return;
     }
 
@@ -436,7 +437,7 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
     // For now, let's assume alpha texture has same width/height as target texture.
     if(alphaTexture.mWidth != mWidth || alphaTexture.mHeight != mHeight)
     {
-        printf("Can't apply alpha texture! Width and height do not match.\n");
+        LOG_ERROR("Can't apply alpha texture! Width and height do not match.");
         return;
     }
 
@@ -446,7 +447,7 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
         CreatePixelsFromPaletteData();
         if(mPixels == nullptr)
         {
-            printf("Can't apply alpha texture! No pixel data exists.\n");
+            LOG_ERROR("Can't apply alpha texture! No pixel data exists.");
             return;
         }
     }
@@ -480,7 +481,7 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
                 mFormat = Format::RGBA;
                 break;
             default:
-                printf("Unexpected pixel format in ApplyAlphaChannel!\n");
+                LOG_ERROR("Unexpected pixel format in ApplyAlphaChannel!");
                 break;
         }
 
@@ -956,7 +957,7 @@ void Texture::LoadCompressedFormat(BinaryReader& reader)
     unsigned short fileIdentifier2 = reader.ReadUShort();
     if(fileIdentifier2 != 0x4D6E) // Mn
     {
-        printf("BMP file does not have correct identifier!\n");
+        LOG_ERROR("BMP file does not have correct identifier!");
         return;
     }
 
@@ -1024,7 +1025,7 @@ void Texture::LoadBmpFormat(BinaryReader& reader)
     unsigned int dibHeaderSize = reader.ReadUInt();
     if(dibHeaderSize != 40)
     {
-        std::cout << "Texture: unsupported dib header size of " << dibHeaderSize << std::endl;
+        LOG_ERROR("Texture %s has unsupported dib header size of %u", mName.c_str(), dibHeaderSize);
         return;
     }
 
@@ -1036,7 +1037,7 @@ void Texture::LoadBmpFormat(BinaryReader& reader)
     uint16_t colorPlaneCount = reader.ReadUShort();
     if(colorPlaneCount != 1)
     {
-        printf("Texture: unsupported color plane count: %u\n", colorPlaneCount);
+        LOG_ERROR("Texture: unsupported color plane count: %u", colorPlaneCount);
         return;
     }
 
@@ -1045,7 +1046,7 @@ void Texture::LoadBmpFormat(BinaryReader& reader)
     mBytesPerPixel = bitsPerPixel / 8;
     if(bitsPerPixel != 8 && bitsPerPixel != 24 && bitsPerPixel != 32)
     {
-        printf("Texture: unsupported bit depth: %u\n", bitsPerPixel);
+        LOG_ERROR("Texture: unsupported bit depth: %u", bitsPerPixel);
         return;
     }
 
@@ -1060,7 +1061,7 @@ void Texture::LoadBmpFormat(BinaryReader& reader)
     uint32_t compressionMethod = reader.ReadUInt();
     if(compressionMethod != 0)
     {
-        printf("Texture: unsupported compression method: %u\n", compressionMethod);
+        LOG_ERROR("Texture: unsupported compression method: %u", compressionMethod);
         return;
     }
 

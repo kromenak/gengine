@@ -98,14 +98,12 @@ RegFunc1(StartMom, void, string, WAITABLE, REL_FUNC);
 /*
 shpvoid StartMorphAnimation(std::string animationName, int animStartFrame, int morphFrames)
 {
-    std::cout << "StartMorphAnimation" << std::endl;
     return 0;
 }
 RegFunc3(StartMorphAnimation, void, string, int, int, WAITABLE, REL_FUNC);
 
 shpvoid StopMorphAnimation(std::string animationName)
 {
-    std::cout << "StopMorphAnimation" << std::endl;
     return 0;
 }
 RegFunc1(StopMorphAnimation, void, string, IMMEDIATE, REL_FUNC);

@@ -1,7 +1,8 @@
-#include <cstdio>
-
 #include "Loader.h"
 
+#include <cstdio>
+
+#include "Log.h"
 #include "ThreadPool.h"
 
 // Loader uses a single background thread, for now.
@@ -49,7 +50,6 @@ void Loader::AddLoadingTask()
     // We are now timing a new "batch" of loading tasks.
     if(sLoadingCount == 0)
     {
-        printf("Starting load\n");
         sLoadingStopwatch.Reset();
     }
 
@@ -63,7 +63,7 @@ void Loader::RemoveLoadingTask()
     // If no more active loading tasks, consider the current loading "batch" to be done.
     if(sLoadingCount == 0)
     {
-        printf("Loading completed in %f seconds.\n", sLoadingStopwatch.GetSeconds());
+        Logf("Loading completed in %f seconds.", sLoadingStopwatch.GetSeconds());
         OnLoadingFinished();
     }
 }

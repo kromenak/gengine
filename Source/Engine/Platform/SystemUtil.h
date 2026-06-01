@@ -8,6 +8,7 @@
 #include <ctime>
 #include <string>
 
+#include "Log.h"
 #include "Platform.h"
 
 #if defined(PLATFORM_WINDOWS)
@@ -45,7 +46,7 @@ namespace SystemUtil
             DWORD bufferSize = kBufferSize;
             if(!GetComputerName(computerName, &bufferSize))
             {
-                printf("Failed to get machine name.\n");
+                Log("Failed to get machine name.");
                 return std::string();
             }
             return std::string(computerName);
@@ -56,7 +57,7 @@ namespace SystemUtil
             int res = gethostname(computerName, HOST_NAME_MAX);
             if(res != 0)
             {
-                printf("Failed to get machine name.\n");
+                Log("Failed to get machine name.");
                 return std::string();
             }
             return std::string(computerName);
@@ -75,7 +76,7 @@ namespace SystemUtil
             DWORD bufferSize = kBufferSize;
             if(!GetUserName(userName, &bufferSize))
             {
-                printf("Failed to get user name.\n");
+                Log("Failed to get user name.");
                 return std::string();
             }
             return std::string(userName);
@@ -86,7 +87,7 @@ namespace SystemUtil
             int res = getlogin_r(userName, LOGIN_NAME_MAX);
             if(res != 0)
             {
-                printf("Failed to get user name.\n");
+                Log("Failed to get user name.");
                 return std::string();
             }
             return std::string(userName);

@@ -9,6 +9,7 @@
 
 #include "Asset.h"
 #include "AssetManager.h"
+#include "ReportManager.h"
 #include "StringUtil.h"
 
 class TextAsset;
@@ -38,11 +39,11 @@ T* Localizer::LoadLocalizedAsset(const std::string& name, AssetScope scope, cons
     T* asset = gAssetManager.LoadAsset<T>(GetLanguagePrefix() + name, scope, assetCacheId);
     if(asset == nullptr)
     {
-        printf("Failed to load %s%s - falling back on English (E%s).\n", GetLanguagePrefix().c_str(), name.c_str(), name.c_str());
+        LOG_WARNING("Failed to load %s%s - falling back on English (E%s).", GetLanguagePrefix().c_str(), name.c_str(), name.c_str());
         asset = gAssetManager.LoadAsset<T>("E" + name, scope, assetCacheId);
         if(asset == nullptr)
         {
-            printf("Failed to load localized asset %s!\n", name.c_str());
+            LOG_ERROR("Failed to load localized asset %s!", name.c_str());
         }
     }
     return asset;

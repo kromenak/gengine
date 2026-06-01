@@ -18,7 +18,7 @@ Localizer gLocalizer;
         if(config != nullptr && config->HasKey("Localization", "Locale"))
         {
             languagePrefix = config->GetString("Localization", "Locale", "E");
-            printf("Language preference set to %s (from GK3.ini)\n", languagePrefix.c_str());
+            LOG_GENERIC("Language preference set to %s (from GK3.ini)\n", languagePrefix.c_str());
         }
         else
         {

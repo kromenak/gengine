@@ -466,7 +466,7 @@ bool SidneyAnagramParser::RefreshSelectedAndAvailableWords()
         std::vector<std::string> wordAndTranslation = StringUtil::Split(labelText, '(', true);
         if(wordAndTranslation.size() != 2)
         {
-            printf("Unexpected format for word/translation combo in anagram parser: %s\n", labelText.c_str());
+            LOG_WARNING("Unexpected format for word/translation combo in anagram parser: %s", labelText.c_str());
             continue;
         }
 

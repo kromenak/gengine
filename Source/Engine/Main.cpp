@@ -9,12 +9,13 @@
 
 #include "BuildEnv.h"
 #include "GEngine.h"
+#include "Log.h"
 
 int main(int argc, char* argv[])
 {
-    printf("--------------------\n");
-    printf("GEngine v%s\n", PROJECT_VERSION);
-    printf("--------------------\n");
+    Log("--------------------");
+    Logf("GEngine v%s", PROJECT_VERSION);
+    Log("--------------------");
 
     // Create the engine.
     GEngine engine;

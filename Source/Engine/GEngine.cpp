@@ -463,7 +463,7 @@ bool GEngine::InitAssetManager()
                 std::vector<std::string> customBarnNames = StringUtil::Split(customBarns, ';');
                 for(auto& barnName : customBarnNames)
                 {
-                    printf("Load barn %s\n", barnName.c_str());
+                    LOG_GENERIC("Load barn %s", barnName.c_str());
                     gAssetManager.LoadAssetArchive(barnName, -1);
                 }
             }

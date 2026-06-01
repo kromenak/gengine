@@ -8,6 +8,7 @@
 #include "GK3UI.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
+#include "ReportManager.h"
 #include "Scene.h"
 #include "Texture.h"
 #include "UIButton.h"
@@ -412,7 +413,7 @@ void FingerprintScreen::Show(const std::string& nounName)
             // Can't show this fingerprint because we ran out of images!
             if(imageIndex >= kMaxFingerprintImages)
             {
-                printf("ERROR: Ran out of fingerprint images when showing fingerprint object!\n");
+                LOG_ERROR("ERROR: Ran out of fingerprint images when showing fingerprint object!");
                 continue;
             }
 

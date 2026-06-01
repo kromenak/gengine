@@ -156,7 +156,6 @@ void DialogueManager::SetConversation(const std::string& conversation, const std
 {
     // Now in a conversation!
     mConversation = conversation;
-    //std::cout << "SetConversation " << conversation << std::endl;
 
     // Save callback.
     mConversationAnimFinishCallback = finishCallback;
@@ -334,7 +333,6 @@ void DialogueManager::EndConversation(const std::function<void()>& finishCallbac
     CheckConversationAnimFinishCallback();
 
     // No longer in this conversation.
-    //std::cout << "EndConversation " << mConversation << std::endl;
     mConversation.clear();
 }
 
@@ -361,19 +359,12 @@ void DialogueManager::PlayNextDialogueLine()
     mDialogueSequenceNumber++;
 
     // Load the YAK! If we can't find it for some reason, output an error and move on right away.
-    Animation* yak = gAssetManager.LoadAsset<Animation>(Localizer::GetLanguagePrefix() + yakName, AssetScope::Scene, "yak");
+    Animation* yak = Localizer::LoadLocalizedAsset<Animation>(yakName, AssetScope::Scene, "yak");
     if(yak == nullptr)
     {
-        printf("Couldn't load yak %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), yakName.c_str(), yakName.c_str());
-
-        // Attempt to load English version.
-        yak = gAssetManager.LoadAsset<Animation>("E" + yakName, AssetScope::Scene, "yak");
-        if(yak == nullptr)
-        {
-            printf("Couldn't load yak %s - skipping to next dialogue line.\n", yakName.c_str());
-            TriggerDialogueCue();
-            return;
-        }
+        LOG_WARNING("Couldn't load yak %s - skipping to next dialogue line.", yakName.c_str());
+        TriggerDialogueCue();
+        return;
     }
 
     // Play the YAK.

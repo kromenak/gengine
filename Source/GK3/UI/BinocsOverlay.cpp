@@ -10,6 +10,7 @@
 #include "GKPrefs.h"
 #include "IniReader.h"
 #include "LocationManager.h"
+#include "ReportManager.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "Scene.h"
@@ -277,7 +278,7 @@ void BinocsOverlay::Show()
     }
     else
     {
-        printf("ERROR: Using binocs from an invalid location or timeblock\n");
+        LOG_ERROR("ERROR: Using binocs from an invalid location or timeblock");
         Hide();
     }
 
@@ -406,7 +407,7 @@ void BinocsOverlay::OnZoomInButtonPressed()
     auto it = mCurrentUseCase->zoomLocations.find(mCamZoomToLocCode);
     if(it == mCurrentUseCase->zoomLocations.end())
     {
-        printf("ERROR: no info on how to zoom to %s exists for the current location/timeblock.\n", mCamZoomToLocCode.c_str());
+        LOG_ERROR("ERROR: no info on how to zoom to %s exists for the current location/timeblock.", mCamZoomToLocCode.c_str());
         return;
     }
     mCurrentZoomLocation = &it->second;
@@ -448,7 +449,7 @@ void BinocsOverlay::OnZoomInButtonPressed()
     });
 
     // We are zoomed in!
-    printf("Zoom to %s\n", mCamZoomToLocCode.c_str());
+    //printf("Zoom to %s\n", mCamZoomToLocCode.c_str());
     mIsZoomedIn = true;
 }
 

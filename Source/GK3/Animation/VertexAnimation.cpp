@@ -7,6 +7,7 @@
 
 #include "BinaryReader.h"
 #include "GMath.h"
+#include "ReportManager.h"
 
 //#define DEBUG_OUTPUT
 
@@ -426,7 +427,7 @@ void VertexAnimation::ParseFromData(uint8_t* data, uint32_t dataLength)
     std::string identifier = reader.ReadString(4);
     if(identifier != "HTCA")
     {
-        std::cout << "ACT file does not have ACTH identifier!" << std::endl;
+        LOG_ERROR("ACT file %s does not have ACTH identifier!", mName.c_str());
         return;
     }
 
@@ -747,7 +748,7 @@ void VertexAnimation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else
                 {
-                    std::cout << "Unexpected identifier " << (int)dataId << std::endl;
+                    LOG_ERROR("ACT file %s unexpected data identifier %u.", mName.c_str(), dataId);
                 }
             } // while(byteCount > 0)
         } // iterate mesh groups

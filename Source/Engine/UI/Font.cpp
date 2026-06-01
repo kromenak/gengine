@@ -4,6 +4,7 @@
 #include "Color32.h"
 #include "IniReader.h"
 #include "Material.h"
+#include "ReportManager.h"
 #include "ShaderCache.h"
 #include "StringUtil.h"
 #include "Texture.h"
@@ -250,7 +251,7 @@ void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
             //TODO: source opacity
             else
             {
-                std::cout << "Unknown font property: " << keyValue.key << std::endl;
+                LOG_WARNING("In font %s, Unknown font property: %s", mName.c_str(), keyValue.key.c_str());
             }
         }
     }

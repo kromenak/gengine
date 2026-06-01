@@ -3,6 +3,7 @@
 #include <cstring>
 #include <iostream>
 
+#include "ReportManager.h"
 #include "ThreadUtil.h"
 
 VertexArray::VertexArray(const MeshDefinition& data) :
@@ -152,7 +153,7 @@ void VertexArray::ChangeVertexData(VertexAttribute::Semantic semantic, void* dat
     // If data is interleaved, we'll just fall back on overwriting all data.
     if(mData.vertexDefinition.layout == VertexLayout::Interleaved)
     {
-        printf("WARNING: You can only update an individual vertex attribute's data when using non-interleaved data!\n");
+        LOG_WARNING("WARNING: You can only update an individual vertex attribute's data when using non-interleaved data!\n");
         ChangeVertexData(data);
         return;
     }

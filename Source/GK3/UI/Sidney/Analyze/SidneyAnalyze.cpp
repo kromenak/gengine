@@ -343,7 +343,7 @@ void SidneyAnalyze::SetStateFromFile()
     }
     else
     {
-        printf("Unknown analyze state!\n");
+        LOG_WARNING("Unknown analyze state!");
     }
 }
 

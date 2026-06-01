@@ -10,189 +10,10 @@
 #include "GEngine.h"
 #include "GMath.h"
 #include "Profiler.h"
+#include "ReportManager.h"
 #include "SaveManager.h"
 
 AudioManager gAudioManager;
-
-PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel, FMOD::Sound* sound) :
-    channel(channel),
-    sound(sound)
-{
-    mStartFrame = GEngine::Instance()->GetFrameNumber();
-}
-
-void PlayingSoundHandle::Stop(float fadeOutTime)
-{
-    gAudioManager.Stop(*this, fadeOutTime);
-}
-
-void PlayingSoundHandle::Pause()
-{
-    if(channel != nullptr)
-    {
-        FMOD_RESULT result = channel->setPaused(true);
-        if(result != FMOD_OK)
-        {
-            std::cout << FMOD_ErrorString(result) << std::endl;
-        }
-    }
-}
-
-void PlayingSoundHandle::Resume()
-{
-    if(channel != nullptr)
-    {
-        FMOD_RESULT result = channel->setPaused(false);
-        if(result != FMOD_OK)
-        {
-            std::cout << FMOD_ErrorString(result) << std::endl;
-        }
-    }
-}
-
-bool PlayingSoundHandle::IsPlaying() const
-{
-    // No channel means not playing.
-    if(channel == nullptr) { return false; }
-
-    // Query whether channel is playing.
-    bool isPlaying = false;
-    FMOD_RESULT result = channel->isPlaying(&isPlaying);
-
-    // If result is not OK, assume the sound is not playing.
-    // Some reasons it might not be OK:
-    //  - sound has stopped playing (FMOD_ERR_INVALID_HANDLE)
-    //  - channel stolen b/c trying to play more sounds than there are channels (FMOD_ERR_CHANNEL_STOLEN)
-    if(result != FMOD_OK)
-    {
-        return false;
-    }
-
-    // Assuming OK was returned, either the channel is playing or not!
-    return isPlaying;
-}
-
-void PlayingSoundHandle::SetVolume(float volume)
-{
-    // This may fail if the channel handle is no longer valid.
-    // But that means we're trying to set volume for a sound that's not playing. So...it doesn't matter.
-    if(channel != nullptr)
-    {
-        channel->setVolume(Math::Clamp(volume, 0.0f, 1.0f));
-    }
-}
-
-void PlayingSoundHandle::SetPosition(const Vector3& position)
-{
-    if(channel != nullptr)
-    {
-        channel->set3DAttributes((const FMOD_VECTOR*)&position, nullptr);
-    }
-}
-
-bool Fader::Update(float deltaTime)
-{
-    if(fadeTimer < fadeDuration)
-    {
-        fadeTimer += deltaTime;
-
-        // Set volume based on lerp.
-        // Note that SetVolume can fail, but if so, we don't really care.
-        float volume = Math::Lerp(fadeFrom, fadeTo, fadeTimer / fadeDuration);
-        channelControl->setVolume(volume);
-
-        // After fading out completely, stop any sounds on this channel.
-        // This stops long/looping sounds from continuing when fading back in.
-        if(volume <= 0.0f)
-        {
-            channelControl->stop();
-        }
-    }
-    return fadeTimer >= fadeDuration;
-}
-
-void Fader::SetFade(float fadeTime, float targetVolume, float startVolume)
-{
-    // Set duration and reset timer.
-    fadeDuration = fadeTime;
-    fadeTimer = 0.0f;
-
-    // Save target volume.
-    fadeTo = Math::Clamp(targetVolume, 0.0f, 1.0f);
-
-    // If start volume is specified, use that value for "fade from".
-    // If not specified, the current ambient volume is used.
-    if(startVolume >= 0.0f)
-    {
-        fadeFrom = Math::Clamp(startVolume, 0.0f, 1.0f);
-    }
-    else
-    {
-        channelControl->getVolume(&fadeFrom);
-    }
-}
-
-bool Crossfader::Init(FMOD::System* system, const char* name)
-{
-    // Create channel group. This inputs to master channel group by default.
-    FMOD_RESULT result = system->createChannelGroup(name, &channelGroup);
-    if(result != FMOD_OK)
-    {
-        std::cout << FMOD_ErrorString(result) << std::endl;
-        return false;
-    }
-
-    // Create fade channel groups that feed into the parent channel group.
-    // So you end up with [Fade Channel Group] --> [Parent Channel Group] --> [Master Channel Group] --> [Your Ears].
-    for(int i = 0; i < 2; ++i)
-    {
-        char childName[64];
-        snprintf(childName, sizeof(childName), "%s %i", name, i);
-
-        result = system->createChannelGroup(childName, &faderChannelGroups[i]);
-        if(result != FMOD_OK)
-        {
-            std::cout << FMOD_ErrorString(result) << std::endl;
-            return false;
-        }
-
-        // Make the fade channel group an input to the ambient channel group.
-        result = channelGroup->addGroup(faderChannelGroups[i]);
-        if(result != FMOD_OK)
-        {
-            std::cout << FMOD_ErrorString(result) << std::endl;
-            return false;
-        }
-
-        // Tell associated fader to use this channel group when fading.
-        faders[i].channelControl = faderChannelGroups[i];
-    }
-
-    // All's good.
-    return true;
-}
-
-void Crossfader::Update(float deltaTime)
-{
-    // Update faders.
-    for(auto& fader : faders)
-    {
-        fader.Update(deltaTime);
-    }
-}
-
-void Crossfader::Swap()
-{
-    // Fade out current.
-    faders[fadeIndex].SetFade(1.0f, 0.0f);
-
-    // Go to next ambient fade group.
-    fadeIndex++;
-    fadeIndex %= 2;
-
-    // Fade in next.
-    faders[fadeIndex].SetFade(1.0f, 1.0f);
-}
 
 bool AudioManager::Initialize()
 {
@@ -202,7 +23,7 @@ bool AudioManager::Initialize()
     FMOD_RESULT result = FMOD::System_Create(&mSystem);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to create FMOD system: %s", FMOD_ErrorString(result));
         return false;
     }
 
@@ -211,14 +32,14 @@ bool AudioManager::Initialize()
     result = mSystem->getVersion(&version);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to get FMOD version: %s", FMOD_ErrorString(result));
         return false;
     }
 
     // Verify that the FMOD library version matches the header version.
     if(version < FMOD_VERSION)
     {
-        std::cout << "FMOD lib version " << version << " doesn't match header version " <<  FMOD_VERSION << std::endl;
+        LOG_ERROR("FMOD library version %u doesn't match header version %u.", version, FMOD_VERSION);
         return false;
     }
 
@@ -226,7 +47,7 @@ bool AudioManager::Initialize()
     result = mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to init FMOD system: %s", FMOD_ErrorString(result));
         return false;
     }
 
@@ -235,7 +56,7 @@ bool AudioManager::Initialize()
     result = mSystem->set3DSettings(1.0f, 1.0f, 1.0f);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to set FMOD 3D settings: %s", FMOD_ErrorString(result));
         return false;
     }
 
@@ -243,7 +64,7 @@ bool AudioManager::Initialize()
     result = mSystem->createChannelGroup("SFX", &mSFXChannelGroup);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to create FMOD SFX channel group: %s", FMOD_ErrorString(result));
         return false;
     }
 
@@ -251,7 +72,7 @@ bool AudioManager::Initialize()
     result = mSystem->createChannelGroup("VO", &mVOChannelGroup);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to create FMOD VO channel group: %s", FMOD_ErrorString(result));
         return false;
     }
 
@@ -259,7 +80,7 @@ bool AudioManager::Initialize()
     result = mSystem->createChannelGroup("Ambient", &mAmbientChannelGroup);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to create FMOD Ambient channel group: %s", FMOD_ErrorString(result));
         return false;
     }
 
@@ -267,7 +88,7 @@ bool AudioManager::Initialize()
     result = mSystem->createChannelGroup("Music", &mMusicChannelGroup);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to create FMOD Music channel group: %s", FMOD_ErrorString(result));
         return false;
     }
 
@@ -275,7 +96,7 @@ bool AudioManager::Initialize()
     result = mSystem->getMasterChannelGroup(&mMasterChannelGroup);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to get FMOD master channel group: %s", FMOD_ErrorString(result));
         return false;
     }
 
@@ -440,7 +261,7 @@ void AudioManager::UpdateListener(const Vector3& position, const Vector3& veloci
                                                          (const FMOD_VECTOR*)&forward, (const FMOD_VECTOR*)&up);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to update FMOD 3D listener attributes: %s", FMOD_ErrorString(result));
     }
 }
 
@@ -462,6 +283,7 @@ PlayingSoundHandle AudioManager::Play(const PlayAudioParams& params)
     FMOD::Sound* sound = CreateSound(params.audio, params.audioType, params.is3d, (params.loopCount < 0 || params.loopCount > 0));
     if(sound == nullptr)
     {
+        LOG_WARNING("Failed to create FMOD sound.");
         return PlayingSoundHandle();
     }
 
@@ -469,6 +291,7 @@ PlayingSoundHandle AudioManager::Play(const PlayAudioParams& params)
     FMOD::Channel* channel = CreateChannel(sound, GetChannelGroupForAudioType(params.audioType));
     if(channel == nullptr)
     {
+        LOG_WARNING("Failed to create FMOD channel.");
         return PlayingSoundHandle();
     }
 
@@ -836,7 +659,8 @@ FMOD::Sound* AudioManager::CreateSound(Audio* audio, AudioType audioType, bool i
     FMOD_RESULT result = mSystem->createSound(reinterpret_cast<char*>(audioBuffer), mode, &exinfo, &sound);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to create FMOD sound: %s", FMOD_ErrorString(result));
+        return nullptr;
     }
 
     // If we made a copy of the audio data (for streaming audio), save it as userdata so we can delete it later.
@@ -899,7 +723,7 @@ FMOD::Channel* AudioManager::CreateChannel(FMOD::Sound* sound, FMOD::ChannelGrou
     FMOD_RESULT result = mSystem->playSound(sound, channelGroup, true, &channel);
     if(result != FMOD_OK)
     {
-        std::cout << FMOD_ErrorString(result) << std::endl;
+        LOG_ERROR("Failed to create FMOD channel: %s", FMOD_ErrorString(result));
     }
     return channel;
 }

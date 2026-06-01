@@ -179,14 +179,12 @@ RegFunc3(IsWalkingActorNear, int, string, string, float, IMMEDIATE, REL_FUNC);
 /*
 std::string GetIndexedPosition(int index)
 {
-    std::cout << "GetIndexedPosition" << std::endl;
     return "";
 }
 RegFunc1(GetIndexedPosition, string, int, IMMEDIATE, DEV_FUNC);
 
 int GetPositionCount()
 {
-    std::cout << "GetPositionCount" << std::endl;
     return 0;
 }
 RegFunc0(GetPositionCount, int, IMMEDIATE, DEV_FUNC);
@@ -290,14 +288,12 @@ RegFunc1(DisableHitTestModel, void, string, IMMEDIATE, REL_FUNC);
 /*
 shpvoid ShowModelGroup(std::string groupName)
 {
-    std::cout << "ShowModelGroup" << std::endl;
     return 0;
 }
 RegFunc1(ShowModelGroup, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideModelGroup(std::string groupName)
 {
-    std::cout << "HideModelGroup" << std::endl;
     return 0;
 }
 RegFunc1(HideModelGroup, void, string, IMMEDIATE, REL_FUNC);
@@ -350,14 +346,12 @@ RegFunc2(WalkerBoundaryUnblockRegion, void, int, int, IMMEDIATE, REL_FUNC);
 /*
 shpvoid WalkNear(std::string actorName, std::string positionName)
 {
-    std::cout << "WalkNear" << std::endl;
     return 0;
 }
 RegFunc2(WalkNear, void, string, string, WAITABLE, REL_FUNC);
 
 shpvoid WalkNearModel(std::string actorName, std::string modelName)
 {
-    std::cout << "WalkNearModel" << std::endl;
     return 0;
 }
 RegFunc2(WalkNearModel, void, string, string, WAITABLE, REL_FUNC);
@@ -428,7 +422,6 @@ RegFunc2(WalkToAnimation, void, string, string, WAITABLE, REL_FUNC);
 /*
 shpvoid WalkToSeeModel(std::string actorName, std::string modelName)
 {
-    std::cout << "WalkToSeeModel" << std::endl;
     return 0;
 }
 RegFunc2(WalkToSeeModel, void, string, string, WAITABLE, REL_FUNC);

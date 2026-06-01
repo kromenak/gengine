@@ -7,6 +7,10 @@
 #include "minilzo.h"
 #include "zlib.h"
 
+#include "ReportManager.h"
+
+#define LOG_BARN(x, ...) gReportManager.Logf("BarnFileMgr", x, __VA_ARGS__)
+
 BarnFile::BarnFile(const std::string& filePath) :
     mName(filePath),
     mReader(filePath.c_str())
@@ -14,7 +18,7 @@ BarnFile::BarnFile(const std::string& filePath) :
     // Make sure we can actually read this file.
     if(!mReader.CanRead())
     {
-        std::cout << "Can't read barn file at " << filePath << "\n";
+        LOG_BARN("Can't read Barn file at %s!", filePath.c_str());
         return;
     }
 
@@ -24,7 +28,7 @@ BarnFile::BarnFile(const std::string& filePath) :
     uint32_t barnIdentifier = mReader.ReadUInt();
     if(gameIdentifier != kGameIdentifier && barnIdentifier != kBarnIdentifier)
     {
-        std::cout << "Invalid file type!\n";
+        LOG_BARN("Invalid Barn file type identifier!");
         return;
     }
 
@@ -239,7 +243,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     // The "-1" case can happen when reading the last file in the barn, but asset is still valid.
     if(readCount != asset.size && readCount != asset.size - 1)
     {
-        std::cout << "Didn't read desired number of bytes.\n";
+        LOG_BARN("Didn't read expected number of Barn file bytes when creating asset buffer for %s.", assetName.c_str());
         delete[] compressedBuffer;
         return nullptr;
     }
@@ -264,7 +268,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         int result = inflateInit(&strm);
         if(result != Z_OK)
         {
-            std::cout << "Error when calling inflateInit: " << result << "\n";
+            LOG_BARN("Error when calling inflateInit: %i", result);
             delete[] compressedBuffer;
             delete[] buffer;
             return nullptr;
@@ -274,7 +278,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         result = inflate(&strm, Z_FINISH);
         if(result != Z_STREAM_END)
         {
-            std::cout << "Inflate didn't inflate entire stream, or an error occurred: " << result << "\n";
+            LOG_BARN("Inflate didn't inflate entire stream, or an error occurred: %i", result);
             delete[] compressedBuffer;
             delete[] buffer;
             return nullptr;
@@ -284,7 +288,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         result = inflateEnd(&strm);
         if(result != Z_OK)
         {
-            std::cout << "Error while ending inflate: " << result << "\n";
+            LOG_BARN("Error while ending inflate: %i", result);
             delete[] compressedBuffer;
             delete[] buffer;
             return nullptr;
@@ -303,7 +307,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
             }
             else
             {
-                std::cout << "Failed to init LZO!\n";
+                LOG_BARN("Failed to init LZO!");
                 delete[] compressedBuffer;
                 delete[] buffer;
                 return nullptr;
@@ -322,7 +326,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         // I'll let it slide for now...but it might indicate an earlier read error, or I'm missing something somewhere.
         if(result != LZO_E_OK && result != LZO_E_INPUT_NOT_CONSUMED)
         {
-            std::cout << "Error during LZO decompress: " << result << "\n";
+            LOG_BARN("Error during LZO decompress: %i", result);
             delete[] compressedBuffer;
             delete[] buffer;
             return nullptr;
@@ -333,7 +337,7 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     }
     else
     {
-        std::cout << "Asset " << asset.name << " has invalid compression type " << static_cast<int>(asset.compressionType) << "\n";
+        LOG_BARN("Asset %s has an invalid compression type %i", asset.name.c_str(), static_cast<int>(asset.compressionType));
         delete[] compressedBuffer;
         delete[] buffer;
         return nullptr;

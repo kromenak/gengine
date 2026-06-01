@@ -23,7 +23,7 @@ namespace
     {
         for(auto& action : actions)
         {
-            std::cout << "Action " << action->ToString() << std::endl;
+            printf("Action %s\n", action->ToString().c_str());
         }
     }
 
@@ -60,6 +60,11 @@ void ActionManager::Init()
     // Create action bar, which will be used to choose nouns/verbs by the player.
     mActionBar = new ActionBar();
     mActionBar->SetIsDestroyOnLoad(false);
+
+    // Configure actions report stream.
+    ReportStream& actions = gReportManager.GetReportStream("Actions");
+    actions.AddOutput(ReportOutput::Debugger | ReportOutput::SharedMemory | ReportOutput::Console);
+    actions.AddContent(ReportContent::AllButDateMachineUser);
 }
 
 void ActionManager::AddActionSet(const std::string& assetName)
@@ -728,7 +733,7 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
     //TODO: Add any more global conditions.
 
     // Assume any not found case is false by default.
-    std::cout << "Unknown NVC case " << caseLabel << std::endl;
+    LOG_WARNING("Unknown NVC case %s", caseLabel.c_str());
     return false;
 }
 
@@ -881,7 +886,7 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                 }
                 else
                 {
-                    printf("Unaccounted for case label %s!\n", entry.first.c_str());
+                    LOG_ERROR("Unaccounted for case label %s!", entry.first.c_str());
                 }
 
                 // If we found a case with a higher score, we'll use that instead.

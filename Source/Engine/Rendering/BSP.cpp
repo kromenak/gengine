@@ -611,7 +611,7 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
     std::string identifier = reader.ReadString(4);
     if(identifier != "NECS")
     {
-        std::cout << "BSP file does not have SCEN identifier! Instead has " << identifier << std::endl;
+        LOG_ERROR("BSP file %s does not have SCEN file identifier!", mName.c_str());
         return;
     }
 

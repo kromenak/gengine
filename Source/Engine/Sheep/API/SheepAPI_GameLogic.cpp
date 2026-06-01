@@ -51,9 +51,7 @@ RegFunc1(GetFlag, int, string, IMMEDIATE, REL_FUNC);
 int GetFlagInt(int flagEnum)
 {
     // This function gets a flag, not by name, but by internal integer value.
-    // I'm a bit unclear how any Sheep caller would know this value, and how
-    // this value would be persistant across runs of the game...
-    std::cout << "GetFlagInt was called!" << std::endl;
+    // I'm a bit unclear how any Sheep caller would know this value, and how this value would be persistant across runs of the game...
     return 0;
 }
 RegFunc1(GetFlagInt, int, int, IMMEDIATE, REL_FUNC);

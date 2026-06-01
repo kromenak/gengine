@@ -4,6 +4,7 @@
 
 #include "AudioManager.h"
 #include "BinaryReader.h"
+#include "ReportManager.h"
 
 TYPEINFO_INIT(Audio, Asset, GENERATE_TYPE_ID)
 {
@@ -32,7 +33,7 @@ void Audio::Load(AssetData& data)
     std::string identifier = reader.ReadString(4);
     if(identifier != "RIFF")
     {
-        std::cout << "WAV file does not have RIFF identifier!\n";
+        LOG_ERROR("WAV file does not have RIFF identifier!");
         return;
     }
 
@@ -43,7 +44,7 @@ void Audio::Load(AssetData& data)
     identifier = reader.ReadString(4);
     if(identifier != "WAVE")
     {
-        std::cout << "WAV file does not have WAVE identifier!\n";
+        LOG_ERROR("WAV file does not have WAVE identifier!");
         return;
     }
 
@@ -52,7 +53,7 @@ void Audio::Load(AssetData& data)
     identifier = reader.ReadString(4);
     if(identifier != "fmt ")
     {
-        std::cout << "WAV file chunk didn't start with 'fmt ' identifier!\n";
+        LOG_ERROR("WAV file chunk didn't start with 'fmt ' identifier!");
         return;
     }
 
@@ -96,7 +97,7 @@ void Audio::Load(AssetData& data)
         identifier = reader.ReadString(4);
         if(identifier != "fact")
         {
-            std::cout << "Non-PCM WAV file is missing fact chunk!\n";
+            LOG_ERROR("Non-PCM WAV file is missing fact chunk!");
             return;
         }
 
@@ -109,7 +110,7 @@ void Audio::Load(AssetData& data)
     identifier = reader.ReadString(4);
     if(identifier != "data")
     {
-        std::cout << "WAV file is missing data chunk!\n";
+        LOG_ERROR("WAV file is missing data chunk!");
         return;
     }
 

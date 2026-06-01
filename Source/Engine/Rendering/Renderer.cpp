@@ -15,6 +15,7 @@
 #include "Profiler.h"
 #include "RectTransform.h"
 #include "RenderTransforms.h"
+#include "ReportManager.h"
 #include "SaveManager.h"
 #include "SceneManager.h"
 #include "SequentialFilePathGenerator.h"
@@ -99,13 +100,14 @@ bool Renderer::Initialize()
     Window::Create("Gabriel Knight 3");
     if(Window::Get() == nullptr)
     {
-        printf("Failed to create game window!\n");
+        LOG_FATAL("Failed to create game window!");
         return false;
     }
 
     // Set which graphics API to use.
     if(!GAPI::Set<GAPI_OpenGL>())
     {
+        LOG_FATAL("Failed to initialize OpenGL!");
         return false;
     }
 

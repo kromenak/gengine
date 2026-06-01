@@ -1,6 +1,6 @@
 #include "RenderTexture.h"
 
-#include <iostream>
+#include "ReportManager.h"
 
 RenderTexture::RenderTexture(int width, int height) :
     mRenderTexture(width, height, Color32::Black)
@@ -24,7 +24,7 @@ RenderTexture::RenderTexture(int width, int height) :
     GLenum result = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if(result != GL_FRAMEBUFFER_COMPLETE)
     {
-        std::cout << "Problem creating render texture frame buffer!" << std::endl;
+        LOG_ERROR("Problem creating render texture frame buffer!");
     }
 
     // Unbind frame buffer until we need it again.

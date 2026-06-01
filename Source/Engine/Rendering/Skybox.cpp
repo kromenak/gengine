@@ -8,6 +8,7 @@
 #include "Mesh.h"
 #include "Ray.h"
 #include "Renderer.h"
+#include "ReportManager.h"
 #include "ShaderCache.h"
 #include "Texture.h"
 
@@ -180,37 +181,31 @@ uint8_t Skybox::Raycast(const Ray& ray)
             Vector2 finalUV;
             if(Math::Approximately(hitPoint.x, -kSkyboxSize, kSideDetectPrecision))
             {
-                //printf("Left\n");
                 finalUV = Vector2(pointUV.z, pointUV.y);
                 maskTexture = mMaskTextures.named.left;
             }
             else if(Math::Approximately(hitPoint.x, kSkyboxSize, kSideDetectPrecision))
             {
-                //printf("Right\n");
                 finalUV = Vector2(1.0f - pointUV.z, pointUV.y);
                 maskTexture = mMaskTextures.named.right;
             }
             else if(Math::Approximately(hitPoint.z, -kSkyboxSize, kSideDetectPrecision))
             {
-                //printf("Back\n");
                 finalUV = Vector2(1.0f - pointUV.x, pointUV.y);
                 maskTexture = mMaskTextures.named.front;
             }
             else if(Math::Approximately(hitPoint.z, kSkyboxSize, kSideDetectPrecision))
             {
-                //printf("Front\n");
                 finalUV = Vector2(pointUV.x, pointUV.y);
                 maskTexture = mMaskTextures.named.back;
             }
             else if(Math::Approximately(hitPoint.y, -kSkyboxSize, kSideDetectPrecision))
             {
-                //printf("Down\n");
                 finalUV = Vector2(1.0f - pointUV.z, pointUV.x);
                 maskTexture = mMaskTextures.named.bottom;
             }
             else if(Math::Approximately(hitPoint.y, kSkyboxSize, kSideDetectPrecision))
             {
-                //printf("Up\n");
                 finalUV = Vector2(1.0f - pointUV.z, 1.0f - pointUV.x);
                 maskTexture = mMaskTextures.named.top;
             }
@@ -275,7 +270,7 @@ void Skybox::CreateMeshAndCubemap()
         }
         if(defaultTexture == nullptr)
         {
-            printf("Can't create skybox - no textures were provided!\n");
+            LOG_WARNING("Can't create skybox - no textures were provided!");
             return;
         }
 

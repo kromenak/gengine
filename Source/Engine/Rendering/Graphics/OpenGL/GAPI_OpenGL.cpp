@@ -4,6 +4,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 
+#include "Log.h"
 #include "Matrix4.h"
 #include "Platform.h"
 #include "Window.h"
@@ -12,7 +13,7 @@
 // This macro just makes the syntax clearer for the reader.
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-#define ERR_CHECK(x) if((x) != 0) { printf("%s\n", SDL_GetError()); }
+#define ERR_CHECK(x) if((x) != 0) { Logf("OpenGL Error: %s", SDL_GetError()); }
 
 namespace GLState
 {
@@ -191,7 +192,7 @@ bool GAPI_OpenGL::Init()
     mContext = SDL_GL_CreateContext(Window::Get());
     if(mContext == nullptr)
     {
-        printf("Failed to create OpenGL context: %s\n", SDL_GetError());
+        Logf("Failed to create OpenGL context: %s", SDL_GetError());
         return false;
     }
 
@@ -207,7 +208,7 @@ bool GAPI_OpenGL::Init()
         GLenum glewInitResult = glewInit();
         if(glewInitResult != GLEW_OK)
         {
-            printf("glewInit failed! Error: %s\n", glewGetErrorString(glewInitResult));
+            Logf("glewInit failed! Error: %s", glewGetErrorString(glewInitResult));
             return false;
         }
 
@@ -216,7 +217,7 @@ bool GAPI_OpenGL::Init()
         GLenum error = glGetError();
         if(error != GL_NO_ERROR)
         {
-            printf("glewInit generated OpenGL error: %d\n", error);
+            Logf("glewInit generated OpenGL error: %d", error);
         }
     }
 
@@ -691,7 +692,7 @@ namespace
             GLchar* errorLog = new GLchar[errorLength];
             glGetShaderInfoLog(shaderId, errorLength, &errorLength, errorLog);
 
-            printf("Failed to compile shader: %s\n", errorLog);
+            Logf("Failed to compile shader: %s", errorLog);
             delete[] errorLog;
             glDeleteShader(shaderId);
             return GL_NONE;
@@ -730,7 +731,7 @@ namespace
             GLchar* errorLog = new GLchar[errorLength];
             glGetProgramInfoLog(program, errorLength, &errorLength, errorLog);
 
-            printf("Failed to link shader program: %s\n", errorLog);
+            Logf("Failed to link shader program: %s", errorLog);
             delete[] errorLog;
         }
 

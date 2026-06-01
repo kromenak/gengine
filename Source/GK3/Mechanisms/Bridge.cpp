@@ -11,6 +11,7 @@
 #include "GKObject.h"
 #include "InputManager.h"
 #include "PersistState.h"
+#include "ReportManager.h"
 #include "SceneManager.h"
 
 namespace
@@ -284,7 +285,7 @@ void Bridge::JumpToTile(int index)
         {
             // I don't think this puzzle has any opportunity for left/right jumps like this.
             // Going to leave this unimplemented for now.
-            printf("Left/right jump during bridge puzzle!?\n");
+            LOG_WARNING("Left/right jump during bridge puzzle!?");
         }
         else if(jumpDir.x == jumpDir.y) // diagonal
         {
