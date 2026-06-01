@@ -9,14 +9,23 @@
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "LocationManager.h"
+#include "Log.h"
 #include "OSDialog.h"
+#include "Platform.h"
+#include "StreamLockGuard.h"
 #include "SystemUtil.h"
 
 ReportStream::ReportStream(const std::string& name) :
     mName(name),
-    mFilename(name + ".log")
+    mFilePath(name + ".log")
 {
 
+}
+
+ReportStream::~ReportStream()
+{
+    // Return any stream handles we've obtained.
+    StreamManager::ReturnStream(mFileStreamHandle);
 }
 
 void ReportStream::Log(const std::string& content)
@@ -33,16 +42,18 @@ void ReportStream::Log(const std::string& content)
         gConsole.AddToScrollback(output);
     }
 
-    // Handle debugger output type.
-    if((mOutput & ReportOutput::Debugger) != ReportOutput::None)
-    {
-        printf("%s", output.c_str());
-    }
-
     // Handle file output type.
     if((mOutput & ReportOutput::File) != ReportOutput::None)
     {
+        // If no file stream yet, grab one.
+        if(mFileStreamHandle == nullptr)
+        {
+            mFileStreamHandle = StreamManager::TakeFileStream(mFilePath, mFileTruncate);
+        }
 
+        // Lock the file stream, write, then unlock.
+        StreamLockGuard lock(mFileStreamHandle);
+        lock.stream << output;
     }
 
     // Handle shared memory output type (or rather...DON'T!).
@@ -55,6 +66,25 @@ void ReportStream::Log(const std::string& content)
     if((mOutput & ReportOutput::OSDialog) != ReportOutput::None)
     {
         OSDialog::Ok(OSDIALOG_INFO, output);
+    }
+
+    // Handle debugger output type.
+    if((mOutput & ReportOutput::Debugger) != ReportOutput::None)
+    {
+        // On Windows, we can output the string to the debugger (usually Visual Studio 20XX) "output" panel.
+        #if defined(PLATFORM_WINDOWS)
+        OutputDebugStringA(output.c_str());
+        #endif
+
+        // "::Log" automatically adds a newline to outputs, so if the output has a newline at the end, remove that.
+        if(!output.empty() && output.back() == '\n')
+        {
+            output.pop_back();
+        }
+
+        // For most platforms, outputting to standard output via printf achieves the goal - the string appears in Xcode, CLion, etc.
+        // Even on Windows, this is handy to see log output in the Command Prompt window when using /subsystem:console.
+        ::Log(output.c_str());
     }
 
     // If this report stream has an action associated with it, take that action.
@@ -76,11 +106,43 @@ void ReportStream::Log(const std::string& content)
     }
 }
 
-std::string ReportStream::BuildOutputString(const std::string& content)
+void ReportStream::Logf(const char* format, ...)
 {
-    std::ostringstream outputStr;
+    // Convert to va_list and pass to other Logf.
+    va_list args;
+    va_start(args, format);
+    Logf(format, args);
+    va_end(args);
+}
 
+void ReportStream::Logf(const char* format, va_list args)
+{
+    // Format to an std::string and pass to the basic Log function.
+    Log(StringUtil::vFormatf(format, args));
+}
+
+void ReportStream::SetFilePath(const std::string& filePath)
+{
+    // Has the file changed from what was previously set?
+    if(filePath != mFilePath)
+    {
+        // Close the previous file stream, if any.
+        if(mFileStreamHandle != nullptr)
+        {
+            StreamManager::ReturnStream(mFileStreamHandle);
+            mFileStreamHandle = nullptr;
+        }
+
+        // Save the new file path. A stream will be opened the first time we write to this path.
+        mFilePath = filePath;
+    }
+}
+
+std::string ReportStream::BuildOutputString(const std::string& content) const
+{
     // If we want "Begin" content, we'll add some data before the real content.
+    std::ostringstream outputStr;
+    bool addedContent = false;
     if((mContent & ReportContent::Begin) != ReportContent::None)
     {
         // The begin string always starts with 5 dashes.
@@ -166,19 +228,29 @@ std::string ReportStream::BuildOutputString(const std::string& content)
         {
             outputStr << "--------------------";
         }
-        outputStr << "\n";
+        addedContent = true;
     }
 
     // If we want "Content" content, that means we want to output what was passed in!
     // It seems pretty rare to NOT do this...but you can!
     if((mContent & ReportContent::Content) != ReportContent::None)
     {
-        outputStr << content << "\n";
+        // Add a newline before the main content if we added begin content.
+        if(addedContent)
+        {
+            outputStr << "\n";
+        }
+        outputStr << content;
+        addedContent = true;
     }
 
     // If we want "End" content, we'll add an empty line for spacing.
     if((mContent & ReportContent::End) != ReportContent::None)
     {
+        if(addedContent)
+        {
+            outputStr << "\n";
+        }
         outputStr << "\n";
     }
     return outputStr.str();

@@ -8,6 +8,7 @@
 #pragma once
 #include <string>
 
+#include "Log.h"
 #include "ReportStream.h"
 #include "StringUtil.h"
 
@@ -33,15 +34,19 @@ public:
     void SetStreamFileTruncate(const std::string& streamName, bool truncate);
 
     void Log(const std::string& streamName, const std::string& content);
+    void Logf(const std::string& streamName, const char* format, ...);
 
-    // Subsystems may want to get a ReportStream and call functions on it directly.
     ReportStream& GetReportStream(const std::string& streamName);
 
 private:
     // All defined streams, keyed by stream name.
-    std::unordered_map_ci<std::string, ReportStream> mStreams;
-
-    ReportStream& GetOrCreateStream(const std::string& streamName);
+    std::string_map_ci<ReportStream> mStreams;
 };
 
 extern ReportManager gReportManager;
+
+// Convenience macros for logging to common built-in log streams.
+#define LOG_GENERIC(x, ...) gReportManager.Logf("Generic", x, __VA_ARGS__);
+#define LOG_WARNING(x, ...) gReportManager.Logf("Warning", x, __VA_ARGS__);
+#define LOG_ERROR(x, ...) gReportManager.Logf("Error", x, __VA_ARGS__);
+#define LOG_FATAL(x, ...) gReportManager.Logf("Fatal", x, __VA_ARGS__);

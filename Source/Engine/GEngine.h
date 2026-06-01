@@ -70,6 +70,7 @@ private:
     // If true, the application continues to update, even when it doesn't have focus.
     bool mAlwaysActive = false;
 
+    void InitReportStreams();
     bool InitAssetManager();
 
     void ShowOpeningMovies();

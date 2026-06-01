@@ -29,6 +29,7 @@
 #include "Renderer.h"
 #include "SaveManager.h"
 #include "SceneManager.h"
+#include "SheepManager.h"
 #include "TextInput.h"
 #include "ThreadPool.h"
 #include "ThreadUtil.h"
@@ -73,8 +74,14 @@ bool GEngine::Initialize()
     ThreadUtil::Init();
     ThreadPool::Init(4);
 
+    // Init report streams, for system logging.
+    InitReportStreams();
+
     // Tell console to log itself to the "Console" report stream.
     gConsole.SetReportStream(&gReportManager.GetReportStream("Console"));
+
+    // Init Sheep system.
+    gSheepManager.Init();
 
     // Init asset manager.
     if(!InitAssetManager())
@@ -295,6 +302,42 @@ void GEngine::OnPersist(PersistState& ps)
     ps.Xfer(PERSIST_VAR(mFrameNumber));
     ps.Xfer(PERSIST_VAR(mTimeMultiplier));
     ps.Xfer(PERSIST_VAR(mDemoMode));
+}
+
+void GEngine::InitReportStreams()
+{
+    // Seems to be for tracking resource usage, but I haven't ever seen anything written to it.
+    ReportStream& resTrack = gReportManager.GetReportStream("ResTrack");
+    resTrack.AddOutput(ReportOutput::File);
+    resTrack.AddContent(ReportContent::AllButDateMachineUser);
+    resTrack.SetFilePath("ResTrack.log");
+    resTrack.SetFileTruncate(true);
+
+    // Despite the name, I only ever see asset load/unload messages written to this stream.
+    ReportStream& gengine = gReportManager.GetReportStream("GEngine");
+    gengine.AddOutput(ReportOutput::Debugger | ReportOutput::SharedMemory | ReportOutput::Console);
+    gengine.AddContent(ReportContent::Content);
+
+    // A stream for ???.
+    ReportStream& pathFileMgr = gReportManager.GetReportStream("PathFileMgr");
+    pathFileMgr.AddOutput(ReportOutput::Debugger | ReportOutput::SharedMemory);
+    pathFileMgr.AddContent(ReportContent::Content);
+
+    // A stream for logging barn file loading/unloading.
+    ReportStream& barnFileMgr = gReportManager.GetReportStream("BarnFileMgr");
+    barnFileMgr.AddOutput(ReportOutput::Debugger | ReportOutput::SharedMemory);
+    barnFileMgr.AddContent(ReportContent::Content);
+
+    // A stream that ostensibly logs game logic messages. But I've never seen anything written to it!
+    ReportStream& gameLogic = gReportManager.GetReportStream("GameLogic");
+    gameLogic.AddOutput(ReportOutput::Debugger | ReportOutput::SharedMemory | ReportOutput::Console);
+    gameLogic.AddContent(ReportContent::AllButDateMachineUser);
+
+    // GK3 internally creates this "Status" stream, but I've never seen anything get written to it.
+    // No idea what it's used for, if anything.
+    ReportStream& status = gReportManager.GetReportStream("Status");
+    status.AddOutput(ReportOutput::Debugger | ReportOutput::SharedMemory | ReportOutput::Console);
+    status.AddContent(ReportContent::Content);
 }
 
 bool GEngine::InitAssetManager()

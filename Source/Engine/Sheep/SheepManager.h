@@ -13,6 +13,8 @@ class PersistState;
 class SheepManager
 {
 public:
+    void Init();
+
     // Compilation - convert text-based SheepScript to a compiled SheepScript.
     SheepScript* Compile(const char* filePath);
     SheepScript* Compile(const std::string& name, const std::string& sheep);
