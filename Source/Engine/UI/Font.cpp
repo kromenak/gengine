@@ -246,9 +246,19 @@ void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
                     mBackgroundColor = keyValue.GetValueAsColor32();
                 }
             }
-            //TODO: function
-            //TODO: destination opacity
-            //TODO: source opacity
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "source opacity"))
+            {
+                // The original game included opacity values in the font for the fading status bar text.
+                // For this new engine, the value isn't needed, so silently ignore it.
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "destination opacity"))
+            {
+                // Same comment as above.
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "function"))
+            {
+                //TODO: The only function used is ADD. Unsure if need to add any support in new engine. Things seem to work fine?
+            }
             else
             {
                 LOG_WARNING("In font %s, Unknown font property: %s", mName.c_str(), keyValue.key.c_str());
