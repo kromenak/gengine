@@ -4,6 +4,7 @@
 // Any object that exists in the game world and has position/rotation/scale.
 //
 #pragma once
+#include <string>
 #include <vector>
 
 #include "Component.h"

@@ -161,6 +161,11 @@ bool Actor::IsActive() const
 
 void Actor::Destroy()
 {
+    // When destroying an object, it should go from Active -> Inactive -> Destroyed.
+    // So, first make sure the object is Inactive. This calls OnInactive/OnDisable functions.
+    SetActive(false);
+
+    // Then, destroy the actor and all children.
     mState = State::Destroyed;
 
     // Destroying an actor also destroys its children.
