@@ -88,6 +88,7 @@ target_include_directories(gk3 PRIVATE
 # Platform-agnostic defines.
 target_compile_definitions(gk3 PRIVATE
     $<$<CONFIG:Debug>:DEBUG>
+    $<$<CONFIG:MinSizeRel,RelWithDebInfo,Release>:RELEASE>
 )
 
 # Warning/error settings - generally, enable ALL warnings, but disable a subset we don't want.
