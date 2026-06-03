@@ -8,6 +8,13 @@
 
 #include "RectTransform.h"
 
+enum class UIWidgetInputMode
+{
+    ReceivesNoInput,            // Widget can't receive any input.
+    ReceivesInputWithinRect,    // Widget receives input if pointer is over the widget's rect. Most common/normal approach.
+    ReceivesAllInput            // Widget ALWAYS receives input. Used mainly for fullscreen input capture.
+};
+
 class UIWidget : public Component
 {
     TYPEINFO_SUB(UIWidget, Component);
@@ -27,8 +34,11 @@ public:
 
     RectTransform* GetRectTransform() const { return mRectTransform; }
 
-    void SetReceivesInput(bool receivesInput) { mReceivesInput = receivesInput; }
-    bool ReceivesInput() const { return mReceivesInput; }
+    void SetReceivesInput(bool receivesInput) { mInputMode = receivesInput ? UIWidgetInputMode::ReceivesInputWithinRect : UIWidgetInputMode::ReceivesNoInput; }
+    bool ReceivesInput() const { return mInputMode != UIWidgetInputMode::ReceivesNoInput; }
+
+    void SetInputMode(UIWidgetInputMode inputMode) { mInputMode = inputMode; }
+    UIWidgetInputMode GetInputMode() const { return mInputMode; }
 
     virtual void SetDirty() { }
 
@@ -42,5 +52,5 @@ private:
 
     // If a widget receives input, its "OnPointer" functions are called
     // AND it can block interaction with the scene (since it can "eat" inputs).
-    bool mReceivesInput = false;
+    UIWidgetInputMode mInputMode = UIWidgetInputMode::ReceivesNoInput;
 };

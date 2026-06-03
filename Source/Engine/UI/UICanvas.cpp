@@ -37,12 +37,22 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
             UIWidget* widget = canvas->mWidgets[j];
             if(!widget->IsActiveAndEnabled()) { continue; }
 
-            // Widgets that are not recieving inputs should be ignored.
+            // Widgets that are not receiving inputs should be ignored.
             if(!widget->ReceivesInput()) { continue; }
 
             // See whether the pointer is over this widget.
-            RectTransform* widgetRT = widget->GetRectTransform();
-            if(widgetRT->GetWorldRect().Contains(gInputManager.GetMousePosition()))
+            bool widgetReceivesInput = false;
+            if(widget->GetInputMode() == UIWidgetInputMode::ReceivesAllInput)
+            {
+                widgetReceivesInput = true;
+            }
+            else if(widget->GetInputMode() == UIWidgetInputMode::ReceivesInputWithinRect)
+            {
+                widgetReceivesInput = widget->GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition());
+            }
+
+            // If widget should receive the input, do some processing.
+            if(widgetReceivesInput)
             {
                 // Pointer is over this widget, but it is not the "over" widget yet!
                 if(sMouseOverWidget != widget)
@@ -72,7 +82,6 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
                 }
 
                 // Inputs on further widgets or canvases are not possible, since this widget "ate" the input.
-                //TODO: We could add some sort of "ignores input events" flag for certain widgets, if needed.
                 return;
             }
         }
