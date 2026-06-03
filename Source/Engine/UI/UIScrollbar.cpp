@@ -93,6 +93,7 @@ UIScrollbar::UIScrollbar(Actor* owner, const UIScrollbarParams& params) : UIWidg
 
         mSlider->SetHandleActor(handle->GetOwner());
         mHandle = handle->GetOwner()->GetComponent<UIDrag>();
+        mHandle->SetAllowedDragDirection(Vector2::UnitY);
     }
 }
 
