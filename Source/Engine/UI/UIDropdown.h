@@ -14,6 +14,7 @@ class RectTransform;
 class UIButton;
 class UIImage;
 class UILabel;
+class UIScrollbar;
 
 class UIDropdown : public Actor
 {
@@ -29,18 +30,22 @@ public:
     void SetCallback(std::function<void(int)> callback) { mCallback = callback; }
 
 protected:
-    void OnUpdate(float deltaTime);
+    void OnInactive() override;
+    void OnUpdate(float deltaTime) override;
 
 private:
-    // The button you press to expand the dropdown.
+    // The button you press to expand the dropdown and show the choice box.
     UIButton* mExpandButton = nullptr;
 
-    // The text showing the currently selected option.
+    // The text showing the currently selected choice.
     UILabel* mCurrentChoiceLabel = nullptr;
 
-    // The box that contains the options you can select.
-    // Appears when expand button is pressed.
-    RectTransform* mBoxRT = nullptr;
+    // The box that contains the choices you can select. Appears when expand button is pressed.
+    RectTransform* mChoiceBoxRT = nullptr;
+
+    // A giant button that blocks all input when the choice box is up.
+    // When a dropdown choice box is opened, no other UI or scene element is interactive.
+    UIButton* mChoiceBoxInputBlocker = nullptr;
 
     // The UI elements for each choice.
     struct ChoiceUI
@@ -50,6 +55,9 @@ private:
         UIButton* button = nullptr;
     };
     std::vector<ChoiceUI> mChoiceUIs;
+
+    // A scrollbar that displays when there are more options than can be seen at once in the dropdown.
+    UIScrollbar* mScrollbar = nullptr;
 
     // All choices that can be selected.
     std::vector<std::string> mChoices;
@@ -64,8 +72,18 @@ private:
     // This is the offset/index of the selection at the top of the list; mainly used while scrolling.
     int mChoicesOffset = 0;
 
+    void ShowChoiceBox();
+    void HideChoiceBox();
+
+    void DecrementChoiceOffset();
+    void IncrementChoiceOffset();
+
     void RefreshChoicesUI();
 
     void OnExpandButtonPressed();
     void OnSelectionPressed(UIButton* button);
+
+    void OnScrollbarUpArrowPressed();
+    void OnScrollbarDownArrowPressed();
+    void OnScrollbarValueChanged(float value);
 };

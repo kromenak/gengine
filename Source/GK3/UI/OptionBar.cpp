@@ -665,32 +665,59 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
     CreateAdvancedGraphicOptionsSection(config);
 
     // Resolution dropdown (create after other elements so dropdown box draws above everything).
-    mResolutionDropdown = new UIDropdown("ResolutionDropdown", this);
-    mResolutionDropdown->SetMaxVisibleChoices(5);
-    RectTransform* resolutionDropdownRT = mResolutionDropdown->GetComponent<RectTransform>();
-    resolutionDropdownRT->SetParent(mGraphicOptionsSection->GetTransform());
-    resolutionDropdownRT->SetAnchor(AnchorPreset::TopLeft);
+    {
+        mResolutionDropdown = new UIDropdown("ResolutionDropdown", this);
+        mResolutionDropdown->SetMaxVisibleChoices(5);
+        RectTransform* resolutionDropdownRT = mResolutionDropdown->GetComponent<RectTransform>();
+        resolutionDropdownRT->SetParent(mGraphicOptionsSection->GetTransform());
+        resolutionDropdownRT->SetAnchor(AnchorPreset::TopLeft);
 
-    // Dropdown sizes in the config file seem wrong, at least based on what I'm expecting.
-    // e.g. this one says height is 39, but the area in the art is clearly 15...
-    Vector2 dropdownSize = config["graphOptResolutionBoxSize"].GetValueAsVector2();
-    dropdownSize.y = 15;
+        // Dropdown sizes in the config file seem wrong, at least based on what I'm expecting.
+        // e.g. this one says height is 39, but the area in the art is clearly 15...
+        Vector2 dropdownSize = config["graphOptResolutionBoxSize"].GetValueAsVector2();
+        dropdownSize.y = 15;
 
-    // Dropdown position is also a bit weird - the pos is from top-left, but it's the bottom-left corner pos.
-    Vector2 dropdownPos = config["graphOptResolutionBoxPos"].GetValueAsVector2();
-    dropdownPos.y -= dropdownSize.y;
-    dropdownPos.y *= -1;
+        // Dropdown position is also a bit weird - the pos is from top-left, but it's the bottom-left corner pos.
+        Vector2 dropdownPos = config["graphOptResolutionBoxPos"].GetValueAsVector2();
+        dropdownPos.y -= dropdownSize.y;
+        dropdownPos.y *= -1;
 
-    resolutionDropdownRT->SetAnchoredPosition(dropdownPos);
-    resolutionDropdownRT->SetSizeDelta(dropdownSize);
+        resolutionDropdownRT->SetAnchoredPosition(dropdownPos);
+        resolutionDropdownRT->SetSizeDelta(dropdownSize);
 
-    mResolutionDropdown->SetCallback([](int selectedIndex){
-        const std::vector<Window::Resolution>& resolutions = Window::GetResolutions();
-        if(selectedIndex >= 0 && selectedIndex < resolutions.size())
-        {
-            gRenderer.ChangeResolution(resolutions[selectedIndex]);
-        }
-    });
+        mResolutionDropdown->SetCallback([](int selectedIndex){
+            const std::vector<Window::Resolution>& resolutions = Window::GetResolutions();
+            if(selectedIndex >= 0 && selectedIndex < resolutions.size())
+            {
+                gRenderer.ChangeResolution(resolutions[selectedIndex]);
+            }
+        });
+    }
+
+    // Create 3D driver dropdown.
+    {
+        UIDropdown* mDriverDropdown = new UIDropdown("3DDriverDropdown", this);
+        RectTransform* driverDropdownRT = mDriverDropdown->GetComponent<RectTransform>();
+        driverDropdownRT->SetParent(mGraphicOptionsSection->GetTransform());
+        driverDropdownRT->SetAnchor(AnchorPreset::TopLeft);
+
+        // Dropdown sizes in the config file seem wrong, at least based on what I'm expecting.
+        // e.g. this one says height is 39, but the area in the art is clearly 15...
+        Vector2 dropdownSize = config["graphOptDriverBoxSize"].GetValueAsVector2();
+        dropdownSize.y = 15;
+
+        // Dropdown position is also a bit weird - the pos is from top-left, but it's the bottom-left corner pos.
+        Vector2 dropdownPos = config["graphOptDriverBoxPos"].GetValueAsVector2();
+        dropdownPos.y -= dropdownSize.y;
+        dropdownPos.y *= -1;
+
+        driverDropdownRT->SetAnchoredPosition(dropdownPos);
+        driverDropdownRT->SetSizeDelta(dropdownSize);
+
+        mDriverDropdown->SetChoices({ "OpenGL" });
+        //mDriverDropdown->SetCurrentChoice("OpenGL");
+        mDriverDropdown->SetMaxVisibleChoices(5);
+    }
 }
 
 void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)

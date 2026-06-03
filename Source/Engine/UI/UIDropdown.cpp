@@ -3,10 +3,12 @@
 #include "AssetManager.h"
 #include "Font.h"
 #include "InputManager.h"
+#include "Log.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UIScrollbar.h"
 #include "UIUtil.h"
 
 UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, TransformType::RectTransform)
@@ -36,8 +38,7 @@ UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, Tra
 
         // Anchor to fill size of parent, but put pivot to bottom-left.
         // Then, decrease horizontal size by width of expand button. Because pivot is on left, all size decrease occurs on the right!
-        mCurrentChoiceLabel->GetRectTransform()->SetAnchorMin(Vector2::Zero);
-        mCurrentChoiceLabel->GetRectTransform()->SetAnchorMax(Vector2::One);
+        mCurrentChoiceLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
         mCurrentChoiceLabel->GetRectTransform()->SetPivot(Vector2::Zero);
         mCurrentChoiceLabel->GetRectTransform()->SetSizeDelta(-mExpandButton->GetRectTransform()->GetRect().GetSize().x, 0.0f);
 
@@ -46,19 +47,27 @@ UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, Tra
         mCurrentChoiceLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mCurrentChoiceLabel->SetVerticalAlignment(VerticalAlignment::Center);
         mCurrentChoiceLabel->SetFont(gAssetManager.LoadAsset<Font>("F_ARIAL_T8"));
-        mCurrentChoiceLabel->SetText("800 x 600");
+        mCurrentChoiceLabel->SetText("");
     }
 
-    // Create downdown expand box.
+    // Create downdown choice box. This contains all the choices you can choose for the dropdown.
     {
+        // This input blocker blocks the *entire screen* of everything behind the choice box.
+        // Order is important here - UI input is processed front to back, so this should come before the actual choices so they can be interacted with.
+        mChoiceBoxInputBlocker = UI::CreateWidgetActor<UIButton>("SceneBlocker", this);
+        mChoiceBoxInputBlocker->GetRectTransform()->SetSizeDelta(Vector2::Zero);
+        mChoiceBoxInputBlocker->SetInputMode(UIWidgetInputMode::ReceivesAllInput);
+        mChoiceBoxInputBlocker->SetPressCallback([this](UIButton* button){
+            mChoiceBoxInputBlocker->GetOwner()->SetActive(false);
+            mChoiceBoxRT->GetOwner()->SetActive(false);
+        });
+
         // Put a gray background inside the box.
         UIImage* background = UI::CreateWidgetActor<UIImage>("Background", this);
         background->SetColor(Color32::Gray);
-        background->GetRectTransform()->SetAnchorMin(Vector2::Zero);
-        background->GetRectTransform()->SetAnchorMax(Vector2(1.0f, 0.0f));
-        background->GetRectTransform()->SetPivot(0.0f, 1.0f);
-        background->GetRectTransform()->SetSizeDelta(0.0f, 50.0f);
-        mBoxRT = background->GetRectTransform();
+        background->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
+        background->GetRectTransform()->SetSizeDelta(0.0f, 25.0f);
+        mChoiceBoxRT = background->GetRectTransform();
 
         // Create border images for bottom/top/left/right.
         // I'm going to skip the corner images because...they don't seem necessary!
@@ -111,8 +120,56 @@ UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, Tra
             }
         }
 
-        // Hide box by default.
-        background->GetOwner()->SetActive(false);
+        // Create scrollbar to show if there are too many options.
+        {
+            Texture* downArrowUp = gAssetManager.LoadAsset<Texture>("RC_ARW_R.BMP");
+            Texture* downArrowDown = gAssetManager.LoadAsset<Texture>("RC_ARW_DWN.BMP");
+
+            // GK3 doesn't ship with a great up arrow to use in this context.
+            // To HACK around this for now, we'll duplicate the dropdown arrow and flip it!
+            Texture* upArrowUp = gAssetManager.LoadAsset<Texture>("RC_ARW_R_FLIP.BMP");
+            if(upArrowUp == nullptr)
+            {
+                upArrowUp = downArrowUp->Duplicate();
+                upArrowUp->SetName("RC_ARW_R_FLIP.BMP");
+                upArrowUp->FlipVertically();
+                gAssetManager.TrackAsset<Texture>(upArrowUp);
+            }
+            Texture* upArrowDown = gAssetManager.LoadAsset<Texture>("RC_ARW_DWN_FLIP.BMP");
+            if(upArrowDown == nullptr)
+            {
+                upArrowDown = downArrowDown->Duplicate();
+                upArrowDown->SetName("RC_ARW_DWN_FLIP.BMP");
+                upArrowDown->FlipVertically();
+                upArrowDown->FlipHorizontally();
+                gAssetManager.TrackAsset<Texture>(upArrowDown);
+            }
+
+            // Create a scrollbar inside the choice box.
+            UIScrollbarParams scrollbarParams;
+            scrollbarParams.decreaseValueButtonUp = upArrowUp;
+            scrollbarParams.decreaseValueButtonDown = upArrowDown;
+            scrollbarParams.increaseValueButtonUp = downArrowUp;
+            scrollbarParams.increaseValueButtonDown = downArrowDown;
+            scrollbarParams.scrollbarBackingColor = Color32(123, 121, 123);
+            scrollbarParams.handleParams.SetAllBorderColors(Color32(85, 84, 85));
+            scrollbarParams.handleParams.centerColor = Color32(65, 64, 65);
+            mScrollbar = UI::CreateWidgetActor<UIScrollbar>("Scrollbar", mChoiceBoxRT, scrollbarParams);
+
+            // Hook up scrollbar to change the choice offset.
+            mScrollbar->SetDecreaseValueCallback([this](){
+                OnScrollbarUpArrowPressed();
+            });
+            mScrollbar->SetIncreaseValueCallback([this](){
+                OnScrollbarDownArrowPressed();
+            });
+            mScrollbar->SetValueChangeCallback([this](float value){
+                OnScrollbarValueChanged(value);
+            });
+        }
+
+        // Hide choice box by default.
+        HideChoiceBox();
     }
 }
 
@@ -141,6 +198,11 @@ void UIDropdown::SetCurrentChoice(const std::string& choice)
     mCurrentChoiceLabel->SetText(choice);
 }
 
+void UIDropdown::OnInactive()
+{
+    Log("Inactive dropdown");
+}
+
 void UIDropdown::OnUpdate(float deltaTime)
 {
     // Check for changing visible choices based on mouse scroll wheel.
@@ -151,22 +213,45 @@ void UIDropdown::OnUpdate(float deltaTime)
         if(mouseWheelScrollDelta.y != 0)
         {
             // If so, increment or decrement choice offset up to min/max.
-            int oldChoiceOffset = mChoicesOffset;
-            if(mouseWheelScrollDelta.y > 0 && mChoicesOffset > 0)
+            if(mouseWheelScrollDelta.y > 0)
             {
-                --mChoicesOffset;
+                DecrementChoiceOffset();
             }
-            else if(mouseWheelScrollDelta.y < 0 && mChoicesOffset < mChoices.size() - mMaxVisibleChoices)
+            else if(mouseWheelScrollDelta.y < 0)
             {
-                ++mChoicesOffset;
-            }
-
-            // If offset changed, refresh displayed choices.
-            if(mChoicesOffset != oldChoiceOffset)
-            {
-                RefreshChoicesUI();
+                IncrementChoiceOffset();
             }
         }
+    }
+}
+
+void UIDropdown::ShowChoiceBox()
+{
+    mChoiceBoxInputBlocker->GetOwner()->SetActive(true);
+    mChoiceBoxRT->GetOwner()->SetActive(true);
+}
+
+void UIDropdown::HideChoiceBox()
+{
+    mChoiceBoxInputBlocker->GetOwner()->SetActive(false);
+    mChoiceBoxRT->GetOwner()->SetActive(false);
+}
+
+void UIDropdown::DecrementChoiceOffset()
+{
+    if(mChoicesOffset > 0)
+    {
+        --mChoicesOffset;
+        RefreshChoicesUI();
+    }
+}
+
+void UIDropdown::IncrementChoiceOffset()
+{
+    if(mChoicesOffset < mChoices.size() - mMaxVisibleChoices)
+    {
+        ++mChoicesOffset;
+        RefreshChoicesUI();
     }
 }
 
@@ -178,6 +263,10 @@ void UIDropdown::RefreshChoicesUI()
         choiceUI.transform->GetOwner()->SetActive(false);
     }
 
+    // Determine whether we will show a scrollbar or not.
+    bool showingScrollbar = mMaxVisibleChoices > 0 && mChoices.size() > mMaxVisibleChoices;
+    mScrollbar->GetOwner()->SetActive(showingScrollbar);
+
     // Generate dropdown choices.
     for(int i = mChoicesOffset; i < mChoices.size(); ++i)
     {
@@ -188,23 +277,28 @@ void UIDropdown::RefreshChoicesUI()
             break;
         }
 
-        // We may need to create a new selection.
+        // We may need to create a new choice UI.
         if(choiceUIIndex >= mChoiceUIs.size())
         {
             // NOTE: Changing the button's texture currently updates the RectTransform's size. So do this before changing RT properties.
-            UIButton* button = UI::CreateWidgetActor<UIButton>("Choice" + std::to_string(i), mBoxRT);
+            UIButton* button = UI::CreateWidgetActor<UIButton>("Choice" + std::to_string(i), mChoiceBoxRT);
             button->SetUpTexture(nullptr, Color32::Gray);
             button->SetHoverTexture(nullptr, Color32(200, 200, 200, 255));
             button->SetDownTexture(nullptr, Color32(200, 200, 200, 255));
             button->SetPressCallback(std::bind(&UIDropdown::OnSelectionPressed, this, std::placeholders::_1));
 
             // Expand to fill width, anchor to top of box, and set pivot to top-left.
-            button->GetRectTransform()->SetAnchorMin(Vector2(0.0f, 1.0f));
-            button->GetRectTransform()->SetAnchorMax(Vector2::One);
-            button->GetRectTransform()->SetPivot(0.0f, 1.0f);
+            button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+
+            // If showing a scrollbar, make some room for it on the right side.
+            float width = mChoiceBoxRT->GetSize().x;
+            if(showingScrollbar)
+            {
+                width -= mScrollbar->GetRectTransform()->GetSize().x;
+            }
 
             // Height of each button is the same as the height of the dropdown itself.
-            button->GetRectTransform()->SetSizeDelta(0.0f, static_cast<RectTransform*>(GetTransform())->GetSize().y);
+            button->GetRectTransform()->SetSizeDelta(width, static_cast<RectTransform*>(GetTransform())->GetSize().y);
 
             // Create center-aligned label.
             UILabel* label = button->GetOwner()->AddComponent<UILabel>();
@@ -227,40 +321,88 @@ void UIDropdown::RefreshChoicesUI()
 void UIDropdown::OnExpandButtonPressed()
 {
     // Toggle box active or inactive.
-    bool isActive = mBoxRT->GetOwner()->IsActive();
+    bool isActive = mChoiceBoxRT->GetOwner()->IsActive();
     isActive = !isActive;
-    mBoxRT->GetOwner()->SetActive(isActive);
-
-    // If active, populate the box with options!
     if(isActive)
     {
-        int yPos = 0.0f;
-        for(auto& selection : mChoiceUIs)
+        ShowChoiceBox();
+
+        // Make sure the dropdown box appears below the current choice field.
+        mChoiceBoxRT->SetAnchoredPosition(0.0f, -static_cast<RectTransform*>(GetTransform())->GetSize().y);
+
+        // Position each choice one after the other going down.
+        float yPos = 0.0f;
+        for(auto& choice : mChoiceUIs)
         {
-            selection.transform->SetAnchoredPosition(0.0f, yPos);
-            yPos -= selection.transform->GetSize().y;
+            choice.transform->SetAnchoredPosition(0.0f, yPos);
+            yPos -= choice.transform->GetSize().y;
         }
+
+        // Update the containing box to the size of the choices (so the scrollbar is sized right).
+        mChoiceBoxRT->SetSizeDeltaY(-yPos);
+    }
+    else
+    {
+        HideChoiceBox();
     }
 }
 
 void UIDropdown::OnSelectionPressed(UIButton* button)
 {
     // Figure out which selection was pressed.
-    if(mCallback != nullptr)
+    for(int i = 0; i < mChoiceUIs.size(); ++i)
     {
-        for(int i = 0; i < mChoiceUIs.size(); ++i)
+        if(mChoiceUIs[i].button == button)
         {
-            if(mChoiceUIs[i].button == button)
-            {
-                // Update current selection text.
-                mCurrentChoiceLabel->SetText(mChoiceUIs[i].label->GetText());
+            // Update current selection text.
+            mCurrentChoiceLabel->SetText(mChoiceUIs[i].label->GetText());
 
-                // Let others know that the selection changed.
+            // Let others know that the selection changed.
+            if(mCallback != nullptr)
+            {
                 mCallback(mChoicesOffset + i);
             }
         }
     }
 
-    // Hide the dropdown selection box.
-    mBoxRT->GetOwner()->SetActive(false);
+    // Hide the dropdown choice box.
+    HideChoiceBox();
+}
+
+void UIDropdown::OnScrollbarUpArrowPressed()
+{
+    DecrementChoiceOffset();
+    mScrollbar->SetValueSilently(static_cast<float>(mChoicesOffset) / (mChoices.size() - mMaxVisibleChoices));
+}
+
+void UIDropdown::OnScrollbarDownArrowPressed()
+{
+    IncrementChoiceOffset();
+    mScrollbar->SetValueSilently(static_cast<float>(mChoicesOffset) / (mChoices.size() - mMaxVisibleChoices));
+}
+
+void UIDropdown::OnScrollbarValueChanged(float value)
+{
+    int oldRowOffset = mChoicesOffset;
+    int maxOffset = mChoices.size() - mMaxVisibleChoices;
+    for(int i = 0; i <= maxOffset; ++i)
+    {
+        float normalizedValue = static_cast<float>(i) / maxOffset;
+        if(value >= normalizedValue)
+        {
+            // The scrollbar value is more than the value for this threshold, so we'll use this offset.
+            mChoicesOffset = i;
+        }
+        else
+        {
+            // The scrollbar is less than this threshold, so we don't need to iterate anymore.
+            break;
+        }
+    }
+
+    // If the offset changed due to changing the scrollbar value, refresh the layout.
+    if(mChoicesOffset != oldRowOffset)
+    {
+        RefreshChoicesUI();
+    }
 }
