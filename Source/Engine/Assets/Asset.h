@@ -36,6 +36,7 @@ class Asset
 public:
     virtual ~Asset() = default;
 
+    void SetName(const std::string& name) { mName = name; }
     const std::string& GetName() const { return mName; }
     std::string GetNameNoExtension() const;
 

@@ -75,6 +75,7 @@ public:
     void SetAssetNameResolver(const AssetNameResolver& resolver) { mAssetNameResolver = resolver; }
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache);
+    template<typename T> void TrackAsset(T* asset, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
     template<typename T> const std::string_map_ci<T*>& GetAssets(const std::string& assetCacheId = "");
     void UnloadAssets(AssetScope scope);
 
@@ -148,6 +149,23 @@ T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache
         // Try to load just using the passed in name as-is.
         return LoadAssetInternal<T>(name, scope, cache);
     }
+}
+
+template<typename T>
+void AssetManager::TrackAsset(T* asset, AssetScope scope, const std::string& assetCacheId)
+{
+    // Get asset cache for this asset type and provided cache ID.
+    AssetCache<T>* assetCache = nullptr;
+    if(scope != AssetScope::Manual)
+    {
+        assetCache = AssetCache<T>::Get(assetCacheId);
+    }
+
+    // Make sure asset matches desired scope.
+    asset->SetScope(scope);
+
+    // Add asset to the asset cache.
+    assetCache->SetAsset(asset->GetName(), asset);
 }
 
 template<typename T>
