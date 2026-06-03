@@ -120,6 +120,7 @@ public:
     void ApplyAlphaChannel(const Texture& alphaTexture);
 
     // Image Modifications
+    Texture* Duplicate();
     void FlipVertically();
     void FlipHorizontally();
     void RotateClockwise();

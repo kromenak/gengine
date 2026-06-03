@@ -509,6 +509,41 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
     mRenderType = RenderType::Translucent;
 }
 
+Texture* Texture::Duplicate()
+{
+    Texture* texture = new Texture(GetName(), GetScope());
+    texture->mWidth = mWidth;
+    texture->mHeight = mHeight;
+    texture->mFormat = mFormat;
+    texture->mBytesPerPixel = mBytesPerPixel;
+
+    texture->mRenderType = mRenderType;
+    texture->mFilterMode = mFilterMode;
+    texture->mWrapMode = mWrapMode;
+    texture->mMipmaps = mMipmaps;
+
+    if(mPixels != nullptr)
+    {
+        size_t byteCount = mWidth * mHeight * mBytesPerPixel;
+        texture->mPixels = new uint8_t[byteCount];
+        memcpy(texture->mPixels, mPixels, byteCount);
+    }
+
+    if(mPalette != nullptr)
+    {
+        texture->mPalette = new uint8_t[mPaletteSize];
+        texture->mPaletteSize = mPaletteSize;
+        memcpy(texture->mPalette, mPalette, mPaletteSize);
+    }
+
+    if(mPaletteIndexes != nullptr)
+    {
+        texture->mPaletteIndexes = new uint8_t[mWidth * mHeight];
+        memcpy(texture->mPaletteIndexes, mPaletteIndexes, mWidth * mHeight);
+    }
+    return texture;
+}
+
 void Texture::FlipVertically()
 {
     if(mPixels != nullptr)
