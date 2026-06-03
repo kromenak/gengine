@@ -169,9 +169,8 @@ SaveLoadScreen::SaveLoadScreen() : Actor("SaveLoadScreen", TransformType::RectTr
     scrollbarParams.increaseValueButtonUp = gAssetManager.LoadAsset<Texture>("SAVELOAD_SCROLLDN_STD.BMP");
     scrollbarParams.increaseValueButtonDown = gAssetManager.LoadAsset<Texture>("SAVELOAD_SCROLLDN_DWN.BMP");
     scrollbarParams.scrollbarBacking = gAssetManager.LoadAsset<Texture>("SAVELOAD_SCROLLBACK.BMP");
+    scrollbarParams.handleParams.SetAllBorderColors(Color32(90, 28, 33));
     scrollbarParams.handleParams.leftColor = scrollbarParams.handleParams.topColor = scrollbarParams.handleParams.topLeftColor = Color32(181, 125, 0);
-    scrollbarParams.handleParams.rightColor = scrollbarParams.handleParams.bottomColor = scrollbarParams.handleParams.topRightColor =
-        scrollbarParams.handleParams.bottomRightColor = scrollbarParams.handleParams.bottomLeftColor = Color32(90, 28, 33);
     scrollbarParams.handleParams.centerColor = Color32(123, 77, 8);
     scrollbarParams.handleParams.borderWidth = 2;
 

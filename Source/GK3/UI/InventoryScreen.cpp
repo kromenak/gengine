@@ -36,17 +36,15 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
     exitButton->GetRectTransform()->SetAnchoredPosition(10.0f, 10.0f);
     mExitButton = exitButton;
 
-    // Add scrollbar on the right side of the screen, for when there are too many
-    // inventory items to fit on one screen.
+    // Add scrollbar on the right side of the screen, for when there are too many inventory items to fit on one screen.
     UIScrollbarParams scrollbarParams;
     scrollbarParams.decreaseValueButtonUp = gAssetManager.LoadAsset<Texture>("INV_SCROLLUP_STD.BMP");
     scrollbarParams.decreaseValueButtonDown = gAssetManager.LoadAsset<Texture>("INV_SCROLLUP_DWN.BMP");
     scrollbarParams.increaseValueButtonUp = gAssetManager.LoadAsset<Texture>("INV_SCROLLDN_STD.BMP");
     scrollbarParams.increaseValueButtonDown = gAssetManager.LoadAsset<Texture>("INV_SCROLLDN_DWN.BMP");
     scrollbarParams.scrollbarBacking = gAssetManager.LoadAsset<Texture>("INV_SCROLLBACK.BMP");
+    scrollbarParams.handleParams.SetAllBorderColors(Color32(90, 28, 33));
     scrollbarParams.handleParams.leftColor = scrollbarParams.handleParams.topColor = scrollbarParams.handleParams.topLeftColor = Color32(181, 125, 0);
-    scrollbarParams.handleParams.rightColor = scrollbarParams.handleParams.bottomColor = scrollbarParams.handleParams.topRightColor =
-        scrollbarParams.handleParams.bottomRightColor = scrollbarParams.handleParams.bottomLeftColor = Color32(90, 28, 33);
     scrollbarParams.handleParams.centerColor = Color32(123, 77, 8);
     scrollbarParams.handleParams.borderWidth = 2;
 

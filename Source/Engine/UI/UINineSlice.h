@@ -45,6 +45,11 @@ struct UINineSliceParams
     Color32  topColor = Color32::White;
 
     int borderWidth = 0;
+
+    void SetAllBorderColors(const Color32& color)
+    {
+        leftColor = topColor = topLeftColor = rightColor = bottomColor = topRightColor = bottomRightColor = bottomLeftColor = color;
+    }
 };
 
 class UINineSlice : public UIWidget
