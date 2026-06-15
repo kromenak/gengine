@@ -43,6 +43,18 @@ bool AudioManager::Initialize()
         return false;
     }
 
+    // If desired, set DSP buffer size to something other than the default of 1024.
+    // EXPERIMENTAL: one user reported crackling audio, so I'm curious if this helps resolve it.
+    Config* userConfig = gAssetManager.LoadAsset<Config>("GK3.ini");
+    if(userConfig != nullptr)
+    {
+        int dspBufferSize = userConfig->GetInt("Audio", "DSP Buffer Size", 1024);
+        if(dspBufferSize != 1024)
+        {
+            mSystem->setDSPBufferSize(dspBufferSize, 4);
+        }
+    }
+
     // Initialize the FMOD system.
     result = mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
     if(result != FMOD_OK)
@@ -134,11 +146,11 @@ bool AudioManager::Initialize()
     SetVolume(AudioType::Music, musicVolume);
 
     // Grab defaults from GAME.CFG.
-    Config* config = gAssetManager.LoadAsset<Config>("GAME.CFG");
-    if(config != nullptr)
+    Config* gameConfig = gAssetManager.LoadAsset<Config>("GAME.CFG");
+    if(gameConfig != nullptr)
     {
-        mDefault3DMinDist = config->GetFloat("Sound", "Default Sound Min Distance", mDefault3DMinDist);
-        mDefault3DMaxDist = config->GetFloat("Sound", "Default Sound Max Distance", mDefault3DMaxDist);
+        mDefault3DMinDist = gameConfig->GetFloat("Sound", "Default Sound Min Distance", mDefault3DMinDist);
+        mDefault3DMaxDist = gameConfig->GetFloat("Sound", "Default Sound Max Distance", mDefault3DMaxDist);
     }
 
     // We initialized audio successfully!
