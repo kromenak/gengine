@@ -83,6 +83,7 @@ private:
     void OnExpandButtonPressed();
     void OnSelectionPressed(UIButton* button);
 
+    void RefreshScrollbarPosition();
     void OnScrollbarUpArrowPressed();
     void OnScrollbarDownArrowPressed();
     void OnScrollbarValueChanged(float value);

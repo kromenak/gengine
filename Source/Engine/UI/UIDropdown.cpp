@@ -243,6 +243,7 @@ void UIDropdown::DecrementChoiceOffset()
     {
         --mChoicesOffset;
         RefreshChoicesUI();
+        RefreshScrollbarPosition();
     }
 }
 
@@ -252,6 +253,7 @@ void UIDropdown::IncrementChoiceOffset()
     {
         ++mChoicesOffset;
         RefreshChoicesUI();
+        RefreshScrollbarPosition();
     }
 }
 
@@ -369,16 +371,19 @@ void UIDropdown::OnSelectionPressed(UIButton* button)
     HideChoiceBox();
 }
 
+void UIDropdown::RefreshScrollbarPosition()
+{
+    mScrollbar->SetValueSilently(static_cast<float>(mChoicesOffset) / (mChoices.size() - mMaxVisibleChoices));
+}
+
 void UIDropdown::OnScrollbarUpArrowPressed()
 {
     DecrementChoiceOffset();
-    mScrollbar->SetValueSilently(static_cast<float>(mChoicesOffset) / (mChoices.size() - mMaxVisibleChoices));
 }
 
 void UIDropdown::OnScrollbarDownArrowPressed()
 {
     IncrementChoiceOffset();
-    mScrollbar->SetValueSilently(static_cast<float>(mChoicesOffset) / (mChoices.size() - mMaxVisibleChoices));
 }
 
 void UIDropdown::OnScrollbarValueChanged(float value)
