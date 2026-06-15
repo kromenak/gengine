@@ -230,29 +230,38 @@ void RectTransform::MoveInsideRect(const Rect& otherWorldRect)
     // Calculate our rect, taking into account children.
     Rect ourWorldRect = GetWorldRect(true);
 
+    // Get our min/max.
     Vector2 min = ourWorldRect.GetMin();
     Vector2 max = ourWorldRect.GetMax();
 
+    // Get other's min/max.
     Vector2 otherMin = otherWorldRect.GetMin();
     Vector2 otherMax = otherWorldRect.GetMax();
 
     // If our rect is outside of other rect, calculate a diff to move it back inside.
+    // BUT don't do this if we are wider/taller than the other rect - we can only be inside a rect if its bigger than us.
     Vector2 diff = Vector2::Zero;
-    if(min.x < otherMin.x)
+    if(max.x - min.x < otherMax.x - otherMin.x) // we are smaller than the other rect on x-axis
     {
-        diff.x += (otherMin.x - min.x);
+        if(min.x < otherMin.x)
+        {
+            diff.x += (otherMin.x - min.x);
+        }
+        if(max.x > otherMax.x)
+        {
+            diff.x += (otherMax.x - max.x);
+        }
     }
-    if(max.x > otherMax.x)
+    if(max.y - min.y < otherMax.y - otherMin.y) // we are smaller than the other rect on y-axis
     {
-        diff.x += (otherMax.x - max.x);
-    }
-    if(min.y < otherMin.y)
-    {
-        diff.y += (otherMin.y - min.y);
-    }
-    if(max.y > otherMax.y)
-    {
-        diff.y += (otherMax.y - max.y);
+        if(min.y < otherMin.y)
+        {
+            diff.y += (otherMin.y - min.y);
+        }
+        if(max.y > otherMax.y)
+        {
+            diff.y += (otherMax.y - max.y);
+        }
     }
 
     // The diff is in world space, but we want to apply it in local space.
