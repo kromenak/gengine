@@ -8,10 +8,12 @@
 #include "AssetManager.h"
 #include "GKPrefs.h"
 #include "IniReader.h"
+#include "Platform.h"
 #include "ReportManager.h"
 #include "StringUtil.h"
 #include "Texture.h"
 #include "UIUtil.h"
+#include "Window.h"
 
 TYPEINFO_INIT(Cursor, Asset, GENERATE_TYPE_ID)
 {
@@ -175,6 +177,23 @@ void Cursor::CreateCursorFrames(float scaleFactor)
         texWidth *= scaleFactor;
         texHeight *= scaleFactor;
 
+        // On Windows, in exclusive fullscreen mode, there appears to be a max cursor size of 256x256.
+        // That's based on experimentation - cursor disappears if either width or height is greater. I'm not sure if this limitation exists on other platforms.
+        // To contend with this, the easiest thing is to just clamp the max size of the cursor in that case by decreasing the scale factor.
+        // TODO: I'm pretty sure this isn't a problem on Mac, but it might be a problem on Linux.
+        #if defined(PLATFORM_WINDOWS) || defined(PLATFORM_LINUX)
+        if(Window::GetFullscreenMode() == Window::Mode::FullscreenExclusive)
+        {
+            const uint32_t kMaxCursorSize = 256;
+            while(scaleFactor > 1.0f && ((texWidth / mFrameCount) > kMaxCursorSize || texHeight > kMaxCursorSize))
+            {
+                scaleFactor -= 1.0f;
+                texWidth = mTexture->GetWidth() * scaleFactor;
+                texHeight = mTexture->GetHeight() * scaleFactor;
+            }
+        }
+        #endif
+
         // Make a new set of pixels at the desired size.
         allocatedPixelData = std::make_unique<uint8_t[]>(texWidth * texHeight * texBytesPerPixel);
         texPixels = allocatedPixelData.get();
@@ -224,7 +243,7 @@ void Cursor::CreateCursorFrames(float scaleFactor)
     {
         // Cursor frames are all in a single horizontal row.
         // So x varies by frame index, y is always 0. Width/height are also constant.
-        SDL_Rect srcRect;
+        SDL_Rect srcRect { };
         srcRect.x = i * frameWidth;
         srcRect.y = 0;
         srcRect.w = frameWidth;
@@ -235,7 +254,7 @@ void Cursor::CreateCursorFrames(float scaleFactor)
         SDL_Surface* dstSurface = SDL_CreateRGBSurface(0, frameWidth, frameHeight, 32, rmask, gmask, bmask, amask);
         if(dstSurface == nullptr)
         {
-            LOG_ERROR("Create cursor %s failed: couldn't create dest surface for frame %i (%s).LOG_ERROR", mName.c_str(), i, SDL_GetError());
+            LOG_ERROR("Create cursor %s failed: couldn't create dest surface for frame %i (%s).", mName.c_str(), i, SDL_GetError());
         }
         int result = SDL_BlitSurface(srcSurface, &srcRect, dstSurface, nullptr);
         if(result != 0)

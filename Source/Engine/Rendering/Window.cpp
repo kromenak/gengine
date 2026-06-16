@@ -309,18 +309,16 @@ void Window::ToggleFullscreen()
 
 Window::Mode Window::GetFullscreenMode()
 {
+    // The bitmask for SDL_WINDOW_FULLSCREEN_DESKTOP includes SDL_WINDOW_FULLSCREEN, so check SDL_WINDOW_FULLSCREEN_DESKTOP first.
+    // Only when we know SDL_WINDOW_FULLSCREEN_DESKTOP are not set can we accurately check SDL_WINDOW_FULLSCREEN.
     Uint32 flags = SDL_GetWindowFlags(window);
-    bool isFullscreen = (flags & SDL_WINDOW_FULLSCREEN) != 0;
-    bool isFullscreenDesktop = (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0;
-
-    // Exclusive fullscreen reports as fullscreen, but not fullscreen desktop.
-    if(isFullscreen && !isFullscreenDesktop)
-    {
-        return Mode::FullscreenExclusive;
-    }
-    if(isFullscreen)
+    if((flags & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP)
     {
         return Mode::FullscreenDesktop;
+    }
+    else if((flags & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN)
+    {
+        return Mode::FullscreenExclusive;
     }
     return Mode::Windowed;
 }
