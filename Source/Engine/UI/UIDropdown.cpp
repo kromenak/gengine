@@ -198,11 +198,6 @@ void UIDropdown::SetCurrentChoice(const std::string& choice)
     mCurrentChoiceLabel->SetText(choice);
 }
 
-void UIDropdown::OnInactive()
-{
-    Log("Inactive dropdown");
-}
-
 void UIDropdown::OnUpdate(float deltaTime)
 {
     // Check for changing visible choices based on mouse scroll wheel.

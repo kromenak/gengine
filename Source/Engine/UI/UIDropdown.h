@@ -30,7 +30,6 @@ public:
     void SetCallback(std::function<void(int)> callback) { mCallback = callback; }
 
 protected:
-    void OnInactive() override;
     void OnUpdate(float deltaTime) override;
 
 private:
