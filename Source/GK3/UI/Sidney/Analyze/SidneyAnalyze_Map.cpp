@@ -993,6 +993,11 @@ void SidneyAnalyze::AnalyzeMap_CheckLibraCompletion()
                 gGameProgress.SetFlag("Libra");
                 gGameProgress.SetFlag("LockedHexagram");
                 SidneyUtil::UpdateLSRState();
+
+                // Completing this step also adds the hexagram arm coordinates to Grace's inventory.
+                // To do this, we actually use that inventory item and grant a new one.
+                gInventoryManager.RemoveInventoryItem("Grace", "GRACE_COORDINATE_PAPER_1");
+                gInventoryManager.AddInventoryItem("Grace", "GRACE_COORDINATE_PAPER_2");
             }
             //printf("Center (%f, %f), Size (%f), Angle (%f)\n", hexagram.center.x, hexagram.center.y, hexagram.radius, degrees);
         }
@@ -1067,6 +1072,12 @@ void SidneyAnalyze::AnalyzeMap_CheckScorpioCompletion(const Vector2& point)
         gGameProgress.SetFlag("MarkedTheSite");
         gGameProgress.SetFlag("Scorpio");
         SidneyUtil::UpdateLSRState();
+
+        // Completing this step also adds The Site to our coordinate paper.
+        // To do this, we actually remove the previous version(s) of that inventory item and grant a new one.
+        gInventoryManager.RemoveInventoryItem("Grace", "GRACE_COORDINATE_PAPER_1");
+        gInventoryManager.RemoveInventoryItem("Grace", "GRACE_COORDINATE_PAPER_2");
+        gInventoryManager.AddInventoryItem("Grace", "GRACE_COORDINATE_PAPER_3");
 
         // Grace says "that's it, that's the site, I'll write down the coords."
         gActionManager.ExecuteDialogueAction("02O8O2ZRA1", 2, [this](const Action* action){

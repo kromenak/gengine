@@ -62,8 +62,7 @@ shpvoid SetInvItemStatus(const std::string& itemName, const std::string& status)
        || StringUtil::EqualsIgnoreCase(status, "Placed")
        || StringUtil::EqualsIgnoreCase(status, "GraceHas")
        || StringUtil::EqualsIgnoreCase(status, "GabeHas")
-       || StringUtil::EqualsIgnoreCase(status, "BothHave")
-       || StringUtil::EqualsIgnoreCase(status, "Used"))
+       || StringUtil::EqualsIgnoreCase(status, "BothHave"))
     {
         validStatus = true;
     }
