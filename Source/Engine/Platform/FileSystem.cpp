@@ -33,7 +33,11 @@ std::string Path::Combine(std::initializer_list<std::string> paths)
     while(it != paths.end())
     {
         // Skip empty pieces.
-        if(it->empty()) { continue; }
+        if(it->empty())
+        {
+            it++;
+            continue;
+        }
 
         // Place path separator ('/' or '\') between elements.
         // Empty check stops us from putting separators at beginning of path accidentally.

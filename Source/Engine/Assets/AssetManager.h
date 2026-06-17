@@ -111,6 +111,9 @@ extern AssetManager gAssetManager;
 template<typename T>
 T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, const std::string& assetCacheId)
 {
+    // We can quickly early out if no name is provided.
+    if(name.empty()) { return nullptr; }
+
     // Get asset cache for this asset type and provided cache ID.
     AssetCache<T>* assetCache = nullptr;
     if(scope != AssetScope::Manual)
@@ -125,6 +128,9 @@ T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, const std:
 template<typename T>
 T* AssetManager::LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache)
 {
+    // We can quickly early out if no name is provided.
+    if(name.empty()) { return nullptr; }
+
     // If the asset name already has a valid extension, assume the caller knows what they're doing.
     // Just load the asset with that name, as-is.
     if(mAssetNameResolver.HasValidExtension(name))
