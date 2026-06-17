@@ -116,13 +116,13 @@ void DrivingScreen::Show(FollowMode followMode)
         // POU (Poussin's Tomb) is available after the tour on Day 2, 7am.
         mLocationButtons["POU"].button->SetEnabled(currentTimeblock >= Timeblock(2, 7, Timeblock::AM) || currentTimeblock == Timeblock(2, 2));
 
-        // BEC (Bottom of Hexagram) is only at the beginning of Day 3, 12PM (even though you discover the coordinates in Day 3, 7AM).
+        // BEC (Bottom of Hexagram) is only available during Day 3, 12PM (even though you discover the coordinates in Day 3, 7AM).
         // MCB (Top of Hexagram) is the same.
-        mLocationButtons["BEC"].button->SetEnabled(currentTimeblock >= Timeblock(3, 12));
-        mLocationButtons["MCB"].button->SetEnabled(currentTimeblock >= Timeblock(3, 12));
+        mLocationButtons["BEC"].button->SetEnabled(currentTimeblock == Timeblock(3, 12));
+        mLocationButtons["MCB"].button->SetEnabled(currentTimeblock == Timeblock(3, 12));
 
-        // TRE (Treasure) is only available after you've marked it on the map in Sidney.
-        mLocationButtons["TRE"].button->SetEnabled(gGameProgress.GetFlag("MarkedTheSite"));
+        // TRE (Treasure) is only available after you've marked it on the map in Sidney, and then only available in Day 3, 12PM as well.
+        mLocationButtons["TRE"].button->SetEnabled(gGameProgress.GetFlag("MarkedTheSite") && currentTimeblock == Timeblock(3, 12));
 
         // BMB (Red Rock) is only available after spying on Buchelli from Blanchefort.
         mLocationButtons["BMB"].button->SetEnabled(gGameProgress.GetNounVerbCount("VIEW_OF_ORANGE_ROCK", "BINOCULARS") > 0 || currentTimeblock >= Timeblock(3, 3, Timeblock::PM));
@@ -180,8 +180,6 @@ void DrivingScreen::Show(FollowMode followMode)
 
         // Also play motorcycle driving away SFX.
         soundtrackPlayer->Play(gAssetManager.LoadAsset<Soundtrack>("MAPHARLEYAWAY.STK"));
-
-
 
         // When Gabe attempts to follow the Black Sedan during 202A timeblock, some dialogue plays over the map screen.
         // This doesn't seem to be accounted for in any NVC or Sheepscript, so it must be hardcoded...
