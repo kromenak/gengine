@@ -11,6 +11,13 @@
 #include "Platform.h"
 #include "StringTokenizer.h"
 
+enum FileType
+{
+    FILETYPE_FILE = 1 << 0,
+    FILETYPE_DIRECTORY = 1 << 1,
+    FILETYPE_ALL = FILETYPE_FILE | FILETYPE_DIRECTORY
+};
+
 namespace Path
 {
     // Separator used for platform.
@@ -122,7 +129,7 @@ namespace Directory
     /**
      * Lists the files in a directory, optionally filtering to only files with a specific extension.
      */
-    std::vector<std::string> List(const std::string& path, const std::string& extension = "");
+    std::vector<std::string> List(const std::string& path, FileType fileTypeMask, const std::string& filter = "");
 }
 
 namespace File
@@ -141,4 +148,6 @@ namespace File
      * Reads file contents into a buffer.
      */
     uint8_t* ReadIntoBuffer(const std::string& filePath, uint32_t& outBufferSize);
+
+    std::string ReadIntoString(const std::string& filePath);
 }

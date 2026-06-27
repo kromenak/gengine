@@ -29,6 +29,8 @@ std::string Paths::GetUserDataPath(const std::string& filename)
 
 const std::string& Paths::GetDataPath()
 {
+    //TODO: This doesn't work when running in an IDE with a different working directory set - both VS and Xcode allow this.
+    //TODO: In those cases, we'd ideally use the IDE working directory path (perhaps via getcwd?) instead of SDL_GetBasePath.
     static std::string dataPath;
     if(dataPath.empty())
     {

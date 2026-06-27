@@ -1,5 +1,6 @@
 #include "FileSystem.h"
 
+#include <cstring>
 #include <fstream>
 
 #include "Log.h"
@@ -13,6 +14,10 @@
 
 #if defined(HAVE_DIRENT_H)
 #include <dirent.h>
+#endif
+
+#if defined(HAVE_FNMATCH_H)
+#include <fnmatch.h>
 #endif
 
 #if defined(HAVE_STAT_H)
@@ -358,20 +363,20 @@ bool Directory::CreateAll(const std::string& path)
     return true;
 }
 
-std::vector<std::string> Directory::List(const std::string& path, const std::string& extension)
+std::vector<std::string> Directory::List(const std::string& path, FileType fileTypeMask, const std::string& filter)
 {
     std::vector<std::string> files;
     #if defined(PLATFORM_WINDOWS)
     {
         // Decide on search string.
         std::string searchPath = path;
-        if(extension.empty())
+        if(filter.empty())
         {
-            searchPath += "/*.*"; // no filter, return everything
+            searchPath += "\\*"; // no filter, return everything
         }
         else
         {
-            searchPath += "/*." + extension; // only files with specific extension
+            searchPath += "\\" + filter; // only files matching a filter
         }
 
         // Use Windows FindFirstFile/FindNextFile to iterate contents of directory.
@@ -381,9 +386,23 @@ std::vector<std::string> Directory::List(const std::string& path, const std::str
         {
             do
             {
-                // Add to file list, but skip directories.
-                bool isDirectory = fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-                if(!isDirectory)
+                // Ignore current directory and parent directory entries.
+                if(strcmp(fd.cFileName, ".") == 0 || strcmp(fd.cFileName, "..") == 0)
+                {
+                    continue;
+                }
+
+                // Ignore hidden and system files completely.
+                if((fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) || (fd.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM))
+                {
+                    continue;
+                }
+
+                // If this is a directory, only include it if we want to include directories.
+                // Likewise, if this is not a directory, only include it if we want to include normal files.
+                bool isDirectory = (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+                if((isDirectory && (fileTypeMask & FILETYPE_DIRECTORY)) ||
+                   (!isDirectory && (fileTypeMask & FILETYPE_FILE)))
                 {
                     files.emplace_back(fd.cFileName);
                 }
@@ -392,7 +411,7 @@ std::vector<std::string> Directory::List(const std::string& path, const std::str
             ::FindClose(hFind);
         }
     }
-    #elif defined(HAVE_DIRENT_H)
+    #elif defined(HAVE_DIRENT_H) && defined(HAVE_FNMATCH_H)
     {
         // Open the directory for reading.
         DIR* dir = opendir(path.c_str());
@@ -402,15 +421,19 @@ std::vector<std::string> Directory::List(const std::string& path, const std::str
             dirent* dirEntry;
             while((dirEntry = readdir(dir)) != nullptr)
             {
-                // We only want to list regular files; not sub-directories or other esoteric file types.
-                if(dirEntry->d_type == DT_REG)
+                // Ignore current directory and parent directory entries.
+                if(strcmp(dirEntry->d_name, ".") == 0 || strcmp(dirEntry->d_name, "..") == 0)
                 {
-                    // Include file in final list depending on extension filter.
-                    if(extension.empty())
-                    {
-                        files.emplace_back(dirEntry->d_name);
-                    }
-                    else if(StringUtil::EndsWithIgnoreCase(dirEntry->d_name, extension))
+                    continue;
+                }
+
+                // If this is a regular file and we want regular files...
+                // Or if this is a directory and we want directories...
+                if((dirEntry->d_type == DT_REG && (fileTypeMask & FILETYPE_FILE)) ||
+                   (dirEntry->d_type == DT_DIR && (fileTypeMask & FILETYPE_DIRECTORY)))
+                {
+                    // Include in final list depending on filter.
+                    if(filter.empty() || fnmatch(filter.c_str(), dirEntry->d_name, 0) == 0)
                     {
                         files.emplace_back(dirEntry->d_name);
                     }
@@ -491,4 +514,19 @@ uint8_t* File::ReadIntoBuffer(const std::string& filePath, uint32_t& outBufferSi
     // Pass out buffer size and return buffer.
     outBufferSize = size + 1;
     return buffer;
+}
+
+std::string File::ReadIntoString(const std::string& filePath)
+{
+    // Open file.
+    std::ifstream file(filePath, std::iostream::in | std::iostream::binary);
+    if(!file.good())
+    {
+        return "";
+    }
+
+    // Read contents into a string.
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
 }

@@ -11,3 +11,4 @@
 #cmakedefine HAVE_STAT_H 1
 #cmakedefine HAVE_DIRENT_H 1
 #cmakedefine HAVE_UNISTD_H 1
+#cmakedefine HAVE_FNMATCH_H 1

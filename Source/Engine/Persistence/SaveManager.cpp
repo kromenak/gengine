@@ -230,7 +230,7 @@ void SaveManager::RescanSaveDirectory()
     mNextSaveNumber = 1;
 
     // Get all files with "gk3" extension in the save data directory.
-    std::vector<std::string> saveFileNames = Directory::List(Path::Combine({ Paths::GetUserDataPath(), "Save Games" }), "gk3");
+    std::vector<std::string> saveFileNames = Directory::List(Path::Combine({ Paths::GetUserDataPath(), "Save Games" }), FILETYPE_FILE, "*.gk3");
     for(std::string& saveFileName : saveFileNames)
     {
         // Load in the relevant data.

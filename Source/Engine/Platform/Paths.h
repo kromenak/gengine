@@ -16,7 +16,7 @@ namespace Paths
 
     /**
      * The "data path" is the root directory for the game's read-only data (Assets, Data, etc).
-     * This is usually the directory containing the executable, but not always (on Mac/iOS for example, this is "GK3.app/Contents/Resources").
+     * This is usually the directory containing the executable, but not always (on Mac for example, this is "GK3.app/Contents/Resources").
      */
     const std::string& GetDataPath();
     std::string GetDataPath(const std::string& filename);
