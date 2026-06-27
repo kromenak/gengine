@@ -24,8 +24,8 @@ Data*
 ## Ignore imgui generated files
 imgui.ini
 
-## Ignore generated log file.
-GK3.log
+## Ignore generated log files.
+*.log
 
 ####
 # Xcode
