@@ -11,6 +11,7 @@
 #include "Console.h"
 #include "ConsoleUI.h"
 #include "CursorManager.h"
+#include "DataHelper.h"
 #include "Debug.h"
 #include "FileSystem.h"
 #include "FootstepManager.h"
@@ -342,6 +343,19 @@ void GEngine::InitReportStreams()
 
 bool GEngine::InitAssetManager()
 {
+    // Figure out which data directory to use based on what's available and engine configuration.
+    DataDirectory dataDirectory;
+    if(!DataHelper::GetDataDirectoryToUse(dataDirectory))
+    {
+        std::string error = "Failed to find a valid Data directory. Make sure one exists and contains all game data assets.";
+        OSDialog::Ok(OSDIALOG_ERROR, error);
+        Log(error.c_str());
+        return false;
+    }
+
+    // Use the locale prefix detected for the data folder that will be used.
+    Localizer::SetLocalePrefix(std::string(1, dataDirectory.localePrefix));
+
     // Load GK3.ini from the root directory so we can bootstrap asset search paths.
     gAssetManager.AddSearchPath("");
     Config* config = gAssetManager.LoadAsset<Config>("GK3.ini");
@@ -368,19 +382,8 @@ bool GEngine::InitAssetManager()
     // Assets: loose files that aren't packed into a BRN.
     gAssetManager.AddSearchPath("Assets");
 
-    // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
-    {
-        // The original game only ever shipped with one language per SKU, so there was no way to change the language after install.
-        // But we would like to support that maybe, for both official and unofficial translations.
-        // To support OFFICIAL translations, we'll use Data folders with a suffix equal to the language prefix (e.g. DataF for French, DataG for German).
-        if(Localizer::GetLanguagePrefix()[0] != 'E')
-        {
-            gAssetManager.AddSearchPath("Data" + Localizer::GetLanguagePrefix());
-        }
-
-        // Lowest priority is the normal "Data" folder.
-        gAssetManager.AddSearchPath("Data");
-    }
+    // Data: content shipped with the original game; lower priority so assets can be easily overridden.
+    gAssetManager.AddSearchPath(dataDirectory.path);
 
     // Also allow searching the root directory for assets moving forward, but at the lowest priority.
     gAssetManager.AddSearchPath("");
@@ -440,7 +443,11 @@ bool GEngine::InitAssetManager()
             if(!gAssetManager.LoadAssetArchive(barn))
             {
                 // Generate expected path for this asset.
-                std::string path = Paths::GetDataPath(Path::Combine({ "Data", barn }));
+                std::string path = Path::Combine({ dataDirectory.path, barn });
+                if(!Path::IsAbsolute(dataDirectory.path))
+                {
+                    path = Paths::GetDataPath(path);
+                }
 
                 // Generate error and show error box.
                 std::string error = StringUtil::Format("Could not load barn %s.\n\nMake sure Data directory is populated before running the game.", path.c_str());
@@ -463,7 +470,7 @@ bool GEngine::InitAssetManager()
                 std::vector<std::string> customBarnNames = StringUtil::Split(customBarns, ';');
                 for(auto& barnName : customBarnNames)
                 {
-                    LOG_GENERIC("Load barn %s", barnName.c_str());
+                    TIMER_SCOPED_VAR(barnName.c_str(), barnTimer);
                     gAssetManager.LoadAssetArchive(barnName, -1);
                 }
             }

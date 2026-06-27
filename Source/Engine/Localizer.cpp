@@ -3,30 +3,28 @@
 #include <cassert>
 
 #include "Config.h"
+#include "FileSystem.h"
 #include "IniReader.h"
+#include "Paths.h"
+#include "StringUtil.h"
 #include "TextAsset.h"
 
 Localizer gLocalizer;
 
-/*static*/ const std::string& Localizer::GetLanguagePrefix()
+namespace
 {
-    static std::string languagePrefix;
-    if(languagePrefix.empty())
-    {
-        // If a language prefix is specified in GK3.ini, it will override anything else.
-        Config* config = gAssetManager.LoadAsset<Config>("GK3.ini");
-        if(config != nullptr && config->HasKey("Localization", "Locale"))
-        {
-            languagePrefix = config->GetString("Localization", "Locale", "E");
-            LOG_GENERIC("Language preference set to %s (from GK3.ini)\n", languagePrefix.c_str());
-        }
-        else
-        {
-            // Default to English.
-            languagePrefix = "E";
-        }
-    }
-    return languagePrefix;
+    // A prefix added to the front of certain localized assets.
+    std::string localePrefix = "E";
+}
+
+void Localizer::SetLocalePrefix(const std::string& prefix)
+{
+    localePrefix = prefix;
+}
+
+/*static*/ const std::string& Localizer::GetLocalePrefix()
+{
+    return localePrefix;
 }
 
 Localizer::Localizer(const std::string& fileName, const std::string& sectionName)

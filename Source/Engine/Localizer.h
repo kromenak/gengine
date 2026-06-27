@@ -17,7 +17,8 @@ class TextAsset;
 class Localizer
 {
 public:
-    static const std::string& GetLanguagePrefix();
+    static void SetLocalePrefix(const std::string& prefix);
+    static const std::string& GetLocalePrefix();
     template<typename T> static T* LoadLocalizedAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
 
     Localizer() = default;
@@ -36,10 +37,10 @@ private:
 template <typename T>
 T* Localizer::LoadLocalizedAsset(const std::string& name, AssetScope scope, const std::string& assetCacheId)
 {
-    T* asset = gAssetManager.LoadAsset<T>(GetLanguagePrefix() + name, scope, assetCacheId);
+    T* asset = gAssetManager.LoadAsset<T>(GetLocalePrefix() + name, scope, assetCacheId);
     if(asset == nullptr)
     {
-        LOG_WARNING("Failed to load %s%s - falling back on English (E%s).", GetLanguagePrefix().c_str(), name.c_str(), name.c_str());
+        LOG_WARNING("Failed to load %s%s - falling back on English (E%s).", GetLocalePrefix().c_str(), name.c_str(), name.c_str());
         asset = gAssetManager.LoadAsset<T>("E" + name, scope, assetCacheId);
         if(asset == nullptr)
         {

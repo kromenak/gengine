@@ -11,6 +11,26 @@ The [Gabriel Knight 3 demo](https://archive.org/details/GabrielKnight3BloodOfThe
 ## Config Options
 The file `GK3.ini` in the game's root directory provides some options for changing how the game functions. If interested, take a look - all options are present and documented. Just uncomment an option to have it read by the game.
 
+## Localization
+The most straightforward way to play a localized version of GK3 is to simply put the localized data files in the `Data` folder. 
+
+Officially localized versions (English, German, French, Spanish, Italian, Portuguese, and Russian) have auto-detection logic. On the other hand, unofficial localized versions should work fine as long as no asset files have been renamed.
+
+NOTE: The official Polish version of the game is not yet tested/supported.
+
+### Support for Multiple Localizations
+If you'd like to have the option to play in multiple languages, simply create separate Data folders for each language: `DataEnglish` and `DataFrench` for example.
+
+To specify which one to use when the game runs, you have two options:
+
+1. Specify the data folder name or path in the `Data Directory` option in `GK3.ini`.
+
+2. Specify the ISO 639 locale code  in the `Locale` option in `GK3.ini`. Valid built-in options are en (English), fr (French), it (Italian), de (German), es (Spanish), pt (Portuguese), and ru (Russian).
+	- You can also associate a custom locale name with a data folder by adding a `Data.cfg` file to the Data folder and putting a `LocaleName = YourCustomLocaleName` line in that file. Use an ISO 638 locale code or really any name that strikes your fancy.
+
+### Support for Unofficial Localizations
+If you have data files for an unofficial localization of the game, it's likely they will work - simply put the data files in the `Data` folder and attempt to run the game! If the localization doesn't work, check the logs for details. Worst case, please open a GitHub issue for investigation.
+
 ## Developer Mode
 You can open the developer console using the `~` key, which allows you to enter commands in the Sheep language. For example, try `SetLocation("LBY")` or `PrintString("Hello World")`. Check out the GitHub wiki for a list of all Sheep functions that can be called.
 

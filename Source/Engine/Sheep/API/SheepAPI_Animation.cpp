@@ -81,7 +81,7 @@ shpvoid StartMom(const std::string& momAnimationName)
     // However, official localization (such as French) do localize these assets, so we must take that into account.
 
     // First, try to load the localized version of the asset.
-    Animation* animation = gAssetManager.LoadAsset<Animation>(Localizer::GetLanguagePrefix() + momAnimationName, AssetScope::Scene, "mom");
+    Animation* animation = gAssetManager.LoadAsset<Animation>(Localizer::GetLocalePrefix() + momAnimationName, AssetScope::Scene, "mom");
     if(animation == nullptr)
     {
         // If we can't load that, fall back on the English version. For unofficial localizations, there is no need to localize these files.

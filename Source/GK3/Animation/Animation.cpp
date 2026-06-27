@@ -775,7 +775,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                         // The YAK name is *almost* always prefixed with the language code (E). *Almost* always.
                         // We want to store the name *without* the language code, so detect and remove it if it's there.
                         // NOTE: In the french version YAK name is prefixed with f (in lowercase)
-                        if(std::toupper(line.entries[2].key[0]) == Localizer::GetLanguagePrefix()[0])
+                        if(std::toupper(line.entries[2].key[0]) == Localizer::GetLocalePrefix()[0])
                         {
                             node->licensePlate = line.entries[2].key.substr(1);
                         }
