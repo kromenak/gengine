@@ -151,6 +151,7 @@ if(MSVC)
         /fp:fast    # Optimize floating point math for speed.
         /JMC        # Enable "Just My Code" to skip system/library code when debugging.
         /MP         # Multithreaded compiling - it's faster.
+        /utf-8      # Enforce UTF-8 encoding of source files and strings at runtime.
     )
 elseif(APPLE)
     #target_compile_options(gk3 PRIVATE
@@ -160,6 +161,15 @@ endif()
 
 #########################
 # LINKER CONFIG
+#########################
+if(WIN32)
+    #target_link_options(gk3 PRIVATE
+    #
+    #)
+endif()
+
+#########################
+# LIBRARY CONFIG
 #########################
 # Library locations/linking/copying.
 set(LIBS_SRC "${PLAT_SOURCE_DIR}/Libraries")
@@ -374,6 +384,10 @@ if(WIN32)
     )
     source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${APP_RESOURCES})
     target_sources(gk3 PRIVATE ${APP_RESOURCES})
+
+    # Also add App.manifest, which configures some Windows options (such as using UTF-8). Kind of similar to Info.plist on Mac?
+    # NOTE: For some reason, App.manifest absolutely refuses to appear in the VS Solution Explorer. But rest assured, it is being added to the compiled EXE.
+    target_sources(gk3 PRIVATE Publish/Windows/App.manifest)
 
 elseif(APPLE)
     # Build a Mac app (rather than command line tool).
