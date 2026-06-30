@@ -61,7 +61,7 @@ struct SaveHeader
     char userName[32] = "UNKNOWN-USER";
 
     // Copyright message.
-    char copyright[100] = "Copyright © 1999 Sierra Studios. All rights reserved.";
+    char copyright[100] = "Copyright Â© 1999 Sierra Studios. All rights reserved.";
 
     void OnPersist(PersistState& ps)
     {
