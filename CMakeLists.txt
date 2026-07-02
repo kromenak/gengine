@@ -146,6 +146,8 @@ endif()
 if(MSVC)
     target_compile_definitions(gk3 PRIVATE
         _CRT_SECURE_NO_WARNINGS     # Don't display warnings for using unsecure standard C/C++ functions.
+        UNICODE                     # Tells Windows header to enable wide character function variants.
+        _UNICODE                    # Tells C runtime to enable wide character function variants.
     )
     target_compile_options(gk3 PRIVATE
         /fp:fast    # Optimize floating point math for speed.

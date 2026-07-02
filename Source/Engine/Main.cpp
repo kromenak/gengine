@@ -10,11 +10,16 @@
 #include "BuildEnv.h"
 #include "GEngine.h"
 #include "Log.h"
+#include "TextEncode.h"
 
 int main(int argc, char* argv[])
 {
+    // Take care of any runtime configuration to ensure the program supports UTF-8.
+    TextEncode::InitUtf8();
+
+    // Output version info.
     Log("--------------------");
-    Logf("GEngine v%s", PROJECT_VERSION);
+    Logf("G-Engine v%s", PROJECT_VERSION);
     Log("--------------------");
 
     // Create the engine.

@@ -14,6 +14,7 @@
 #if defined(PLATFORM_WINDOWS)
 #include <Windows.h>
 #include <lmcons.h> // for ULEN define
+#include "TextEncode.h"
 #endif
 
 #if defined(HAVE_UNISTD_H)
@@ -42,14 +43,14 @@ namespace SystemUtil
         #if defined(PLATFORM_WINDOWS)
         {
             const DWORD kBufferSize = MAX_COMPUTERNAME_LENGTH + 1;
-            char computerName[kBufferSize] = { 0 };
+            WCHAR computerName[kBufferSize] = { 0 };
             DWORD bufferSize = kBufferSize;
-            if(!GetComputerName(computerName, &bufferSize))
+            if(!GetComputerNameW(computerName, &bufferSize))
             {
                 Log("Failed to get machine name.");
                 return std::string();
             }
-            return std::string(computerName);
+            return TextEncode::Utf16ToUtf8(computerName);
         }
         #elif defined(HAVE_UNISTD_H)
         {
@@ -72,14 +73,14 @@ namespace SystemUtil
         #if defined(PLATFORM_WINDOWS)
         {
             const DWORD kBufferSize = UNLEN + 1;
-            char userName[kBufferSize];
+            WCHAR userName[kBufferSize];
             DWORD bufferSize = kBufferSize;
-            if(!GetUserName(userName, &bufferSize))
+            if(!GetUserNameW(userName, &bufferSize))
             {
                 Log("Failed to get user name.");
                 return std::string();
             }
-            return std::string(userName);
+            return TextEncode::Utf16ToUtf8(userName);
         }
         #elif defined(HAVE_UNISTD_H)
         {

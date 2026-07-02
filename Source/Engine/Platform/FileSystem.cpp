@@ -8,8 +8,11 @@
 
 #if defined(PLATFORM_MAC)
 #include <CoreFoundation/CoreFoundation.h>
-#elif defined(PLATFORM_WINDOWS)
+#endif
+
+#if defined(PLATFORM_WINDOWS)
 #include <Windows.h>
+#include "TextEncode.h"
 #endif
 
 #if defined(HAVE_DIRENT_H)
@@ -104,16 +107,7 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
     outPath = Path::Combine({ relativeSearchPath, fileName });
 
     // Use some method to determine if the file exists or not.
-    #if defined(HAVE_STAT_H)
-    // On systems that have stat.h header, we can use this method. This is technically POSIX-only, but Windows has the header too...
-    // Some people on StackOverflow found this to be faster than other methods: https://stackoverflow.com/a/12774387/782181
-    struct stat buffer;
-    return (stat(outPath.c_str(), &buffer) == 0);
-    #else
-    // Using just standard C++, we can tell if a file exists by opening a stream and seeing if it works.
-    std::ifstream f(outPath.c_str());
-    return f.good();
-    #endif
+    return File::Exists(outPath);
 }
 
 std::string Path::GetFileName(const std::string& path)
@@ -255,7 +249,7 @@ bool Directory::Exists(const std::string& path)
 {
     #if defined(PLATFORM_WINDOWS)
     {
-        DWORD fileAttributes = GetFileAttributesA(path.c_str());
+        DWORD fileAttributes = GetFileAttributesW(TextEncode::Utf8ToUtf16(path).c_str());
 
         // In this case, the provided path might be malformed.
         if(fileAttributes == INVALID_FILE_ATTRIBUTES) { return false; }
@@ -288,7 +282,7 @@ bool Directory::Create(const std::string& path)
     #if defined(PLATFORM_WINDOWS)
     {
         // Make the directory.
-        bool result = CreateDirectory(path.c_str(), NULL);
+        bool result = CreateDirectoryW(TextEncode::Utf8ToUtf16(path).c_str(), NULL);
 
         // A false result indicates an error.
         if(!result)
@@ -381,13 +375,13 @@ std::vector<std::string> Directory::List(const std::string& path, FileType fileT
 
         // Use Windows FindFirstFile/FindNextFile to iterate contents of directory.
         WIN32_FIND_DATA fd;
-        HANDLE hFind = ::FindFirstFile(searchPath.c_str(), &fd);
+        HANDLE hFind = ::FindFirstFileW(TextEncode::Utf8ToUtf16(searchPath).c_str(), &fd);
         if(hFind != INVALID_HANDLE_VALUE)
         {
             do
             {
                 // Ignore current directory and parent directory entries.
-                if(strcmp(fd.cFileName, ".") == 0 || strcmp(fd.cFileName, "..") == 0)
+                if(wcscmp(fd.cFileName, L".") == 0 || wcscmp(fd.cFileName, L"..") == 0)
                 {
                     continue;
                 }
@@ -404,10 +398,10 @@ std::vector<std::string> Directory::List(const std::string& path, FileType fileT
                 if((isDirectory && (fileTypeMask & FILETYPE_DIRECTORY)) ||
                    (!isDirectory && (fileTypeMask & FILETYPE_FILE)))
                 {
-                    files.emplace_back(fd.cFileName);
+                    files.emplace_back(TextEncode::Utf16ToUtf8(fd.cFileName));
                 }
             }
-            while(::FindNextFile(hFind, &fd));
+            while(::FindNextFileW(hFind, &fd));
             ::FindClose(hFind);
         }
     }
@@ -454,8 +448,17 @@ bool File::Exists(const std::string& filePath)
 {
     // There are plenty of ways to do this, see this link: https://stackoverflow.com/a/12774387
     // Could be optimized in a per-platform way, if desired...
+
+    #if defined(HAVE_STAT_H)
+    // On systems that have stat.h header, we can use this method. This is technically POSIX-only, but Windows has the header too...
+    // Some people on StackOverflow found this to be faster than other methods: https://stackoverflow.com/a/12774387/782181
+    struct stat buffer;
+    return (stat(filePath.c_str(), &buffer) == 0);
+    #else
+    // Using just standard C++, we can tell if a file exists by opening a stream and seeing if it works.
     std::ifstream f(filePath.c_str());
     return f.good();
+    #endif
 }
 
 uint64_t File::Size(const std::string& filePath)
@@ -463,8 +466,8 @@ uint64_t File::Size(const std::string& filePath)
     #if defined(PLATFORM_WINDOWS)
     {
         // Use Windows function to get attributes and return size.
-        WIN32_FILE_ATTRIBUTE_DATA file_attr_data;
-        if(GetFileAttributesEx(filePath.c_str(), GetFileExInfoStandard, &file_attr_data))
+        WIN32_FILE_ATTRIBUTE_DATA file_attr_data { };
+        if(GetFileAttributesExW(TextEncode::Utf8ToUtf16(filePath).c_str(), GetFileExInfoStandard, &file_attr_data))
         {
             // For compatibility reasons, the size is stored as two 32-bit ints, but it's meant to represent a 64-bit int.
             // Can use the LARGE_INTEGER struct to convert to int64.

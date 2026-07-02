@@ -7,13 +7,13 @@
 BinaryReader::BinaryReader(const char* filePath) :
     StreamReader(new std::ifstream(filePath, std::ios::in | std::ios::binary), true)
 {
-    //mStream = new std::ifstream(filePath, std::ios::in | std::ios::binary);
+
 }
 
 BinaryReader::BinaryReader(const uint8_t* memory, uint32_t memoryLength) :
     StreamReader(new imstream(reinterpret_cast<const char*>(memory), memoryLength), true)
 {
-    //mStream = new imstream(reinterpret_cast<const char*>(memory), memoryLength);
+
 }
 
 BinaryReader::BinaryReader(const char* memory, uint32_t memoryLength) :
