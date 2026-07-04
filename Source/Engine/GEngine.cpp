@@ -31,6 +31,7 @@
 #include "SaveManager.h"
 #include "SceneManager.h"
 #include "SheepManager.h"
+#include "TextEncode.h"
 #include "TextInput.h"
 #include "ThreadPool.h"
 #include "ThreadUtil.h"
@@ -475,6 +476,34 @@ bool GEngine::InitAssetManager()
                 }
             }
         }
+    }
+
+    // Register asset processors.
+    if(StringUtil::EqualsIgnoreCase(dataDirectory.localeName, "RU"))
+    {
+        // The Russian version of the game has its text assets encoded using the Windows-1251 code page.
+        // In order to use them, we need to convert them to UTF-8 as they are being loaded.
+        auto convertRussianTextFunction = [](AssetData& assetData){
+            uint8_t* newText = TextEncode::Cp1251ToUtf8(assetData.bytes.get(), assetData.length, assetData.length);
+            assetData.bytes.reset(newText);
+        };
+        gAssetManager.SetAssetOnLoadProcessor("TXT", convertRussianTextFunction);
+        gAssetManager.SetAssetOnLoadProcessor("FON", convertRussianTextFunction);
+        gAssetManager.SetAssetOnLoadProcessor("YAK", convertRussianTextFunction);
+        gAssetManager.SetAssetOnLoadProcessor("HTML", convertRussianTextFunction);
+    }
+    else
+    {
+        // Even though EFIGS Extended ASCII with Windows-1252 code page is pretty similar to UTF-8, it isn't exactly the same.
+        // To avoid some issues with logic that expects UTF-8 internally, we need to convert to UTF-8 here.
+        auto convertEFIGSToUtf8Function = [](AssetData& assetData){
+            uint8_t* newText = TextEncode::Cp1252ToUtf8(assetData.bytes.get(), assetData.length, assetData.length);
+            assetData.bytes.reset(newText);
+        };
+        gAssetManager.SetAssetOnLoadProcessor("TXT", convertEFIGSToUtf8Function);
+        gAssetManager.SetAssetOnLoadProcessor("FON", convertEFIGSToUtf8Function);
+        gAssetManager.SetAssetOnLoadProcessor("YAK", convertEFIGSToUtf8Function);
+        gAssetManager.SetAssetOnLoadProcessor("HTML", convertEFIGSToUtf8Function);
     }
 
     // Register asset extractors.

@@ -32,6 +32,7 @@
 #include "Asset.h"
 #include "AssetCache.h"
 #include "AssetNameResolver.h"
+#include "FileSystem.h"
 #include "IAssetArchive.h"
 #include "StringUtil.h"
 
@@ -73,6 +74,7 @@ public:
 
     // Asset Loading/Unloading
     void SetAssetNameResolver(const AssetNameResolver& resolver) { mAssetNameResolver = resolver; }
+    void SetAssetOnLoadProcessor(const std::string& extension, const std::function<void(AssetData&)>& processorFunction);
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
     template<typename T> T* LoadAsset(const std::string& name, AssetScope scope, AssetCache<T>* cache);
     template<typename T> void TrackAsset(T* asset, AssetScope scope = AssetScope::Global, const std::string& assetCacheId = "");
@@ -99,7 +101,11 @@ private:
 
     // Maps an asset extension to a custom extractor function.
     // Many assets can simply be written to disk byte-for-byte. But some can require custom processing.
-    std::unordered_map<std::string, std::function<bool(AssetExtractData&)>> mAssetExtractorsByExtension;
+    std::string_map_ci<std::function<bool(AssetExtractData&)>> mAssetExtractorsByExtension;
+
+    // Maps an asset extension to a custom processor function that executes when the asset is loaded.
+    // Most assets can just be loaded as-is, but on rare occasion additional conditional processing is needed.
+    std::string_map_ci<std::function<void(AssetData&)>> mAssetOnLoadProcessorsByExtension;
 
     bool ExtractAsset(IAssetArchive* archive, const std::string& assetName, const std::string& outputDirectory) const;
     uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize) const;
@@ -204,6 +210,13 @@ inline T* AssetManager::LoadAssetInternal(const std::string& name, AssetScope sc
     assetData.bytes.reset(CreateAssetBuffer(name, assetData.length));
     if(assetData.bytes == nullptr) { return nullptr; }
     //printf("Loading asset %s\n", assetName.c_str());
+
+    // Execute any "on load" processors for this asset extension.
+    auto it = mAssetOnLoadProcessorsByExtension.find(Path::GetExtension(name, true));
+    if(it != mAssetOnLoadProcessorsByExtension.end())
+    {
+        it->second(assetData);
+    }
 
     // Create asset from asset buffer.
     std::string upperName = StringUtil::ToUpperCopy(name);

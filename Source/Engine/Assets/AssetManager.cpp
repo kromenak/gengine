@@ -6,7 +6,6 @@
 #include <string>
 
 #include "BarnFile.h"
-#include "FileSystem.h"
 #include "ReportManager.h"
 #include "StringUtil.h"
 
@@ -174,6 +173,25 @@ void AssetManager::ExtractAssets(const std::string& search, const std::string& o
     LOG_GENERIC("Extracted %u assets matching search string %s.", extractCount, search.c_str());
 }
 
+void AssetManager::SetAssetOnLoadProcessor(const std::string& extension, const std::function<void(AssetData&)>& processorFunction)
+{
+    if(extension.empty())
+    {
+        LOG_WARNING("Empty extension passed to SetAssetOnLoadProcessor.");
+        return;
+    }
+
+    // Add the processor function to the map. Make sure the extension key has a leading dot, for consistency.
+    if(extension.front() != '.')
+    {
+        mAssetOnLoadProcessorsByExtension["." + extension] = processorFunction;
+    }
+    else
+    {
+        mAssetOnLoadProcessorsByExtension[extension] = processorFunction;
+    }
+}
+
 void AssetManager::UnloadAssets(AssetScope scope)
 {
     // Iterate all asset caches and tell them to unload assets at the given scope.
@@ -200,6 +218,13 @@ bool AssetManager::ExtractAsset(IAssetArchive* archive, const std::string& asset
     if(extractData.assetData.bytes == nullptr)
     {
         return false;
+    }
+
+    // Execute any "on load" processors for this asset extension.
+    auto processorIt = mAssetOnLoadProcessorsByExtension.find(Path::GetExtension(assetName, true));
+    if(processorIt != mAssetOnLoadProcessorsByExtension.end())
+    {
+        processorIt->second(extractData.assetData);
     }
 
     // Decide on an output path. Try to use what's provided, but fall back on working directory worst case.
