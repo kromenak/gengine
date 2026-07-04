@@ -15,7 +15,7 @@
 int main(int argc, char* argv[])
 {
     // Take care of any runtime configuration to ensure the program supports UTF-8.
-    TextEncode::InitUtf8();
+    Utf8::Enable();
 
     // Output version info.
     Log("--------------------");
