@@ -81,6 +81,7 @@ target_include_directories(gk3 PRIVATE
     Libraries/imgui/backends
     Libraries/minilzo
     Libraries/stb
+    Libraries/utfcpp
 
     # Required for including BuildEnv.h
     "${CMAKE_CURRENT_BINARY_DIR}"
@@ -154,6 +155,7 @@ if(MSVC)
         /JMC        # Enable "Just My Code" to skip system/library code when debugging.
         /MP         # Multithreaded compiling - it's faster.
         /utf-8      # Enforce UTF-8 encoding of source files and strings at runtime.
+        /Zc:__cplusplus # Report the correct C++ language version from the __cplusplus preprocessor macro
     )
 elseif(APPLE)
     #target_compile_options(gk3 PRIVATE
@@ -360,6 +362,13 @@ set(IMGUI_SOURCES
 )
 target_sources(gk3 PRIVATE ${IMGUI_SOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${IMGUI_SOURCES})
+
+# Add utfcpp library (header only).
+file(GLOB_RECURSE UTFCPP_SOURCES CONFIGURE_DEPENDS
+    "Libraries/utfcpp/*.h"
+)
+target_sources(gk3 PRIVATE ${UTFCPP_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${UTFCPP_SOURCES})
 
 ##################
 # PLATFORM CONFIG
