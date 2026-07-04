@@ -69,6 +69,11 @@ private:
     // A map of search terms to web page asset names.
     std::string_map_ci<std::string> mSearchTerms;
 
+    #if defined(DEBUG)
+    std::vector<std::string> mWebPages;
+    std::vector<std::string>::iterator mWebPagesIterator = mWebPages.end();
+    #endif
+
     // Back and forward buttons for navigating page history.
     SidneyButton* mHistoryBackButton = nullptr;
     SidneyButton* mHistoryForwardButton = nullptr;

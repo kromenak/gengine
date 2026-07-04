@@ -391,6 +391,10 @@ void SidneySearch::Init(Actor* parent)
         IniSection section;
         while(parser.ReadNextSection(section))
         {
+            #if defined(DEBUG)
+            mWebPages.push_back(section.name);
+            #endif
+
             for(auto& line : section.lines)
             {
                 if(line.entries[0].key == "text")
@@ -403,6 +407,10 @@ void SidneySearch::Init(Actor* parent)
                 }
             }
         }
+
+        #if defined(DEBUG)
+        mWebPagesIterator = mWebPages.begin();
+        #endif
     }
 
     // Read in all the dialogue triggers for visiting certain pages under certain conditions.
@@ -487,6 +495,22 @@ void SidneySearch::OnUpdate(float deltaTime)
     {
         OnSearchButtonPressed();
     }
+
+    #if defined(DEBUG)
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RIGHTBRACKET))
+    {
+        if(mWebPagesIterator == mWebPages.end())
+        {
+            mWebPagesIterator = mWebPages.begin();
+        }
+        else
+        {
+            mWebPagesIterator++;
+        }
+        ShowWebPage(*mWebPagesIterator);
+        Logf("Debug Show Web Page %s", (*mWebPagesIterator).c_str());
+    }
+    #endif
 
     // If a link is hovered, we need to update the link target label.
     mLinkTargetLabel->SetText("");
