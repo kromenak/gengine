@@ -239,13 +239,13 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     uint32_t readCount = mReader.Read(compressedBuffer, asset.size);
     mReaderMutex.unlock();
 
-    // Make sure we read what we were expecting.
-    // The "-1" case can happen when reading the last file in the barn, but asset is still valid.
-    if(readCount != asset.size && readCount != asset.size - 1)
+    // For some reason, the last asset in a Barn file sometimes has an asset size larger than the amount of bytes left in the file.
+    // The asset still seems to decompress and function correctly. For now, let's output a warning but still allow decompression to succeed.
+    if(readCount != asset.size)
     {
-        LOG_BARN("Didn't read expected number of Barn file bytes when creating asset buffer for %s.", assetName.c_str());
-        delete[] compressedBuffer;
-        return nullptr;
+        LOG_BARN("Didn't read expected number of Barn file bytes when creating asset buffer for %s (read %u, expected %u).", assetName.c_str(), readCount, asset.size);
+        //delete[] compressedBuffer;
+        //return nullptr;
     }
 
     // Create buffer for uncompressed data.
