@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "Audio.h"
 #include "AudioManager.h"
+#include "DataHelper.h"
 #include "Font.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
@@ -349,12 +350,20 @@ void SaveLoadScreen::PopulateSaveList(bool justShown)
             });
             mListEntries.back().button = button;
 
+            // For some reason, the Russian version of the game seems to use a different font here.
+            std::string fontAssetToUse = "F_SSERIF_T8.FON";
+            DataDirectory dataDirectory;
+            if(DataHelper::GetDataDirectoryToUse(dataDirectory) && StringUtil::EqualsIgnoreCase(dataDirectory.localeName, "RU"))
+            {
+                fontAssetToUse = "F_ARIAL_T8.FON";
+            }
+
             // Name label.
             UILabel* nameLabel = UI::CreateWidgetActor<UILabel>("NameLabel", button);
             nameLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             nameLabel->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
             nameLabel->GetRectTransform()->SetSizeDelta(kLeftColumnWidth, 14.0f);
-            nameLabel->SetFont(gAssetManager.LoadAsset<Font>("F_SSERIF_T8.FON"));
+            nameLabel->SetFont(gAssetManager.LoadAsset<Font>(fontAssetToUse));
             nameLabel->SetVerticalAlignment(VerticalAlignment::Top);
             mListEntries.back().nameLabel = nameLabel;
 
@@ -363,7 +372,7 @@ void SaveLoadScreen::PopulateSaveList(bool justShown)
             dayTimeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             dayTimeLabel->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kColumnSeparatorWidth + 2.0f, -2.0f);
             dayTimeLabel->GetRectTransform()->SetSizeDelta(kMiddleColumnWidth, 14.0f);
-            dayTimeLabel->SetFont(gAssetManager.LoadAsset<Font>("F_SSERIF_T8.FON"));
+            dayTimeLabel->SetFont(gAssetManager.LoadAsset<Font>(fontAssetToUse));
             dayTimeLabel->SetVerticalAlignment(VerticalAlignment::Top);
             mListEntries.back().dayTimeLabel = dayTimeLabel;
 
@@ -372,7 +381,7 @@ void SaveLoadScreen::PopulateSaveList(bool justShown)
             scoreLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             scoreLabel->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kMiddleColumnWidth + (2 * kColumnSeparatorWidth) + 2.0f, -2.0f);
             scoreLabel->GetRectTransform()->SetSizeDelta(kRightColumnWidth, 14.0f);
-            scoreLabel->SetFont(gAssetManager.LoadAsset<Font>("F_SSERIF_T8.FON"));
+            scoreLabel->SetFont(gAssetManager.LoadAsset<Font>(fontAssetToUse));
             scoreLabel->SetVerticalAlignment(VerticalAlignment::Top);
             mListEntries.back().scoreLabel = scoreLabel;
         }

@@ -14,6 +14,9 @@ namespace
     // All data directories that have been detected.
     std::vector<DataDirectory> dataDirectories;
 
+    // The data directory being used for this run of the game.
+    DataDirectory activeDataDirectory;
+
     bool ParseDataDirectory(const std::string& path, DataDirectory& dataDirectory)
     {
         if(!Directory::Exists(path))
@@ -156,6 +159,13 @@ namespace
 
 bool DataHelper::GetDataDirectoryToUse(DataDirectory& dataDirectory)
 {
+    // If we've already done this, just return what we decided on last time.
+    if(!activeDataDirectory.path.empty())
+    {
+        dataDirectory = activeDataDirectory;
+        return true;
+    }
+
     // Attempt to load GK3.ini config so we can check for data directory and locale preferences.
     AssetManager assetManager;
     assetManager.AddSearchPath("");
@@ -168,7 +178,8 @@ bool DataHelper::GetDataDirectoryToUse(DataDirectory& dataDirectory)
         {
             if(GetOrCreateDataDirectory(dataDirectoryPreference, dataDirectory))
             {
-                Logf("Using data directory %s due to Data Directory preference in GK3.ini", dataDirectory.path.c_str());
+                activeDataDirectory = dataDirectory;
+                Logf("Using data directory %s due to Data Directory preference in GK3.ini.", dataDirectory.path.c_str());
                 return true;
             }
         }
@@ -185,7 +196,8 @@ bool DataHelper::GetDataDirectoryToUse(DataDirectory& dataDirectory)
                 if(StringUtil::EqualsIgnoreCase(dataDir.localeName, localePreference))
                 {
                     dataDirectory = dataDir;
-                    Logf("Using data directory %s due to Locale preference in GK3.ini", dataDirectory.path.c_str());
+                    activeDataDirectory = dataDirectory;
+                    Logf("Using data directory %s due to Locale preference in GK3.ini.", dataDirectory.path.c_str());
                     return true;
                 }
             }
@@ -196,6 +208,7 @@ bool DataHelper::GetDataDirectoryToUse(DataDirectory& dataDirectory)
     // Without any preference or config value, let's try to use Data.
     if(GetOrCreateDataDirectory("Data", dataDirectory))
     {
+        activeDataDirectory = dataDirectory;
         Log("Using data directory Data.");
         return true;
     }
@@ -205,6 +218,7 @@ bool DataHelper::GetDataDirectoryToUse(DataDirectory& dataDirectory)
     if(!dataDirectories.empty())
     {
         dataDirectory = dataDirectories[0];
+        activeDataDirectory = dataDirectory;
         Logf("Using data directory %s because it's the first one we found.", dataDirectory.path.c_str());
         return true;
     }
