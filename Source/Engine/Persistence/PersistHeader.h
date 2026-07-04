@@ -12,6 +12,7 @@
 #include "PersistState.h"
 #include "PNGCodec.h"
 #include "Texture.h"
+#include "TextEncode.h"
 
 struct SaveHeader
 {
@@ -124,6 +125,12 @@ struct PersistHeader
         ps.Xfer("Score", score);
         ps.Xfer("Max Score", maxScore);
         ps.Xfer("Last CD", cdNumber);
+
+        // Guard against any invalid characters in the user description.
+        if(ps.IsLoading())
+        {
+            userDescription = utf8::replace_invalid(userDescription, Utf8::kWhiteSquareCodePoint);
+        }
 
         if(ps.IsSaving())
         {
