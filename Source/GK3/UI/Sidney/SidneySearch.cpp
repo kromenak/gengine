@@ -13,6 +13,7 @@
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"
 #include "TextAsset.h"
+#include "TextEncode.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -59,8 +60,7 @@ namespace
         // We need a valid asset pointer.
         if(html == nullptr) { return; }
 
-        // Get the actual text data from the asset.
-        char* text = reinterpret_cast<char*>(html->GetText());
+        // We need text that isn't empty.
         uint32_t textLength = html->GetTextLength();
         if(textLength == 0)
         {
@@ -74,19 +74,19 @@ namespace
         std::string content;
 
         // Iterate until we reach the end of the HTML text, parsing each character in turn.
-        int textIndex = 0;
-        while(textIndex < html->GetTextLength())
+        uint8_t* it = html->GetText();
+        uint8_t* end = it + textLength;
+        while(it < end)
         {
             // Read a character.
-            char c = text[textIndex];
-            ++textIndex;
+            uint32_t codePoint = utf8::next(it, end);
 
             // Treat line breaks in special ways depending on context.
-            if(c == '\n' || c == '\r')
+            if(codePoint == '\n' || codePoint == '\r')
             {
                 if(!content.empty() && content.back() != ' ')
                 {
-                    c = ' ';
+                    codePoint = ' ';
                 }
                 else
                 {
@@ -96,7 +96,7 @@ namespace
 
             // We encountered a tag, but the content isn't empty.
             // Add it to the current element's contents before continuing.
-            if(c == '<' && !content.empty())
+            if(codePoint == '<' && !content.empty())
             {
                 StringUtil::TrimWhitespace(content); // make sure it isn't just whitespace.
                 if(!content.empty())
@@ -111,18 +111,22 @@ namespace
             }
 
             // This is a tag - figure out what the tag is.
-            if(c == '<')
+            if(codePoint == '<')
             {
-                // Read in the entire string.
+                // Read in the entire tag string.
                 std::string tagStr;
-                while(textIndex < textLength && text[textIndex] != '>')
+                while(it < end)
                 {
-                    tagStr.push_back(text[textIndex]);
-                    ++textIndex;
+                    codePoint = utf8::next(it, end);
+                    if(codePoint != '>')
+                    {
+                        tagStr.append(Utf8::CodePointToUtf8(codePoint));
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-
-                // Skip past the close tag.
-                ++textIndex;
 
                 // Split by spaces.
                 std::vector<std::string> tokens = StringUtil::Split(tagStr, ' ', true);
@@ -226,7 +230,7 @@ namespace
             }
             else // must be content?
             {
-                content.push_back(c);
+                content.append(Utf8::CodePointToUtf8(codePoint));
             }
         }
         assert(parseStack.empty());
