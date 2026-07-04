@@ -140,6 +140,12 @@ SaveLoadScreen::SaveLoadScreen() : Actor("SaveLoadScreen", TransformType::RectTr
         mTextInput->SetFont(gAssetManager.LoadAsset<Font>("F_SSERIF_T8.FON"));
         mTextInput->SetVerticalAlignment(VerticalAlignment::Top);
         mTextInput->AllowInputToChangeFocus(false); // this text input is always focused if code focuses it
+
+        //TODO: The original game actually seems to set the max save name length not based on characters, but available UI space.
+        //TODO: For example, a save name of all "i" is allowed to have more characters than a save name with all "w".
+        //TODO: I suppose we could implement something like that, but using a reasonable middle ground for now.
+        mTextInput->SetMaxLength(32);
+
         mTextInput->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mTextInput->GetRectTransform()->SetAnchoredPosition(2.0f, 0.0f);
         mTextInput->GetRectTransform()->SetSizeDelta(kLeftColumnWidth, kRowHeight);
