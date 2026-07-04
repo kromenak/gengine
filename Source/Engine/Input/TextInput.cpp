@@ -1,46 +1,62 @@
 #include "TextInput.h"
 
-void TextInput::Insert(const std::string& text)
+#include "TextEncode.h"
+
+void TextInput::Insert(const std::string& insertText)
 {
-    Insert(text.c_str(), static_cast<int>(text.size()));
-}
+    // Get length of text in UTF-8 characters.
+    int insertTextLength = utf8::distance(insertText.begin(), insertText.end());
 
-void TextInput::Insert(const char* text, int count)
-{
-    for(int i = 0; i < count; ++i)
+    // If this is exactly one character (so, likely typed rather than copy/paste) and its an exclude character, ignore it!
+    if(insertTextLength == 1)
     {
-        Insert(text[i]);
-    }
-}
-
-void TextInput::Insert(char c)
-{
-    // Make sure this isn't an exclude char.
-    for(char mExcludeChar : mExcludeChars)
-    {
-        if(mExcludeChar == c) { return; }
+        for(uint32_t excludeCodePoint : mExcludeCodePoints)
+        {
+            if(Utf8::Utf8ToCodePoint(insertText) == excludeCodePoint)
+            {
+                return;
+            }
+        }
     }
 
-    // Make sure we aren't at our limit.
-    if(mText.length() >= mMaxLength)
+    // Figure out how many characters from the passed in string to insert.
+    // Only truncate if there's a max length and everything doesn't fit in the remaining space.
+    int charactersToInsert = -1;
+    if(mMaxLength >= 0)
     {
-        return;
+        int textLength = utf8::distance(mText.begin(), mText.end());
+        int remainingCharacters = mMaxLength - textLength;
+        if(remainingCharacters < insertTextLength)
+        {
+            charactersToInsert = remainingCharacters;
+        }
     }
 
-    // Add the char to our text.
-    if(mCursorPos < 0 || mCursorPos >= static_cast<int>(mText.size()))
+    // If cursor is at end of text, just append inserted text to the end.
+    if(mCursorPos < 0)
     {
-        mText.push_back(c);
+        if(charactersToInsert < 0)
+        {
+            mText.append(insertText);
+        }
+        else
+        {
+            mText.append(Utf8::Substring(insertText, 0, charactersToInsert));
+        }
     }
-    else
+    else // cursor is in middle of text
     {
-        mText.insert(mText.begin() + mCursorPos, c);
-    }
-
-    // Increment cursor pos, if set.
-    if(mCursorPos >= 0)
-    {
-        ++mCursorPos;
+        // Insert text at cursor position.
+        if(charactersToInsert < 0)
+        {
+            Utf8::Insert(mText, mCursorPos, insertText);
+            mCursorPos += insertTextLength;
+        }
+        else
+        {
+            Utf8::Insert(mText, mCursorPos, Utf8::Substring(insertText, 0, charactersToInsert));
+            mCursorPos += charactersToInsert;
+        }
     }
 }
 
@@ -54,13 +70,14 @@ void TextInput::DeletePrev()
         // Out-of-range cursor pos means just delete from end.
         // Otherwise, delete one before the cursor pos.
         // If cursor pos is 0, this does nothing!
-        if(mCursorPos < 0 || mCursorPos >= static_cast<int>(mText.size()))
+        int textLength = utf8::distance(mText.begin(), mText.end());
+        if(mCursorPos < 0 || mCursorPos >= textLength)
         {
-            mText.pop_back();
+            Utf8::PopBack(mText);
         }
         else if(mCursorPos != 0)
         {
-            mText.erase(mCursorPos - 1, 1);
+            Utf8::Erase(mText, mCursorPos - 1, 1);
 
             // Cursor pos just decreased by one!
             --mCursorPos;
@@ -78,16 +95,24 @@ void TextInput::DeleteNext()
         // For a cursor at the end of the text, this would do nothing.
         // Otherwise, it deletes the current character.
         // Cursor pos does not change!
-        if(mCursorPos >= 0 && mCursorPos < static_cast<int>(mText.size()))
+        int textLength = utf8::distance(mText.begin(), mText.end());
+        if(mCursorPos >= 0 && mCursorPos < textLength)
         {
-            mText.erase(mCursorPos, 1);
+            Utf8::Erase(mText, mCursorPos, 1);
+
+            // If cursor is now at end of the text, set cursor pos to -1 to signify this.
+            if(mCursorPos == textLength - 1)
+            {
+                mCursorPos = -1;
+            }
         }
     }
 }
 
 void TextInput::SetCursorPos(int pos)
 {
-    if(pos < 0 || pos >= static_cast<int>(mText.size()))
+    int textLength = utf8::distance(mText.begin(), mText.end());
+    if(pos < 0 || pos >= textLength)
     {
         mCursorPos = -1;
     }
@@ -100,13 +125,14 @@ void TextInput::SetCursorPos(int pos)
 void TextInput::MoveCursorForward()
 {
     // Move cursor forward if in range.
-    if(mCursorPos >= 0 && mCursorPos < static_cast<int>(mText.size()))
+    int textLength = utf8::distance(mText.begin(), mText.end());
+    if(mCursorPos >= 0 && mCursorPos < textLength)
     {
         ++mCursorPos;
     }
 
     // If cursor went out-of-bounds, just reset to -1 (means 'end of text').
-    if(mCursorPos >= static_cast<int>(mText.size()))
+    if(mCursorPos >= textLength)
     {
         mCursorPos = -1;
     }
@@ -115,9 +141,10 @@ void TextInput::MoveCursorForward()
 void TextInput::MoveCursorBack()
 {
     // If cursor is out-of-bounds (meaning 'end of text'), just move back one.
-    if(mCursorPos < 0 || mCursorPos >= static_cast<int>(mText.size()))
+    int textLength = utf8::distance(mText.begin(), mText.end());
+    if(mCursorPos < 0 || mCursorPos >= textLength)
     {
-        mCursorPos = (int)mText.size() - 1;
+        mCursorPos = textLength - 1;
     }
     else if(mCursorPos > 0)
     {
@@ -135,10 +162,10 @@ void TextInput::MoveCursorToEnd()
     mCursorPos = -1;
 }
 
-void TextInput::SetExcludeChar(int pos, char exclude)
+void TextInput::SetExcludeCodePoint(int pos, uint32_t codePoint)
 {
     if(pos < 0 || pos >= 4) { return; }
-    mExcludeChars[pos] = exclude;
+    mExcludeCodePoints[pos] = codePoint;
 }
 
 void TextInput::SetText(const std::string& text)
@@ -146,7 +173,8 @@ void TextInput::SetText(const std::string& text)
     mText = text;
 
     // Reset cursor pos if it's now too large.
-    if(mCursorPos >= static_cast<int>(mText.size()))
+    int textLength = utf8::distance(mText.begin(), mText.end());
+    if(mCursorPos >= textLength)
     {
         mCursorPos = -1;
     }

@@ -10,7 +10,7 @@ TYPEINFO_INIT(UITextInput, UILabel, 28)
 
 UITextInput::UITextInput(Actor* owner) : UILabel(owner)
 {
-    mTextInput.SetExcludeChar(0, '`');
+    mTextInput.SetExcludeCodePoint(0, '`');
 }
 
 void UITextInput::Render()

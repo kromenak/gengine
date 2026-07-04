@@ -2,6 +2,7 @@
 
 #include "Font.h"
 #include "StringUtil.h"
+#include "TextEncode.h"
 
 TextLayout::CharInfo& TextLayout::CharInfo::operator=(const TextLayout::CharInfo& other)
 {
@@ -62,65 +63,79 @@ void TextLayout::AddLine(const std::string& line)
     // We will be adding at least one line as a result.
     ++mLineCount;
 
-    // Determine the length of this line.
-    // This is made more complex b/c we may need to "wrap" the text if it extends beyond the width of our rect.
-    int nextLineStartDueToWrap = -1;
-    int actualLineLength = line.size();
+    // Get the length of the line in characters (not bytes).
+    int initialLineCharacterLength = utf8::distance(line.begin(), line.end());
+
+    // Iterate the line to determine how many characters will be on this line and how wide the line will be in pixels.
+    // This logic is complicated by the fact that we may wrap (i.e. split this line into more than one line) if it's too long for the display area.
+    int finalLineCharacterLength = initialLineCharacterLength;
+    int lineWrapAtCharacterIndex = -1;
     int lineWidth = 0;
     {
-        int lastSpaceIndex = -1;
-        int lastSpaceWidth = -1;
-        for(size_t i = 0; i < line.size(); ++i)
+        // Whenever we see a space, remember its character index, byte index, and what the line width was at that spot.
+        int lastSpaceCharacterIndex = -1;
+        int lineWidthAtLastSpace = -1;
+
+        // Go character by character and calculate lengths/widths as we go.
+        int characterIndex = 0;
+        auto it = line.begin();
+        while(it != line.end())
         {
             // Get the glyph for this character.
-            Glyph& glyph = mFont->GetGlyph(line[i]);
+            uint32_t codePoint = utf8::next(it, line.end());
+            Glyph& glyph = mFont->GetGlyph(codePoint);
 
             // If wrapping, check for when adding a glyph causes the line width to exceed the rect width.
             // In that case, we will need to wrap to another line.
             if(mHorizontalOverflow == HorizontalOverflow::Wrap)
             {
+                // In this case, we are now using too much space, so we need to wrap.
                 int newWidth = lineWidth + glyph.width;
                 if(newWidth > mRect.width)
                 {
                     // Try to wrap the text on a space to keep full words on one line.
                     // Worst case, if no space was present, just wrap on the current character.
-                    if(lastSpaceIndex >= 0)
+                    if(lastSpaceCharacterIndex >= 0)
                     {
-                        actualLineLength = lastSpaceIndex + 1;
-                        nextLineStartDueToWrap = lastSpaceIndex + 1;
-                        lineWidth = lastSpaceWidth;
+                        finalLineCharacterLength = lastSpaceCharacterIndex + 1;
+                        lineWrapAtCharacterIndex = lastSpaceCharacterIndex + 1;
+                        lineWidth = lineWidthAtLastSpace;
                     }
                     else
                     {
-                        actualLineLength = i;
-                        nextLineStartDueToWrap = actualLineLength;
+                        finalLineCharacterLength = characterIndex;
+                        lineWrapAtCharacterIndex = characterIndex;
                     }
                     break;
                 }
+
+                // From here: no need to wrap yet. Update line width to new bigger value.
                 lineWidth = newWidth;
 
                 // Track whenever we see a space, as that may be where we need to "backtrack" to perform a line wrap.
-                if(line[i] == ' ')
+                if(codePoint == ' ')
                 {
-                    lastSpaceIndex = i;
-                    lastSpaceWidth = lineWidth;
+                    lastSpaceCharacterIndex = characterIndex;
+                    lineWidthAtLastSpace = lineWidth;
                 }
             }
             else
             {
-                // No line wrap? Easy mode - just keep making the line longer.
+                // No line wrap needed? Easy mode - just keep making the line longer.
                 lineWidth += glyph.width;
             }
+            ++characterIndex;
         }
     }
 
-    // If we are artificially line wrapping, trim any extra spaces from the end (so they don't mess up text positioning).
-    if(actualLineLength < line.size())
+    // If the line's character length is less than initially calculated, its because we will split this line due to text wrapping settings.
+    // For this line before the wrap, trim any extra spaces from the end (so they don't mess up text positioning).
+    if(finalLineCharacterLength < initialLineCharacterLength)
     {
         Glyph& glyph = mFont->GetGlyph(' ');
-        while(actualLineLength > 0 && line[actualLineLength - 1] == ' ')
+        while(finalLineCharacterLength > 0 && line[finalLineCharacterLength - 1] == ' ')
         {
-            --actualLineLength;
+            --finalLineCharacterLength;
             lineWidth -= glyph.width;
         }
     }
@@ -214,9 +229,11 @@ void TextLayout::AddLine(const std::string& line)
 
     // OK, we know x/y to start the line at.
     // Determine CharInfo for each text character: the glyph and position of the glyph for rendering.
-    for(size_t i = 0; i < actualLineLength; ++i)
+    auto it = line.begin();
+    for(size_t i = 0; i < finalLineCharacterLength; ++i)
     {
-        Glyph& glyph = mFont->GetGlyph(line[i]);
+        uint32_t codePoint = utf8::next(it, line.end());
+        Glyph& glyph = mFont->GetGlyph(codePoint);
 
         //float leftX = xPos;
         //float rightX = xPos + glyph.width;
@@ -243,9 +260,9 @@ void TextLayout::AddLine(const std::string& line)
     mNextCharPos = Vector2(xPos, yPos);
 
     // If we have an artificial wrap, do the next line with the substring after what we've already processed.
-    if(nextLineStartDueToWrap >= 0)
+    if(lineWrapAtCharacterIndex >= 0)
     {
-        AddLine(line.substr(nextLineStartDueToWrap));
+        AddLine(Utf8::Substring(line, lineWrapAtCharacterIndex));
     }
 }
 

@@ -16,8 +16,8 @@ class Shader;
 
 struct Glyph
 {
-    // The character that is drawn with this glyph.
-    char character = 'a';
+    // The Unicode code point that this glyph represents.
+    uint32_t codePoint = 'a';
 
     // Width and height of glyph, in pixels.
     int width;
@@ -39,7 +39,7 @@ public:
     void Load(AssetData& data);
 
     Texture* GetTexture() const { return mFontTexture; }
-    Glyph& GetGlyph(char character);
+    Glyph& GetGlyph(uint32_t codePoint);
 
     Color32 GetColor() const { return mColor; }
     Color32 GetReplaceColor() const { return mReplaceColor; }
@@ -55,7 +55,7 @@ private:
 
     // A character to use when the font can't render the desired character.
     // The default is usually "0x9D", which is graphically displayed as an "empty rectangle".
-    unsigned char mDefaultChar = 0x9D;
+    uint32_t mDefaultChar = 0x9D;
 
     // The texture containing the font glyphs.
     // Blue dots in row 0 signifies the top-left corner of each glyph in the texture.
@@ -95,7 +95,7 @@ private:
     int mGlyphHeight = 0;
 
     // A mapping from character to glyph.
-    std::unordered_map<char, Glyph> mFontGlyphs;
+    std::unordered_map<uint32_t, Glyph> mFontGlyphs;
 
     void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

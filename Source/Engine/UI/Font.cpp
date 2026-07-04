@@ -7,6 +7,7 @@
 #include "ReportManager.h"
 #include "ShaderCache.h"
 #include "StringUtil.h"
+#include "TextEncode.h"
 #include "Texture.h"
 
 TYPEINFO_INIT(Font, Asset, GENERATE_TYPE_ID)
@@ -51,10 +52,13 @@ void Font::Load(AssetData& data)
     // For each char, determine UV rect within the font texture for rendering the glyph.
     uint32_t currentY = 0;
     int currentLine = 1;
-    for(size_t i = 0; i < mFontCharacters.size(); i++)
+    auto it = mFontCharacters.begin();
+    while(it != mFontCharacters.end())
     {
+        uint32_t codePoint = utf8::next(it, mFontCharacters.end());
+
         Glyph glyph;
-        glyph.character = mFontCharacters[i];
+        glyph.codePoint = codePoint;
         glyph.width = 1; // all glyphs are at least 1 pixel wide
         glyph.height = mGlyphHeight;
 
@@ -94,7 +98,7 @@ void Font::Load(AssetData& data)
             }
 
             // We need to "redo" this glyph on the next line.
-            --i;
+            utf8::prior(it, mFontCharacters.begin());
             continue;
         }
 
@@ -115,7 +119,7 @@ void Font::Load(AssetData& data)
         glyph.bottomRightUvCoord = Vector2(rightUvX, botUvY);
 
         // Save the glyph, mapped to its character.
-        mFontGlyphs[glyph.character] = glyph;
+        mFontGlyphs[glyph.codePoint] = glyph;
 
         // If we reached the end of the font texture, go to the next line, if possible.
         if(currentX >= mFontTexture->GetWidth() - 1 && currentLine < mLineCount)
@@ -144,9 +148,9 @@ void Font::Load(AssetData& data)
     */
 }
 
-Glyph& Font::GetGlyph(char character)
+Glyph& Font::GetGlyph(uint32_t codePoint)
 {
-    auto it = mFontGlyphs.find(character);
+    auto it = mFontGlyphs.find(codePoint);
     if(it != mFontGlyphs.end())
     {
         return it->second;
@@ -181,7 +185,9 @@ void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
             const IniKeyValue& keyValue = parser.GetKeyValue();
             if(StringUtil::EqualsIgnoreCase(keyValue.key, "font"))
             {
-                mFontCharacters = keyValue.value;
+                // The font characters list often has one invalid entry (0x9D) that I think was meant to be an invalid character.
+                // This isn't valid UTF-8 though, so replace any invalid entry with code point for white box.
+                mFontCharacters = utf8::replace_invalid(keyValue.value, Utf8::kWhiteSquareCodePoint);
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "bitmap name"))
             {
@@ -205,7 +211,16 @@ void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "default char"))
             {
-                mDefaultChar = static_cast<unsigned char>(keyValue.GetValueAsInt());
+                // Default char is often an invalid text value (0x9D).
+                // If that's the case, try to redirect to using the white box code point.
+                if(keyValue.value.empty())
+                {
+                    mDefaultChar = Utf8::kWhiteSquareCodePoint;
+                }
+                else
+                {
+                    mDefaultChar = Utf8::Utf8ToCodePoint(utf8::replace_invalid(keyValue.value, Utf8::kWhiteSquareCodePoint));
+                }
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
             {
