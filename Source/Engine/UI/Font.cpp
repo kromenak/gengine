@@ -30,11 +30,14 @@ void Font::Load(AssetData& data)
     // The top-left-most pixel of each glyph in the texture is a special color that signifies the start of a new glyph.
     // Very often, this is (1, 0). But not always! We need to iterate from top-left to find the first non-background-color pixel.
     Color32 fontBackgroundColor = mFontTexture->GetPixelColor(0, 0);
+    fontBackgroundColor.a = 255;
+
     Color32 glyphStartColor;
     uint32_t currentX = 0;
     for(; currentX < mFontTexture->GetWidth(); ++currentX)
     {
         glyphStartColor = mFontTexture->GetPixelColor(currentX, 0);
+        glyphStartColor.a = 255;
         if(glyphStartColor != fontBackgroundColor)
         {
             break;
@@ -67,10 +70,19 @@ void Font::Load(AssetData& data)
 
         // To find the right X UV coord, we need to find the edge of the next glyph (or end of the texture).
         bool foundGlyphStartColor = false;
+        uint32_t startCurrentX = currentX;
         for(currentX = currentX + 1; currentX < mFontTexture->GetWidth(); ++currentX)
         {
             Color32 color = mFontTexture->GetPixelColor(currentX, currentY);
-            if(color == glyphStartColor)
+            color.a = 255;
+
+            // Amazingly, some fonts in certain languages (cough cough Russian) do not use a consistent glyph start color.
+            // For example, most will be (255, 0, 0) but a few will be (246, 0, 0).
+            // To work around this, we have to have some leeway and allow "close to" the expected color!
+            int diff = Math::Abs(color.r - glyphStartColor.r) +
+                Math::Abs(color.g - glyphStartColor.g) +
+                Math::Abs(color.b - glyphStartColor.b);
+            if(diff < 10)
             {
                 foundGlyphStartColor = true;
                 break;
@@ -85,21 +97,65 @@ void Font::Load(AssetData& data)
         // But if this is a MULTI LINE font, we MUST find the "glyph start color". If not found, we go to next line.
         if(mLineCount > 1 && !foundGlyphStartColor)
         {
-            // Go to next line.
-            ++currentLine;
-            currentX = 1;
-            currentY += lineHeight;
-
-            // If we get past the bottom of the font texture, break out of loop - quit trying to find glyphs.
-            // Can happen due to data errors - ex: SID_PDN_12 font lists more chars in .FON file than there are glyphs in the BMP asset!
-            if(currentY > mFontTexture->GetHeight())
+            // Frustratingly, some font textures do not put a glyph marker after the last glyph in the texture.
+            // So...how the heck do you know how wide that glyph is!?
+            // To work around this, we'll have to try to detect pixels of the font glyph and stop when we only see background color.
+            bool lastGlyphWorkaroundWorked = false;
+            if(it == mFontCharacters.end())
             {
-                break;
+                // Revert back to starting state for this glyph.
+                glyph.width = 1;
+                currentX = startCurrentX;
+
+                // Move horizontally and check each column.
+                for(currentX = currentX + 1; currentX < mFontTexture->GetWidth(); ++currentX)
+                {
+                    // See if this column has any non-background-color in it. If so, we'll assume there is glyph here.
+                    // If nothing is found, assume the glyph has ended.
+                    bool nothingInThisColumn = true;
+                    int y = currentY;
+                    for(y = y + 1; y < mFontTexture->GetHeight(); ++y)
+                    {
+                        Color32 color = mFontTexture->GetPixelColor(currentX, y);
+                        color.a = 255;
+                        if(color != fontBackgroundColor)
+                        {
+                            nothingInThisColumn = false;
+                            break;
+                        }
+                    }
+
+                    // If there was nothing in this column, we can break out - we found the end of the glyph.
+                    if(nothingInThisColumn)
+                    {
+                        lastGlyphWorkaroundWorked = true;
+                        break;
+                    }
+
+                    // There was something in this column - add to glyph width.
+                    ++glyph.width;
+                }
             }
 
-            // We need to "redo" this glyph on the next line.
-            utf8::prior(it, mFontCharacters.begin());
-            continue;
+            if(!lastGlyphWorkaroundWorked)
+            {
+                // Go to next line.
+                ++currentLine;
+                currentX = 1;
+                currentY += lineHeight;
+
+                // If we get past the bottom of the font texture, break out of loop - quit trying to find glyphs.
+                // Can happen due to data errors - ex: SID_PDN_12 font lists more chars in .FON file than there are glyphs in the BMP asset!
+                if(currentY >= mFontTexture->GetHeight())
+                {
+                    LOG_WARNING("Ran out of glyphs in font texture when processing font %s - some glyphs may not render correctly!", GetName().c_str());
+                    break;
+                }
+
+                // We need to "redo" this glyph on the next line.
+                utf8::prior(it, mFontCharacters.begin());
+                continue;
+            }
         }
 
         // We now know where the right UV coord is for this glyph.
