@@ -33,14 +33,12 @@ std::string TextReader::ReadLine()
 {
     std::string toReturn;
     std::getline(*mStream, toReturn);
-    StringUtil::TrimSpecialChars(toReturn);
     return toReturn;
 }
 
 bool TextReader::ReadLine(std::string& outString)
 {
     std::getline(*mStream, outString);
-    StringUtil::TrimSpecialChars(outString);
     return mStream->operator bool(); // use istream operator bool overload; returns true if last read succeeded
 }
 

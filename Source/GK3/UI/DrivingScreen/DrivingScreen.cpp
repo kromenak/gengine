@@ -380,6 +380,8 @@ void DrivingScreen::LoadPaths()
         std::string line;
         while(textReader.ReadLine(line))
         {
+            StringUtil::SanitizeLine(line);
+
             StringTokenizer tokenizer(line, { ' ' });
             if(!tokenizer.HasNext()) { continue; }
 
@@ -418,6 +420,8 @@ void DrivingScreen::LoadPaths()
         std::string line;
         while(textReader.ReadLine(line))
         {
+            StringUtil::SanitizeLine(line);
+
             StringTokenizer tokenizer(line, { ' ' });
             if(!tokenizer.HasNext()) { continue; }
 
