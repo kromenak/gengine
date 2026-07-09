@@ -24,6 +24,9 @@
 #include "UITextInput.h"
 #include "UIUtil.h"
 
+//#define DEBUG_WEB_PAGES
+//#define LOG_HTML_WARNINGS
+
 namespace
 {
     const float kWebpageWidth = 520.0f;
@@ -44,6 +47,8 @@ namespace
     // The open tag can also have zero or more HTML attributes.
     struct HtmlElement
     {
+        bool isTag = false;
+
         // Either stores an HTML tag OR text data in leaf nodes.
         std::string tagOrData;
 
@@ -53,19 +58,86 @@ namespace
         // An ordered list of contents inside the HTML element.
         // These are themselves elements, giving us the tree structure.
         std::vector<HtmlElement> contents;
+
+        void FindLinks(std::vector<std::string>& links)
+        {
+            // If this element is a link, find its href and add the link to the links list.
+            if(StringUtil::EqualsIgnoreCase(tagOrData, "A"))
+            {
+                for(HtmlAttribute& attribute : attributes)
+                {
+                    if(StringUtil::EqualsIgnoreCase(attribute.key, "HREF"))
+                    {
+                        links.push_back(attribute.value);
+                    }
+                }
+            }
+
+            // Recursively check all children.
+            for(HtmlElement& child : contents)
+            {
+                child.FindLinks(links);
+            }
+        }
+    };
+
+    const int kLongestValidHtmlTag = 18;
+
+    // To properly parse the HTML, we need to know what are or are not valid tags.
+    // Without this, any text wrapped in < > can be errantly considered to be a tag.
+    const std::string_set_ci kValidHtmlTags = {
+        "HTML",
+        "HEAD",
+        "TITLE",
+        "BODY",
+        "P",
+        "FONT",
+        "HR",
+        "A",
+        "I",
+        "B",
+        "U",
+        "BR",
+        "LI",
+        "IMG"
+        "UL",
+        "OL",
+        "TT",
+        "DIV",
+
+        // These are unused for rendering, but a few pages include tables of data.
+        // Enumerating these tags helps clean up the rendered output. Funny enough...the original game didn't do this!
+        "CENTER",
+        "TABLE",
+        "TR",
+        "TD",
+
+        // For some reason, the Russian HTML pages contain some additional HTML tags that we should consider valid.
+        // These aren't used for rendering, but we don't want them appearing as body content.
+        "st1:Place",
+        "st1:PlaceType",
+        "st1:PlaceName",
+        "st1:Street",
+        "st1:City",
+        "st1:State",
+        "st1:PostalCode",
+        "st1:Address",
+        "st1:Country-Region"
+    };
+
+    // Some tags do not require close tags and require special processing when parsing the HTML tree.
+    const std::string_set_ci kHtmlTagsWithNoCloseTag = {
+        "P",
+        "BR",
+        "LI",
+        "HR",
+        "IMG"
     };
 
     void ParseHtml(TextAsset* html, HtmlElement& root)
     {
         // We need a valid asset pointer.
         if(html == nullptr) { return; }
-
-        // We need text that isn't empty.
-        uint32_t textLength = html->GetTextLength();
-        if(textLength == 0)
-        {
-            return;
-        }
 
         // Keeps track of where we are in the HTML tree as we parse it.
         std::vector<HtmlElement*> parseStack;
@@ -75,13 +147,15 @@ namespace
 
         // Iterate until we reach the end of the HTML text, parsing each character in turn.
         uint8_t* it = html->GetText();
-        uint8_t* end = it + textLength;
+        uint8_t* end = it + html->GetTextLength();
         while(it < end)
         {
             // Read a character.
             uint32_t codePoint = utf8::next(it, end);
 
-            // Treat line breaks in special ways depending on context.
+            // Line breaks outside of page content (in HEAD area for example) should be ignored.
+            // But if inside page content, just use a space rather than an actual line break.
+            // Page contents use <P> and <BR> tags when they actually want a line break.
             if(codePoint == '\n' || codePoint == '\r')
             {
                 if(!content.empty() && content.back() != ' ')
@@ -94,13 +168,131 @@ namespace
                 }
             }
 
-            // We encountered a tag, but the content isn't empty.
-            // Add it to the current element's contents before continuing.
-            if(codePoint == '<' && !content.empty())
+            // If next code point isn't <, then this is just content - easy.
+            if(codePoint != '<')
             {
-                StringUtil::TrimWhitespace(content); // make sure it isn't just whitespace.
+                content.append(Utf8::CodePointToUtf8(codePoint));
+                continue;
+            }
+
+            // Ok, the code point is <, so this could be a tag OR it could be "<" used inside of content.
+            // Figure it out!
+            if(codePoint == '<')
+            {
+                // Read in tag string one character at a time.
+                // If, at any point while reading in, we detect that this isn't a valid tag, just add the string to content and early out.
+                bool validTag = false;
+                std::string possibleContentStr = "<";
+                std::string tagStr;
+                bool isCloseTag = false;
+                bool firstChar = true;
+                while(it < end)
+                {
+                    // Read in one character.
+                    uint32_t tagCodePoint = utf8::next(it, end);
+                    possibleContentStr.append(Utf8::CodePointToUtf8(tagCodePoint));
+
+                    // Detect if this is a close tag (e.g. /FONT /A etc).
+                    if(firstChar && tagCodePoint == '/')
+                    {
+                        isCloseTag = true;
+                        continue;
+                    }
+                    firstChar = false;
+
+                    // If we ever encounter a '>' symbol, then the tag is closed and we can break out of here.
+                    if(tagCodePoint == '>')
+                    {
+                        if(!validTag)
+                        {
+                            content.append(possibleContentStr);
+                        }
+                        break;
+                    }
+
+                    // If we ever encounter '<', then we're in trouble - tags can't have other tags inside of them!
+                    // So in this case, we must assume that the initial '<' was content. And perhaps this one will be an actual open tag!
+                    // Rewind one character and break out of here so the outer while loop will start at this '<' on the next loop.
+                    if(tagCodePoint == '<')
+                    {
+                        content.append(possibleContentStr);
+                        utf8::prior(it, end);
+                        break;
+                    }
+
+                    // Not a special character, so append to the tag string.
+                    tagStr.append(Utf8::CodePointToUtf8(tagCodePoint));
+
+                    // If we haven't detected a valid tag yet, try now.
+                    if(!validTag)
+                    {
+                        std::string temp = tagStr;
+                        StringUtil::TrimWhitespace(temp);
+                        validTag = kValidHtmlTags.count(temp) != 0;
+
+                        // All valid tags are 4 characters or less (and all ASCII to boot, so we can use length() here).
+                        // If we didn't get a valid tag at that point, break outta here because this isn't a valid tag!
+                        if(!validTag && temp.length() >= kLongestValidHtmlTag)
+                        {
+                            content.append(possibleContentStr);
+                            break;
+                        }
+                    }
+                } // read in tag while loop
+
+                // If we didn't detect a valid tag, get outta here.
+                if(!validTag)
+                {
+                    continue;
+                }
+
+                // A full tag consists of the tag keyword and also possibly attributes (e.g. <FONT SIZE=1>).
+                // Split on spaces so the first token is the keyword and any subsequent ones are attributes.
+                std::vector<std::string> tokens = StringUtil::Split(tagStr, ' ', true);
+                if(tokens.empty())
+                {
+                    continue; // empty brackets, like <>? Ignore?
+                }
+
+                // Make sure the first token is a valid tag.
+                // We need to check this here in case the first letters were a valid tag, but without a space after (e.g. <FONTHello My Name Is...)
+                bool firstTokenIsValidTag = kValidHtmlTags.count(tokens[0]) != 0;
+                if(!firstTokenIsValidTag)
+                {
+                    continue;
+                }
+
+                // We encountered a valid tag, but content isn't empty.
+                // Add to current element's contents before continuing.
                 if(!content.empty())
                 {
+                    // Find and remove certain control tags that may be present in the content.
+                    //TODO: There's likely a more efficient way to detect and replace these, but this works in a pinch.
+                    {
+                        // Replace &nbsp; with a space. In at least one spot, the semicolon is absent...
+                        StringUtil::ReplaceAll(content, "&nbsp;", " ");
+                        StringUtil::ReplaceAll(content, "&nbsp", " ");
+
+                        // Though &supX; is used for superscript, in context these HTML pages misuse them as different types of quotes.
+                        StringUtil::ReplaceAll(content, "&sup1;", "'");
+                        StringUtil::ReplaceAll(content, "&sup2;", "\"");
+                        StringUtil::ReplaceAll(content, "&sup3;", "\"");
+
+                        // Replace &quot; with ". Also instances where semicolon is missing.
+                        StringUtil::ReplaceAll(content, "&quot;", "\"");
+                        StringUtil::ReplaceAll(content, "&quot", "\"");
+
+                        // Special and accented characters.
+                        StringUtil::ReplaceAll(content, "&aelig;", "æ");
+                        StringUtil::ReplaceAll(content, "&eacute;", "é");
+                        StringUtil::ReplaceAll(content, "&amp;", "&");
+                        StringUtil::ReplaceAll(content, "&gt;", ">");
+
+                        // In at least one spot, a somewhat unique tab/whitespace is used. It shows as an unknown character when rendered.
+                        // Just replace with a normal space.
+                        StringUtil::ReplaceAll(content, "	", " ");
+                    }
+
                     HtmlElement textElement;
                     textElement.tagOrData = content;
                     parseStack.back()->contents.push_back(textElement);
@@ -108,132 +300,188 @@ namespace
                     // Added the content; clear working string for next time.
                     content.clear();
                 }
-            }
 
-            // This is a tag - figure out what the tag is.
-            if(codePoint == '<')
-            {
-                // Read in the entire tag string.
-                std::string tagStr;
-                while(it < end)
+                // Handle close tags.
+                if(isCloseTag)
                 {
-                    codePoint = utf8::next(it, end);
-                    if(codePoint != '>')
-                    {
-                        tagStr.append(Utf8::CodePointToUtf8(codePoint));
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                // Split by spaces.
-                std::vector<std::string> tokens = StringUtil::Split(tagStr, ' ', true);
-                if(tokens.empty())
-                {
-                    continue; // empty brackets, like <>? Ignore?
-                }
-
-                // If first char of first token is a /, then this is closing some other tag (e.g. /FONT /A etc)
-                if(tokens[0][0] == '/')
-                {
-                    // Get rid of slash char.
-                    tokens[0].erase(0, 1);
                     //printf("Found close tag %s\n", tokens[0].c_str());
 
                     // But then again, some web pages inconsistently use close tags on elements we usually expect no close tag on...
                     // Just ignore them in that case.
-                    if(StringUtil::EqualsIgnoreCase(tokens[0], "P") ||
-                       StringUtil::EqualsIgnoreCase(tokens[0], "BR") ||
-                       StringUtil::EqualsIgnoreCase(tokens[0], "LI") ||
-                       StringUtil::EqualsIgnoreCase(tokens[0], "HR") ||
-                       StringUtil::EqualsIgnoreCase(tokens[0], "IMG"))
+                    if(kHtmlTagsWithNoCloseTag.count(tokens[0]) == 0)
                     {
-                        continue;
-                    }
+                        // The close tag should match whatever's on the back of the parse stack.
+                        // If not, it means we have a close tag with a mistmatched open tag.
+                        if(StringUtil::EqualsIgnoreCase(parseStack.back()->tagOrData, tokens[0]))
+                        {
+                            // Closed this tag, so pop it off the parse stack.
+                            parseStack.pop_back();
 
-                    // The close tag should match whatever's on the back of the parse stack.
-                    // If not, it means we have a close tag with a mistmatched open tag.
-                    if(StringUtil::EqualsIgnoreCase(parseStack.back()->tagOrData, tokens[0]))
-                    {
-                        // Closed this tag, so pop it off the parse stack.
-                        parseStack.pop_back();
+                            // In some rare cases (Gematria.html), there is errantly some extra HTML after the closing HTML tag.
+                            // To deal with that gracefully, just assume we're done parsing if we hit the </HTML> tag in a document.
+                            if(StringUtil::EqualsIgnoreCase(tokens[0], "HTML") && parseStack.empty())
+                            {
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            #if defined(LOG_HTML_WARNINGS)
+                            LOG_WARNING("HTML: close tag %s doesn't match with an open tag in %s. Ignoring!", tokens[0].c_str(), html->GetName().c_str());
+                            #endif
+                        }
                     }
-                    else
-                    {
-                        LOG_WARNING("HTML: close tag %s doesn't match with an open tag in %s. Ignoring!", tokens[0].c_str(), html->GetName().c_str());
-                    }
-                    continue;
                 }
-
-                // Ok, this is an open tag.
-                HtmlElement element;
-                element.tagOrData = tokens[0];
-
-                // Remaining tokens are attributes.
-                for(int i = 1; i < tokens.size(); ++i)
+                else // this is an open tag
                 {
-                    // Each attribute should be either a keyword or a key/value pair (e.g. SRC="BLAH")
-                    std::vector<std::string> attributeTokens = StringUtil::Split(tokens[i], '=', true);
+                    HtmlElement element;
+                    element.isTag = true;
+                    element.tagOrData = tokens[0];
 
-                    // Make sure quotes are removed from around attributes.
-                    for(std::string& attributeToken : attributeTokens)
+                    // Remaining tokens are attributes.
+                    for(int i = 1; i < tokens.size(); ++i)
                     {
-                        StringUtil::Trim(attributeToken, '\"');
+                        // Each attribute should be either a keyword or a key/value pair (e.g. SRC="BLAH")
+                        std::vector<std::string> attributeTokens = StringUtil::Split(tokens[i], '=', true);
+
+                        // Make sure quotes are removed from around attributes.
+                        for(std::string& attributeToken : attributeTokens)
+                        {
+                            StringUtil::Trim(attributeToken, '\"');
+                        }
+
+                        if(attributeTokens.empty())
+                        {
+                            continue;
+                        }
+                        else if(attributeTokens.size() == 1)
+                        {
+                            element.attributes.emplace_back();
+                            element.attributes.back().key = attributeTokens[0];
+                        }
+                        else
+                        {
+                            element.attributes.emplace_back();
+                            element.attributes.back().key = attributeTokens[0];
+                            element.attributes.back().value = attributeTokens[1];
+                        }
                     }
 
-                    if(attributeTokens.empty())
-                    {
-                        continue;
-                    }
-                    else if(attributeTokens.size() == 1)
-                    {
-                        element.attributes.emplace_back();
-                        element.attributes.back().key = attributeTokens[0];
-                    }
-                    else
-                    {
-                        element.attributes.emplace_back();
-                        element.attributes.back().key = attributeTokens[0];
-                        element.attributes.back().value = attributeTokens[1];
-                    }
-                }
+                    // Ok, we've fully parsed this open tag. Figure out what to do with it now.
 
-                // Ok, we've fully parsed this open tag. Figure out what to do with it now.
+                    // The HTML tag is special: it's the root of the HTML. Save it as such.
+                    if(StringUtil::EqualsIgnoreCase(element.tagOrData, "HTML"))
+                    {
+                        assert(parseStack.empty());
+                        root = element;
+                        parseStack.push_back(&root);
+                    }
+                    else if(kHtmlTagsWithNoCloseTag.count(tokens[0]) != 0)
+                    {
+                        // These tags do not have close tags.
+                        // They don't have children, so no need to put them on the parse stack.
+                        parseStack.back()->contents.push_back(element);
+                    }
+                    else // a normal tag that should have a close tag later
+                    {
+                        // Add to contents of the current parent element.
+                        parseStack.back()->contents.push_back(element);
 
-                // The HTML tag is special: it's the root of the HTML. Save it as such.
-                if(StringUtil::EqualsIgnoreCase(element.tagOrData, "HTML"))
-                {
-                    assert(parseStack.empty());
-                    root = element;
-                    parseStack.push_back(&root);
+                        // We are now *inside* this element.
+                        parseStack.push_back(&parseStack.back()->contents.back());
+                    }
                 }
-                else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "IMG") ||
-                        StringUtil::EqualsIgnoreCase(element.tagOrData, "HR") ||
-                        StringUtil::EqualsIgnoreCase(element.tagOrData, "P") ||
-                        StringUtil::EqualsIgnoreCase(element.tagOrData, "BR") ||
-                        StringUtil::EqualsIgnoreCase(element.tagOrData, "LI"))
-                {
-                    // These tags do not have close tags.
-                    // They don't have children, so no need to put them on the parse stack.
-                    parseStack.back()->contents.push_back(element);
-                }
-                else // a normal tag that should have a close tag later
-                {
-                    // Add to contents of the current parent element.
-                    parseStack.back()->contents.push_back(element);
+            } // end tag processing
+        } // while there are characters to parse in the HTML text
 
-                    // We are now *inside* this element.
-                    parseStack.push_back(&parseStack.back()->contents.back());
-                }
-            }
-            else // must be content?
+        // If we get here, the full HTML file was parsed. If the HTML was well-formed, the parse stack should be empty.
+        // In other words, if well-formed, every open tag (<HTML>) had a close tag (</HTML>).
+        #if defined(LOG_HTML_WARNINGS)
+        if(!parseStack.empty())
+        {
+            // Hopefully it still renders correctly...
+            LOG_WARNING("HTML: HTML file is not well formed; not all open tags had expected close tags.");
+        }
+        #endif
+    }
+
+    void ParseHtml(const std::string& pageName, HtmlElement& root)
+    {
+        // Load the HTML text.
+        TextAsset* html = gAssetManager.LoadAsset<TextAsset>(pageName, AssetScope::Scene);
+        if(html == nullptr)
+        {
+            // The game is sometimes not great about specifying the correct extension here, so we have to be careful.
+            // If it didn't load, try using HTML instead of HTM or vice-versa.
+            if(StringUtil::EqualsIgnoreCase(Path::GetExtension(pageName), "HTML"))
             {
-                content.append(Utf8::CodePointToUtf8(codePoint));
+                html = gAssetManager.LoadAsset<TextAsset>(Path::GetFileNameNoExtension(pageName) + ".HTM", AssetScope::Scene);
+            }
+            else if(StringUtil::EqualsIgnoreCase(Path::GetExtension(pageName), "HTM"))
+            {
+                html = gAssetManager.LoadAsset<TextAsset>(Path::GetFileNameNoExtension(pageName) + ".HTML", AssetScope::Scene);
             }
         }
-        assert(parseStack.empty());
+
+        // Parse the HTML text to an in-memory HTML tree representation.
+        ParseHtml(html, root);
+    }
+
+    const std::string_map_ci<std::string> kMisspellRedirects = {
+        { "Altered_States_Of_Conciousness.html", "ALTERED_STATES_OF_CONSCIOUSNESS.HTML" },
+        { "Apporpts.html", "APPORTS.HTML" },
+        { "Blackwood_algeron.html", "BLACKWOOD_ALGERNON.HTML" },
+        { "Cephalomnacy.html", "CEPHALOMANCY.HTML" },
+        { "Cledonism_or_cledomantia.html", "CLEDONISM_OR_CLEDONOMANTIA.HTML" },
+        { "House_of_the_seven_gables_the.html", "HOUSE_OF_SEVEN_GABLES_THE.HTML" },
+        { "Incommunicable axiom.html", "INCOMMUNICABLE_AXIOM.HTML" },
+        { "Khylysty.html", "KHLYSTY.HTML" },
+        { "Lampdomancy.html", "LAMPODOMANCY.HTML" },
+        { "Law_of_true-falsehoods.html", "LAW_OF_TRUE-FALSHOODS.HTML" },
+        { "Leviation.html", "LEVITATION.HTML" },
+        { "magic squares.html", "MAGIC_SQUARES.HTML" },
+        { "metemphyschosis.html", "METEMPSYCHOSIS.HTML" },
+        { "NUMA_POMPLILIUS.HTML", "NUMA_POMPILIUS.HTML" },
+        { "ONIMNANCY_OR_ONYCOMONACY.HTML", "ONIMANCY_OR_ONYCOMANCY.HTML" },
+        { "PSYCHOKNESIS_PK.HTML", "PSYCHOKINESIS_PK.HTML" },
+        { "RASPUTIAN.HTML", "RASPUTIN.HTML" },
+        { "TETRAGRAMMMATION.HTML", "TETRAGRAMMATIOM.HTML" }
+    };
+
+    void SanitizeLink(std::string& link)
+    {
+        // Sometimes, links start with a # symbol. It seems like this should go to SOURCES?
+        if(!link.empty() && link.front() == '#')
+        {
+            link = "SOURCES.HTML";
+            return;
+        }
+
+        // Sometimes, the link contains path info that we don't care about (e.g. !HTML_rus/divination.html").
+        std::size_t separatorIndex = link.find('/');
+        if(separatorIndex != std::string::npos)
+        {
+            link = link.substr(separatorIndex + 1);
+        }
+
+        // Make sure the link is uppercased too, for consistency.
+        StringUtil::ToUpper(link);
+
+        // On occasion, the link will have multiple extensions. Or inconsistent extensions (HTM vs HTML).
+        // Safest thing is to get rid of the extension entirely.
+        std::string extension = Path::HasExtension(link) ? Path::GetExtension(link, true) : ".HTML";
+        while(Path::HasExtension(link))
+        {
+            link = Path::RemoveExtension(link);
+        }
+        link += extension;
+
+        // Wouldn't you know it, some of the page links are misspelled! Consider this a bug fix.
+        auto it = kMisspellRedirects.find(link);
+        if(it != kMisspellRedirects.end())
+        {
+            link = it->second;
+        }
     }
 }
 
@@ -391,8 +639,12 @@ void SidneySearch::Init(Actor* parent)
         IniSection section;
         while(parser.ReadNextSection(section))
         {
-            #if defined(DEBUG)
-            mWebPages.push_back(section.name);
+            SanitizeLink(section.name);
+
+            // Add this page to the set of all known pages for debug iteration.
+            #if defined(DEBUG) && defined(DEBUG_WEB_PAGES)
+            //Logf("%s is reachable via search term.", section.name.c_str());
+            mWebPages.insert(section.name);
             #endif
 
             for(auto& line : section.lines)
@@ -408,8 +660,34 @@ void SidneySearch::Init(Actor* parent)
             }
         }
 
-        #if defined(DEBUG)
-        mWebPagesIterator = mWebPages.begin();
+        #if defined(DEBUG) && defined(DEBUG_WEB_PAGES)
+        std::vector<std::string> pagesToExplore;
+        for(auto& entry : mWebPages)
+        {
+            pagesToExplore.push_back(entry);
+        }
+        while(!pagesToExplore.empty())
+        {
+            std::string page = pagesToExplore.back();
+            pagesToExplore.pop_back();
+
+            HtmlElement root;
+            ParseHtml(page, root);
+
+            std::vector<std::string> links;
+            root.FindLinks(links);
+
+            for(auto& link : links)
+            {
+                SanitizeLink(link);
+                if(mWebPages.insert(link).second)
+                {
+                    pagesToExplore.push_back(link);
+                    //Logf("%s is only reachable via link.", link.c_str());
+                }
+            }
+        }
+        mWebPagesIterator = mWebPages.end();
         #endif
     }
 
@@ -496,7 +774,7 @@ void SidneySearch::OnUpdate(float deltaTime)
         OnSearchButtonPressed();
     }
 
-    #if defined(DEBUG)
+    #if defined(DEBUG) && defined(DEBUG_WEB_PAGES)
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RIGHTBRACKET))
     {
         if(mWebPagesIterator == mWebPages.end())
@@ -507,8 +785,21 @@ void SidneySearch::OnUpdate(float deltaTime)
         {
             mWebPagesIterator++;
         }
-        ShowWebPage(*mWebPagesIterator);
         Logf("Debug Show Web Page %s", (*mWebPagesIterator).c_str());
+        ShowWebPage(*mWebPagesIterator);
+    }
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_LEFTBRACKET))
+    {
+        if(mWebPagesIterator == mWebPages.begin())
+        {
+            mWebPagesIterator = mWebPages.begin();
+        }
+        else
+        {
+            mWebPagesIterator--;
+        }
+        Logf("Debug Show Web Page %s", (*mWebPagesIterator).c_str());
+        ShowWebPage(*mWebPagesIterator);
     }
     #endif
 
@@ -561,12 +852,9 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
     // First, make sure any previous web page has been cleared.
     ClearWebPage();
 
-    // Load the HTML text.
-    TextAsset* html = gAssetManager.LoadAsset<TextAsset>(pageName, AssetScope::Scene);
-
     // Parse the HTML text to an in-memory HTML tree representation.
     HtmlElement root;
-    ParseHtml(html, root);
+    ParseHtml(pageName, root);
 
     // At this point, we've got a fully fleshed out HTML structure.
     // Next, we need to create the UI elements to graphically reflect that.
@@ -654,8 +942,11 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 {
                     if(StringUtil::EqualsIgnoreCase(parseStack[i]->tagOrData, "Font"))
                     {
-                        int fontSizeDiff = std::atoi(parseStack[i]->attributes[0].value.c_str());
-                        fontSize += fontSizeDiff;
+                        if(!parseStack[i]->attributes.empty())
+                        {
+                            int fontSizeDiff = std::atoi(parseStack[i]->attributes[0].value.c_str());
+                            fontSize = Math::Max(fontSize + fontSizeDiff, 0);
+                        }
                     }
                     else if(StringUtil::EqualsIgnoreCase(parseStack[i]->tagOrData, "B"))
                     {
@@ -668,6 +959,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                     else if(StringUtil::EqualsIgnoreCase(parseStack[i]->tagOrData, "A"))
                     {
                         link = parseStack[i]->attributes[0].value;
+                        SanitizeLink(link);
                     }
                 }
 
@@ -698,98 +990,87 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 }
 
                 // Handle rendering the leaf data.
-                const float kLineBreakHeight = 15.0f;
-                if(StringUtil::EqualsIgnoreCase(element.tagOrData, "P") ||
-                   StringUtil::EqualsIgnoreCase(element.tagOrData, "BR"))
+                if(element.isTag)
                 {
-                    if(isTextContinuation && !hadBulletOnLastLine)
+                    const float kLineBreakHeight = 15.0f;
+                    if(StringUtil::EqualsIgnoreCase(element.tagOrData, "P") ||
+                       StringUtil::EqualsIgnoreCase(element.tagOrData, "BR"))
                     {
-                        resultsPos.y -= lastFontGlyphHeight;
-                    }
+                        if(isTextContinuation && !hadBulletOnLastLine)
+                        {
+                            resultsPos.y -= lastFontGlyphHeight;
+                        }
 
-                    // This just breaks to the next line.
-                    resultsPos.x = 0.0f;
-                    resultsPos.y -= kLineBreakHeight;
-
-                    hadBulletOnLastLine = false;
-                    isTextContinuation = false;
-                }
-                else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "LI"))
-                {
-                    // List items should always be on a new line.
-                    // Usually the data does this manually with a <BR> at the end, but sometimes it's forgotten.
-                    if(resultsPos.x > 0.0f)
-                    {
+                        // This just breaks to the next line.
                         resultsPos.x = 0.0f;
                         resultsPos.y -= kLineBreakHeight;
+
+                        hadBulletOnLastLine = false;
+                        isTextContinuation = false;
                     }
+                    else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "LI"))
+                    {
+                        // List items should always be on a new line.
+                        // Usually the data does this manually with a <BR> at the end, but sometimes it's forgotten.
+                        if(resultsPos.x > 0.0f)
+                        {
+                            resultsPos.x = 0.0f;
+                            resultsPos.y -= kLineBreakHeight;
+                        }
 
-                    UIImage* bulletImage = UI::CreateWidgetActor<UIImage>("BulletPoint", mWebPageScrollRect);
-                    bulletImage->SetTexture(gAssetManager.LoadAsset<Texture>("SIDNEYBULLET.BMP", AssetScope::Global), true);
-                    bulletImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-                    bulletImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
-                    mWebPageWidgets.push_back(bulletImage);
+                        UIImage* bulletImage = UI::CreateWidgetActor<UIImage>("BulletPoint", mWebPageScrollRect);
+                        bulletImage->SetTexture(gAssetManager.LoadAsset<Texture>("SIDNEYBULLET.BMP", AssetScope::Global), true);
+                        bulletImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+                        bulletImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
+                        mWebPageWidgets.push_back(bulletImage);
 
-                    // Move over next to the bullet, but stay on the same line.
-                    // The next thing (likely some text) will go next to the bullet.
-                    resultsPos.x += bulletImage->GetRectTransform()->GetRect().width + 2.0f;
+                        // Move over next to the bullet, but stay on the same line.
+                        // The next thing (likely some text) will go next to the bullet.
+                        resultsPos.x += bulletImage->GetRectTransform()->GetRect().width + 2.0f;
 
-                    hadBulletOnLastLine = true;
-                    isTextContinuation = false;
+                        hadBulletOnLastLine = true;
+                        isTextContinuation = false;
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "HR"))
+                    {
+                        // Always flush with left side.
+                        resultsPos.x = 0.0f;
+                        resultsPos.y -= kLineBreakHeight;
+
+                        // Make an image with the horizontal rule.
+                        UIImage* hrImage = UI::CreateWidgetActor<UIImage>("HR", mWebPageScrollRect);
+                        hrImage->SetTexture(gAssetManager.LoadAsset<Texture>("HORIZONTALRULE.BMP"), true);
+                        hrImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+                        hrImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
+                        hrImage->GetRectTransform()->SetSizeDeltaX(kWebpageContentsWidth);
+                        mWebPageWidgets.push_back(hrImage);
+
+                        // Jump down below the image.
+                        resultsPos.x = 0.0f;
+                        resultsPos.y -= hrImage->GetRectTransform()->GetRect().height;
+
+                        isTextContinuation = false;
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "IMG"))
+                    {
+                        // Create the image at the appropriate size.
+                        UIImage* image = UI::CreateWidgetActor<UIImage>("Image", mWebPageScrollRect);
+                        image->SetTexture(gAssetManager.LoadAsset<Texture>(element.attributes[0].value, AssetScope::Global), true);
+                        image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+                        image->GetRectTransform()->SetAnchoredPosition(resultsPos);
+                        mWebPageWidgets.push_back(image);
+
+                        // Jump down below the image.
+                        resultsPos.x = 0.0f;
+                        resultsPos.y -= image->GetRectTransform()->GetRect().height;
+
+                        isTextContinuation = false;
+                    }
                 }
-                else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "HR"))
-                {
-                    // Always flush with left side.
-                    resultsPos.x = 0.0f;
-                    resultsPos.y -= kLineBreakHeight;
-
-                    // Make an image with the horizontal rule.
-                    UIImage* hrImage = UI::CreateWidgetActor<UIImage>("HR", mWebPageScrollRect);
-                    hrImage->SetTexture(gAssetManager.LoadAsset<Texture>("HORIZONTALRULE.BMP"), true);
-                    hrImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-                    hrImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
-                    hrImage->GetRectTransform()->SetSizeDeltaX(kWebpageContentsWidth);
-                    mWebPageWidgets.push_back(hrImage);
-
-                    // Jump down below the image.
-                    resultsPos.x = 0.0f;
-                    resultsPos.y -= hrImage->GetRectTransform()->GetRect().height;
-
-                    isTextContinuation = false;
-                }
-                else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "IMG"))
-                {
-                    // Create the image at the appropriate size.
-                    UIImage* image = UI::CreateWidgetActor<UIImage>("Image", mWebPageScrollRect);
-                    image->SetTexture(gAssetManager.LoadAsset<Texture>(element.attributes[0].value, AssetScope::Global), true);
-                    image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-                    image->GetRectTransform()->SetAnchoredPosition(resultsPos);
-                    mWebPageWidgets.push_back(image);
-
-                    // Jump down below the image.
-                    resultsPos.x = 0.0f;
-                    resultsPos.y -= image->GetRectTransform()->GetRect().height;
-
-                    isTextContinuation = false;
-                }
-                else // text or text link
+                else // text or link
                 {
                     Font* font = gAssetManager.LoadAsset<Font>(fontName);
                     lastFontGlyphHeight = font->GetGlyphHeight();
-
-                    // If we're continuing the text on an existing line, we probably want to add a bit of x-pos for the space between words.
-                    // However, the exception is when the next character is punctuation.
-                    const float kWordSeparation = 6.0f;
-                    if(isTextContinuation)
-                    {
-                        if(!element.tagOrData.empty() &&
-                           element.tagOrData[0] != '.' &&
-                           element.tagOrData[0] != ',' &&
-                           element.tagOrData[0] != ')')
-                        {
-                            resultsPos.x += kWordSeparation;
-                        }
-                    }
 
                     // The logic here is a bit complex due to having to *continue* pre-existing lines if they start midway through a previous line of text.
                     const float kMinWidthToContinueLine = 50.0f;
@@ -845,8 +1126,8 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                                 }
                             }
 
-                            std::string firstLineText = element.tagOrData.substr(0, lastCharIndexOnFirstLine);
-                            std::string remainingText = element.tagOrData.substr(lastCharIndexOnFirstLine + 1);
+                            std::string firstLineText = Utf8::Substring(element.tagOrData, 0, lastCharIndexOnFirstLine);
+                            std::string remainingText = Utf8::Substring(element.tagOrData, lastCharIndexOnFirstLine + 1);
 
                             // Create one label for the text that'll fit in the remaining space on the current line.
                             UILabel* lineOne = CreateWebPageText(firstLineText, font, resultsPos, kWebpageContentsWidth - resultsPos.x, link);

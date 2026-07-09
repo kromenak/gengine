@@ -4,6 +4,7 @@
 // UI for the search subscreen in Sidney.
 //
 #pragma once
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -70,8 +71,8 @@ private:
     std::string_map_ci<std::string> mSearchTerms;
 
     #if defined(DEBUG)
-    std::vector<std::string> mWebPages;
-    std::vector<std::string>::iterator mWebPagesIterator = mWebPages.end();
+    std::set<std::string> mWebPages;
+    std::set<std::string>::iterator mWebPagesIterator;
     #endif
 
     // Back and forward buttons for navigating page history.
