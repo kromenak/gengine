@@ -483,14 +483,15 @@ bool GEngine::InitAssetManager()
     {
         // The Russian version of the game has its text assets encoded using the Windows-1251 code page.
         // In order to use them, we need to convert them to UTF-8 as they are being loaded.
-        auto convertRussianTextFunction = [](AssetData& assetData){
+        auto convertRussianToUtf8Function = [](AssetData& assetData){
             uint8_t* newText = TextEncode::Cp1251ToUtf8(assetData.bytes.get(), assetData.length, assetData.length);
             assetData.bytes.reset(newText);
         };
-        gAssetManager.SetAssetOnLoadProcessor("TXT", convertRussianTextFunction);
-        gAssetManager.SetAssetOnLoadProcessor("FON", convertRussianTextFunction);
-        gAssetManager.SetAssetOnLoadProcessor("YAK", convertRussianTextFunction);
-        gAssetManager.SetAssetOnLoadProcessor("HTML", convertRussianTextFunction);
+        gAssetManager.SetAssetOnLoadProcessor("TXT", convertRussianToUtf8Function);
+        gAssetManager.SetAssetOnLoadProcessor("FON", convertRussianToUtf8Function);
+        gAssetManager.SetAssetOnLoadProcessor("YAK", convertRussianToUtf8Function);
+        gAssetManager.SetAssetOnLoadProcessor("HTML", convertRussianToUtf8Function);
+        gAssetManager.SetAssetOnLoadProcessor("HTM", convertRussianToUtf8Function);
     }
     else
     {
@@ -504,6 +505,7 @@ bool GEngine::InitAssetManager()
         gAssetManager.SetAssetOnLoadProcessor("FON", convertEFIGSToUtf8Function);
         gAssetManager.SetAssetOnLoadProcessor("YAK", convertEFIGSToUtf8Function);
         gAssetManager.SetAssetOnLoadProcessor("HTML", convertEFIGSToUtf8Function);
+        gAssetManager.SetAssetOnLoadProcessor("HTM", convertEFIGSToUtf8Function);
     }
 
     // Register asset extractors.
