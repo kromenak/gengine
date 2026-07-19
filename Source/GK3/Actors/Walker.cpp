@@ -1149,7 +1149,7 @@ bool Walker::SkipPathNodesOutsideFrustum()
     // If we're skipping right to the end, and there's a "turn to face" op, use the turn to face direction.
     // Otherwise, use the calculated direction from earlier.
     Heading warpHeading = Heading::None;
-    if(firstInFrustumIndex == -1 && mWalkActions.front() == WalkOp::TurnToFace)
+    if(firstInFrustumIndex == -1 && (!mWalkActions.empty() && mWalkActions.front() == WalkOp::TurnToFace))
     {
         warpHeading = Heading::FromDirection(mTurnToFaceDir);
     }
