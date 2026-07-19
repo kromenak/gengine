@@ -211,8 +211,8 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
         // Finally, a "translate now" button.
         SidneyButton* translateButton = SidneyUtil::CreateSmallButton(mTranslateWindow);
         translateButton->SetName("TranslateButton");
-        translateButton->SetWidth(108.0f);
         translateButton->SetText(SidneyUtil::GetTranslateLocalizer().GetText("TranslateNow"));
+        translateButton->SetWidth(translateButton->GetLabel()->GetTextWidth() + 10.0f);
         translateButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         translateButton->GetRectTransform()->SetAnchoredPosition(306.0f, -291.0f);
         translateButton->SetPressCallback([this](){
