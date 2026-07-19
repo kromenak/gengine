@@ -5,6 +5,7 @@
 #include "AssetManager.h"
 #include "Audio.h"
 #include "AudioManager.h"
+#include "DataHelper.h"
 #include "Font.h"
 #include "GameProgress.h"
 #include "InputManager.h"
@@ -86,7 +87,18 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMapStatusLabel = UI::CreateWidgetActor<UILabel>("MapStatus", mAnalyzeMapWindow);
         mMapStatusLabel->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_14_GRN.FON"));
         mMapStatusLabel->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        mMapStatusLabel->GetRectTransform()->SetAnchoredPosition(4.0f, 13.0f);
+
+        // The label positioned used for English has too little space in Russian (and perhaps other languages TBD).
+        // Fortunately, there's some extra space a little higher up on screen that we could use instead in that case.
+        DataDirectory dataDirectory;
+        if(DataHelper::GetDataDirectoryToUse(dataDirectory) && StringUtil::EqualsIgnoreCase(dataDirectory.localeName, "RU"))
+        {
+            mMapStatusLabel->GetRectTransform()->SetAnchoredPosition(4.0f, 30.0f);
+        }
+        else
+        {
+            mMapStatusLabel->GetRectTransform()->SetAnchoredPosition(4.0f, 13.0f);
+        }
         mMapStatusLabel->SetEnabled(false);
     }
 
