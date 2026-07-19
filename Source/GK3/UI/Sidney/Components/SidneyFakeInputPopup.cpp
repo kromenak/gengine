@@ -8,6 +8,7 @@
 #include "Random.h"
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
+#include "TextEncode.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UILabel.h"
@@ -83,6 +84,7 @@ void SidneyFakeInputPopup::Show(const std::string& headerText, const std::string
 
     // Save the text that will be typed onto the screen.
     mTextToType = textToType;
+    mTextToTypeLength = utf8::distance(mTextToType.begin(), mTextToType.end());
 
     // Save done callback.
     mDoneCallback = doneCallback;
@@ -118,14 +120,14 @@ void SidneyFakeInputPopup::OnUpdate(float deltaTime)
         if(mTextToTypeTimer <= 0.0f)
         {
             // We have more text to type?
-            if(mTextToTypeIndex < mTextToType.size())
+            if(mTextToTypeIndex < mTextToTypeLength)
             {
                 // Add a letter.
-                mInputLabel->SetText(mTextToType.substr(0, mTextToTypeIndex + 1));
+                mInputLabel->SetText(Utf8::Substring(mTextToType, 0, mTextToTypeIndex + 1));
                 ++mTextToTypeIndex;
 
                 // Reroll timer for next letter.
-                if(mTextToTypeIndex < mTextToType.size())
+                if(mTextToTypeIndex < mTextToTypeLength)
                 {
                     mTextToTypeTimer = Random::Range(kMinMaxTypeInterval.x, kMinMaxTypeInterval.y);
                 }

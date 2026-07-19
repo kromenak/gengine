@@ -45,6 +45,7 @@ private:
     // The in-game character "types" the name of the file before adding it.
     // We use these variables to track the state of the text being typed.
     std::string mTextToType;
+    int mTextToTypeLength = 0;
     int mTextToTypeIndex = -1;
 
     // To simulate distinct keystrokes while typing, we use a timer with randomized duration.
