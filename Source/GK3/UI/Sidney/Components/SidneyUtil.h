@@ -33,7 +33,7 @@ public:
     static Color32 VeryTransBgColor;
 
     static Actor* CreateBackground(Actor* parent);
-    static void CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback);
+    static SidneyButton* CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback);
     static UIButton* CreateCloseWindowButton(Actor* parent, const std::function<void()>& pressCallback);
 
     static SidneyButton* CreateBigButton(Actor* parent);

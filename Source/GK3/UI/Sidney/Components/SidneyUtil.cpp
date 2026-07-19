@@ -34,19 +34,19 @@ Actor* SidneyUtil::CreateBackground(Actor* parent)
     return backgroundActor;
 }
 
-void SidneyUtil::CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback)
+SidneyButton* SidneyUtil::CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback)
 {
     SidneyButton* button = new SidneyButton("MainMenuButton", parent);
     button->SetFont(gAssetManager.LoadAsset<Font>("SID_TEXT_18.FON"));
     button->SetText(GetMainScreenLocalizer().GetText("HomeButton"));
-    button->SetWidth(94.0f);
+    button->SetWidth(button->GetLabel()->GetTextWidth() + 12); // Sized based on text width to support localizations
 
     button->SetPressCallback(pressCallback);
     button->SetPressAudio(gAssetManager.LoadAsset<Audio>("SIDEXIT.WAV"));
 
-    button->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
-    button->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
+    button->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
     button->GetRectTransform()->SetAnchoredPosition(-10.0f, 10.0f); // 10x10 offset from Bottom-Right
+    return button;
 }
 
 UIButton* SidneyUtil::CreateCloseWindowButton(Actor* parent, const std::function<void()>& pressCallback)
