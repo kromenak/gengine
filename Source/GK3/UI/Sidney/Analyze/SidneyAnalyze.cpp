@@ -20,7 +20,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
     mRoot->SetName("Analyze");
 
     // Add main menu button.
-    SidneyUtil::CreateMainMenuButton(mRoot, [this](){
+    SidneyButton* mainMenuButton = SidneyUtil::CreateMainMenuButton(mRoot, [this](){
         Hide();
     });
 
@@ -139,9 +139,8 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
         float labelWidth = analyzeButton->GetLabel()->GetTextWidth() + 12.0f;
         analyzeButton->SetWidth(labelWidth);
 
-        analyzeButton->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
-        analyzeButton->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
-        analyzeButton->GetRectTransform()->SetAnchoredPosition(-113.0f, 10.0f); // offset from bottom-right
+        analyzeButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
+        analyzeButton->GetRectTransform()->SetAnchoredPosition(-10.0f - mainMenuButton->GetWidth() - 10.0f, 10.0f);  // offset from bottom-right, account for variable width main menu button.
 
         analyzeButton->GetButton()->SetCanInteract(false);
 
