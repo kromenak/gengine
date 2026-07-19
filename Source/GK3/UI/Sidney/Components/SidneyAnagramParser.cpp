@@ -664,7 +664,14 @@ void SidneyAnagramParser::StopScramble()
     // Stop the word scramble effect.
     for(int i = 0; i < kMaxAnagramLetters; ++i)
     {
-        mLetterLabels[i]->SetText(std::string(1, mAllLetters[i]));
+        if(i < mAllLetters.size())
+        {
+            mLetterLabels[i]->SetText(std::string(1, mAllLetters[i]));
+        }
+        else
+        {
+            mLetterLabels[i]->SetText("");
+        }
     }
     mScrambleTimer = 0.0f;
 
