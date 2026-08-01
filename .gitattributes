@@ -1,0 +1,2 @@
+# Use LF line endings on commit. Use OS line endings on checkout.
+* text=auto
