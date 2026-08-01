@@ -7,6 +7,7 @@
 // The Utf8 namespace contains helpers to aid in working with UTF-8 strings and Unicode code points.
 //
 #pragma once
+#include <cstdint>
 #include <string>
 
 #include <utf8.h>

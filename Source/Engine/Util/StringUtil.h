@@ -288,10 +288,16 @@ namespace StringUtil
 
     inline std::string vFormatf(const char* format, va_list args)
     {
+        // Copy the va_list so we can use one for sizing and one for formatting.
+        // GCC and Clang don't like it if you use the same va_list twice.
+        va_list argsCopy;
+        va_copy(argsCopy, args);
+
         // Calling snprintf with nullptr & 0 buff_size let's you determine the expected size of the result.
         // Per: https://en.cppreference.com/w/cpp/io/c/fprintf
         // +1 for the \0 null terminator.
-        int res = vsnprintf(nullptr, 0, format, args) + 1;
+        int res = vsnprintf(nullptr, 0, format, argsCopy) + 1;
+        va_end(argsCopy);
         if(res < 0)
         {
             return std::string();

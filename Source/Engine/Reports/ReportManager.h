@@ -46,7 +46,7 @@ private:
 extern ReportManager gReportManager;
 
 // Convenience macros for logging to common built-in log streams.
-#define LOG_GENERIC(x, ...) gReportManager.Logf("Generic", x, __VA_ARGS__);
-#define LOG_WARNING(x, ...) gReportManager.Logf("Warning", x, __VA_ARGS__);
-#define LOG_ERROR(x, ...) gReportManager.Logf("Error", x, __VA_ARGS__);
-#define LOG_FATAL(x, ...) gReportManager.Logf("Fatal", x, __VA_ARGS__);
+#define LOG_GENERIC(x, ...) gReportManager.Logf("Generic", x, ##__VA_ARGS__)
+#define LOG_WARNING(x, ...) gReportManager.Logf("Warning", x, ##__VA_ARGS__)
+#define LOG_ERROR(x, ...) gReportManager.Logf("Error", x, ##__VA_ARGS__)
+#define LOG_FATAL(x, ...) gReportManager.Logf("Fatal", x, ##__VA_ARGS__)

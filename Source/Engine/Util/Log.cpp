@@ -3,6 +3,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <mutex>
+#include <string>
 
 namespace
 {

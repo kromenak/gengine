@@ -9,7 +9,7 @@
 
 #include "ReportManager.h"
 
-#define LOG_BARN(x, ...) gReportManager.Logf("BarnFileMgr", x, __VA_ARGS__)
+#define LOG_BARN(x, ...) gReportManager.Logf("BarnFileMgr", x, ##__VA_ARGS__)
 
 BarnFile::BarnFile(const std::string& filePath) :
     mName(filePath),

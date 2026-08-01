@@ -1,6 +1,7 @@
 #include "StreamManager.h"
 
 #include <fstream>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 

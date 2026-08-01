@@ -7,6 +7,7 @@
 // Calling functions on an invalid handle will have no effect.
 //
 #pragma once
+#include <cstdint>
 #include <functional>
 
 #include <fmod.hpp>

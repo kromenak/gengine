@@ -4,6 +4,7 @@
 // Provides operations for editing a piece of text with a keyboard.
 //
 #pragma once
+#include <cstdint>
 #include <string>
 
 class TextInput
