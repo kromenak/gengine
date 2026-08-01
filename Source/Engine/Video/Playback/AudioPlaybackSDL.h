@@ -21,10 +21,56 @@ struct AudioParams
 {
     int freq = 0;
     int channels = 0;
-    int64_t channel_layout = 0;
     enum AVSampleFormat fmt = AV_SAMPLE_FMT_NONE;
     int frame_size = 0;
     int bytes_per_sec = 0;
+
+    AudioParams() = default;
+
+    ~AudioParams()
+    {
+        av_channel_layout_uninit(&channel_layout);
+    }
+
+    AudioParams(const AudioParams& other) :
+        freq(other.freq),
+        channels(other.channels),
+        fmt(other.fmt),
+        frame_size(other.frame_size),
+        bytes_per_sec(other.bytes_per_sec)
+    {
+        SetChannelLayout(other.channel_layout);
+    }
+
+    AudioParams& operator=(AudioParams& other)
+    {
+        freq = other.freq;
+        channels = other.channels;
+        fmt = other.fmt;
+        frame_size = other.frame_size;
+        bytes_per_sec = other.bytes_per_sec;
+        SetChannelLayout(other.channel_layout);
+        return *this;
+    }
+
+    void SetChannelLayout(const AVChannelLayout& toCopy)
+    {
+        av_channel_layout_uninit(&channel_layout);
+        av_channel_layout_copy(&channel_layout, &toCopy);
+    }
+
+    bool MatchesChannelLayout(const AVChannelLayout& toCompare)
+    {
+        return av_channel_layout_compare(&channel_layout, &toCompare) == 0;
+    }
+
+    const AVChannelLayout& GetChannelLayout()
+    {
+        return channel_layout;
+    }
+
+private:
+    AVChannelLayout channel_layout { };
 };
 
 class AudioPlaybackSDL
@@ -33,7 +79,7 @@ public:
     AudioPlaybackSDL();
     ~AudioPlaybackSDL();
 
-    int Open(VideoState* is, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate);
+    int Open(VideoState* is, const AVChannelLayout& wanted_channel_layout, int wanted_sample_rate);
     void Close();
 
 private:

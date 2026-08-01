@@ -73,7 +73,6 @@ target_include_directories(gk3 PRIVATE
     ${ALL_SOURCE_DIRS}
 
     # Library include dirs
-    Libraries/ffmpeg/include
     Libraries/Flex/include
     Libraries/fmod/inc
     Libraries/GLEW/include
@@ -179,6 +178,7 @@ endif()
 set(LIBS_SRC "${PLAT_SOURCE_DIR}/Libraries")
 if(WIN32)
     target_include_directories(gk3 PRIVATE
+        Libraries/ffmpeg/win/include
         Libraries/libpng/win/include
         Libraries/SDL/win/include
         Libraries/zlib/win/include
@@ -186,7 +186,7 @@ if(WIN32)
 
     # Specify library search directories.
     target_link_directories(gk3 PRIVATE
-        Libraries/ffmpeg/lib/win
+        Libraries/ffmpeg/win/bin
         Libraries/fmod/lib/win
         Libraries/GLEW/lib/win/x86
         Libraries/libpng/win/lib
@@ -207,14 +207,14 @@ if(WIN32)
 
     # Copy libraries after build.
     set(LIB_DEST "${PLAT_BINARY_DIR}/$<CONFIG>")
-    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/lib/win")
+    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/win/bin")
     add_custom_command(TARGET gk3
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avcodec-58.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avformat-58.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avutil-56.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swresample-3.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swscale-5.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avcodec-62.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avformat-62.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avutil-60.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swresample-6.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swscale-9.dll" "${LIB_DEST}"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/fmod/lib/win/fmod.dll" "${LIB_DEST}"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/GLEW/lib/win/x86/glew32.dll" "${LIB_DEST}"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/libpng/win/lib/libpng16.dll" "${LIB_DEST}"
@@ -224,6 +224,7 @@ if(WIN32)
     )
 elseif(APPLE)
     target_include_directories(gk3 PRIVATE
+        Libraries/ffmpeg/mac/include
         Libraries/libpng/mac/include
         Libraries/SDL/SDL2.framework/Headers
         Libraries/zlib/mac/include
@@ -231,7 +232,7 @@ elseif(APPLE)
 
     # Specify library search directories.
     target_link_directories(gk3 PRIVATE
-        Libraries/ffmpeg/lib/mac
+        Libraries/ffmpeg/mac/lib
         Libraries/fmod/lib/mac
         Libraries/GLEW/lib/mac
         Libraries/libpng/mac/lib
@@ -268,7 +269,7 @@ elseif(APPLE)
 
     # Copy libraries after build.
     set(LIB_DEST "${MAC_APP_CONTENTS}/Libraries")
-    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/lib/mac")
+    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/mac/lib")
     add_custom_command(TARGET gk3
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "${LIB_DEST}"
@@ -284,6 +285,7 @@ elseif(APPLE)
     )
 else() # Linux
     target_include_directories(gk3 PRIVATE
+        Libraries/ffmpeg/linux/include
         Libraries/libpng/linux/include
         Libraries/SDL/linux/include
         Libraries/zlib/linux/include
@@ -291,7 +293,7 @@ else() # Linux
 
     # Specify library search directories.
     target_link_directories(gk3 PRIVATE
-        Libraries/ffmpeg/lib/linux
+        Libraries/ffmpeg/linux/lib
         Libraries/fmod/lib/linux
         Libraries/GLEW/lib/linux
         Libraries/libpng/linux/lib
@@ -314,7 +316,7 @@ else() # Linux
 
     # Copy libraries post-build.
     set(LIB_DEST "${PLAT_BINARY_DIR}")
-    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/lib/linux")
+    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/linux/lib")
     add_custom_command(TARGET gk3
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavcodec.so" "${LIB_DEST}"

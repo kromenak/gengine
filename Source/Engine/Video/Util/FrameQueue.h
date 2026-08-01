@@ -10,7 +10,8 @@
 
 extern "C"
 {
-    #include <libavformat/avformat.h> // For AVFrame, AVSubtitle, AVRational
+    #include <libavcodec/avcodec.h> // AVSubtitle
+    #include <libavformat/avformat.h> // AVFrame, AVRational
 }
 #include <SDL.h>
 
@@ -38,7 +39,7 @@ struct Frame
     double duration = 0.0;
 
     // Byte position of the frame in the input file.
-    int64_t pos = 0L;
+    //int64_t pos = 0L;
 
     // VIDEO PLAYBACK
     // Width and height of the video.

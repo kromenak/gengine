@@ -10,7 +10,8 @@
 
 extern "C"
 {
-    #include <libavformat/avformat.h> // For AVRational
+    #include <libavcodec/avcodec.h> // AVCodecContext
+    #include <libavformat/avformat.h> // AVRational
 }
 #include <SDL.h>
 

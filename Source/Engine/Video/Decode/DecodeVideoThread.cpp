@@ -95,7 +95,7 @@ int DecodeVideoThread(void* arg)
 
             // Store pts/pos/duration.
             vp->pts = (avFrame->pts == AV_NOPTS_VALUE) ? std::numeric_limits<double>::quiet_NaN() : avFrame->pts * av_q2d(is->videoStream->time_base);
-            vp->pos = avFrame->pkt_pos;
+            //vp->pos = avFrame->pkt_pos;
             vp->duration = duration;
 
             // Store aspect ratio, width, height.

@@ -35,32 +35,43 @@ AudioPlaybackSDL::~AudioPlaybackSDL()
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
-int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate)
+//int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate)
+int AudioPlaybackSDL::Open(VideoState* is, const AVChannelLayout& wanted_channel_layout, int wanted_sample_rate)
 {
-    // Possible for audio channels argument to be an environment variable.
+    // We need to decide what channel layout to use. Start with a copy of the passed in value.
+    AVChannelLayout channel_layout { };
+    av_channel_layout_copy(&channel_layout, &wanted_channel_layout);
+
+    // Possible for audio channel count argument to be an environment variable.
     // If so, override passed in values.
-    const char* env = SDL_getenv("SDL_AUDIO_CHANNELS");
-    if(env != nullptr)
+    const char* sdl_desired_audio_channel_count = SDL_getenv("SDL_AUDIO_CHANNELS");
+    if(sdl_desired_audio_channel_count != nullptr)
     {
-        wanted_nb_channels = atoi(env);
-        wanted_channel_layout = av_get_default_channel_layout(wanted_nb_channels);
+        av_channel_layout_uninit(&channel_layout);
+        av_channel_layout_default(&channel_layout, atoi(sdl_desired_audio_channel_count));
     }
 
-    // If desired channel layout is not set (or doesn't make sense with desired number of channels), fallback on a default.
-    if(wanted_channel_layout == 0 || wanted_nb_channels != av_get_channel_layout_nb_channels(wanted_channel_layout))
+    // If desired channel layout is not set, fallback on a default.
+    if(av_channel_layout_check(&channel_layout) == 0)
     {
-        wanted_channel_layout = av_get_default_channel_layout(wanted_nb_channels);
-        wanted_channel_layout &= ~AV_CH_LAYOUT_STEREO_DOWNMIX;
+        int fallback_channels = (wanted_channel_layout.nb_channels > 0) ? wanted_channel_layout.nb_channels : 2;
+        av_channel_layout_uninit(&channel_layout);
+        av_channel_layout_default(&channel_layout, fallback_channels);
+
+        if(channel_layout.order == AV_CHANNEL_ORDER_NATIVE)
+        {
+            channel_layout.u.mask &= ~AV_CH_LAYOUT_STEREO_DOWNMIX;
+        }
     }
-    wanted_nb_channels = av_get_channel_layout_nb_channels(wanted_channel_layout);
 
     // Populate wanted specification.
-    SDL_AudioSpec wanted_spec;
-    wanted_spec.channels = wanted_nb_channels;
+    SDL_AudioSpec wanted_spec { };
+    wanted_spec.channels = channel_layout.nb_channels;
     wanted_spec.freq = wanted_sample_rate;
     if(wanted_spec.freq <= 0 || wanted_spec.channels <= 0)
     {
         av_log(NULL, AV_LOG_ERROR, "Invalid sample rate or channel count!\n");
+        av_channel_layout_uninit(&channel_layout);
         return -1;
     }
     wanted_spec.format = AUDIO_S16SYS;
@@ -74,7 +85,7 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
     int next_sample_rate_idx = FF_ARRAY_ELEMS(next_sample_rates) - 1;
     while(next_sample_rate_idx > 0 && next_sample_rates[next_sample_rate_idx] >= wanted_spec.freq)
     {
-        next_sample_rate_idx--;
+        --next_sample_rate_idx;
     }
 
     // Loop and try to create audio device until it succeeds or we run out of options.
@@ -90,8 +101,7 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
         }
 
         // Couldn't open audio device with desired spec, so need to fall back on other options.
-        av_log(NULL, AV_LOG_WARNING, "SDL_OpenAudio (%d channels, %d Hz): %s\n",
-               wanted_spec.channels, wanted_spec.freq, SDL_GetError());
+        av_log(NULL, AV_LOG_WARNING, "SDL_OpenAudio (%d channels, %d Hz): %s\n", wanted_spec.channels, wanted_spec.freq, SDL_GetError());
 
         // Try a different number of channels (using a complicated system of channels->index).
         static const int next_nb_channels[] = { 0, 0, 1, 6, 2, 6, 4, 6 };
@@ -101,14 +111,16 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
         if(wanted_spec.channels == 0)
         {
             wanted_spec.freq = next_sample_rates[next_sample_rate_idx--];
-            wanted_spec.channels = wanted_nb_channels;
+            wanted_spec.channels = channel_layout.nb_channels;
             if(wanted_spec.freq == 0)
             {
                 av_log(NULL, AV_LOG_ERROR, "No more combinations to try, audio open failed\n");
                 return -1;
             }
         }
-        wanted_channel_layout = av_get_default_channel_layout(wanted_spec.channels);
+
+        av_channel_layout_uninit(&channel_layout);
+        av_channel_layout_default(&channel_layout, wanted_spec.channels);
     }
 
     // Got an opened audio device! Save the device ID.
@@ -125,8 +137,10 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
     // In that case, try to update channel layout or fail.
     if(spec.channels != wanted_spec.channels)
     {
-        wanted_channel_layout = av_get_default_channel_layout(spec.channels);
-        if(wanted_channel_layout == 0)
+        av_channel_layout_uninit(&channel_layout);
+        av_channel_layout_default(&channel_layout, spec.channels);
+
+        if(av_channel_layout_check(&channel_layout) == 0)
         {
             av_log(NULL, AV_LOG_ERROR, "SDL advised channel count %d is not supported!\n", spec.channels);
             return -1;
@@ -136,8 +150,11 @@ int AudioPlaybackSDL::Open(VideoState* is, int64_t wanted_channel_layout, int wa
     // Populate audio output format data.
     mAudioOutParams.fmt = AV_SAMPLE_FMT_S16;
     mAudioOutParams.freq = spec.freq;
-    mAudioOutParams.channel_layout = wanted_channel_layout;
-    mAudioOutParams.channels =  spec.channels;
+    mAudioOutParams.SetChannelLayout(channel_layout);
+    mAudioOutParams.channels = spec.channels;
+
+    // No longer need this channel layout object.
+    av_channel_layout_uninit(&channel_layout);
 
     mAudioOutParams.frame_size = av_samples_get_buffer_size(NULL, mAudioOutParams.channels, 1, mAudioOutParams.fmt, 1);
     mAudioOutParams.bytes_per_sec = av_samples_get_buffer_size(NULL, mAudioOutParams.channels, mAudioOutParams.freq, mAudioOutParams.fmt, 1);
@@ -298,15 +315,21 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
     } while(af->serial != is->audioPackets.serial);
 
     // Get buffer size required to hold data in this frame.
-    int data_size = av_samples_get_buffer_size(nullptr, af->frame->channels,
+    int data_size = av_samples_get_buffer_size(nullptr, af->frame->ch_layout.nb_channels,
                                                af->frame->nb_samples,
                                                (AVSampleFormat)af->frame->format, 1);
 
     // Determine channel layout for the audio data in this decoded frame.
     // Or, if not specificed, calculate it!
-    int64_t dec_channel_layout =
-        (af->frame->channel_layout != 0 && af->frame->channels == av_get_channel_layout_nb_channels(af->frame->channel_layout)) ?
-        af->frame->channel_layout : av_get_default_channel_layout(af->frame->channels);
+    AVChannelLayout dec_channel_layout { };
+    if(av_channel_layout_check(&af->frame->ch_layout) != 0)
+    {
+        av_channel_layout_copy(&dec_channel_layout, &af->frame->ch_layout);
+    }
+    else
+    {
+        av_channel_layout_default(&dec_channel_layout, af->frame->ch_layout.nb_channels);
+    }
 
     // Determine wanted number of samples (which may differ from actual number of samples in the frame
     // if audio needs to sync to video or an external clock).
@@ -315,29 +338,36 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
     // If decoded audio in Frame does not match the format required by the playback device,
     // we need to resample the audio.
     if(af->frame->format        != mAudioInParams.fmt            ||
-       dec_channel_layout       != mAudioInParams.channel_layout ||
+       !mAudioInParams.MatchesChannelLayout(dec_channel_layout) ||
        af->frame->sample_rate   != mAudioInParams.freq           ||
        (wanted_nb_samples       != af->frame->nb_samples && mResampleContext == nullptr))
     {
         // Free old resample context and create/init a new one.
         swr_free(&mResampleContext);
-        mResampleContext = swr_alloc_set_opts(nullptr,
-                                     mAudioOutParams.channel_layout, (AVSampleFormat)mAudioOutParams.fmt, mAudioOutParams.freq,
-                                     dec_channel_layout,       (AVSampleFormat)af->frame->format, af->frame->sample_rate,
+        int swr_result = swr_alloc_set_opts2(&mResampleContext,
+                                     &mAudioOutParams.GetChannelLayout(), (AVSampleFormat)mAudioOutParams.fmt, mAudioOutParams.freq,
+                                     &dec_channel_layout, (AVSampleFormat)af->frame->format, af->frame->sample_rate,
                                      0, nullptr);
-        if(mResampleContext == nullptr || swr_init(mResampleContext) < 0)
+        if(swr_result < 0 || mResampleContext == nullptr)
         {
             av_log(NULL, AV_LOG_ERROR,
                    "Cannot create sample rate converter for conversion of %d Hz %s %d channels to %d Hz %s %d channels!\n",
-                    af->frame->sample_rate, av_get_sample_fmt_name((AVSampleFormat)af->frame->format), af->frame->channels,
+                    af->frame->sample_rate, av_get_sample_fmt_name((AVSampleFormat)af->frame->format), af->frame->ch_layout.nb_channels,
                     mAudioOutParams.freq, av_get_sample_fmt_name(mAudioOutParams.fmt), mAudioOutParams.channels);
+            av_channel_layout_uninit(&dec_channel_layout);
+            return -1;
+        }
+        if(swr_init(mResampleContext) < 0)
+        {
+            av_log(NULL, AV_LOG_ERROR, "Cannot init resample context.");
             swr_free(&mResampleContext);
+            av_channel_layout_uninit(&dec_channel_layout);
             return -1;
         }
 
         // Update audio source format info (since it clearly didn't match what was in the frame).
-        mAudioInParams.channel_layout = dec_channel_layout;
-        mAudioInParams.channels = af->frame->channels;
+        mAudioInParams.SetChannelLayout(dec_channel_layout);
+        mAudioInParams.channels = af->frame->ch_layout.nb_channels;
         mAudioInParams.freq = af->frame->sample_rate;
         mAudioInParams.fmt = (AVSampleFormat)af->frame->format;
     }
@@ -354,6 +384,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
         if(out_size < 0)
         {
             av_log(NULL, AV_LOG_ERROR, "av_samples_get_buffer_size() failed\n");
+            av_channel_layout_uninit(&dec_channel_layout);
             return -1;
         }
 
@@ -364,6 +395,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
                                         wanted_nb_samples * mAudioOutParams.freq / af->frame->sample_rate) < 0)
             {
                 av_log(NULL, AV_LOG_ERROR, "swr_set_compensation() failed\n");
+                av_channel_layout_uninit(&dec_channel_layout);
                 return -1;
             }
         }
@@ -373,6 +405,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
         av_fast_malloc(&mResampleBuffer, &mResampleBufferSize, out_size);
         if(mResampleBuffer == nullptr)
         {
+            av_channel_layout_uninit(&dec_channel_layout);
             return AVERROR(ENOMEM);
         }
 
@@ -385,6 +418,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
         if(createdCount < 0)
         {
             av_log(NULL, AV_LOG_ERROR, "swr_convert() failed\n");
+            av_channel_layout_uninit(&dec_channel_layout);
             return -1;
         }
 
@@ -436,6 +470,7 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
     last_clock = audio_clock;
     #endif
     */
+    av_channel_layout_uninit(&dec_channel_layout);
     return resampled_data_size;
 }
 
@@ -492,6 +527,5 @@ int AudioPlaybackSDL::SyncAudio(VideoState* is, int nb_samples)
         audio_diff_avg_count = 0;
         audio_diff_cum       = 0;
     }
-
     return wanted_nb_samples;
 }

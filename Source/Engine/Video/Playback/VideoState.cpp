@@ -46,6 +46,9 @@ VideoState::VideoState(const char* filename) :
         return;
     }
 
+    // These flags attempt to make playback more resilient in the face of corrupt or nonstandard video data.
+    format->flags |= AVFMT_FLAG_GENPTS | AVFMT_FLAG_DISCARD_CORRUPT;
+
     // Set interrupt callback - basically if IO is not possible, just abort.
     format->interrupt_callback.opaque = this;
     format->interrupt_callback.callback = [](void* arg) -> int {
@@ -56,13 +59,12 @@ VideoState::VideoState(const char* filename) :
     // Open video file, or fail.
     int res = avformat_open_input(&format, filename, nullptr, nullptr);
     if(res < 0) {
-        av_log(NULL, AV_LOG_FATAL, "Could not open video file.\n");
+        char errbuf[256];
+        av_strerror(res, errbuf, sizeof(errbuf));
+
+        av_log(NULL, AV_LOG_FATAL, "Could not open video file: %s\n", errbuf);
         return;
     }
-
-    // Put global side data in first packets received from stream (and packets after a seek).
-    //TODO: Why is this important/needed?
-    av_format_inject_global_side_data(format);
 
     // Populate format context with stream info, or fail.
     res = avformat_find_stream_info(format, nullptr);
@@ -309,7 +311,7 @@ int VideoState::OpenStream(int streamIndex)
 
     // We need a decoder in order to decode the stream data for playback.
     // Find the decoder from the codec ID we got from the stream info.
-    AVCodec* codec = avcodec_find_decoder(avctx->codec_id);
+    const AVCodec* codec = avcodec_find_decoder(avctx->codec_id);
     if(codec == nullptr)
     {
         av_log(NULL, AV_LOG_WARNING, "No decoder could be found for codec %s\n", avcodec_get_name(avctx->codec_id));
@@ -335,7 +337,7 @@ int VideoState::OpenStream(int streamIndex)
         audioPlayback = new AudioPlaybackSDL();
 
         // Open audio playback. Returns < 0 on error, audio buffer size on success.
-        ret = audioPlayback->Open(this, avctx->channel_layout, avctx->channels, avctx->sample_rate);
+        ret = audioPlayback->Open(this, avctx->ch_layout, avctx->sample_rate);
         if(ret < 0)
         {
             avcodec_free_context(&avctx);
@@ -351,7 +353,7 @@ int VideoState::OpenStream(int streamIndex)
 
         // For audio, if seek isn't allowed by this stream type, flushing (during start/seek) must always start at beginning of stream.
         // So, set the pts/timebase when flushing to be the start time.
-        if((format->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)) && !format->iformat->read_seek)
+        if((format->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)))
         {
             audioDecoder.SetFlushPts(audioStream->start_time, audioStream->time_base);
         }
