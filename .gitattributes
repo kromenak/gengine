@@ -1,2 +1,10 @@
 # Use LF line endings on commit. Use OS line endings on checkout.
 * text=auto
+
+# Flag certain assets as binary.
+*.png binary
+*.jpg binary
+*.ico binary
+*.so binary
+*.dll binary
+*.dylib binary
