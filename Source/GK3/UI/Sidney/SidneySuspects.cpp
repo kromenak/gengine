@@ -792,28 +792,28 @@ void SidneySuspects::OnMatchAnalysisPressed()
     {
         fingerprintTexture = gAssetManager.LoadAsset<Texture>("EST_LSR_PRINT.BMP", AssetScope::Scene);
         compareTexture = gAssetManager.LoadAsset<Texture>("EST_LSR_COMPARE.BMP", AssetScope::Scene);
-        videoName = "EstLSRScan.avi";
+        videoName = "EstLSRScan";
         matchSuspectIndex = 5;
     }
     else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint1)
     {
         fingerprintTexture = gAssetManager.LoadAsset<Texture>("BUCH_BLD_PRINT.BMP", AssetScope::Scene);
         compareTexture = gAssetManager.LoadAsset<Texture>("BUCH_BLD_COMPARE.BMP", AssetScope::Scene);
-        videoName = "BuchBldScan.avi";
+        videoName = "BuchBldScan";
         matchSuspectIndex = 1;
     }
     else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint2)
     {
         fingerprintTexture = gAssetManager.LoadAsset<Texture>("BUTH_BLD_PRINT.BMP", AssetScope::Scene);
         compareTexture = gAssetManager.LoadAsset<Texture>("BUTH_BLD_COMPARE.BMP", AssetScope::Scene);
-        videoName = "ButhBldScan.avi";
+        videoName = "ButhBldScan";
         matchSuspectIndex = 0;
     }
     else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint3)
     {
         fingerprintTexture = gAssetManager.LoadAsset<Texture>("MOS_BLD_PRINT.BMP", AssetScope::Scene);
         compareTexture = gAssetManager.LoadAsset<Texture>("MOS_BLD_COMPARE.BMP", AssetScope::Scene);
-        videoName = "MosBldScan.avi";
+        videoName = "MosBldScan";
         matchSuspectIndex = 9;
     }
 

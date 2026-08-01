@@ -75,7 +75,7 @@ TitleScreen::TitleScreen() : Actor("TitleScreen", TransformType::RectTransform)
     UIButton* introButton = CreateButton(mBackgroundImage, "TITLE_INTRO");
     introButton->SetTooltipText("titleintro");
     introButton->SetPressCallback([](UIButton* button) {
-        gGK3UI.GetVideoPlayer()->Play("intro.bik", true, true, nullptr);
+        gGK3UI.GetVideoPlayer()->Play("intro", true, true, nullptr);
 
         // The original game plays an SFX here, but I think it sounds better without it.
         // The first few seconds of the intro movie overlap with it.

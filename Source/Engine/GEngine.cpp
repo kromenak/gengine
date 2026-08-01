@@ -534,13 +534,13 @@ bool GEngine::InitAssetManager()
 void GEngine::ShowOpeningMovies()
 {
     // Play opening movie.
-    gGK3UI.GetVideoPlayer()->Play("Sierra.avi", true, true, [this](){
+    gGK3UI.GetVideoPlayer()->Play("Sierra", true, true, [this](){
 
         // On first launch of game, show the intro movie before the title screen.
         // Otherwise, go straight to the title screen.
         if(gSaveManager.GetRunCount() <= 1)
         {
-            gGK3UI.GetVideoPlayer()->Play("intro.bik", true, true, [this](){
+            gGK3UI.GetVideoPlayer()->Play("intro", true, true, [this](){
                 ShowTitleScreen();
             });
         }
