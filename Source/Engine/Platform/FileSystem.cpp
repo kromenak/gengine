@@ -65,6 +65,33 @@ std::string Path::Combine(std::initializer_list<std::string> paths)
 
 bool Path::FindFullPath(const std::string& fileName, const std::string& relativeSearchPath, std::string& outPath)
 {
+    #if defined(PLATFORM_LINUX)
+    // Linux is case-sensitive, which poses a problem because GK3 assets do not always have consistently cased file names.
+    // Scripts sometimes specify file names using cases that differ from what's actually on disk.
+    // And worse, different localizations of the game include files with different cases.
+
+    // To combat this, we need to make Linux act case-insensitive.
+    // The only way I can think to do this is to manually list directory contents and do a case-insensitive filename comparison.
+
+    // Since this function will be called frequently and possibly from different threads, specify a thread local vector to reuse.
+    thread_local std::vector<std::string> files;
+
+    // Clear the list and populate with names of all files in this directory.
+    files.clear();
+    Directory::List(files, relativeSearchPath, FILETYPE_FILE);
+
+    // See if any file on disk has the same name as the passed in file name (ignoring case).
+    for(auto& file : files)
+    {
+        if(StringUtil::EqualsIgnoreCase(fileName, file))
+        {
+            outPath = Path::Combine({ relativeSearchPath, file });
+            return true;
+        }
+    }
+    //NOTE: worst case, falls through to failsafe method below.
+    #endif
+
     #if defined(PLATFORM_MAC)
     // Get ref to the main bundle. This is the ".app" bundle the app is executing in.
     // Even if NOT running in a bundle (like as a command line tool), this still works - OS just "pretends" the directory of the app is the bundle root.
@@ -360,6 +387,12 @@ bool Directory::CreateAll(const std::string& path)
 std::vector<std::string> Directory::List(const std::string& path, FileType fileTypeMask, const std::string& filter)
 {
     std::vector<std::string> files;
+    List(files, path, fileTypeMask, filter);
+    return files;
+}
+
+void Directory::List(std::vector<std::string>& files, const std::string& path, FileType fileTypeMask, const std::string& filter)
+{
     #if defined(PLATFORM_WINDOWS)
     {
         // Decide on search string.
@@ -412,7 +445,7 @@ std::vector<std::string> Directory::List(const std::string& path, FileType fileT
         if(dir != nullptr)
         {
             // Iterate and read each file in the directory. Null is returned when we reach the end.
-            dirent* dirEntry;
+            dirent* dirEntry = nullptr;
             while((dirEntry = readdir(dir)) != nullptr)
             {
                 // Ignore current directory and parent directory entries.
@@ -423,11 +456,11 @@ std::vector<std::string> Directory::List(const std::string& path, FileType fileT
 
                 // If this is a regular file and we want regular files...
                 // Or if this is a directory and we want directories...
-                if((dirEntry->d_type == DT_REG && (fileTypeMask & FILETYPE_FILE)) ||
-                   (dirEntry->d_type == DT_DIR && (fileTypeMask & FILETYPE_DIRECTORY)))
+                if((dirEntry->d_type == DT_REG && (fileTypeMask & FILETYPE_FILE) != 0) ||
+                   (dirEntry->d_type == DT_DIR && (fileTypeMask & FILETYPE_DIRECTORY) != 0))
                 {
                     // Include in final list depending on filter.
-                    if(filter.empty() || fnmatch(filter.c_str(), dirEntry->d_name, 0) == 0)
+                    if(filter.empty() || fnmatch(filter.c_str(), dirEntry->d_name, FNM_CASEFOLD) == 0)
                     {
                         files.emplace_back(dirEntry->d_name);
                     }
@@ -441,7 +474,6 @@ std::vector<std::string> Directory::List(const std::string& path, FileType fileT
     #else
         #error "No implementation for Directory::List!"
     #endif
-    return files;
 }
 
 bool File::Exists(const std::string& filePath)

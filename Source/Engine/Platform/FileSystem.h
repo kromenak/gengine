@@ -130,6 +130,7 @@ namespace Directory
      * Lists the files in a directory, optionally filtering to only files with a specific extension.
      */
     std::vector<std::string> List(const std::string& path, FileType fileTypeMask, const std::string& filter = "");
+    void List(std::vector<std::string>& files, const std::string& path, FileType fileTypeMask, const std::string& filter = "");
 }
 
 namespace File
