@@ -72,8 +72,16 @@ void ReportStream::Log(const std::string& content)
     if((mOutput & ReportOutput::Debugger) != ReportOutput::None)
     {
         // On Windows, we can output the string to the debugger (usually Visual Studio 20XX) "output" panel.
+        // We want a newline on this string, or else log messages all display on one giant line.
         #if defined(PLATFORM_WINDOWS)
-        OutputDebugStringA(output.c_str());
+        if(!output.empty() && output.back() == '\n')
+        {
+            OutputDebugStringA(output.c_str());
+        }
+        else
+        {
+            OutputDebugStringA((output + "\n").c_str());
+        }
         #endif
 
         // "::Log" automatically adds a newline to outputs, so if the output has a newline at the end, remove that.
