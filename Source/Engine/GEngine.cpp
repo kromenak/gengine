@@ -461,6 +461,13 @@ bool GEngine::InitAssetManager()
         // Try to load this, but since it's optional, it shouldn't show an error message.
         gAssetManager.LoadAssetArchive("override.brn", -1);
 
+        // If Polish locale, load "pl.brn" which contains all the Polish overrides for the entire game.
+        // Similar to "overrides.brn" for other languages.
+        if(dataDirectory.localeName == "pl")
+        {
+            gAssetManager.LoadAssetArchive("pl.brn", -1);
+        }
+
         // Also check if any other Barns are specified in the INI file to load.
         if(config != nullptr)
         {

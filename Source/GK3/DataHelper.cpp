@@ -17,6 +17,10 @@ namespace
     // The data directory being used for this run of the game.
     DataDirectory activeDataDirectory;
 
+    // Polish is unique in that the Data folder is identical to the English version, but there's a special "pl.brn" present in the same folder as the executable.
+    // This bool stores whether we detected pl.brn was present.
+    bool polishBarnPresent = false;
+
     bool ParseDataDirectory(const std::string& path, DataDirectory& dataDirectory)
     {
         if(!Directory::Exists(path))
@@ -51,6 +55,17 @@ namespace
 
             Logf("Found data directory %s with configured locale %s (%c).", path.c_str(), dataDirectory.localeName.c_str(), dataDirectory.localePrefix);
             delete dataConfig;
+            return true;
+        }
+
+        // If the Polish "pl.brn" was present and this is the "Data" directory, just assume this is the Polish version of the game.
+        if(polishBarnPresent && StringUtil::EqualsIgnoreCase(path, "Data"))
+        {
+            dataDirectory.path = path;
+            dataDirectory.localeName = "pl";
+            dataDirectory.localePrefix = 'E';
+
+            Logf("Found data directory %s with auto-detected locale %s (%c).", path.c_str(), dataDirectory.localeName.c_str(), dataDirectory.localePrefix);
             return true;
         }
 
@@ -99,12 +114,18 @@ namespace
             {
                 localeName = "ru";
             }
-            //TODO: Polish?
 
             // If we couldn't detect the locale, just use an "unknown" placeholder.
             if(localeName.empty())
             {
                 localeName = "un";
+            }
+
+            // In a scenario where Polish is supported alongside other languages, see if we have "pl.brn" in this Data folder.
+            // If so, assume this is the Polish localization.
+            if(localeName == "en" && assetManager.LoadAssetArchive("pl.brn"))
+            {
+                localeName = "pl";
             }
 
             dataDirectory.path = path;
@@ -165,6 +186,9 @@ bool DataHelper::GetDataDirectoryToUse(DataDirectory& dataDirectory)
         dataDirectory = activeDataDirectory;
         return true;
     }
+
+    // Check whether the Polish override Barn is present.
+    polishBarnPresent = File::Exists("pl.brn");
 
     // Attempt to load GK3.ini config so we can check for data directory and locale preferences.
     AssetManager assetManager;

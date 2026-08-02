@@ -9,6 +9,11 @@ Data/*
 /Data*
 !Data
 
+## Exclude specific data file formats.
+*.brn
+*.avi
+*.bik
+
 ## Ignore Bin directory (where final release files go)
 /Bin
 

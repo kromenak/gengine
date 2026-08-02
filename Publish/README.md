@@ -2,7 +2,7 @@
 This is a full rewrite of the game engine for Gabriel Knight 3: Blood of the Sacred, Blood of the Damned. It uses the same assets and data files as the original game, but the underlying engine is completely rewritten to be cross-platform and support modern systems.
 
 ## Data Files
-When you first run the game, you will get an error message about missing data files. In order to play the game, you will need the data files - purchase a copy of GK3 (available on Steam or GOG) to get them. The data files are all the files in the `Data` directory after installing the game (`brn` asset bundles and `bik`/`avi` video files).
+In order to play the game, you will need the data files - purchase a copy of GK3 (available on Steam or GOG) to get them. The data files are all the files in the `Data` directory after installing the game (`brn` asset bundles and `bik`/`avi` video files).
 
 On Windows and Linux, copy the data files from their original location to the `Data` folder in the same directory as this README. On Mac, copy them to `Gabriel Knight 3.app/Contents/Resources/Data`.
 
@@ -12,21 +12,24 @@ The [Gabriel Knight 3 demo](https://archive.org/details/GabrielKnight3BloodOfThe
 The file `GK3.ini` in the game's root directory provides some options for changing how the game functions. If interested, take a look - all options are present and documented. Just uncomment an option to have it read by the game.
 
 ## Localization
-The most straightforward way to play a localized version of GK3 is to simply put the localized data files in the `Data` folder. 
+The most straightforward way to play a localized version of GK3 is to simply put the localized data files in the `Data` folder.
 
-Officially localized versions (English, German, French, Spanish, Italian, Portuguese, and Russian) have auto-detection logic. On the other hand, unofficial localized versions should work fine as long as no asset files have been renamed.
+Officially localized versions (English, German, French, Spanish, Italian, Portuguese, Russian, and Polish) have auto-detection logic. On the other hand, unofficial localized versions should work fine as long as no asset files have been renamed.
 
-NOTE: The official Polish version of the game is not yet tested/supported.
+For the Polish version of the game, `pl.brn` can either be placed in the same directory as the executable or in the `Data` folder.
 
 ### Support for Multiple Localizations
-If you'd like to have the option to play in multiple languages, simply create separate Data folders for each language: `DataEnglish` and `DataFrench` for example.
+If you'd like to have the option to play in multiple languages, simply create separate Data folders for each language: `DataEnglish`, `DataFrench`, and `DataGerman` for example.
 
 To specify which one to use when the game runs, you have two options:
 
 1. Specify the data folder name or path in the `Data Directory` option in `GK3.ini`.
 
-2. Specify the ISO 639 locale code  in the `Locale` option in `GK3.ini`. Valid built-in options are en (English), fr (French), it (Italian), de (German), es (Spanish), pt (Portuguese), and ru (Russian).
-	- You can also associate a custom locale name with a data folder by adding a `Data.cfg` file to the Data folder and putting a `LocaleName = YourCustomLocaleName` line in that file. Use an ISO 638 locale code or really any name that strikes your fancy.
+2. Specify the ISO 639 locale code  in the `Locale` option in `GK3.ini`. Valid built-in options are en (English), fr (French), it (Italian), de (German), es (Spanish), pt (Portuguese), ru (Russian), and pl (Polish). You can also explicitly set a Data folder's locale by adding a `Data.cfg` file to the folder with these contents:
+```
+LocaleName = en      // Specify the ISO 639 locale code here (or anything you'd like really).
+LocalePrefix = E     // You can ommit this unless you've changed the prefix used for localized files in this language.
+```
 
 ### Support for Unofficial Localizations
 If you have data files for an unofficial localization of the game, it's likely they will work - simply put the data files in the `Data` folder and attempt to run the game! If the localization doesn't work, check the logs for details. Worst case, please open a GitHub issue for investigation.
