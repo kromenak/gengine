@@ -227,11 +227,11 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
                     // We got the UV, convert that into a specific pixel color from this polygon's surface texture.
                     Vector2 pixelPos(pointUV.x * mSurfaces[polygon->surfaceIndex].texture->GetWidth(),
                                      pointUV.y * mSurfaces[polygon->surfaceIndex].texture->GetHeight());
-                    Color32 color = mSurfaces[polygon->surfaceIndex].texture->GetPixelColor(pixelPos.x, pixelPos.y);
+                    bool pixelTransparent = mSurfaces[polygon->surfaceIndex].texture->IsPixelTransparent(pixelPos.x, pixelPos.y);
 
                     // If the color is transparent, this doesn't count as a hit - the ray "goes through" the transparent area.
                     // But if at all opaque, we count this as a hit.
-                    if(color != Color32::Magenta)
+                    if(!pixelTransparent)
                     {
                         return true;
                     }

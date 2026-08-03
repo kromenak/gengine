@@ -103,6 +103,7 @@ public:
     void SetPixelColor(uint32_t pixelIndex, Color32 color);
     Color32 GetPixelColor(uint32_t x, uint32_t y) const;
     Color32 GetPixelColor(uint32_t pixelIndex) const;
+    bool IsPixelTransparent(uint32_t x, uint32_t y) const;
 
     // Set or Get Palette Indexes
     void SetPixelPaletteIndex(uint32_t x, uint32_t y, uint8_t val);

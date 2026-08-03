@@ -298,6 +298,21 @@ Color32 Texture::GetPixelColor(uint32_t pixelIndex) const
     return Color32::Black;
 }
 
+bool Texture::IsPixelTransparent(uint32_t x, uint32_t y) const
+{
+    // Get the pixel's color.
+    Color32 color = GetPixelColor(x, y);
+
+    // If this texture has an alpha channel, a zero alpha is transparent.
+    if(mBytesPerPixel == 4)
+    {
+        return color.a == 0;
+    }
+
+    // If this texture doesn't have an alpha channel, the pixel is transparent if it's magenta.
+    return color == Color32::Magenta;
+}
+
 void Texture::SetPixelPaletteIndex(uint32_t x, uint32_t y, uint8_t val)
 {
     // No palette indexes means we can't get a value!
