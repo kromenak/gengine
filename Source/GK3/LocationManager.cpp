@@ -395,6 +395,14 @@ void LocationManager::LoadScene(const std::string& location, const std::function
 {
     gSceneManager.LoadScene(location, [callback](){
         gGK3UI.HideSceneTransitioner();
+
+        // Sometimes, the game plays a video with "autoclose" set to false. But then how/when does the video player close itself?
+        // One of the events that will close the video player is a scene change.
+        if(gGK3UI.GetVideoPlayer()->IsActive())
+        {
+            gGK3UI.GetVideoPlayer()->Hide();
+        }
+
         if(callback != nullptr) { callback(); }
     });
 }
