@@ -184,6 +184,13 @@ void Chessboard::OnPersist(PersistState& ps)
 
 void Chessboard::OnUpdate(float deltaTime)
 {
+    // Since this Actor isn't officially part of the scene, it doesn't get paused when the scene gets paused.
+    // But don't update when the scene is paused (which usually happens if a UI is open over the game).
+    if(gSceneManager.GetScene()->IsPaused())
+    {
+        return;
+    }
+
     // The code below updates which tile the mouse is hovering, whether it's a valid move, and what animation to use when jumping to it.
     // That code is here (rather than directly in Scene::Interact) to avoid polluting the Scene class with scene-specific logic.
     // We want to do these updates before the player clicks on a tile, but once they do, we should stop until the action bar is gone and any subsequent action is done.

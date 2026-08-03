@@ -97,6 +97,7 @@ public:
     void SetFixedModelLighting(const std::string& modelName, const Color32& color);
 
     void SetPaused(bool paused);
+    bool IsPaused() const { return mPaused; }
 
     void InspectActiveObject(const std::function<void()>& finishCallback);
     void InspectObject(const std::string& noun, const std::function<void()>& finishCallback);

@@ -109,6 +109,13 @@ void LaserHead::OnPersist(PersistState& ps)
 
 void LaserHead::OnUpdate(float deltaTime)
 {
+    // Since this Actor isn't officially part of the scene, it doesn't get paused when the scene gets paused.
+    // But don't update when the scene is paused (which usually happens if a UI is open over the game).
+    if(gSceneManager.GetScene()->IsPaused())
+    {
+        return;
+    }
+
     // Turn the head if the timer has been set.
     if(mTurnTimer < kTurnDuration)
     {

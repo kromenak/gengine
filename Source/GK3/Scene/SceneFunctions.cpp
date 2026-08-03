@@ -178,7 +178,6 @@ namespace
     {
         cs2LaserHeads[4]->TurnRight(callback);
     }
-
 }
 
 namespace
