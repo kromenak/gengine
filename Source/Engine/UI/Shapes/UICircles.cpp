@@ -1,6 +1,7 @@
 #include "UICircles.h"
 
 #include "Mesh.h"
+#include "UILines.h"
 
 TYPEINFO_INIT(UICircles, UIShapes<Circle>, 17)
 {
@@ -20,11 +21,31 @@ void UICircles::Add(const Vector2& center, float radius)
 
 void UICircles::GenerateMesh(const std::vector<Circle>& shapes, Mesh* mesh)
 {
-    // TThe circle's vertices are procedurally generated.
+    // The circle's vertices are procedurally generated.
     // Smaller angle interval makes the circle smoother (at the cost of more vertices).
     const float kAngleInterval = 0.1f;
     const size_t kPointsPerCircle = Math::k2Pi / kAngleInterval;
 
+    #if defined(NEW_SHAPE_RENDERING)
+    std::vector<LineSegment> lineSegments;
+    for(int i = 0; i < shapes.size(); ++i)
+    {
+        Vector3 startPoint(shapes[i].center.x, shapes[i].center.y + shapes[i].radius);
+        Vector3 prevPoint = startPoint;
+        for(int j = 1; j < kPointsPerCircle; ++j)
+        {
+            float angle = j * kAngleInterval;
+
+            Vector3 point(shapes[i].center.x + shapes[i].radius * Math::Sin(angle),
+                          shapes[i].center.y + shapes[i].radius * Math::Cos(angle));
+
+            lineSegments.emplace_back(prevPoint, point);
+            prevPoint = point;
+        }
+        lineSegments.emplace_back(prevPoint, startPoint);
+    }
+    UILines::GenerateMesh(lineSegments, mesh, Math::Max(GetUIScale() * 0.5f, 2.0f));
+    #else
     // Generate positions for each vertex.
     size_t vertexCount = shapes.size() * kPointsPerCircle;
     float* positions = new float[vertexCount * 3];
@@ -49,4 +70,5 @@ void UICircles::GenerateMesh(const std::vector<Circle>& shapes, Mesh* mesh)
 
     // A circle is actually rendered as a bunch of small lines, with the last line connecting to the first one.
     submesh->SetRenderMode(RenderMode::LineLoop);
+    #endif
 }

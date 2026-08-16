@@ -14,6 +14,8 @@ class UILines : public UIShapes<LineSegment>
 {
     TYPEINFO_SUB(UILines, UIShapes<LineSegment>);
 public:
+    static void GenerateMesh(const std::vector<LineSegment>& shapes, Mesh* mesh, float scale);
+
     UILines(Actor* owner);
 
     void Add(const Vector2& startPoint, const Vector2& endPoint);

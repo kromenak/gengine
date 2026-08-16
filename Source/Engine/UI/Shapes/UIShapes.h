@@ -8,8 +8,11 @@
 
 #include <vector>
 
+#include "Actor.h"
 #include "Material.h"
 #include "Mesh.h"
+
+#define NEW_SHAPE_RENDERING
 
 class Color32;
 
@@ -38,6 +41,17 @@ public:
 
         // Nothing to render if shapes list is empty.
         if(mShapes.empty()) { return; }
+
+        // Detect UI scale and regen mesh if needed.
+        if(mRegenMeshOnUIScaleChange)
+        {
+            float currentUIScale = GetUIScale();
+            if(currentUIScale != mLastUIScale)
+            {
+                mNeedMeshRegen = true;
+                mLastUIScale = currentUIScale;
+            }
+        }
 
         // Generate the mesh, if needed.
         if(mNeedMeshRegen)
@@ -108,7 +122,12 @@ protected:
     // Material used to render the mesh.
     Material mMaterial;
 
+    // If true, mesh will be regenerated if UI scale changes.
+    bool mRegenMeshOnUIScaleChange = true;
+
     virtual void GenerateMesh(const std::vector<T>& shapes, Mesh* mesh) { }
+
+    float GetUIScale() const { return GetOwner()->GetTransform()->GetWorldScale().x; }
 
 private:
     // The shapes to be rendered.
@@ -119,6 +138,9 @@ private:
 
     // If true, mesh needs to be regenerated.
     bool mNeedMeshRegen = true;
+
+    // Last detected UI scale.
+    float mLastUIScale = 1.0f;
 };
 
 TYPEINFO_INIT_TEMPLATE(UIShapes, UIWidget);

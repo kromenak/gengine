@@ -134,19 +134,14 @@ void MapView::Init(Actor* parent, bool zoomedIn)
 
     // Create various shape renderers.
     // The main difference between the zoomed in and zoomed out maps are the colors used to render in some cases.
-    // Create locked hexagrams renderer.
-    {
-        lockedHexagrams = UI::CreateWidgetActor<UIHexagrams>("LockedHexagrams", mapImage);
-        lockedHexagrams->SetColor(zoomedIn ? kZoomedInLockedShapeColor : kZoomedOutLockedShapeColor);
-        lockedHexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-    }
 
-    // Create hexagrams renderer.
-    {
-        hexagrams = UI::CreateWidgetActor<UIHexagrams>("Hexagrams", mapImage);
-        hexagrams->SetColor(zoomedIn ? kZoomedInShapeColor : kZoomedOutShapeColor);
-        hexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-    }
+    // The render order here is based on the original game. From lowest to highest:
+    // - Grids have lowest render priority.
+    // - Then rectangles
+    // - Then circles
+    // - Then hexagrams
+    // - Then lines
+    // - Points render above everything else.
 
     // Create locked grids renderer.
     {
@@ -188,6 +183,20 @@ void MapView::Init(Actor* parent, bool zoomedIn)
         circles = UI::CreateWidgetActor<UICircles>("Circles", mapImage);
         circles->SetColor(zoomedIn ? kZoomedInShapeColor : kZoomedOutShapeColor);
         circles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+    }
+
+    // Create locked hexagrams renderer.
+    {
+        lockedHexagrams = UI::CreateWidgetActor<UIHexagrams>("LockedHexagrams", mapImage);
+        lockedHexagrams->SetColor(zoomedIn ? kZoomedInLockedShapeColor : kZoomedOutLockedShapeColor);
+        lockedHexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+    }
+
+    // Create hexagrams renderer.
+    {
+        hexagrams = UI::CreateWidgetActor<UIHexagrams>("Hexagrams", mapImage);
+        hexagrams->SetColor(zoomedIn ? kZoomedInShapeColor : kZoomedOutShapeColor);
+        hexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
     }
 
     // Create lines renderer.

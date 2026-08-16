@@ -2,6 +2,7 @@
 
 #include "Matrix3.h"
 #include "Mesh.h"
+#include "UILines.h"
 
 TYPEINFO_INIT(UIRectangles, UIShapes<UIRectangle>, 25)
 {
@@ -24,10 +25,35 @@ void UIRectangles::Add(const Vector2& center, const Vector2& size, float angle)
 
 void UIRectangles::GenerateMesh(const std::vector<UIRectangle>& shapes, Mesh* mesh)
 {
+    #if defined(NEW_SHAPE_RENDERING)
+    // A rectangle is really just 4 line segments, so we can lean on existing line mesh generation code.
+    std::vector<LineSegment> lineSegments;
+    for(int i = 0; i < shapes.size(); ++i)
+    {
+        float halfWidth = shapes[i].size.x * 0.5f;
+        float halfHeight = shapes[i].size.y * 0.5f;
+
+        Matrix3 rotMat = Matrix3::MakeRotateZ(shapes[i].angle);
+        Vector2 topLeftDir = rotMat.TransformVector(Vector2(-halfWidth, halfHeight));
+        Vector2 topRightDir = rotMat.TransformVector(Vector2(halfWidth, halfHeight));
+        Vector2 botLeftDir = rotMat.TransformVector(Vector2(-halfWidth, -halfHeight));
+        Vector2 botRightDir = rotMat.TransformVector(Vector2(halfWidth, -halfHeight));
+
+        Vector2 topLeft = shapes[i].center + topLeftDir;
+        Vector2 topRight = shapes[i].center + topRightDir;
+        Vector2 bottomLeft = shapes[i].center + botLeftDir;
+        Vector2 bottomRight = shapes[i].center + botRightDir;
+
+        lineSegments.emplace_back(topLeft, topRight);
+        lineSegments.emplace_back(topRight, bottomRight);
+        lineSegments.emplace_back(bottomRight, bottomLeft);
+        lineSegments.emplace_back(bottomLeft, topLeft);
+    }
+    UILines::GenerateMesh(lineSegments, mesh, Math::Max(GetUIScale() * 0.5f, 2.0f));
+    #else
     // Each rectangle consists of eight vertices.
     // This is because we need to double up each vertex since we're rendering with Lines approach.
     size_t vertexCount = shapes.size() * 8;
-
     float* positions = new float[vertexCount * 3];
     for(int i = 0; i < shapes.size(); ++i)
     {
@@ -88,4 +114,5 @@ void UIRectangles::GenerateMesh(const std::vector<UIRectangle>& shapes, Mesh* me
 
     // Render it in "lines" mode, since this is a set of lines!
     submesh->SetRenderMode(RenderMode::Lines);
+    #endif
 }

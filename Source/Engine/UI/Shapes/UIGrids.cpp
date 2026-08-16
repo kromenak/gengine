@@ -2,6 +2,7 @@
 
 #include "Matrix3.h"
 #include "Mesh.h"
+#include "UILines.h"
 
 TYPEINFO_INIT(UIGrids, UIShapes<UIGrid>, 19)
 {
@@ -26,6 +27,61 @@ void UIGrids::Add(const Vector2& center, const Vector2& size, float angle, int d
 
 void UIGrids::GenerateMesh(const std::vector<UIGrid>& shapes, Mesh* mesh)
 {
+    #if defined(NEW_SHAPE_RENDERING)
+    std::vector<LineSegment> lineSegments;
+    for(auto& grid : shapes)
+    {
+        float halfWidth = grid.size.x * 0.5f;
+        float halfHeight = grid.size.y * 0.5f;
+
+        Matrix3 rotMat = Matrix3::MakeRotateZ(grid.angle);
+        Vector2 topLeftDir = rotMat.TransformVector(Vector2(-halfWidth, halfHeight));
+        Vector2 topRightDir = rotMat.TransformVector(Vector2(halfWidth, halfHeight));
+        Vector2 botLeftDir = rotMat.TransformVector(Vector2(-halfWidth, -halfHeight));
+        Vector2 botRightDir = rotMat.TransformVector(Vector2(halfWidth, -halfHeight));
+
+        Vector2 topLeft = grid.center + topLeftDir;
+        Vector2 topRight = grid.center + topRightDir;
+        Vector2 bottomLeft = grid.center + botLeftDir;
+        Vector2 bottomRight = grid.center + botRightDir;
+
+        if(grid.drawBorder)
+        {
+            lineSegments.emplace_back(topLeft, bottomLeft);
+            lineSegments.emplace_back(bottomLeft, bottomRight);
+            lineSegments.emplace_back(bottomRight, topRight);
+            lineSegments.emplace_back(topRight, topLeft);
+        }
+
+        if(grid.divisions > 1)
+        {
+            Vector2 tlToTr = Vector2::Normalize(topRight - topLeft);
+            Vector2 tlToBl = Vector2::Normalize(bottomLeft - topLeft);
+            float intervalX = grid.size.x / grid.divisions;
+            float intervalY = grid.size.y / grid.divisions;
+
+            Vector2 currentTop = topLeft;
+            Vector2 currentBot = bottomLeft;
+            Vector2 currentLeft = topLeft;
+            Vector2 currentRight = topRight;
+            for(int i = 1; i < grid.divisions; ++i)
+            {
+                // Increment current values to next grid line spots.
+                currentTop += (tlToTr * intervalX);
+                currentBot += (tlToTr * intervalX);
+                currentLeft += (tlToBl * intervalY);
+                currentRight += (tlToBl * intervalY);
+
+                // Vertical line.
+                lineSegments.emplace_back(currentTop, currentBot);
+
+                // Horizontal line.
+                lineSegments.emplace_back(currentLeft, currentRight);
+            }
+        }
+    }
+    UILines::GenerateMesh(lineSegments, mesh, Math::Max(GetUIScale() * 0.5f, 2.0f));
+    #else
     // Calculating then number of vertices is a bit more involved - it depends on grid divisions and other options.
     size_t vertexCount = 0;
     for(auto& grid : shapes)
@@ -154,4 +210,5 @@ void UIGrids::GenerateMesh(const std::vector<UIGrid>& shapes, Mesh* mesh)
 
     // Render it in "lines" mode, since this is a set of lines!
     submesh->SetRenderMode(RenderMode::Lines);
+    #endif
 }

@@ -1,6 +1,7 @@
 #include "UIHexagrams.h"
 
 #include "Mesh.h"
+#include "UILines.h"
 
 TYPEINFO_INIT(UIHexagrams, UIShapes<UIHexagram>, 34)
 {
@@ -23,6 +24,43 @@ void UIHexagrams::Add(const Vector2& center, float radius, float angle)
 
 void UIHexagrams::GenerateMesh(const std::vector<UIHexagram>& shapes, Mesh* mesh)
 {
+    #if defined(NEW_SHAPE_RENDERING)
+    std::vector<LineSegment> lineSegments;
+    for(int i = 0; i < shapes.size(); ++i)
+    {
+        Matrix3 rotMat = Matrix3::MakeRotateZ(shapes[i].angle);
+        const float kAngleInterval = Math::k2Pi / 6;
+        Vector2 points[6];
+        for(int j = 0; j < 6; ++j)
+        {
+            float angle = j * kAngleInterval;
+
+            points[j].x = shapes[i].radius * Math::Sin(angle);
+            points[j].y = shapes[i].radius * Math::Cos(angle);
+            points[j] = rotMat.TransformVector(points[j]);
+            points[j] += shapes[i].center;
+        }
+
+        // Triangle 1, side 1.
+        lineSegments.emplace_back(points[0], points[2]);
+
+        // Triangle 1, side 2.
+        lineSegments.emplace_back(points[2], points[4]);
+
+        // Triangle 1, side 3.
+        lineSegments.emplace_back(points[4], points[0]);
+
+        // Triangle 2, side 1.
+        lineSegments.emplace_back(points[1], points[3]);
+
+        // Triangle 2, side 2.
+        lineSegments.emplace_back(points[3], points[5]);
+
+        // Triangle 2, side 3.
+        lineSegments.emplace_back(points[5], points[1]);
+    }
+    UILines::GenerateMesh(lineSegments, mesh, Math::Max(GetUIScale() * 0.5f, 2.0f));
+    #else
     // Each hexagram consists of 12 vertices.
     // This is because we need to double up each vertex since we're rendering with Lines approach.
     size_t vertexCount = shapes.size() * 12;
@@ -101,4 +139,5 @@ void UIHexagrams::GenerateMesh(const std::vector<UIHexagram>& shapes, Mesh* mesh
 
     // Render it in "lines" mode, since this is a set of lines!
     submesh->SetRenderMode(RenderMode::Lines);
+    #endif
 }
