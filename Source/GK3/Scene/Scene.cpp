@@ -1390,6 +1390,17 @@ void Scene::ExecuteAction(const Action* action)
     // Log to "Actions" stream.
     gReportManager.Log("Actions", "Playing NVC " + action->ToString());
 
+    gActionManager.StartActionApproach();
+
+    // Clear the pending approach before handing off to Sheep/NVC execution.
+    auto finishApproachAndExecute = [action]() {
+        gActionManager.FinishActionApproach();
+        if(!gActionManager.IsActionBarShowing())
+        {
+            gActionManager.ExecuteAction(action, nullptr, false);
+        }
+    };
+
     // Before executing the NVC, we need to handle any approach.
     switch(action->approach)
     {
@@ -1399,16 +1410,11 @@ void Scene::ExecuteAction(const Action* action)
             if(scenePos != nullptr)
             {
                 //Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
-                mEgo->WalkToExact(scenePos->position, scenePos->heading, [action]() {
-                    if(!gActionManager.IsActionBarShowing())
-                    {
-                        gActionManager.ExecuteAction(action, nullptr, false);
-                    }
-                });
+                mEgo->WalkToExact(scenePos->position, scenePos->heading, finishApproachAndExecute);
             }
             else
             {
-                gActionManager.ExecuteAction(action, nullptr, false);
+                finishApproachAndExecute();
             }
             break;
         }
@@ -1417,23 +1423,18 @@ void Scene::ExecuteAction(const Action* action)
             Animation* anim = gAssetManager.LoadAsset<Animation>(action->target, AssetScope::Scene);
             if(anim != nullptr)
             {
-                mEgo->WalkToAnimationStart(anim, [action]() {
-                    if(!gActionManager.IsActionBarShowing())
-                    {
-                        gActionManager.ExecuteAction(action, nullptr, false);
-                    }
-                });
+                mEgo->WalkToAnimationStart(anim, finishApproachAndExecute);
             }
             else
             {
-                gActionManager.ExecuteAction(action, nullptr, false);
+                finishApproachAndExecute();
             }
             break;
         }
         case Action::Approach::Near: // Never used in GK3.
         {
             LOG_WARNING("Executed NEAR approach type! This is unexpected!");
-            gActionManager.ExecuteAction(action, nullptr, false);
+            finishApproachAndExecute();
             break;
         }
         case Action::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
@@ -1456,28 +1457,23 @@ void Scene::ExecuteAction(const Action* action)
                 }
 
                 // Walk there, and then do the action.
-                mEgo->WalkToBestEffort(walkPos, walkHeading, [action](){
-                    if(!gActionManager.IsActionBarShowing())
-                    {
-                        gActionManager.ExecuteAction(action, nullptr, false);
-                    }
-                });
+                mEgo->WalkToBestEffort(walkPos, walkHeading, finishApproachAndExecute);
             }
             else
             {
                 // Just do the action if model could not be found.
-                gActionManager.ExecuteAction(action, nullptr, false);
+                finishApproachAndExecute();
             }
             break;
         }
         case Action::Approach::Region: // Never used in GK3 (it does appear once in a SIF file, but it is misconfigured with an invalid region anyway).
         {
-            gActionManager.ExecuteAction(action, nullptr, false);
+            finishApproachAndExecute();
             break;
         }
         case Action::Approach::TurnTo: // Never used in GK3.
         {
-            gActionManager.ExecuteAction(action, nullptr, false);
+            finishApproachAndExecute();
             break;
         }
         case Action::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
@@ -1504,12 +1500,7 @@ void Scene::ExecuteAction(const Action* action)
 
             // Do a "turn to" heading.
             Heading turnToHeading = Heading::FromDirection(egoToModel);
-            mEgo->TurnTo(turnToHeading, [action]() -> void {
-                if(!gActionManager.IsActionBarShowing())
-                {
-                    gActionManager.ExecuteAction(action, nullptr, false);
-                }
-            });
+            mEgo->TurnTo(turnToHeading, finishApproachAndExecute);
             break;
         }
         case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser/Plant, RC1 Look Bench/Bookstore Sign
@@ -1521,30 +1512,25 @@ void Scene::ExecuteAction(const Action* action)
             // If didn't find it, print a warning/error and just execute right away.
             if(obj != nullptr)
             {
-                mEgo->WalkToSee(obj, [action]() {
-                    if(!gActionManager.IsActionBarShowing())
-                    {
-                        gActionManager.ExecuteAction(action, nullptr, false);
-                    }
-                });
+                mEgo->WalkToSee(obj, finishApproachAndExecute);
             }
             else
             {
                 LOG_WARNING("Could not find WalkToSee target %s.", action->target.c_str());
-                gActionManager.ExecuteAction(action, nullptr, false);
+                finishApproachAndExecute();
             }
             break;
         }
         case Action::Approach::None:
         {
             // Just do it!
-            gActionManager.ExecuteAction(action, nullptr, false);
+            finishApproachAndExecute();
             break;
         }
         default:
         {
             gReportManager.Log("Error", "Invalid approach " + std::to_string(static_cast<int>(action->approach)));
-            gActionManager.ExecuteAction(action, nullptr, false);
+            finishApproachAndExecute();
             break;
         }
     }

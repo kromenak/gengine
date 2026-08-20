@@ -38,7 +38,7 @@ public:
                       Animation* startTurnLeftAnim, Animation* startTurnRightAnim);
 
     void WalkToBestEffort(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback);
-    void WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback);
+    void WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool allowFrustumPathSkip = true);
     void WalkToGas(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback);
     void WalkToSee(GKObject* target, const std::function<void()>& finishCallback);
 
@@ -140,12 +140,15 @@ private:
     // Only use case is the demon in the final fight so far.
     bool mAllowWalkSkip = true;
 
+    // If false, the walker must follow the full path (e.g. when walking to an animation start pose).
+    bool mAllowFrustumPathSkip = true;
+
     // REGION SUPPORT
     // A callback for exiting a region.
     int mExitRegionIndex = -1;
     std::function<void()> mExitRegionCallback = nullptr;
 
-    void WalkToInternal(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool fromAutoscript, bool mustReachDestination);
+    void WalkToInternal(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool fromAutoscript, bool mustReachDestination, bool allowFrustumPathSkip = true);
 
     void PopAndNextAction();
     void NextAction();
