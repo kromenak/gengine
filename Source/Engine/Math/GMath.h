@@ -9,6 +9,7 @@
 #pragma once
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 
 #include "Interpolate.h"
@@ -24,181 +25,193 @@ namespace Math
     static constexpr float kPiOver2 = kPi / 2.0f;
     static constexpr float kPiOver4 = kPi / 4.0f;
 
-    inline float Sqrt(float val)
+    [[nodiscard]] inline constexpr float Abs(float val)
     {
-        return ::sqrtf(val);
+        // Can't use std::abs here because it isn't constexpr until C++23!
+        return val < 0.0f ? -val : val;
     }
 
-    inline float InvSqrt(float val)
+    [[nodiscard]] inline float Sqrt(float val)
     {
-        //TODO: this could be replaced by a faster (but approximate) calculation
-        //TODO: the famous "fast inverse square root!"
-        //TODO: https://www.slideshare.net/maksym_zavershynskyi/fast-inverse-square-root
-        return (1.0f / ::sqrtf(val));
+        return std::sqrt(val);
     }
 
-    inline bool IsZero(float val)
+    [[nodiscard]] inline float InvSqrt(float val)
     {
-        return (::fabsf(val) < kEpsilon);
+        return 1.0f / std::sqrt(val);
     }
 
-    inline bool AreEqual(float a, float b)
+    [[nodiscard]] inline constexpr bool IsZero(float val)
+    {
+        return Abs(val) < kEpsilon;
+    }
+
+    [[nodiscard]] inline constexpr bool AreEqual(float a, float b)
     {
         return IsZero(a - b);
     }
 
-    inline bool Approximately(float a, float b, float epsilon = kEpsilon)
+    [[nodiscard]] inline constexpr bool Approximately(float a, float b, float epsilon = kEpsilon)
     {
-        return (::fabs(a - b) < epsilon);
+        return Abs(a - b) < epsilon;
     }
 
-    inline float Pow(float base, float exp)
+    [[nodiscard]] inline float Pow(float base, float exp)
     {
         return std::pow(base, exp);
     }
 
-    inline int PowBase2(int exp)
+    [[nodiscard]] inline constexpr int PowBase2(int exp)
     {
         return 1 << exp;
     }
 
-    inline float Log(float val)
+    [[nodiscard]] inline float Log(float val)
     {
         return std::log(val);
     }
 
-    inline float LogBase2(float val)
+    [[nodiscard]] inline float LogBase2(float val)
     {
         return std::log2(val);
     }
 
-    inline float Mod(float num1, float num2)
+    [[nodiscard]] inline float Mod(float num1, float num2)
     {
         // floating-point equivalent of "return num1 % num2;"
         return std::fmod(num1, num2);
     }
 
-    inline float Sin(float radians)
+    [[nodiscard]] inline float Sin(float radians)
     {
-        return ::sinf(radians);
+        return std::sin(radians);
     }
 
-    inline float Asin(float ratio)
+    [[nodiscard]] inline float Asin(float ratio)
     {
         // See comment in acos below.
-        return ::asinf(std::fmin(1.0f, std::fmax(ratio, -1.0f)));
+        return std::asin(std::clamp(ratio, -1.0f, 1.0f));
     }
 
-    inline float Cos(float radians)
+    [[nodiscard]] inline float Cos(float radians)
     {
-        return ::cosf(radians);
+        return std::cos(radians);
     }
 
-    inline float Acos(float ratio)
+    [[nodiscard]] inline float Acos(float ratio)
     {
         // Even if passed in ratio should be in valid range (e.g. dot product of two normalized vectors),
         // There's a chance it'll be *just* outside that range, due to floating point imprecision.
         // It's safer to clamp the range here than to allow NaN to propagate in the program!
-        return ::acosf(std::fmin(1.0f, std::fmax(ratio, -1.0f)));
+        return std::acos(std::clamp(ratio, -1.0f, 1.0f));
     }
 
-    inline float Tan(float radians)
+    [[nodiscard]] inline float Tan(float radians)
     {
-        return ::tanf(radians);
+        return std::tan(radians);
     }
 
-    inline float Atan(float ratio)
+    [[nodiscard]] inline float Atan(float ratio)
     {
-        return ::atanf(ratio);
+        return std::atan(ratio);
     }
 
-    inline float Atan2(float y, float x)
+    [[nodiscard]] inline float Atan2(float y, float x)
     {
         return std::atan2(y, x);
     }
 
-    inline float Floor(float val)
+    [[nodiscard]] inline constexpr float Floor(float val)
     {
-        return std::floor(val);
+        // std::floor isn't constexpr until C++23.
+        // For positive numbers, truncating would be sufficient. But we have to deal with negatives.
+        // For negative numbers, val ends up being less than the truncated value, and must subtract one (e.g. -4.7 floored is -5).
+        const int64_t truncated = static_cast<int64_t>(val);
+        const float f = static_cast<float>(truncated);
+        return (val < f) ? f - 1.0f : f;
     }
 
-    inline float Ceil(float val)
+    [[nodiscard]] inline constexpr float Ceil(float val)
     {
-        return std::ceil(val);
+        // std::ceil isn't constexpr until C++23.
+        // Similar to Floor, but inversed. Negative numbers are easy, but positive numbers need extra work.
+        const int64_t truncated = static_cast<int64_t>(val);
+        const float f = static_cast<float>(truncated);
+        return (val > f) ? f + 1.0f : f;
     }
 
-    inline float Round(float val)
+    [[nodiscard]] inline constexpr float Round(float val)
     {
-        return std::round(val);
+        // std::round isn't constexpr until C++23.
+        // For positive values, adding 0.5f and flooring ensures that anything 0.5f and up rounds up, anything below rounds down.
+        // For negative values, subtract 0.5f and ceil ensures anything -0.5f and below rounds down and anything 0.5f and up rounds up.
+        return (val < 0.0f) ? Ceil(val - 0.5f) : Floor(val + 0.5f);
     }
 
-    inline int FloorToInt(float val)
+    [[nodiscard]] inline constexpr int FloorToInt(float val)
     {
         return static_cast<int>(Floor(val));
     }
 
-    inline int CeilToInt(float val)
+    [[nodiscard]] inline constexpr int CeilToInt(float val)
     {
         return static_cast<int>(Ceil(val));
     }
 
-    inline int RoundToInt(float val)
+    [[nodiscard]] inline constexpr int RoundToInt(float val)
     {
         return static_cast<int>(Round(val));
     }
 
-    inline float Truncate(float val)
+    [[nodiscard]] inline constexpr float Truncate(float val)
     {
-        return static_cast<float>(static_cast<int>(val));
+        return static_cast<float>(static_cast<int64_t>(val));
     }
 
-    inline float TruncateToInt(float val)
+    [[nodiscard]] inline constexpr int TruncateToInt(float val)
     {
         return static_cast<int>(val);
     }
 
-    inline float Abs(float val)
+    [[nodiscard]] inline constexpr float MagnitudeSign(float mag, float sign)
     {
-        return std::abs(val);
-    }
-
-    inline float MagnitudeSign(float mag, float sign)
-    {
+        // std::copysign isn't constexpr until C++23.
         // Take magnitude of first number and sign of second number.
         // Return product of those two things. (e.g. 35, -18 => -35)
-        return std::copysign(mag, sign);
+        float absMag = Abs(mag);
+        return (sign < 0.0f) ? -absMag : absMag;
     }
 
     template<typename T>
-    inline T Min(T val1, T val2)
+    [[nodiscard]] inline constexpr T Min(T val1, T val2)
     {
         return val1 < val2 ? val1 : val2;
     }
 
     template<typename T>
-    inline T Max(T val1, T val2)
+    [[nodiscard]] inline constexpr T Max(T val1, T val2)
     {
         return val1 > val2 ? val1 : val2;
     }
 
     template<typename T>
-    inline T Clamp(T value, T min, T max)
+    [[nodiscard]] inline constexpr T Clamp(T value, T min, T max)
     {
         return Min(max, Max(value, min));
     }
 
-    inline constexpr float ToDegrees(float radians)
+    [[nodiscard]] inline constexpr float ToDegrees(float radians)
     {
         return (radians * (180.0f / kPi));
     }
 
-    inline constexpr float ToRadians(float degrees)
+    [[nodiscard]] inline constexpr float ToRadians(float degrees)
     {
         return (degrees * (kPi / 180.0f));
     }
 
     template<typename T>
-    inline T Lerp(T a, T b, float t)
+    [[nodiscard]] inline T Lerp(T a, T b, float t)
     {
         return Interpolate::Linear(a, b, t);
     }
