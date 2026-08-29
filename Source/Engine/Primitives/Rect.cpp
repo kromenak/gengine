@@ -11,7 +11,22 @@ Rect::Rect(float x, float y, float width, float height) :
     width(width),
     height(height)
 {
+    // Protect against negative width/heights being passed in.
+    // A negative width means that the x point passed in is actually the max corner.
+    // Do some math so that it is actually the minimum corner.
+    if(this->width < 0.0f)
+    {
+        this->x += this->width;
+        this->width = -this->width;
+    }
 
+    // Same here - negative height means y point is actually the max.
+    // Do some math to adjust it to the minimum corner.
+    if(this->height < 0.0f)
+    {
+        this->y += this->height;
+        this->height = -this->height;
+    }
 }
 
 Rect::Rect(const Vector2& p0, const Vector2& p1)
@@ -21,15 +36,11 @@ Rect::Rect(const Vector2& p0, const Vector2& p1)
     Vector2 max = p1;
     if(min.x > max.x)
     {
-        float temp = min.x;
-        min.x = max.x;
-        max.x = temp;
+        std::swap(min.x, max.x);
     }
     if(min.y > max.y)
     {
-        float temp = min.y;
-        min.y = max.y;
-        max.y = temp;
+        std::swap(min.y, max.y);
     }
 
     // Assign values.
@@ -49,10 +60,7 @@ bool Rect::operator==(const Rect& other) const
 
 bool Rect::operator!=(const Rect& other) const
 {
-    return !(Math::AreEqual(x, other.x)
-          && Math::AreEqual(y, other.y)
-          && Math::AreEqual(width, other.width)
-          && Math::AreEqual(height, other.height));
+    return !(*this == other);
 }
 
 void Rect::Contain(const Rect& other)
@@ -72,15 +80,15 @@ void Rect::Contain(const Rect& other)
     height = biggestMaxY - y;
 }
 
-bool Rect::Contains(const Vector2& vec) const
+bool Rect::Contains(const Vector2& point) const
 {
     // If x/y of vector are less than rect's x/y, vector is not contained.
-    if(vec.x < x) { return false; }
-    if(vec.y < y) { return false; }
+    if(point.x < x) { return false; }
+    if(point.y < y) { return false; }
 
     // If x/y of vector are greater than rect's w/h, vector is not contained.
-    if(vec.x > x + width) { return false; }
-    if(vec.y > y + height) { return false; }
+    if(point.x > x + width) { return false; }
+    if(point.y > y + height) { return false; }
 
     // If x/y of vector are both greater than rect's x/y and less than w/h, it is contained!
     return true;
@@ -109,13 +117,13 @@ Vector2 Rect::GetPoint(const Vector2& normalizedPoint) const
 Vector2 Rect::GetNormalizedPoint(const Vector2& point) const
 {
     float normalizedX = 0.0f;
-    if(width != 0.0f)
+    if(!Math::IsZero(width))
     {
         normalizedX = (point.x - x) / width;
     }
 
     float normalizedY = 0.0f;
-    if(height != 0.0f)
+    if(!Math::IsZero(height))
     {
         normalizedY = (point.y - y) / height;
     }

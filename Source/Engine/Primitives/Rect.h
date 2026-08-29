@@ -24,7 +24,7 @@ public:
     Vector2 GetSize() const { return Vector2(width, height); }
 
     void Contain(const Rect& other);
-    bool Contains(const Vector2& vec) const;
+    bool Contains(const Vector2& point) const;
     bool Overlaps(const Rect& other) const;
 
     Vector2 GetPoint(const Vector2& normalizedPoint) const;
