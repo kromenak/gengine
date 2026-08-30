@@ -34,6 +34,8 @@ public:
     void SetValueSilently(float value);
     float GetValue() const { return mValue; }
 
+    bool IsDragging() const;
+
 protected:
     void OnUpdate(float deltaTime) override;
 

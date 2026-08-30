@@ -24,6 +24,9 @@ std::wstring TextEncode::Utf8ToUtf16(const std::string& utf8Str)
     MultiByteToWideChar(CP_UTF8, 0, &utf8Str[0], static_cast<int>(utf8Str.size()), &utf16Str[0], sizeNeeded);
     return utf16Str;
     #else
+    //TODO: Turns out this code is probably not correct. wchar_t is 32-bit on Linux and Mac, plus these functions depend on the system locale.
+    //TODO: Fortunately, this UTF-16 conversion code is only needed on Windows right now!
+
     // Using a state object so that this implementation is thread-safe.
     std::mbstate_t state = std::mbstate_t();
 
@@ -75,6 +78,9 @@ std::string TextEncode::Utf16ToUtf8(const std::wstring& utf16str)
     WideCharToMultiByte(CP_UTF8, 0, &utf16str[0], static_cast<int>(utf16str.size()), &utf8Str[0], sizeNeeded, NULL, NULL);
     return utf8Str;
     #else
+    //TODO: Turns out this code is probably not correct. wchar_t is 32-bit on Linux and Mac, plus these functions depend on the system locale.
+    //TODO: Fortunately, this UTF-16 conversion code is only needed on Windows right now!
+
     // Using a state object so that this implementation is thread-safe.
     std::mbstate_t state = std::mbstate_t();
 

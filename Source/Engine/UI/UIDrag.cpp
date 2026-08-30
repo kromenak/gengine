@@ -84,7 +84,7 @@ void UIDrag::OnUpdate(float deltaTime)
     }
 }
 
-void UIDrag::UpdateCursor()
+void UIDrag::UpdateCursor() const
 {
     if(mUseHighlightCursor && (mDragging || mPointerHovering))
     {

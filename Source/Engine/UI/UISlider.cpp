@@ -87,6 +87,15 @@ void UISlider::SetValueSilently(float value)
     mValue = Math::Clamp(value, 0.0f, 1.0f);
 }
 
+bool UISlider::IsDragging() const
+{
+    if(mHandle != nullptr)
+    {
+        return mHandle->IsDragging();
+    }
+    return false;
+}
+
 void UISlider::OnUpdate(float deltaTime)
 {
     if(mHandle != nullptr)

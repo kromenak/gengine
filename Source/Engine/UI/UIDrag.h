@@ -50,5 +50,5 @@ private:
     // If true, use highlight cursor to indicate this is interactive.
     bool mUseHighlightCursor = true;
 
-    void UpdateCursor();
+    void UpdateCursor() const;
 };
