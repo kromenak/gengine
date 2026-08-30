@@ -15,7 +15,7 @@ TYPEINFO_INIT(RectTransform, Transform, 3)
 
 RectTransform::RectTransform(Actor* owner) : Transform(owner)
 {
-
+    SetDirty();
 }
 
 void RectTransform::SetSizeDelta(float x, float y)
@@ -225,7 +225,7 @@ Matrix4 RectTransform::GetRectToLocalMatrix()
     return Matrix4::MakeTranslate(rect.GetMin()) * Matrix4::MakeScale(rect.GetSize());
 }
 
-void RectTransform::MoveInsideRect(const Rect& otherWorldRect)
+Vector2 RectTransform::MoveInsideRect(const Rect& otherWorldRect)
 {
     // Calculate our rect, taking into account children.
     Rect ourWorldRect = GetWorldRect(true);
@@ -271,10 +271,20 @@ void RectTransform::MoveInsideRect(const Rect& otherWorldRect)
     // Can be helpful to visualize how this works.
     //Debug::DrawScreenRect(ourRect, Color32::Green);
     //Debug::DrawScreenRect(other, Color32::Red);
+
+    // Returning the diff can help caller know if this RT was moved and by how much.
+    return localDiff;
 }
 
-void RectTransform::CalcLocalPosition()
+void RectTransform::SetPixelPerfect(bool pixelPerfect)
 {
+    mPixelPerfect = pixelPerfect;
+    SetDirty();
+}
+
+void RectTransform::SetDirty()
+{
+    // Figure out parent rect and pivot.
     Rect parentRect;
     Vector2 parentPivot;
     if(mParent == nullptr || !mParent->IsA<RectTransform>())
@@ -290,20 +300,14 @@ void RectTransform::CalcLocalPosition()
         parentPivot = parent->GetPivot();
     }
 
-    Vector3 localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, mAnchorMin, mAnchorMax, mAnchoredPosition, mPivot, mPixelPerfect);
-
     // Update local pos x/y components.
     // Don't overwrite the z-component, which can be set freely.
-    if(mPixelPerfect)
-    {
-        mLocalPosition.x = Math::Floor(localPos.x);
-        mLocalPosition.y = Math::Floor(localPos.y);
-    }
-    else
-    {
-        mLocalPosition.x = localPos.x;
-        mLocalPosition.y = localPos.y;
-    }
+    Vector2 localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, mAnchorMin, mAnchorMax, mAnchoredPosition, mPivot, mPixelPerfect);
+    mLocalPosition.x = localPos.x;
+    mLocalPosition.y = localPos.y;
+
+    // Call base class version.
+    Transform::SetDirty();
 }
 
 void RectTransform::OnUpdate(float deltaTime)

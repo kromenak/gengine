@@ -1,5 +1,7 @@
 #include "Transform.h"
 
+#include "Log.h"
+
 TYPEINFO_INIT(Transform, Component, 2)
 {
     TYPEINFO_VAR(Transform, VariableType::Vector3, mLocalPosition);
@@ -20,12 +22,11 @@ Transform::~Transform()
     // Ensure that deleted actor doesn't stay a child of some actor.
     SetParent(nullptr);
 
-    // If this actor is gone...what about all its children?
-    // For now, let's just unparent the child entirely! (Maybe should set to my parent instead?)
-    for(auto& child : mChildren)
+    // If this actor is gone...what about all its children? For now, just unparent the child entirely.
+    // Calling SetParent(nullptr) will remove from this list until it is empty.
+    while(!mChildren.empty())
     {
-        child->mParent = nullptr;
-        child->SetDirty();
+        mChildren.back()->SetParent(nullptr);
     }
 }
 
@@ -51,9 +52,9 @@ Vector3 Transform::GetWorldPosition() const
 {
     if(mParent != nullptr)
     {
-        return mParent->GetLocalToWorldMatrix().TransformPoint(GetPosition());
+        return mParent->GetLocalToWorldMatrix().TransformPoint(mLocalPosition);
     }
-    return GetPosition();
+    return mLocalPosition;
 }
 
 void Transform::SetWorldPosition(const Vector3& position)
@@ -73,63 +74,90 @@ Quaternion Transform::GetWorldRotation() const
 {
     if(mParent != nullptr)
     {
-        return mParent->GetWorldRotation() * GetRotation();
+        // If we have a parent, we must take their rotation and then apply ours relative to theirs.
+        // Going up the chain, this ultimately gets us a combined rotation in world space.
+        return mParent->GetWorldRotation() * mLocalRotation;
     }
-    return GetRotation();
+
+    // With no parent, assumed to be in world space already.
+    return mLocalRotation;
 }
 
 void Transform::SetWorldRotation(const Quaternion& rotation)
 {
     if(mParent != nullptr)
     {
+        // If we have a parent, we must convert the world space rotation to local space.
+        // This can be done by multiplying with the inverse of the parent's rotation.
         mLocalRotation = Quaternion::Inverse(mParent->GetWorldRotation()) * rotation;
     }
     else
     {
+        // With no parent our local rotation is already in world space.
         mLocalRotation = rotation;
     }
+    SetDirty();
 }
 
 Vector3 Transform::GetWorldScale() const
 {
     if(mParent != nullptr)
     {
-        return mParent->GetWorldScale() * mLocalScale;
+        // This works, but gives incorrect results with non-uniform scale.
+        // return mParent->GetWorldScale() * mLocalScale;
+
+        // To deal with non-uniform scale effectively, we should extract scales directly from the columns of the world transform matrix.
+        const Matrix4& localToWorldMatrix = GetLocalToWorldMatrix();
+        return Vector3(localToWorldMatrix[0].GetLength(), localToWorldMatrix[1].GetLength(), localToWorldMatrix[2].GetLength());
     }
     return mLocalScale;
 }
 
 void Transform::SetParent(Transform* parent)
 {
+    // I can't be the child of a parent if the parent is my child...
+    // In other words, disallow using a parent that is my child.
+    Transform* parentAncestor = parent;
+    while(parentAncestor != nullptr)
+    {
+        if(parentAncestor == this)
+        {
+            Logf("Cyclical transform hierarchy detected and avoided!");
+            return;
+        }
+        parentAncestor = parentAncestor->mParent;
+    }
+
     // Remove from existing parent.
     if(mParent != nullptr)
     {
-        mParent->RemoveChild(this);
+        auto it = std::find(mParent->mChildren.begin(), mParent->mChildren.end(), this);
+        if(it != mParent->mChildren.end())
+        {
+            mParent->mChildren.erase(it);
+        }
         mParent = nullptr;
     }
 
-    //TODO: Ensure not setting as parent one of my children?
-    //TODO: For now, let's count on not doing that...
+    //TODO: The current logic keeps this transform's local position even though the parent changed.
+    //TODO: So it's likely the transform will "snap" to a new world position on next render.
+    //TODO: We could have an option to have an object keep its world position when changing a parent?
 
     // Attach to new parent. It could be null for "no parent".
     mParent = parent;
     if(mParent != nullptr)
     {
-        mParent->AddChild(this);
+        mParent->mChildren.push_back(this);
     }
 
     // Changing parent requires recalculating matrices.
     SetDirty();
 }
 
-const Matrix4& Transform::GetLocalToWorldMatrix()
+const Matrix4& Transform::GetLocalToWorldMatrix() const
 {
     if(mLocalToWorldDirty)
     {
-        // Make sure local position is up-to-date.
-        // This is primarily for RectTransform pivot/size changing local position.
-        CalcLocalPosition();
-
         // Get translate/rotate/scale matrices.
         Matrix4 translateMatrix = Matrix4::MakeTranslate(mLocalPosition);
         Matrix4 rotateMatrix = Matrix4::MakeRotate(mLocalRotation);
@@ -154,7 +182,7 @@ const Matrix4& Transform::GetLocalToWorldMatrix()
     return mLocalToWorldMatrix;
 }
 
-const Matrix4& Transform::GetWorldToLocalMatrix()
+const Matrix4& Transform::GetWorldToLocalMatrix() const
 {
     if(mWorldToLocalDirty)
     {
@@ -164,33 +192,34 @@ const Matrix4& Transform::GetWorldToLocalMatrix()
     return mWorldToLocalMatrix;
 }
 
-Vector3 Transform::LocalToWorldPoint(const Vector3& localPoint)
+Vector3 Transform::LocalToWorldPoint(const Vector3& localPoint) const
 {
     return GetLocalToWorldMatrix().TransformPoint(localPoint);
 }
 
-Vector3 Transform::LocalToWorldDirection(const Vector3& localDirection)
+Vector3 Transform::LocalToWorldDirection(const Vector3& localDirection) const
 {
-    //TODO: Unit test this?
-    Vector4 result = Vector4(localDirection.x, localDirection.y, localDirection.z, 0.0f) * GetWorldToLocalMatrix();
-    return Vector3(result.x, result.y, result.z);
+    // If there is scale applied to this transform or any parent, the scale will be applied to the transformed direction.
+    // As a result, we should normalize before returning - this is meant to calculate a unit direction vector.
+    return GetLocalToWorldMatrix().TransformVector(localDirection).Normalize();
 }
 
-Quaternion Transform::LocalToWorldRotation(const Quaternion& localRotation)
+Quaternion Transform::LocalToWorldRotation(const Quaternion& localRotation) const
 {
+    // This is basically the same code/idea that's in GetWorldPosition.
+    // Take world rotation and then apply ours relative to that.
     return GetWorldRotation() * localRotation;
 }
 
-Vector3 Transform::WorldToLocalPoint(const Vector3& worldPoint)
+Vector3 Transform::WorldToLocalPoint(const Vector3& worldPoint) const
 {
     return GetWorldToLocalMatrix().TransformPoint(worldPoint);
 }
 
-Vector3 Transform::WorldToLocalDirection(const Vector3& worldDirection)
+Vector3 Transform::WorldToLocalDirection(const Vector3& worldDirection) const
 {
-    //TODO: Unit test this?
-    Vector4 result = Vector4(worldDirection.x, worldDirection.y, worldDirection.z, 0.0f) * GetLocalToWorldMatrix();
-    return Vector3(result.x, result.y, result.z);
+    // As with LocalToWorldDirection, make sure result is unit length despite any scaling on intermediate transforms.
+    return GetWorldToLocalMatrix().TransformVector(worldDirection).Normalize();
 }
 
 void Transform::Translate(const Vector3& offset)
@@ -207,17 +236,13 @@ void Transform::Rotate(const Quaternion& rotation, Space space)
 {
     if(space == Space::Local)
     {
-        SetRotation(GetRotation() * rotation);
+        // This takes our current local rotation and applies the passed in rotation on top of it.
+        SetRotation(mLocalRotation * rotation);
     }
     else
     {
-        // What's going on here!? From left to right:
-        // 1) WR * IWR cancels each other out - gets us to zero rotation
-        // 2) Apply desired rotation
-        // 3) Reapply previous WR on top of rotation
-        Quaternion worldRotation = GetWorldRotation();
-        Quaternion invertedWorldRotation = Quaternion::Inverse(worldRotation);
-        SetWorldRotation(worldRotation * invertedWorldRotation * rotation * worldRotation);
+        // Apply the passed in rotation first (in world space) and then apply our existing rotation on top of it.
+        SetWorldRotation(rotation * GetWorldRotation());
     }
 }
 
@@ -244,7 +269,7 @@ void Transform::RotateAround(const Vector3& worldPoint, const Quaternion& rotati
     SetWorldPosition(worldPoint + rotation.Rotate(pointToPos));
 
     // Actually rotate the transform.
-    Rotate(rotation);
+    Rotate(rotation, Transform::Space::World);
 }
 
 void Transform::SetDirty()
@@ -255,20 +280,6 @@ void Transform::SetDirty()
     for(auto& child : mChildren)
     {
         child->SetDirty();
-    }
-}
-
-void Transform::AddChild(Transform* child)
-{
-    mChildren.push_back(child);
-}
-
-void Transform::RemoveChild(Transform* child)
-{
-    auto it = std::find(mChildren.begin(), mChildren.end(), child);
-    if(it != mChildren.end())
-    {
-        mChildren.erase(it);
     }
 }
 

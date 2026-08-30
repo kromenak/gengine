@@ -18,6 +18,6 @@ namespace RectUtil
                        const Vector2& sizeDelta, const Vector2& pivot, bool pixelPerfect = true);
 
     // Given parent rect/pivot and child's anchors/anchorPos/pivot, calculates child's local position in parent's space.
-    Vector3 CalcLocalPosition(const Rect& parentRect, const Vector2& parentPivot, const Vector2& anchorMin, const Vector2& anchorMax,
+    Vector2 CalcLocalPosition(const Rect& parentRect, const Vector2& parentPivot, const Vector2& anchorMin, const Vector2& anchorMax,
                               const Vector2& anchoredPosition, const Vector2& pivot, bool pixelPerfect = true);
 }

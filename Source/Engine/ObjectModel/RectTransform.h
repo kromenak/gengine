@@ -75,13 +75,13 @@ public:
 
     // Sometimes, you want to make sure a RectTransform is inside of some Rect area.
     // Good example: a UI widget (action bar, option bar) that you want to keep within the screen rect.
-    void MoveInsideRect(const Rect& otherWorldRect);
+    Vector2 MoveInsideRect(const Rect& otherWorldRect);
 
-    void SetPixelPerfect(bool pixelPerfect) { mPixelPerfect = pixelPerfect; }
+    void SetPixelPerfect(bool pixelPerfect);
+
+    void SetDirty() override;
 
 protected:
-    void CalcLocalPosition() override;
-
     void OnUpdate(float deltaTime) override;
 
 private:

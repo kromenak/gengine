@@ -196,7 +196,7 @@ TEST_CASE("RectUtil::CalcChildRect works")
 
     Rect rect = RectUtil::CalcLocalRect(parentRect, anchorMin, anchorMax, sizeDelta, pivot);
     //REQUIRE(rect == Rect(-298.0f, -8.79459857f, 596.0f, 43.9729919f));
-    REQUIRE(rect == Rect(-298.0f, -9.0f, 596.0f, 43.0f)); // since CalcLocalRect now rounds for pixel-perfect placement
+    REQUIRE(rect == Rect(-298.0f, -9.0f, 596.0f, 44.0f)); // since CalcLocalRect now rounds for pixel-perfect placement
 
     Rect parentRect2(-512.0f, -384.0f, 1024.0f, 768.0f);
     Vector2 anchorMin2(0.5f, 0.5f);
@@ -218,24 +218,24 @@ TEST_CASE("RectUtil::CalcLocalPosition works")
     Vector2 pivot(0.5f, 0.5f);
 
     // A child rect with same pivot, full anchor min/max, and zero anchored position has no local pos offset.
-    Vector3 localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, anchorMin, anchorMax, anchoredPosition, pivot);
-    REQUIRE(localPos == Vector3::Zero);
+    Vector2 localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, anchorMin, anchorMax, anchoredPosition, pivot);
+    REQUIRE(localPos == Vector2::Zero);
 
     // If the parent pivot changes, the local pos should change.
     Vector2 offcenterParentPivot(0.0f, 0.5f);
     localPos = RectUtil::CalcLocalPosition(parentRect, offcenterParentPivot, anchorMin, anchorMax, anchoredPosition, pivot);
-    REQUIRE(localPos == Vector3(512.0f, 0.0f, 0.0f));
+    REQUIRE(localPos == Vector2(512.0f, 0.0f));
 
     // If the anchored position changes, it should change the local pos.
     Vector2 adjustedAnchoredPosition(95.0f, -200.0f);
     localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, anchorMin, anchorMax, adjustedAnchoredPosition, pivot);
-    REQUIRE(localPos == Vector3(95.0f, -200.0f, 0.0f));
+    REQUIRE(localPos == Vector2(95.0f, -200.0f));
 
     // Try a very unusual one!
     Vector2 anchorMin2(0.3f, 0.1f);
     Vector2 anchorMax2(0.4f, 0.2f);
-    Vector3 anchoredPosition2(-104.0f, 323.0f);
-    Vector3 pivot2(0.2f, 0.6f);
+    Vector2 anchoredPosition2(-104.0f, 323.0f);
+    Vector2 pivot2(0.2f, 0.6f);
     localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, anchorMin2, anchorMax2, anchoredPosition2, pivot2);
-    REQUIRE(localPos == Vector3(-288.320007f, 61.8800049f, 0.0f));
+    REQUIRE(localPos == Vector2(-288.0f, 62.0f));
 }
