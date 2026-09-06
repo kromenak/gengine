@@ -1165,7 +1165,8 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 
     // Create some extra space at the bottom of the web page using an empty label.
     UILabel* spacerLabel = UI::CreateWidgetActor<UILabel>("Spacer", mWebPageScrollRect);
-    spacerLabel->GetRectTransform()->SetSizeDeltaY(0.0f);
+    spacerLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+    spacerLabel->GetRectTransform()->SetSizeDeltaY(50.0f);
     spacerLabel->GetRectTransform()->SetAnchoredPosition(resultsPos);
     mWebPageWidgets.push_back(spacerLabel);
 
