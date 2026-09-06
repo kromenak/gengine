@@ -318,9 +318,5 @@ void RectTransform::OnUpdate(float deltaTime)
         // For UI, "world space" is really "screen space". Confusing, I know.
         Rect screenRect = GetWorldRect();
         Debug::DrawScreenRect(screenRect, Color32::Cyan);
-
-        // Also draw axes at pivot point.
-        Vector2 pivotPos(screenRect.GetMin().x + screenRect.GetSize().x * mPivot.x, screenRect.GetMin().y + screenRect.GetSize().y * mPivot.y);
-        Debug::DrawAxes(pivotPos);
     }
 }

@@ -46,14 +46,17 @@ private:
     // If true, the scroll area is disabled because there isn't enough content to scroll.
     bool mScrollDisabled = false;
 
-    // The current offset of the content based on current scroll slider value.
+    // The current offset of the content in local space. Changes based on scrollbar values.
     Vector2 mOffset;
 
     // How much we should scroll when a button (e.g. up or down) is pressed.
     float mButtonScrollIncrement = 16.0f;
 
+    // The most recently calculated content height.
+    float mContentHeight = -1.0f;
+
     float GetScrollRectHeight() const;
-    float GetContentHeight() const;
+    float CalculateContentHeight() const;
 
     void OnUpButtonPressed();
     void OnDownButtonPressed();

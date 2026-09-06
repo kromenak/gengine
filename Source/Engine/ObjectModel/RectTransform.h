@@ -48,7 +48,7 @@ public:
 
     void SetPivot(float x, float y);
     void SetPivot(const Vector2& pivot);
-    Vector2 GetPivot() const { return mPivot; }
+    const Vector2& GetPivot() const { return mPivot; }
 
     void SetAnchor(AnchorPreset preset, bool setPivot = true);
     void SetAnchor(float x, float y) { SetAnchor(Vector2(x, y)); }
@@ -58,12 +58,12 @@ public:
     void SetAnchorMax(const Vector2& anchorMax);
     void SetAnchorMin(float x, float y) { SetAnchorMin(Vector2(x, y)); }
     void SetAnchorMax(float x, float y) { SetAnchorMax(Vector2(x, y)); }
-    Vector2 GetAnchorMin() const { return mAnchorMin; }
-    Vector2 GetAnchorMax() const { return mAnchorMax; }
+    const Vector2& GetAnchorMin() const { return mAnchorMin; }
+    const Vector2& GetAnchorMax() const { return mAnchorMax; }
 
     void SetAnchoredPosition(float x, float y);
     void SetAnchoredPosition(const Vector2& anchoredPosition);
-    Vector2 GetAnchoredPosition() const { return mAnchoredPosition; }
+    const Vector2& GetAnchoredPosition() const { return mAnchoredPosition; }
 
     // Rect width/height
     Vector2 GetSize() const { return GetRect().GetSize(); }

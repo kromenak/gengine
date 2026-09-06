@@ -8,6 +8,12 @@
 #include "UISlider.h"
 #include "UIUtil.h"
 
+//#define DEBUG_VISUALIZE_CONTENT_CALCS
+
+#if defined(DEBUG_VISUALIZE_CONTENT_CALCS)
+#include "Debug.h"
+#endif
+
 UIScrollRect::UIScrollRect(Actor* parent) : Actor("ScrollRect", TransformType::RectTransform)
 {
     GetTransform()->SetParent(parent->GetTransform());
@@ -35,7 +41,6 @@ UIScrollRect::UIScrollRect(Actor* parent) : Actor("ScrollRect", TransformType::R
     UIImage* backing = UI::CreateWidgetActor<UIImage>("Backing", mScrollbarActor);
     backing->SetTexture(&Texture::Black);
     backing->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-    backing->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
     backing->GetRectTransform()->SetSizeDelta(0.0f, -scrollbarEndMargin);
     mHandleBacking = backing->GetRectTransform();
 
@@ -78,8 +83,7 @@ UIScrollRect::UIScrollRect(Actor* parent) : Actor("ScrollRect", TransformType::R
         params.rightColor = params.bottomColor = params.bottomLeftColor = params.bottomRightColor = params.topRightColor = Color32(90, 28, 33);
 
         UINineSlice* handle = UI::CreateWidgetActor<UINineSlice>("Handle", backing, params);
-        handle->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
-        handle->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+        handle->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         handle->GetRectTransform()->SetSizeDelta(backing->GetRectTransform()->GetRect().width, 25.0f);
         mHandle = handle->GetRectTransform();
 
@@ -127,10 +131,10 @@ void UIScrollRect::OnUpdate(float deltaTime)
     float scrollRectHeight = GetScrollRectHeight();
 
     // And the children that make up the contents of the scroll rect have a height...
-    float contentHeight = GetContentHeight();
+    mContentHeight = CalculateContentHeight();
 
     // If the contents are smaller than the scroll rect, we don't need to scroll.
-    if(contentHeight <= scrollRectHeight)
+    if(mContentHeight <= scrollRectHeight)
     {
         mScrollDisabled = true;
         mHandle->GetOwner()->SetActive(false);
@@ -138,27 +142,28 @@ void UIScrollRect::OnUpdate(float deltaTime)
     }
     else
     {
-        // If bigger, we DO need to scroll.
+        // If contents are bigger, we DO need to scroll.
         mScrollDisabled = false;
         mHandle->GetOwner()->SetActive(true);
 
         // The size of the handle decreases when there is more content.
         // For example, if content was twice as large as the scroll area, the handle should take up 50% of the space.
         // If the content is 4x as large as scroll area, the handle should take up 25% of the space.
-        float ratio = scrollRectHeight / contentHeight;
+        float ratio = scrollRectHeight / mContentHeight;
         mHandle->SetSizeDeltaY(mHandleBacking->GetRect().height * ratio);
     }
 }
 
 float UIScrollRect::GetScrollRectHeight() const
 {
-    // The scroll rect's height is just our rect's height.
-    return GetComponent<RectTransform>()->GetRect().height;
+    // The height of the scroll area is just the height of this Actor's RectTransform. We are the scroll rect after all.
+    // Use world rect in case our parent has done some scaling, and to be consistent with calculations in CalculateContentHeight.
+    return GetRectTransform()->GetWorldRect().height;
 }
 
-float UIScrollRect::GetContentHeight() const
+float UIScrollRect::CalculateContentHeight() const
 {
-    // You might think we could just do: GetComponent<RectTransform>()->GetWorldRect(true).height
+    // You might think we could just do: GetRectTransform()->GetWorldRect(true).height
     // Unfortunately, this won't give the correct result. As you scroll down, any empty space at the TOP of the scroll area stops being included in the calculation.
 
     // To get a better result, we can use this heuristic:
@@ -169,8 +174,7 @@ float UIScrollRect::GetContentHeight() const
     // Get the scroll area world rect and add any offset we currently have.
     // The effect is that the top-left corner corresponds to (0, 0) within our local space, even if we have scrolled.
     Rect worldRect = GetComponent<RectTransform>()->GetWorldRect();
-    worldRect.y += mOffset.y;
-    //Debug::DrawScreenRect(worldRect, Color32::Green);
+    worldRect.y += mOffset.y * GetRectTransform()->GetWorldScale().x; // since offset is in local space, multiply by world scale to put in world space
 
     // The top left corner represents the START of the content.
     float topLeftCorner = worldRect.GetMax().y;
@@ -178,7 +182,9 @@ float UIScrollRect::GetContentHeight() const
     // Next, iterate children and find the LOWEST down rect's bottom left corner.
     // The bottom left corner represents the END of the content.
     float bottomLeftCorner = topLeftCorner;
-    //Rect bottomWorldRect;
+    #if defined(DEBUG_VISUALIZE_CONTENT_CALCS)
+    Rect bottomWorldRect;
+    #endif
     for(Transform* child : GetTransform()->GetChildren())
     {
         if(child->GetOwner() == mScrollbarActor) { continue; }
@@ -189,10 +195,20 @@ float UIScrollRect::GetContentHeight() const
         if(childWorldRect.GetMin().y < bottomLeftCorner)
         {
             bottomLeftCorner = childWorldRect.GetMin().y;
-            //bottomWorldRect = childWorldRect;
+            #if defined(DEBUG_VISUALIZE_CONTENT_CALCS)
+            bottomWorldRect = childWorldRect;
+            #endif
         }
     }
-    //Debug::DrawScreenRect(bottomWorldRect, Color32::Cyan);
+
+    #if defined(DEBUG_VISUALIZE_CONTENT_CALCS)
+    Debug::DrawScreenRect(worldRect, Color32::Green);
+    Debug::DrawScreenRect(bottomWorldRect, Color32::Cyan);
+
+    Rect fullRect = worldRect;
+    fullRect.Contain(bottomWorldRect);
+    Debug::DrawScreenRect(fullRect, Color32::Magenta);
+    #endif
 
     // The height is then the diff of those two.
     return Math::Abs(topLeftCorner - bottomLeftCorner);
@@ -202,12 +218,16 @@ void UIScrollRect::OnUpButtonPressed()
 {
     if(!mScrollDisabled)
     {
-        // Each press of this button moves the scroll up by X units.
+        // Each press of this button moves the scroll up by some number of units.
         // But we need to translate that into a scroll bar value delta instead of units!
-        float desiredYOffset = mOffset.y - mButtonScrollIncrement;
-        float scrollAreaHeight = GetContentHeight() - GetScrollRectHeight();
-        float desiredValue = desiredYOffset / scrollAreaHeight;
-        mSlider->SetValue(desiredValue);
+
+        // Reduce the offset by some amount.
+        // The scroll area height is in world space. We need to multiply the y offset by world scale to also get it in world space.
+        float desiredYOffset = (mOffset.y - mButtonScrollIncrement) * GetRectTransform()->GetWorldScale().x;
+        float scrollAreaHeight = mContentHeight - GetScrollRectHeight();
+
+        // Slider value is offset divided by height.
+        mSlider->SetValue(desiredYOffset / scrollAreaHeight);
     }
 }
 
@@ -216,10 +236,9 @@ void UIScrollRect::OnDownButtonPressed()
     if(!mScrollDisabled)
     {
         // Same as up button, but going in opposite direction.
-        float desiredYOffset = mOffset.y + mButtonScrollIncrement;
-        float scrollAreaHeight = GetContentHeight() - GetScrollRectHeight();
-        float desiredValue = desiredYOffset / scrollAreaHeight;
-        mSlider->SetValue(desiredValue);
+        float desiredYOffset = (mOffset.y + mButtonScrollIncrement) * GetRectTransform()->GetWorldScale().x;
+        float scrollAreaHeight = mContentHeight - GetScrollRectHeight();
+        mSlider->SetValue(desiredYOffset / scrollAreaHeight);
     }
 }
 
@@ -230,8 +249,9 @@ void UIScrollRect::OnSliderValueChanged(float value)
 
     // Get content height FIRST (before messing with transforms) to ensure accurate values.
     // If you do this between the for-loops, you get incorrect results.
-    float contentHeight = GetContentHeight();
+    float contentHeight = mContentHeight;
     float scrollRectHeight = GetScrollRectHeight();
+    //printf("Content height: %f; scroll area height: %f\n", contentHeight, scrollRectHeight); // 1078, 762
 
     // One annoying problem: we want the user of this class to just be able to add children to it and have them scroll.
     // That means there's no parent container we can scroll up and down here - we need to scroll the children individually.
@@ -256,7 +276,8 @@ void UIScrollRect::OnSliderValueChanged(float value)
     else // content is bigger than scroll area
     {
         // Then we calculate a new offset based on the slider value.
-        mOffset.y = value * (contentHeight - scrollRectHeight);
+        // The height diff is in world space, but we want the offset in local space. Divide by world scale to get that.
+        mOffset.y = value * (contentHeight - scrollRectHeight) / GetRectTransform()->GetWorldScale().x;
 
         // And then we APPLY the NEW offset to all the child items.
         for(Transform* child : GetTransform()->GetChildren())

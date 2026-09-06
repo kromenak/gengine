@@ -70,7 +70,37 @@ void UIDrag::OnUpdate(float deltaTime)
             // Keep within boundary rect, if rect is valid/set.
             if(mBoundaryRectTransform != nullptr)
             {
-                GetRectTransform()->MoveInsideRect(mBoundaryRectTransform->GetWorldRect());
+                // If the boundary rect is the direct parent of the UIDrag, we can clamp anchored position in local space to keep within boundary.
+                // TODO: This code assumes the pivot corresponds to the anchor, which is usually the case.
+                // TODO: This code assumes a singular anchor - no stretching. AnchorMin == AnchorMax.
+                if(GetRectTransform()->GetParent() == mBoundaryRectTransform &&
+                   GetRectTransform()->GetPivot() == GetRectTransform()->GetAnchorMin() &&
+                   GetRectTransform()->GetAnchorMin() == GetRectTransform()->GetAnchorMax())
+                {
+                    // If anchor of UIDrag is bottom-left, MinX/MinY would be zero. If top-right, MinX/MinY are (-sizeDiff.x, -sizeDiff.y).
+                    // So multiplying by the pivot (assuming pivot corresponds to anchor position) gives correct min values.
+                    Vector2 boundaryRectSize = mBoundaryRectTransform->GetSize();
+                    Vector2 handleSize = GetRectTransform()->GetSize();
+                    float minX = (boundaryRectSize.x - handleSize.x) * -GetRectTransform()->GetPivot().x;
+                    float minY = (boundaryRectSize.y - handleSize.y) * -GetRectTransform()->GetPivot().y;
+
+                    // If anchor is bottom-left, MaxX/MaxY are just the size diff. If top-right, MaxX/MaxY are zero.
+                    // So multiplying by (1-pivot) (assuming pivot corresponds to anchor position) gives correct max value.
+                    float maxX = (boundaryRectSize.x - handleSize.x) * (1.0f - GetRectTransform()->GetPivot().x);
+                    float maxY = (boundaryRectSize.y - handleSize.y) * (1.0f - GetRectTransform()->GetPivot().y);
+
+                    // And then we can clamp anchored position and use that.
+                    anchoredPos.x = Math::Clamp(anchoredPos.x, minX, maxX);
+                    anchoredPos.y = Math::Clamp(anchoredPos.y, minY, maxY);
+                    GetRectTransform()->SetAnchoredPosition(anchoredPos);
+                }
+                else
+                {
+                    // The clamping approach is nice because it does everything in a single coordinate space and is very accurate.
+                    // But if it can't be achieved, we can do everything in world space.
+                    // This introduces some floating point inaccuracies that can cause jitter, but it has to do worst case.
+                    GetRectTransform()->MoveInsideRect(mBoundaryRectTransform->GetWorldRect());
+                }
             }
         }
 
