@@ -87,6 +87,11 @@ void GameProgress::ChangeScore(const std::string& scoreName)
     }
 }
 
+bool GameProgress::ObtainedScore(const std::string& scoreName)
+{
+    return mScoreEventFlags.find(scoreName) != mScoreEventFlags.end();
+}
+
 void GameProgress::SetTimeblock(const Timeblock& timeblock)
 {
     mLastTimeblock = mTimeblock;

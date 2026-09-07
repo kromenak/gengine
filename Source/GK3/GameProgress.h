@@ -25,6 +25,7 @@ public:
     void SetScore(int score);
     void IncreaseScore(int points);
     void ChangeScore(const std::string& scoreName);
+    bool ObtainedScore(const std::string& scoreName);
 
     // Timeblock
     const Timeblock& GetTimeblock() const { return mTimeblock; }

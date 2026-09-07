@@ -387,9 +387,10 @@ void SidneyEmail::CheckNewEmail()
     }
 
     // Starting on Day 3 6PM, you CAN get an email about hermetical symbols IF you analyzed them previously.
-    if(gGameProgress.GetTimeblock() >= Timeblock(3, 18))
+    // NOTE: usually, the game uses flags for this purpose.
+    // NOTE: However, in testing save data before/after analyzing symbols, the only thing that changes is the score being obtained. So we need to check that.
+    if(gGameProgress.GetTimeblock() >= Timeblock(3, 18) && gGameProgress.ObtainedScore("e_sidney_analysis_symbols_from_serres"))
     {
-        //TODO: What flag indicates that we've analyzed the hermetical symbols previously?
         ReceiveEmail("Email5");
     }
 
