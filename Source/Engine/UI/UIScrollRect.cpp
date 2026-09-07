@@ -131,10 +131,10 @@ void UIScrollRect::OnUpdate(float deltaTime)
     float scrollRectHeight = GetScrollRectHeight();
 
     // And the children that make up the contents of the scroll rect have a height...
-    mContentHeight = CalculateContentHeight();
+    float contentHeight = CalculateContentHeight();
 
     // If the contents are smaller than the scroll rect, we don't need to scroll.
-    if(mContentHeight <= scrollRectHeight)
+    if(contentHeight <= scrollRectHeight)
     {
         mScrollDisabled = true;
         mHandle->GetOwner()->SetActive(false);
@@ -149,7 +149,7 @@ void UIScrollRect::OnUpdate(float deltaTime)
         // The size of the handle decreases when there is more content.
         // For example, if content was twice as large as the scroll area, the handle should take up 50% of the space.
         // If the content is 4x as large as scroll area, the handle should take up 25% of the space.
-        float ratio = scrollRectHeight / mContentHeight;
+        float ratio = scrollRectHeight / contentHeight;
         mHandle->SetSizeDeltaY(mHandleBacking->GetRect().height * ratio);
     }
 }
@@ -224,7 +224,7 @@ void UIScrollRect::OnUpButtonPressed()
         // Reduce the offset by some amount.
         // The scroll area height is in world space. We need to multiply the y offset by world scale to also get it in world space.
         float desiredYOffset = (mOffset.y - mButtonScrollIncrement) * GetRectTransform()->GetWorldScale().x;
-        float scrollAreaHeight = mContentHeight - GetScrollRectHeight();
+        float scrollAreaHeight = CalculateContentHeight() - GetScrollRectHeight();
 
         // Slider value is offset divided by height.
         mSlider->SetValue(desiredYOffset / scrollAreaHeight);
@@ -237,7 +237,7 @@ void UIScrollRect::OnDownButtonPressed()
     {
         // Same as up button, but going in opposite direction.
         float desiredYOffset = (mOffset.y + mButtonScrollIncrement) * GetRectTransform()->GetWorldScale().x;
-        float scrollAreaHeight = mContentHeight - GetScrollRectHeight();
+        float scrollAreaHeight = CalculateContentHeight() - GetScrollRectHeight();
         mSlider->SetValue(desiredYOffset / scrollAreaHeight);
     }
 }
@@ -249,7 +249,7 @@ void UIScrollRect::OnSliderValueChanged(float value)
 
     // Get content height FIRST (before messing with transforms) to ensure accurate values.
     // If you do this between the for-loops, you get incorrect results.
-    float contentHeight = mContentHeight;
+    float contentHeight = CalculateContentHeight();
     float scrollRectHeight = GetScrollRectHeight();
     //printf("Content height: %f; scroll area height: %f\n", contentHeight, scrollRectHeight); // 1078, 762
 

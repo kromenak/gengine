@@ -52,9 +52,6 @@ private:
     // How much we should scroll when a button (e.g. up or down) is pressed.
     float mButtonScrollIncrement = 16.0f;
 
-    // The most recently calculated content height.
-    float mContentHeight = -1.0f;
-
     float GetScrollRectHeight() const;
     float CalculateContentHeight() const;
 
