@@ -26,9 +26,15 @@ void Chessboard::Reset(bool swordsGlow)
     gGameProgress.SetGameVariable("Te1GabeColumn", -1);
     gGameProgress.SetGameVariable("Te1MoveType", 1);
     gGameProgress.SetGameVariable("Te1TileState", 0);
-    gGameProgress.ClearFlag("AllSwords");
     gGameProgress.SetGameVariable("Te1TileRow", 0);
     gGameProgress.SetGameVariable("Te1TileColumn", 0);
+
+    // DO NOT reset this flag here! Though logically it makes sense, there's a bug in the Sheepscript that causes a soft crash.
+    // In short: ValidMove$ calls Die$ which calls Reset$. This functions is called, the chessboard is reset.
+    //           BUT THEN ValidMove$ uses an "if" instead of an "else if" to say "if all swords is false, play stand anim".
+    //           Since the game is paused due to death screen being up, the anim never plays and we're stuck.
+    // To fix, just clear AllSwords at a different spot - see below.
+    //gGameProgress.ClearFlag("AllSwords");
 
     // Iterate all tiles and set them to initial states.
     for(int col = 0; col < 8; ++col)
@@ -95,6 +101,10 @@ void Chessboard::Takeoff()
 void Chessboard::Landed()
 {
     // This function is called after Gabe has landed on a new tile.
+
+    // For reasons mentioned in Reset, we can't reset this flag over there.
+    // Instead, this seems like a "safe" place to reset it, since it'll be set to true down below if we've just landed on the last sword tile.
+    gGameProgress.ClearFlag("AllSwords");
 
     // Get row/col landed on.
     int row = gGameProgress.GetGameVariable("Te1GabeRow");
@@ -360,7 +370,7 @@ void Chessboard::OnUpdate(float deltaTime)
         }
     }
 
-    // If Gabe is on the Chessboard, deal with clicks on the floor area.
+    // If Gabe is on the Chessboard, deal with clicks on the floor area (OFF the chessboard).
     // This requires some special processing so that Gabe doesn't just try to walk in an invalid way for the puzzle.
     if(gGameProgress.GetGameVariable("Te1GabeRow") >= 0)
     {
@@ -391,7 +401,7 @@ void Chessboard::OnUpdate(float deltaTime)
                     gGameProgress.SetGameVariable("Te1MoveType", kInvalidMoveType);
                 }
 
-                // Execute the scene jump action, which will either send you to safety or illicit an "it's too far away" response.
+                // Execute the scene jump action, which will either send you to safety (jump off the chessboard) or illicit an "it's too far away" response.
                 gActionManager.ExecuteAction("SCENE", "JUMP");
             }
         }
