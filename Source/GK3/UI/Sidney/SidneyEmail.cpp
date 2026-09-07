@@ -573,7 +573,7 @@ void SidneyEmail::BuildEmailBody(const std::string& emailId)
     // First, hide any pre-existing labels/boxes/images.
     for(auto& bodyLabel : mBodyLabels)
     {
-        bodyLabel->SetEnabled(false);
+        bodyLabel->GetOwner()->SetActive(false);
     }
     mUsedBodyLabelCount = 0;
     for(auto& bodyBox : mBodyBoxes)
@@ -582,7 +582,7 @@ void SidneyEmail::BuildEmailBody(const std::string& emailId)
     }
     for(auto& bodyImage : mBodyImages)
     {
-        bodyImage->SetEnabled(false);
+        bodyImage->GetOwner()->SetActive(false);
     }
 
     // Unfortunately, a couple emails have extremely custom/bespoke layouts.
@@ -681,7 +681,7 @@ void SidneyEmail::BuildEmailBody(const std::string& emailId)
         }
         for(int i = 0; i < 4; ++i)
         {
-            mBodyImages[i]->SetEnabled(true);
+            mBodyImages[i]->GetOwner()->SetActive(true);
             mBodyImages[i]->SetTexture(gAssetManager.LoadAsset<Texture>("SID_SYMB_" + std::to_string(i + 1) + ".BMP"));
         }
 
@@ -737,7 +737,7 @@ UILabel* SidneyEmail::GetBodyLabel(const std::string& text)
     label->SetVerticalAlignment(VerticalAlignment::Top);
     label->SetHorizonalAlignment(HorizontalAlignment::Left);
     label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
-    label->SetEnabled(true);
+    label->GetOwner()->SetActive(true);
 
     // Increment item index.
     ++mUsedBodyLabelCount;
