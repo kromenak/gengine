@@ -60,7 +60,7 @@ public:
     // Walker
     void TurnTo(const Heading& heading, const std::function<void()>& finishCallback);
     void WalkToBestEffort(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback);
-    void WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback);
+    void WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool allowFrustumPathSkip = true);
     void WalkToGas(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback);
     void WalkToSee(GKObject* target, const std::function<void()>& finishCallback);
     void WalkToAnimationStart(Animation* anim, const std::function<void()>& finishCallback);

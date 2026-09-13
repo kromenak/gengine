@@ -61,8 +61,11 @@ public:
 
     void StartManualAction() { ++mManualActionCounter; }
     void FinishManualAction() { mManualActionCounter = Math::Max(--mManualActionCounter, 0); }
+    void StartActionApproach() { ++mActionApproachCounter; }
+    void FinishActionApproach() { mActionApproachCounter = Math::Max(--mActionApproachCounter, 0); }
 
-    bool IsActionPlaying() const { return mCurrentAction != nullptr || mManualActionCounter > 0; }
+    bool IsActionPlaying() const { return mCurrentAction != nullptr || mManualActionCounter > 0 || mActionApproachCounter > 0; }
+    bool IsNvcActionPlaying() const { return mCurrentAction != nullptr || mActionApproachCounter > 0; }
 
     void SkipCurrentAction() { mWantsActionSkip = true; }
     bool IsSkippingCurrentAction() const { return mWantsActionSkip || mSkipInProgress; }
@@ -157,6 +160,7 @@ private:
     // In addition to playing actual actions, we can also record "manual" actions that the game is performing.
     // This allows most of the game to behave as though we're waiting on an action, even though it might not actually be happening through the Action system.
     int mManualActionCounter = 0;
+    int mActionApproachCounter = 0;
 
     // A callback to execute when the current action finishes executing.
     std::function<void(const Action*)> mCurrentActionFinishCallback = nullptr;
