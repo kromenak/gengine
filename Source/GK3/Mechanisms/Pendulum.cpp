@@ -161,7 +161,7 @@ void Pendulum::UpdatePendulum(float deltaTime)
         mGabePendulumActor->SetActive(false);
         mNormalPendulumActor->SetActive(false);
     }
-    else if(mGabeState == GabeState::OnPendulum)
+    else if(mGabeState == GabeState::OnPendulum || mGabeState == GabeState::JumpingFromPendulum)
     {
         UseGabePendulum();
     }
@@ -216,7 +216,7 @@ void Pendulum::SetPendulumActorRotation(float angle)
     mPendulumActor->GetTransform()->SetPosition(mPendulumPivotPoint + rotated * kPendulumArmRadius);
 }
 
-float Pendulum::GetPendulumAngle()
+float Pendulum::GetPendulumAngle() const
 {
     // Use cubic interpolation to calculate the pendulum's angle between min and max along the desired duration.
     // The duration represents a full swing out AND back, so we need to account for switching direction halfway through the duration.
@@ -277,7 +277,7 @@ void Pendulum::UpdatePlatforms(float deltaTime)
     }
 }
 
-int Pendulum::GetIndexOfPlatformAtEntryway()
+int Pendulum::GetIndexOfPlatformAtEntryway() const
 {
     // We need to know which platform is in front of the entryway.
     // This could be quite hairy, but fortunately, we know two things:
@@ -318,7 +318,7 @@ int Pendulum::GetIndexOfPlatformAtRightPendulumSlot()
     return index;
 }
 
-Vector3 Pendulum::GetPlatformPosition(int platformIndex)
+Vector3 Pendulum::GetPlatformPosition(int platformIndex) const
 {
     // You'd think this would be simple...just platform->GetPosition right?
     // WRONG! All the platforms have the same position, in the center of the scene.
@@ -524,6 +524,9 @@ void Pendulum::UpdateGabeInteract()
                 // Clicking the mouse commits to jumping off.
                 if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
                 {
+                    // This state is only used very briefly, and mainly stops click spamming from doing multiple jump anims.
+                    mGabeState = GabeState::JumpingFromPendulum;
+
                     // Show a short animation of Gabe jumping off the pendulum.
                     AnimParams jumpOffPendulumParams;
                     jumpOffPendulumParams.animation = gAssetManager.LoadAsset<Animation>("GABJMPOFFPEN", AssetScope::Scene);

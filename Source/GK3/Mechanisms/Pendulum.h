@@ -68,7 +68,7 @@ private:
     void UpdatePendulum(float deltaTime);
 
     void SetPendulumActorRotation(float angle);
-    float GetPendulumAngle();
+    float GetPendulumAngle() const;
 
     void UseNormalPendulum();
     void UseGabePendulum();
@@ -93,10 +93,10 @@ private:
 
     void UpdatePlatforms(float deltaTime);
 
-    int GetIndexOfPlatformAtEntryway();
+    int GetIndexOfPlatformAtEntryway() const;
     int GetIndexOfPlatformAtLeftPendulumSlot();
     int GetIndexOfPlatformAtRightPendulumSlot();
-    Vector3 GetPlatformPosition(int platformIndex);
+    Vector3 GetPlatformPosition(int platformIndex) const;
 
     //
     // PLAYER LOGIC
@@ -128,6 +128,9 @@ private:
         Done,
         Dying,
         DeadOnPlatform,
+
+        // Added later, so must be last for save code to work.
+        JumpingFromPendulum,
     };
     GabeState mGabeState = GabeState::InEntryway;
 
