@@ -753,7 +753,9 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                         mFrames[frameNumber].push_back(node);
                     }
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyword, "DIALOGUECUE"))
+                // In at least one case, (E091MO44411.YAK in Polish), there's an errant word appended (DIALOGUECUEEmpty.)
+                // To make that work correctly, we should use "StartsWithIgnoreCase".
+                else if(StringUtil::StartsWithIgnoreCase(keyword, "DIALOGUECUE"))
                 {
                     // No options for this one.
 
