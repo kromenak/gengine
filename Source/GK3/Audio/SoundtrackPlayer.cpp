@@ -235,9 +235,17 @@ void SoundtrackPlayer::OnPersist(PersistState& ps)
 {
     // Get all currently playing soundtracks.
     std::vector<Soundtrack*> soundtracks;
-    for(PlayingSoundtrack& playing : mPlaying)
+    if(ps.IsSaving())
     {
-        soundtracks.push_back(playing.mSoundtrack);
+        for(PlayingSoundtrack& playing : mPlaying)
+        {
+            // Only save looping soundtracks.
+            // Non-looping soundtracks are only used for one-off sounds, which shouldn't restart on load.
+            if(playing.IsLooping())
+            {
+                soundtracks.push_back(playing.mSoundtrack);
+            }
+        }
     }
 
     // Either save or load the entire list of soundtracks.

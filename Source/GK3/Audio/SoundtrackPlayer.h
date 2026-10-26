@@ -33,6 +33,7 @@ public:
     void Update(float deltaTime);
 
     bool AllNodesHitRepeatLimit() const;
+    bool IsLooping() const { return !mNonLooping; }
 
 private:
     void ProcessNextNode();
