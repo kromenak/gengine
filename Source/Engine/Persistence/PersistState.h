@@ -71,7 +71,7 @@ public:
 
     // Version
     void SetFormatVersionNumber(int versionNumber) { mFormatVersionNumber = versionNumber; }
-    int GetFormatVersionNumber() { return mFormatVersionNumber; }
+    int GetFormatVersionNumber() const { return mFormatVersionNumber; }
 
     // Bytes
     void Xfer(const char* name, uint8_t* bytes, size_t bytesSize);

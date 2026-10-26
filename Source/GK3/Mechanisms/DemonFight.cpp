@@ -47,15 +47,27 @@ void DemonFight::OnLateUpdate(float deltaTime)
         // The Sheepscript for this scene sets this flag when Gabe is walking backwards.
         if(gGameProgress.GetFlag("Te6GabeWalk"))
         {
+            // Remember where actor is before we force-update their position.
+            Vector3 startPosition = actor->GetPosition();
+
             // Keep position on a radius around the center of the room.
             const float kWalkRadius = 210.0f;
             Vector3 originToActorDir = Vector3::Normalize(actor->GetPosition());
             actor->SetPosition(originToActorDir * kWalkRadius);
 
+            // Calculate how much we updated the position.
+            // This is distance that was lost because we forced Gabe back onto the circular track around the room.
+            float adjustPosDistance = (startPosition - actor->GetPosition()).GetLength();
+
             // Using cross product, we can calculate expected facing direction (looking along movement circle edge).
             Vector3 cross = Vector3::Normalize(Vector3::Cross(Vector3::UnitY, originToActorDir));
             actor->SetForcedFacingDir(cross);
             actor->SetHeading(Heading::FromDirection(cross));
+
+            // This is not very scientific, but it seems to give better positioning results.
+            // Because we're forcing Gabe onto a track as he moves around the room, he loses any movement perpendicular to the track.
+            // We try to compensate by taking some of the lost movement and reapplying it in the circular movement direction.
+            actor->SetPosition(actor->GetPosition() - cross * adjustPosDistance * 0.5f);
         }
         else
         {
