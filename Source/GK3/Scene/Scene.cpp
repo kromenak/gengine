@@ -842,15 +842,15 @@ void Scene::SetSceneModelVisibility(const std::string& modelName, bool visible)
     BSPActor* bspActor = GetBSPActorByModelName(modelName);
     if(bspActor != nullptr)
     {
-        // This function's effect is inconsistent between normal scene models and hit test models.
+        // This is confusing, but this function behaves differently for hit tests.
+        // Hit tests only have visibility affected while others become completely inactive (both visibility and interactivity disabled).
+        // Hit tests can only have interactivity disabled via DisableHitTestModel.
         if(bspActor->IsHitTest())
         {
-            // For hit tests, visibility is disabled, but interactivity is unaffected (use EnableHitTest/DisableHitTest for that).
-            bspActor->SetVisible(visible);
+            bspActor->SetHitTestVisible(visible);
         }
         else
         {
-            // For normal scene models, both visibility and interactivity are disabled. So we can set the whole active flag.
             bspActor->SetActive(visible);
         }
     }
@@ -1299,13 +1299,10 @@ GKObject* Scene::CreateSceneModel(const SceneModel* sceneModel)
                 // Mark this object as a hit test (rather than a normal BSP-based scene model).
                 actor->SetHitTest(true);
 
-                // Hit test actors are never *visible* (unless you enable a debug option).
-                actor->SetVisible(false);
-
                 // However, if hidden flag is true, it also means the actor is not interactable.
                 if(sceneModel->hidden)
                 {
-                    actor->SetInteractive(false);
+                    actor->SetActive(false);
                 }
                 return actor;
             }

@@ -21,15 +21,11 @@ public:
     void SetAABB(const AABB& aabb) { mAABB = aabb; }
     AABB GetAABB() const override { return mAABB; }
 
-    void SetVisible(bool visible);
-    void SetInteractive(bool interactive);
-
     void SetHitTest(bool hitTest);
     bool IsHitTest() const;
+    void SetHitTestVisible(bool visible);
 
     bool Raycast(const Ray& ray, RaycastHit& hitInfo);
-
-    void OnPersist(PersistState& ps) override;
 
 protected:
     void OnActive() override;
@@ -47,13 +43,12 @@ private:
     std::vector<BSPSurface*> mSurfaces;
     std::vector<BSPPolygon*> mPolygons;
 
-    // If true, this BSP actor is visible (we are rendering its surfaces).
-    bool mVisible = true;
+    // If this is a hit test, this forces the hit test to be visible at all times.
+    bool mForceHitTestVisible = false;
 
-    // If true, this BSP actor is interactive (it can be hit by raycasts).
-    bool mInteractive = true;
-
-    void RefreshSurfaceFlags();
     void SetSurfacesVisible(bool visible);
     void SetSurfacesInteractive(bool interactive);
+
+    bool ShouldBeVisible() const;
+    bool ShouldBeInteractive() const;
 };

@@ -268,7 +268,7 @@ shpvoid EnableHitTestModel(const std::string& modelName)
     BSPActor* hitTestActor = gSceneManager.GetScene()->GetHitTestByModelName(modelName);
     if(hitTestActor != nullptr)
     {
-        hitTestActor->SetInteractive(true);
+        hitTestActor->SetActive(true);
     }
     return 0;
 }
@@ -279,7 +279,7 @@ shpvoid DisableHitTestModel(const std::string& modelName)
     BSPActor* hitTestActor = gSceneManager.GetScene()->GetHitTestByModelName(modelName);
     if(hitTestActor != nullptr)
     {
-        hitTestActor->SetInteractive(false);
+        hitTestActor->SetActive(false);
     }
     return 0;
 }

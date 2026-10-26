@@ -13,24 +13,6 @@ BSPActor::BSPActor(BSP* bsp, const std::string& name, std::vector<BSPSurface*>& 
     mPolygons(std::move(polygons))
 {
     SetName(name);
-
-    // When a BSP actor is created, it's not always necessarily visible and interactive to start.
-    // Update surface flags to match the current state of the underlying BSP surfaces.
-    RefreshSurfaceFlags();
-}
-
-void BSPActor::SetVisible(bool visible)
-{
-    // Update visibility flag and then actually set surfaces visible or not.
-    mVisible = visible;
-    SetSurfacesVisible(visible);
-}
-
-void BSPActor::SetInteractive(bool interactive)
-{
-    // Update interactivity flag and then actually set surfaces visible or not.
-    mInteractive = interactive;
-    SetSurfacesInteractive(interactive);
 }
 
 void BSPActor::SetHitTest(bool hitTest)
@@ -41,11 +23,21 @@ void BSPActor::SetHitTest(bool hitTest)
     {
         surface->hitTest = hitTest;
     }
+
+    // Enabing or disabling hit test may affect visibility.
+    SetSurfacesVisible(ShouldBeVisible());
+    SetSurfacesInteractive(ShouldBeInteractive());
 }
 
 bool BSPActor::IsHitTest() const
 {
     return !mSurfaces.empty() && mSurfaces[0]->hitTest;
+}
+
+void BSPActor::SetHitTestVisible(bool visible)
+{
+    mForceHitTestVisible = visible;
+    SetSurfacesVisible(ShouldBeVisible());
 }
 
 bool BSPActor::Raycast(const Ray& ray, RaycastHit& hitInfo)
@@ -67,35 +59,16 @@ bool BSPActor::Raycast(const Ray& ray, RaycastHit& hitInfo)
     return false;
 }
 
-void BSPActor::OnPersist(PersistState& ps)
-{
-    // BSP geometry is save/loaded before BSPActors.
-    // So, when loading, the BSP geometry may have already loaded to a different state that no longer matches our state flags.
-    // As a result, we need to refresh those before loading so they're accurate - they have an effect when Persist code activates or deactivates.
-    if(ps.IsLoading())
-    {
-        RefreshSurfaceFlags();
-    }
-
-    // And then persist normally.
-    GKObject::OnPersist(ps);
-}
-
 void BSPActor::OnActive()
 {
-    // For a BSPActor to be visible/interactive, it must be active AND the corresponding flag must be true.
-    SetSurfacesVisible(mVisible);
-    SetSurfacesInteractive(mInteractive);
+    SetSurfacesVisible(ShouldBeVisible());
+    SetSurfacesInteractive(ShouldBeInteractive());
 }
 
 void BSPActor::OnInactive()
 {
-    // Since we're about to force this BSPActor invisible and noninteractive, make sure our local state flags are up to date.
-    RefreshSurfaceFlags();
-
-    // If BSPActor is inactive, it is always invisible and noninteractive, overriding individual state flags.
-    SetSurfacesVisible(false);
-    SetSurfacesInteractive(false);
+    SetSurfacesVisible(ShouldBeVisible());
+    SetSurfacesInteractive(ShouldBeInteractive());
 }
 
 void BSPActor::OnUpdate(float deltaTime)
@@ -106,14 +79,6 @@ void BSPActor::OnUpdate(float deltaTime)
     {
         Debug::DrawAABB(mAABB, Color32::Orange);
     }
-}
-
-void BSPActor::RefreshSurfaceFlags()
-{
-    // Derive initial visibility/interactivity from the BSP surface values.
-    // We're assuming that all surfaces of an object are set visible/interactive as a whole, so checking the first one is sufficient.
-    mVisible = !mSurfaces.empty() && mSurfaces[0]->visible;
-    mInteractive = !mSurfaces.empty() && mSurfaces[0]->interactive;
 }
 
 void BSPActor::SetSurfacesVisible(bool visible)
@@ -130,4 +95,17 @@ void BSPActor::SetSurfacesInteractive(bool interactive)
     {
         surface->interactive = interactive;
     }
+}
+
+bool BSPActor::ShouldBeVisible() const
+{
+    // "Normal" BSP Actors are always visible when active.
+    // Hit tests are only visible when the debug flag is on.
+    return IsActive() && (!IsHitTest() || Debug::GetFlag("ShowHitTests") || mForceHitTestVisible);
+}
+
+bool BSPActor::ShouldBeInteractive() const
+{
+    // Both "Normal" and hit test BSP actors are always interactive if active.
+    return IsActive();
 }
