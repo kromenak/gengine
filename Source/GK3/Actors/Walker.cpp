@@ -84,11 +84,11 @@ void Walker::WalkToBestEffort(const Vector3& position, const Heading& heading, c
     WalkToInternal(position, heading, finishCallback, false, false);
 }
 
-void Walker::WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
+void Walker::WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool allowFrustumPathSkip)
 {
     // This is "exact", which means it will always leave the walker at the exact position/heading specified.
     // This version is used for specific ScenePositions, or when scripts demand a specific walk pos internally.
-    WalkToInternal(position, heading, finishCallback, false, true);
+    WalkToInternal(position, heading, finishCallback, false, true, allowFrustumPathSkip);
 }
 
 void Walker::WalkToGas(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
@@ -480,10 +480,13 @@ void Walker::OnUpdate(float deltaTime)
     }
 }
 
-void Walker::WalkToInternal(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool fromAutoscript, bool mustReachDestination)
+void Walker::WalkToInternal(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool fromAutoscript, bool mustReachDestination, bool allowFrustumPathSkip)
 {
     // Save if from autoscript.
     mFromAutoscript = fromAutoscript;
+
+    // Save whether frustum path skipping is allowed for this walk.
+    mAllowFrustumPathSkip = allowFrustumPathSkip;
 
     // Save finish callback.
     mFinishedPathCallback = finishCallback;
@@ -1026,7 +1029,7 @@ int Walker::FindEarliestPathNodeInsideActiveTriggerRegion(Vector3& outEnterTrigg
     int earliestPathIndex = -1;
 
     // This logic only applies to the Ego in the current scene when walking freely (not during an action).
-    if(mGKOwner == gSceneManager.GetScene()->GetEgo() && !gActionManager.IsActionPlaying())
+    if(mGKOwner == gSceneManager.GetScene()->GetEgo() && !gActionManager.IsNvcActionPlaying())
     {
         // Iterate all triggers in the scene - this is often zero. Scenes rarely have trigger regions.
         for(auto& trigger : gSceneManager.GetScene()->GetSceneData()->GetTriggers())
@@ -1082,8 +1085,8 @@ bool Walker::SkipPathNodesOutsideFrustum()
     // But if 90% of the path is behind the camera, the walker can just skip to the node right before the camera and walk from there!
 
     // Skipping path nodes outside the view frustum is mainly meant for user-initiated walk actions.
-    // Don't do this for AI walkers (autoscript), of if this isn't ego.
-    if(mFromAutoscript || mGKOwner != gSceneManager.GetScene()->GetEgo() || mPath.empty())
+    // Don't do this for AI walkers (autoscript), action approach walks, or if this isn't ego.
+    if(mFromAutoscript || mGKOwner != gSceneManager.GetScene()->GetEgo() || mPath.empty() || !mAllowFrustumPathSkip)
     {
         //printf("Early out skip path nodes - not ego, from autoscript, or path is empty.\n");
         return false;

@@ -283,10 +283,10 @@ void GKActor::WalkToBestEffort(const Vector3& position, const Heading& heading, 
     });
 }
 
-void GKActor::WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
+void GKActor::WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool allowFrustumPathSkip)
 {
-    InterruptFidget(false, [this, position, heading, finishCallback](){
-        mWalker->WalkToExact(position, heading, finishCallback);
+    InterruptFidget(false, [this, position, heading, finishCallback, allowFrustumPathSkip](){
+        mWalker->WalkToExact(position, heading, finishCallback, allowFrustumPathSkip);
     });
 }
 
@@ -388,7 +388,7 @@ void GKActor::WalkToAnimationStart(Animation* anim, const std::function<void()>&
 
     // Walk to that position/heading.
     InterruptFidget(false, [this, walkPos, heading, finishCallback](){
-        mWalker->WalkToExact(walkPos, heading, finishCallback);
+        mWalker->WalkToExact(walkPos, heading, finishCallback, false);
     });
 
     // To visualize walk position/heading.
